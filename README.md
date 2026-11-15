@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://github.com/user-attachments/assets/e9886f32-5ba3-444b-804e-1de4a37eb1b6" width="80px" alt="OpenRBX logo">
+  <img src="https://github.com/user-attachments/assets/44d0875e-d46f-40eb-88ea-ea89875f2f99" width="100px" alt="OpenRBX logo">
 
   [Discord] | [Contributing]
 </div>
