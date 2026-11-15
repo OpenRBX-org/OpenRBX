@@ -174,14 +174,8 @@ void BoxSelectCommand::onMouseMove(const UIEvent& uiEvent)
 
 	std::set<Instance*> instances;
 
-#ifdef COMPAT_MODE
 	G3D::Rect2D selectBox = G3D::Rect2D::xyxy(mouseDownView.x, mouseDownView.y, mouseCurrentView.x, mouseCurrentView.y);
 	getMouseInstances(instances, uiEvent, selectBox);
-#else
-	getMouseInstances(
-		instances, uiEvent, G3D::Rect2D::xyxy(mouseDownView.x, mouseDownView.y, mouseCurrentView.x, mouseCurrentView.y)
-	);
-#endif
 
 	if (reverseSelecting) {
 		selectReverse(instances);

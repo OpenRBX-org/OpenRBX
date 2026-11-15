@@ -111,12 +111,8 @@ std::string DataModel::doHttpGet(std::string url)
 std::string DataModel::doHttpPost(std::string url, std::string data)
 {
 	std::string response;
-#ifdef COMPAT_MODE
 	std::istringstream input(data);
 	Http(url).post(input, true, response);
-#else
-	Http(url).post(std::istringstream(data), true, response);
-#endif
 	return response;
 }
 

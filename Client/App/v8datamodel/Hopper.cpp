@@ -136,12 +136,8 @@ void BackpackItem::render2d(Adorn* adorn)
 	}
 
 	if (guiImageDraw.setImage(adorn, textureId)) {
-#ifdef COMPAT_MODE
 		Rect imageRect = draw.inset(fontSize);
 		guiImageDraw.render2d(adorn, isEnabled() || viewHack, imageRect, widgetState);
-#else
-		guiImageDraw.render2d(adorn, isEnabled() || viewHack, draw.inset(fontSize), widgetState);
-#endif
 	}
 	else {
 		Widget::render2d(adorn);
