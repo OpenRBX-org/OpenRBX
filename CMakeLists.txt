@@ -91,11 +91,25 @@ set(OPENRBX_G3D_EXTRA_INCLUDE_DIRS
 add_library(fmodex IMPORTED UNKNOWN)
 set_property(TARGET fmodex PROPERTY IMPORTED_LOCATION "${PROJECT_SOURCE_DIR}/Client/fmod/api/lib/fmodex_vc.lib")
 set_property(TARGET fmodex PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${PROJECT_SOURCE_DIR}/Client/fmod/api/inc")
-add_custom_command(OUTPUT "${PROJECT_BINARY_DIR}/fmodex.dll"
-  COMMAND "${CMAKE_COMMAND}" -E copy "${PROJECT_SOURCE_DIR}/Client/fmod/api/fmodex.dll" "${PROJECT_BINARY_DIR}"
-  DEPENDS "${PROJECT_SOURCE_DIR}/Client/fmod/api/fmodex.dll"
+
+set(OPENRBX_RUNTIME_FILES
+  Client/fmod/api/fmodex.dll
+  Client/win/AppSettings.xml
+  Client/win/ReflectionMetadata.xml
+  Client/win/copyrights.txt
+  WebService/WebService.disco
+  WebService/WebService.htm
 )
-add_custom_target(fmodex_dll DEPENDS "${PROJECT_BINARY_DIR}/fmodex.dll")
+set(OPENRBX_RUNTIME_OUTPUTS)
+foreach(file ${OPENRBX_RUNTIME_FILES})
+  get_filename_component(name "${file}" NAME)
+  add_custom_command(OUTPUT "${PROJECT_BINARY_DIR}/${name}"
+    COMMAND "${CMAKE_COMMAND}" -E copy "${PROJECT_SOURCE_DIR}/${file}" "${PROJECT_BINARY_DIR}"
+    DEPENDS "${PROJECT_SOURCE_DIR}/${file}"
+  )
+  list(APPEND OPENRBX_RUNTIME_OUTPUTS "${PROJECT_BINARY_DIR}/${name}")
+endforeach()
+add_custom_target(runtime_files DEPENDS ${OPENRBX_RUNTIME_OUTPUTS})
 
 add_subdirectory(3rdparty)
 
@@ -657,7 +671,7 @@ target_link_libraries(webservice PRIVATE
 )
 
 target_link_libraries(webservice PRIVATE fmodex)
-add_dependencies(webservice fmodex_dll)
+add_dependencies(webservice runtime_files)
 
 target_link_libraries(webservice PRIVATE
   advapi32
@@ -778,7 +792,7 @@ if (OPENRBX_MSVC8)
     endif()
   endforeach()
 
-  add_dependencies(roblox fmodex_dll)
+  add_dependencies(roblox runtime_files)
   target_link_libraries(roblox PRIVATE
     toolkitpro
     rgmain

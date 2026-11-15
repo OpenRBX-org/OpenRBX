@@ -150,9 +150,9 @@ jobs:
         if: ${{ matrix.package }}
         shell: pwsh
         run: |
-          New-Item -ItemType Directory -Force build/dist/openrbx | Out-Null
-          Copy-Item build/Roblox.exe, build/Roblox.pdb, build/WebService.dll, build/WebService.pdb, Client/fmod/api/fmodex.dll build/dist/openrbx
-          Copy-Item build/3rdparty/OPENGL32.DLL, build/3rdparty/GLU32.DLL, build/3rdparty/OSMESA32.DLL, build/3rdparty/SciLexer.dll, build/3rdparty/rgmain.dll, build/3rdparty/rgpar.dll, build/3rdparty/rggl.dll, build/3rdparty/rgdx.dll build/dist/openrbx
+          New-Item -ItemType Directory -Force build/dist/openrbx/Roblox, build/dist/openrbx/RBXGS | Out-Null
+          Copy-Item build/Roblox.exe, build/Roblox.pdb, build/AppSettings.xml, build/ReflectionMetadata.xml, build/copyrights.txt, build/fmodex.dll, build/SciLexer.dll, build/rgmain.dll, build/rgpar.dll, build/rggl.dll, build/rgdx.dll build/dist/openrbx/Roblox
+          Copy-Item build/WebService.dll, build/WebService.pdb, build/WebService.disco, build/WebService.htm, build/fmodex.dll, build/3rdparty/OPENGL32.DLL, build/3rdparty/GLU32.DLL, build/3rdparty/OSMESA32.DLL build/dist/openrbx/RBXGS
           Compress-Archive -Path build/dist/openrbx/* -DestinationPath build/dist/openrbx-win32.zip
 
       - name: Upload Build Artifacts

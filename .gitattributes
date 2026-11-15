@@ -18,3 +18,8 @@ Client/Rendering/Mesa-6.5/** -text
 Client/Rendering/OgreSDK/** -text
 Client/win/ScintillaCtrl.* -text
 Client/win/ScintillaDocView.* -text
+Client/win/AppSettings.xml -text
+Client/win/ReflectionMetadata.xml -text
+Client/win/copyrights.txt -text
+WebService/WebService.disco -text
+WebService/WebService.htm -text

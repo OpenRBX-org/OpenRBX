@@ -780,7 +780,11 @@ if (OPENRBX_MSVC8)
   )
 
   add_library(scilexer SHARED ${OPENRBX_SCILEXER_SOURCES})
-  set_target_properties(scilexer PROPERTIES OUTPUT_NAME "SciLexer" MSVC_RUNTIME_LIBRARY "MultiThreaded")
+  set_target_properties(scilexer PROPERTIES
+    OUTPUT_NAME "SciLexer"
+    MSVC_RUNTIME_LIBRARY "MultiThreaded"
+    RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}"
+  )
   target_include_directories(scilexer PRIVATE "${SCINTILLA}/include" "${SCINTILLA}/src")
   target_compile_definitions(scilexer PRIVATE NDEBUG WIN32 _WINDOWS _MBCS _USRDLL SCI_LEXER)
   target_compile_options(scilexer PRIVATE /O1 /Ob1 /W4 /EHsc)
@@ -839,5 +843,9 @@ if (OPENRBX_MSVC8)
   target_link_directories(rgdx PRIVATE "${DXSDK}/Lib")
   target_link_libraries(rgdx PRIVATE rgmain d3d9 d3dx9 dxerr9 dxguid)
 
-  set_target_properties(rgmain rgpar rggl rgdx PROPERTIES VERSION 0.99 MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
+  set_target_properties(rgmain rgpar rggl rgdx PROPERTIES
+    VERSION 0.99
+    MSVC_RUNTIME_LIBRARY "MultiThreadedDLL"
+    RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}"
+  )
 endif()
