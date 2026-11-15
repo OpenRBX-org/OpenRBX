@@ -1,8 +1,6 @@
 #ifndef UTIL_VECTOR3INT32_H
 #define UTIL_VECTOR3INT32_H
 
-#include "placeholder.h"
-
 #include <G3D/Vector3.h>
 #include <cmath>
 

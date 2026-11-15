@@ -1,7 +1,6 @@
 #ifndef SCRIPT_SCRIPTCONTEXT_H
 #define SCRIPT_SCRIPTCONTEXT_H
 
-#include "placeholder.h"
 #include "reflection/property.h"
 #include "reflection/type.h"
 #include "script/ThreadRef.h"

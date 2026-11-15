@@ -2,7 +2,6 @@
 #define ACTIVEDOCVIEW_H
 
 #include "RobloxDoc.h"
-#include "placeholder.h"
 #include "v8datamodel/DataModel.h"
 
 #include <boost/shared_ptr.hpp>

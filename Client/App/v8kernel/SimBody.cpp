@@ -1,6 +1,5 @@
 #include "v8kernel/SimBody.h"
 
-#include "placeholder.h"
 #include "util/Math.h"
 #include "util/Units.h"
 #include "v8kernel/Body.h"

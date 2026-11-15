@@ -1,7 +1,6 @@
 #ifndef UTIL_IRENDERABLE_H
 #define UTIL_IRENDERABLE_H
 
-#include "placeholder.h"
 #include "util/IndexArray.h"
 
 namespace RBX {

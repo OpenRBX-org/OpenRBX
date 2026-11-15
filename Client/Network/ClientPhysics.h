@@ -1,7 +1,6 @@
 #ifndef NETWORK_CLIENTPHYSICS_H
 #define NETWORK_CLIENTPHYSICS_H
 
-#include "placeholder.h"
 #include "util/RunStateOwner.h"
 
 #include <G3D/CoordinateFrame.h>

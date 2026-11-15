@@ -2,7 +2,6 @@
 #define GUI_SCOREHUD_H
 
 #include "gui/GUI.h"
-#include "placeholder.h"
 
 #include <string>
 #include <vector>

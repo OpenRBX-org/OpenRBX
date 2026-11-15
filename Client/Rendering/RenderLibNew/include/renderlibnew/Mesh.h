@@ -1,8 +1,6 @@
 #ifndef RENDERLIBNEW_MESH_H
 #define RENDERLIBNEW_MESH_H
 
-#include "placeholder.h"
-
 #include <G3D/Array.h>
 #include <G3D/CoordinateFrame.h>
 #include <G3D/MeshAlg.h>
@@ -118,7 +116,7 @@ protected:
 	Ogre::Unknown00671c70* m_unk0x38;
 
 public:
-	undefined4 m_unk0x3c;
+	int m_unk0x3c;
 
 	static Ogre::MeshPtr g_unk0x0095877c;
 

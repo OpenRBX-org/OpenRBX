@@ -1,7 +1,6 @@
 #ifndef NETWORK_PLAYER_H
 #define NETWORK_PLAYER_H
 
-#include "placeholder.h"
 #include "reflection/property.h"
 #include "reflection/signal.h"
 #include "util/Events.h"

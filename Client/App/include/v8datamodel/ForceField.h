@@ -1,7 +1,6 @@
 #ifndef V8DATAMODEL_FORCEFIELD_H
 #define V8DATAMODEL_FORCEFIELD_H
 
-#include "placeholder.h"
 #include "util/IRenderable.h"
 #include "v8tree/Instance.h"
 

@@ -1,6 +1,5 @@
 #include "util/Http.h"
 
-#include "compat.h"
 #include "util/ContentProvider.h"
 #include "util/StandardOut.h"
 

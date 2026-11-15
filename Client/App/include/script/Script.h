@@ -1,7 +1,6 @@
 #ifndef SCRIPT_SCRIPT_H
 #define SCRIPT_SCRIPT_H
 
-#include "placeholder.h"
 #include "reflection/property.h"
 #include "util/ContentProvider.h"
 #include "v8tree/Instance.h"

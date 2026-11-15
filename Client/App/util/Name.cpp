@@ -1,7 +1,5 @@
 #include "util/Name.h"
 
-#include "placeholder.h"
-
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/once.hpp>
 

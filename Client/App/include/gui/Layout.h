@@ -1,7 +1,6 @@
 #ifndef GUI_LAYOUT_H
 #define GUI_LAYOUT_H
 
-#include "placeholder.h"
 #include "util/Rect.h"
 
 #include <G3D/Color4.h>

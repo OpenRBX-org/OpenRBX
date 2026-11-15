@@ -1,7 +1,6 @@
 #ifndef V8DATAMODEL_FEATURE_H
 #define V8DATAMODEL_FEATURE_H
 
-#include "placeholder.h"
 #include "util/IRenderable.h"
 #include "util/NormalId.h"
 #include "v8datamodel/JointInstance.h"

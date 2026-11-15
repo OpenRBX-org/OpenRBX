@@ -3,7 +3,6 @@
 
 #include "IObjectSafetyRobloxImpl.h"
 #include "Roblox_h.h"
-#include "placeholder.h"
 
 #include <atlbase.h>
 #include <atlcom.h>

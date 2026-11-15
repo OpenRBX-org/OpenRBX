@@ -1,7 +1,6 @@
 #ifndef RBXVIEW_MESHFACTORY_H
 #define RBXVIEW_MESHFACTORY_H
 
-#include "placeholder.h"
 #include "renderlib/Mesh.h"
 #include "util/NormalId.h"
 

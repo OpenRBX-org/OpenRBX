@@ -2,7 +2,6 @@
 #define APPDRAW_RBXSCENEMANAGER_H
 
 #include "appdraw/RbxSky.h"
-#include "placeholder.h"
 
 #include <OgreSceneManager.h>
 #include <OgreSceneManagerEnumerator.h>

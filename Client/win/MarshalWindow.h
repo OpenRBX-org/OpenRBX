@@ -1,8 +1,6 @@
 #ifndef MARSHALWINDOW_H
 #define MARSHALWINDOW_H
 
-#include "placeholder.h"
-
 #include <atlbase.h>
 #include <atlsync.h>
 #include <atlwin.h>

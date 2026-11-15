@@ -1,8 +1,6 @@
 #ifndef V8DATAMODEL_IPRIMARYPART_H
 #define V8DATAMODEL_IPRIMARYPART_H
 
-#include "placeholder.h"
-
 namespace RBX {
 
 class PartInstance;

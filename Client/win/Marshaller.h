@@ -1,8 +1,6 @@
 #ifndef MARSHALLER_H
 #define MARSHALLER_H
 
-#include "placeholder.h"
-
 #include <atlbase.h>
 #include <atlwin.h>
 #include <boost/function.hpp>

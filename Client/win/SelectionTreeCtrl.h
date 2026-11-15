@@ -3,7 +3,6 @@
 
 #include "ActiveDocView.h"
 #include "RobloxTreeCtrl.h"
-#include "placeholder.h"
 #include "util/Events.h"
 #include "v8datamodel/DataModel.h"
 #include "v8datamodel/Selection.h"
@@ -64,9 +63,9 @@ private:
 	void FUN_004285a0(boost::shared_ptr<RBX::DataModel> dataModel);
 
 	CMenu m_unk0xc4;
-	undefined m_unk0xcc;
-	undefined m_unk0xcd;
-	undefined m_unk0xce;
+	bool m_unk0xcc;
+	bool m_unk0xcd;
+	bool m_unk0xce;
 	std::set<boost::shared_ptr<RBX::Instance> > m_unk0xd0;
 	std::set<CRobloxTreeCtrlNode*> m_unk0xdc;
 	boost::shared_ptr<RBX::DataModel> m_unk0xe8;

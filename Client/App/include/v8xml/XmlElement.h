@@ -1,7 +1,6 @@
 #ifndef V8XML_XMLELEMENT_H
 #define V8XML_XMLELEMENT_H
 
-#include "placeholder.h"
 #include "util/ContentProvider.h"
 #include "util/Handle.h"
 

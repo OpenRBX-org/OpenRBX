@@ -1,6 +1,5 @@
 #include "gui/ProfanityFilter.h"
 
-#include "compat.h"
 #include "util/ContentProvider.h"
 
 #include <boost/algorithm/string.hpp>

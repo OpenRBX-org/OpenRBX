@@ -1,7 +1,6 @@
 #ifndef V8DATAMODEL_DEBUGSETTINGS_H
 #define V8DATAMODEL_DEBUGSETTINGS_H
 
-#include "placeholder.h"
 #include "util/Utilities.h"
 #include "v8datamodel/GlobalSettings.h"
 

@@ -1,7 +1,5 @@
 #include "util/Log.h"
 
-#include "placeholder.h"
-
 #include <cstdio>
 #include <windows.h>
 

@@ -2,7 +2,6 @@
 #define MARSHALEDLISTENER_H
 
 #include "MarshalWindow.h"
-#include "placeholder.h"
 #include "util/Events.h"
 #include "util/object.h"
 

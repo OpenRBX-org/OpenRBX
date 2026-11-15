@@ -1,8 +1,6 @@
 #ifndef V8WORLD_CLUMP2_H
 #define V8WORLD_CLUMP2_H
 
-#include "placeholder.h"
-
 #include <cstddef>
 
 namespace RBX {

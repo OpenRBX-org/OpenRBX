@@ -1,8 +1,6 @@
 #ifndef SECUREHTMLVIEW_H
 #define SECUREHTMLVIEW_H
 
-#include "placeholder.h"
-
 #include <afxhtml.h>
 
 class CSecureHtmlView : public CHtmlView
@@ -30,7 +28,7 @@ public:
 	);
 
 protected:
-	undefined m_unk0xf0;
+	bool m_unk0xf0;
 };
 
 #endif // SECUREHTMLVIEW_H

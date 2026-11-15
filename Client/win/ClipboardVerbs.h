@@ -1,7 +1,6 @@
 #ifndef CLIPBOARDVERBS_H
 #define CLIPBOARDVERBS_H
 
-#include "placeholder.h"
 #include "v8datamodel/Commands.h"
 #include "v8datamodel/DataModel.h"
 #include "v8tree/Verb.h"

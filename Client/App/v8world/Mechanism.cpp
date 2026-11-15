@@ -1,6 +1,5 @@
 #include "v8world/Mechanism.h"
 
-#include "placeholder.h"
 #include "util/StlExtra.h"
 #include "v8world/Assembly2.h"
 #include "v8world/Primitive.h"

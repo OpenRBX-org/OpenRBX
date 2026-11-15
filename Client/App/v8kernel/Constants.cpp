@@ -1,6 +1,5 @@
 #include "v8kernel/Constants.h"
 
-#include "placeholder.h"
 #include "util/Math.h"
 
 #include <G3D/Vector3int16.h>

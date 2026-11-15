@@ -1,6 +1,5 @@
 #include "appdraw/DrawPrimitives.h"
 
-#include "placeholder.h"
 #include "util/IndexBox.h"
 #include "util/Rect.h"
 

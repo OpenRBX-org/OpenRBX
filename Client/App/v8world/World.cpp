@@ -1,6 +1,5 @@
 #include "v8world/World.h"
 
-#include "placeholder.h"
 #include "util/standardout.h"
 #include "v8kernel/Constants.h"
 #include "v8kernel/Kernel.h"

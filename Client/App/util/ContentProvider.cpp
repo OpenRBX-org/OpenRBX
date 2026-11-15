@@ -1,7 +1,5 @@
 #include "util/ContentProvider.h"
 
-#include "compat.h"
-#include "placeholder.h"
 #include "util/FileSystem.h"
 #include "util/Http.h"
 #include "util/StandardOut.h"
@@ -581,7 +579,7 @@ ContentProvider::ContentProvider()
 {
 	char path[MAX_PATH];
 	if (SHGetFolderPathAndSubDir(NULL, CSIDL_COMMON_APPDATA, NULL, 0, "Roblox\\content\\", path) == S_OK) {
-		ContentProvider::singleton().setAssetFolder(path);
+		setAssetFolder(path);
 	}
 	else {
 		StandardOut::singleton()->print(MESSAGE_WARNING, "Failed to get asset folder");

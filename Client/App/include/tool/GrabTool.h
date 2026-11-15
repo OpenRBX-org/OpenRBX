@@ -1,7 +1,6 @@
 #ifndef TOOL_GRABTOOL_H
 #define TOOL_GRABTOOL_H
 
-#include "placeholder.h"
 #include "util/Name.h"
 #include "v8datamodel/MouseCommand.h"
 

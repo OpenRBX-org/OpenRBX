@@ -2,7 +2,6 @@
 #define RBXVIEW_CYLINDERMESH_H
 
 #include "MeshFactory.h"
-#include "placeholder.h"
 #include "renderlib/Mesh.h"
 #include "util/NormalId.h"
 

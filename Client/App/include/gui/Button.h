@@ -3,7 +3,6 @@
 
 #include "gui/GuiDraw.h"
 #include "gui/Widget.h"
-#include "placeholder.h"
 
 #include <SDL_keysym.h>
 #include <string>

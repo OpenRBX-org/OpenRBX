@@ -2,8 +2,6 @@
 
 #include "util/Profiling.h"
 
-#include "placeholder.h"
-
 #include <G3D/System.h>
 #include <algorithm>
 

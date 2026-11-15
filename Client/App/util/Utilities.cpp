@@ -1,6 +1,5 @@
 #include "util/Utilities.h"
 
-#include "placeholder.h"
 #include "util/ContentProvider.h"
 #include "v8datamodel/BrickColor.h"
 

@@ -1,7 +1,6 @@
 #ifndef APPDRAW_ADORNRBXGFX_H
 #define APPDRAW_ADORNRBXGFX_H
 
-#include "placeholder.h"
 #include "rbxgraphics/Adorn.h"
 
 #include <G3D/CoordinateFrame.h>

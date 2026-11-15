@@ -1,8 +1,6 @@
 #ifndef RBXVIEWBASE_VIEWBASE_H
 #define RBXVIEWBASE_VIEWBASE_H
 
-#include "placeholder.h"
-
 #include <boost/shared_ptr.hpp>
 
 class RenderStats;

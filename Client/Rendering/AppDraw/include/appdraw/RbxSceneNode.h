@@ -1,8 +1,6 @@
 #ifndef APPDRAW_RBXSCENENODE_H
 #define APPDRAW_RBXSCENENODE_H
 
-#include "placeholder.h"
-
 #include <OgreMatrix4.h>
 #include <OgreSceneNode.h>
 #include <OgreSphere.h>

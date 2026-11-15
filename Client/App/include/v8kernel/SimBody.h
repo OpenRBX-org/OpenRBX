@@ -1,7 +1,6 @@
 #ifndef V8KERNEL_SIMBODY_H
 #define V8KERNEL_SIMBODY_H
 
-#include "placeholder.h"
 #include "util/PV.h"
 #include "util/Quaternion.h"
 

@@ -1,6 +1,5 @@
 #include "tool/Dragger.h"
 
-#include "placeholder.h"
 #include "tool/DragUtilities.h"
 #include "util/Math.h"
 #include "v8datamodel/PartInstance.h"

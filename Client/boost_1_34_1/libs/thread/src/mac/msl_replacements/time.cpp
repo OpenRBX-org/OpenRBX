@@ -65,8 +65,8 @@ clock_t __get_clock()
 time_t __get_time()
 {
     boost::xtime sTime;
-    int nType = boost::xtime_get(&sTime, boost::TIME_UTC);
-    assert(nType == boost::TIME_UTC);
+    int nType = boost::xtime_get(&sTime, boost::TIME_UTC_);
+    assert(nType == boost::TIME_UTC_);
     return(static_cast<time_t>(sTime.sec));
 }
 

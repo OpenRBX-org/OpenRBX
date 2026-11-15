@@ -3,7 +3,6 @@
 
 #include "NullDoc.h"
 #include "SecureHtmlView.h"
-#include "placeholder.h"
 
 #include <atlbase.h>
 #include <list>
@@ -63,8 +62,8 @@ private:
 	CXTPControlComboBox* m_unk0x104;
 	CXTPToolBar m_unk0x108;
 	CComPtr<IDispatch> m_unk0x2b0;
-	undefined m_unk0x2b4;
-	undefined m_unk0x2b5;
+	bool m_unk0x2b4;
+	bool m_unk0x2b5;
 
 protected:
 	CString m_unk0x2b8;

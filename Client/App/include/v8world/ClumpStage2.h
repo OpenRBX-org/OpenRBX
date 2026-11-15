@@ -1,7 +1,6 @@
 #ifndef V8WORLD_CLUMPSTAGE2_H
 #define V8WORLD_CLUMPSTAGE2_H
 
-#include "placeholder.h"
 #include "v8world/IWorldStage.h"
 #include "v8world/Joint.h"
 

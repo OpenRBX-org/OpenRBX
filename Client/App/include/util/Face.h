@@ -1,7 +1,6 @@
 #ifndef UTIL_FACE_H
 #define UTIL_FACE_H
 
-#include "placeholder.h"
 #include "util/Extents.h"
 #include "util/NormalId.h"
 

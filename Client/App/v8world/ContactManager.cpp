@@ -1,4 +1,3 @@
-#include "placeholder.h"
 #include "util/HitTestFilter.h"
 #include "v8world/Contact.h"
 #include "v8world/SpatialHash.h"

@@ -1,6 +1,5 @@
 #include "v8world/Primitive.h"
 
-#include "placeholder.h"
 #include "util/Face.h"
 #include "util/Velocity.h"
 #include "v8kernel/Body.h"

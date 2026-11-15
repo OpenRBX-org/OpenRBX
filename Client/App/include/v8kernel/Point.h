@@ -1,7 +1,6 @@
 #ifndef V8KERNEL_POINT_H
 #define V8KERNEL_POINT_H
 
-#include "placeholder.h"
 #include "util/IndexArray.h"
 #include "v8kernel/KernelIndex.h"
 

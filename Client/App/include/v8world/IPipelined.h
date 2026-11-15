@@ -1,7 +1,6 @@
 #ifndef V8WORLD_IPIPELINED_H
 #define V8WORLD_IPIPELINED_H
 
-#include "placeholder.h"
 #include "v8kernel/IStage.h"
 #include "v8world/IWorldStage.h"
 

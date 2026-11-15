@@ -3,7 +3,6 @@
 
 #include "Roblox_h.h"
 #include "SecureHtmlView.h"
-#include "placeholder.h"
 
 #include <atlbase.h>
 

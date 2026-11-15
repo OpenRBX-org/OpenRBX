@@ -1,7 +1,6 @@
 #ifndef UTIL_GUID_H
 #define UTIL_GUID_H
 
-#include "placeholder.h"
 #include "util/Name.h"
 
 #include <boost/noncopyable.hpp>

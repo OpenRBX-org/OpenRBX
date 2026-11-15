@@ -1,6 +1,5 @@
 #include "v8world/SleepStage2.h"
 
-#include "placeholder.h"
 #include "util/Velocity.h"
 #include "v8kernel/Body.h"
 #include "v8world/Clump2.h"

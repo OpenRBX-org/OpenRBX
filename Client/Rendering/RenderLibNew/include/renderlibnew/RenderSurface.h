@@ -1,7 +1,6 @@
 #ifndef RENDERLIBNEW_RENDERSURFACE_H
 #define RENDERLIBNEW_RENDERSURFACE_H
 
-#include "placeholder.h"
 #include "renderlibnew/Material.h"
 #include "renderlibnew/Mesh.h"
 

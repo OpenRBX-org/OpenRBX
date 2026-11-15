@@ -1,7 +1,6 @@
 #ifndef REFLECTION_ENUMCONVERTER_H
 #define REFLECTION_ENUMCONVERTER_H
 
-#include "placeholder.h"
 #include "reflection/type.h"
 
 #include <algorithm>

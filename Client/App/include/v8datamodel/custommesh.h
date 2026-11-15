@@ -1,7 +1,6 @@
 #ifndef V8DATAMODEL_CUSTOMMESH_H
 #define V8DATAMODEL_CUSTOMMESH_H
 
-#include "placeholder.h"
 #include "util/MeshId.h"
 #include "util/TextureId.h"
 #include "v8tree/Instance.h"

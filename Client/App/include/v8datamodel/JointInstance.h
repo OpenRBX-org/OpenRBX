@@ -1,7 +1,6 @@
 #ifndef V8DATAMODEL_JOINTINSTANCE_H
 #define V8DATAMODEL_JOINTINSTANCE_H
 
-#include "placeholder.h"
 #include "util/IRenderable.h"
 #include "v8tree/Instance.h"
 #include "v8world/Edge.h"

@@ -1,7 +1,6 @@
 #ifndef V8WORLD_SIMJOBSTAGE_H
 #define V8WORLD_SIMJOBSTAGE_H
 
-#include "placeholder.h"
 #include "v8world/IWorldStage.h"
 #include "v8world/Mechanism.h"
 

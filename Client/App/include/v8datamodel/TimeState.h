@@ -1,8 +1,6 @@
 #ifndef V8DATAMODEL_TIMESTATE_H
 #define V8DATAMODEL_TIMESTATE_H
 
-#include "placeholder.h"
-
 #include <G3D/Stopwatch.h>
 
 namespace RBX {

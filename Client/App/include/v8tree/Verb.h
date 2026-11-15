@@ -1,7 +1,6 @@
 #ifndef V8TREE_VERB_H
 #define V8TREE_VERB_H
 
-#include "placeholder.h"
 #include "util/StateStack.h"
 #include "util/Utilities.h"
 #include "v8xml/XmlElement.h"

@@ -1,8 +1,6 @@
 #ifndef V8KERNEL_KERNELINDEX_H
 #define V8KERNEL_KERNELINDEX_H
 
-#include "placeholder.h"
-
 namespace RBX {
 
 class KernelIndex

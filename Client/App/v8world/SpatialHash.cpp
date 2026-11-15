@@ -1,6 +1,5 @@
 #include "v8world/SpatialHash.h"
 
-#include "placeholder.h"
 #include "util/standardout.h"
 #include "v8world/Assembly2.h"
 #include "v8world/Primitive.h"

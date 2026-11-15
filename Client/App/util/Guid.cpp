@@ -1,6 +1,5 @@
 #include "util/Guid.h"
 
-#include "placeholder.h"
 #include "util/Name.h"
 
 #define NOMINMAX

@@ -1,8 +1,6 @@
 #ifndef UTIL_ASSOCIATION_H
 #define UTIL_ASSOCIATION_H
 
-#include "placeholder.h"
-
 #include <vector>
 
 namespace RBX {

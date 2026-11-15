@@ -1,8 +1,6 @@
 #ifndef INSERTOBJECTDIALOG_H
 #define INSERTOBJECTDIALOG_H
 
-#include "placeholder.h"
-
 class CInsertObjectDialog : public CDialog
 {
 	DECLARE_DYNAMIC(CInsertObjectDialog)

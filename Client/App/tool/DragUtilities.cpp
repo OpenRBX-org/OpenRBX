@@ -1,6 +1,5 @@
 #include "tool/DragUtilities.h"
 
-#include "placeholder.h"
 #include "tool/Dragger.h"
 #include "util/Math.h"
 #include "v8datamodel/MouseCommand.h"

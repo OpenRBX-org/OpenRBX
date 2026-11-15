@@ -1,6 +1,5 @@
 #include "v8world/IWorldStage.h"
 
-#include "placeholder.h"
 #include "v8world/Primitive.h"
 
 namespace RBX {

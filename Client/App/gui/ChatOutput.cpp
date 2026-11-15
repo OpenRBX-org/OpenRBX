@@ -1,6 +1,5 @@
 #include "gui/ChatOutput.h"
 
-#include "compat.h"
 #include "network/Player.h"
 #include "network/Players.h"
 #include "util/Color.h"

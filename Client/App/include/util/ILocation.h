@@ -1,8 +1,6 @@
 #ifndef UTIL_ILOCATION_H
 #define UTIL_ILOCATION_H
 
-#include "placeholder.h"
-
 #include <G3D/CoordinateFrame.h>
 
 namespace RBX {

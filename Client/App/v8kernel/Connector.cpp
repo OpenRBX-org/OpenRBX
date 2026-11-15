@@ -1,6 +1,5 @@
 #include "v8kernel/Connector.h"
 
-#include "placeholder.h"
 #include "util/Math.h"
 #include "v8kernel/Body.h"
 #include "v8kernel/SimBody.h"

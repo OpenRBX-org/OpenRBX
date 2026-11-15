@@ -3,7 +3,6 @@
 
 #include "gui/GuiDraw.h"
 #include "gui/Widget.h"
-#include "placeholder.h"
 #include "util/TextureId.h"
 #include "v8tree/Instance.h"
 #include "v8tree/Service.h"

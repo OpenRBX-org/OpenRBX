@@ -268,7 +268,7 @@ bool condition_impl::do_timed_wait(const xtime& xt)
         if (res == WAIT_TIMEOUT)
         {
             xtime cur;
-            xtime_get(&cur, TIME_UTC);
+            xtime_get(&cur, TIME_UTC_);
             if (xtime_cmp(xt, cur) > 0)
                 continue;
         }
@@ -383,7 +383,7 @@ bool condition_impl::do_timed_wait(const xtime& xt, pthread_mutex_t* pmutex)
 #ifndef NDEBUG
     if (res == EINVAL) {
         boost::xtime now;
-        boost::xtime_get(&now, boost::TIME_UTC);
+        boost::xtime_get(&now, boost::TIME_UTC_);
         std::cerr << "now: " << now.sec << " " << now.nsec << std::endl;
         std::cerr << "time: " << time(0) << std::endl;
         std::cerr << "xtime: " << xt.sec << " " << xt.nsec << std::endl;

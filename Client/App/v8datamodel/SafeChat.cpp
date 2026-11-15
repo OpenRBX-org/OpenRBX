@@ -1,6 +1,5 @@
 #include "v8datamodel/SafeChat.h"
 
-#include "compat.h"
 #include "util/ContentProvider.h"
 #include "util/Name.h"
 #include "v8xml/XmlElement.h"

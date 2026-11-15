@@ -2,7 +2,6 @@
 #define ABOUTROBLOXDIALOG_H
 
 #include "Roblox.h"
-#include "placeholder.h"
 
 class CAboutRobloxDialog : public CRobloxDHtmlDialog
 {

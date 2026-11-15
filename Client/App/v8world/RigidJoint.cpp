@@ -1,6 +1,5 @@
 #include "v8world/RigidJoint.h"
 
-#include "placeholder.h"
 #include "util/Math.h"
 #include "v8world/Primitive.h"
 

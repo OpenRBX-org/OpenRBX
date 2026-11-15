@@ -2,7 +2,6 @@
 #define HUMANOID_SEATED_H
 
 #include "humanoid/Humanoid.h"
-#include "placeholder.h"
 #include "util/Name.h"
 
 namespace RBX {

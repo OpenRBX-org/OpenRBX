@@ -3,7 +3,6 @@
 
 #include "InstanceExplorer.h"
 #include "SettingsPropGrid.h"
-#include "placeholder.h"
 
 class CSettingsExplorer : public CInstanceExplorer
 {

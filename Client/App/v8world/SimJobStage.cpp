@@ -1,6 +1,5 @@
 #include "v8world/SimJobStage.h"
 
-#include "placeholder.h"
 #include "v8kernel/Kernel.h"
 #include "v8world/Assembly2.h"
 #include "v8world/Primitive.h"

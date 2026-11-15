@@ -2,7 +2,6 @@
 #define SAVETOROBLOXDIALOG_H
 
 #include "Roblox.h"
-#include "placeholder.h"
 
 class CSaveToRobloxDialog : public CRobloxDHtmlDialog
 {

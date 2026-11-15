@@ -1,8 +1,6 @@
 #ifndef V8WORLD_CONTROLLER_H
 #define V8WORLD_CONTROLLER_H
 
-#include "placeholder.h"
-
 #include <G3D/Color3.h>
 #include <G3D/ReferenceCount.h>
 

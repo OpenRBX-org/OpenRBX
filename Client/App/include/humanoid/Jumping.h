@@ -2,7 +2,6 @@
 #define HUMANOID_JUMPING_H
 
 #include "humanoid/Flying.h"
-#include "placeholder.h"
 #include "util/Name.h"
 
 namespace RBX {

@@ -1,8 +1,6 @@
 #ifndef UTIL_STLEXTRA_H
 #define UTIL_STLEXTRA_H
 
-#include "placeholder.h"
-
 #include <algorithm>
 #include <vector>
 

@@ -2,7 +2,6 @@
 #define NETWORK_REPLICATOR_H
 
 #include "Streaming.h"
-#include "placeholder.h"
 #include "reflection/reflection.h"
 #include "util/Events.h"
 #include "util/RunStateOwner.h"

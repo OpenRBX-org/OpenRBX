@@ -1,7 +1,6 @@
 #ifndef V8WORLD_SLEEPSTAGE2_H
 #define V8WORLD_SLEEPSTAGE2_H
 
-#include "placeholder.h"
 #include "util/IndexArray.h"
 #include "util/Profiling.h"
 #include "v8world/Assembly2.h"

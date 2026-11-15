@@ -12,7 +12,7 @@
   last-revision="$Date: 2006/10/15 14:52:54 $">
   <namespace name="boost">
     <enum name="xtime_clock_types">
-		<enumvalue name="TIME_UTC" />
+		<enumvalue name="TIME_UTC_" />
 
 		<purpose>
 			<para>Specifies the clock type to use when creating
@@ -21,7 +21,7 @@
 
 		<description>
 			<para>The only clock type supported by &Boost.Thread; is 
-			<code>TIME_UTC</code>. The epoch for <code>TIME_UTC</code>
+			<code>TIME_UTC_</code>. The epoch for <code>TIME_UTC_</code>
 			is 1970-01-01 00:00:00.</para>
 		</description>
 	</enum>

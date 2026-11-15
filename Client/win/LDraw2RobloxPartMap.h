@@ -1,8 +1,6 @@
 #ifndef LDRAW2ROBLOXPARTMAP_H
 #define LDRAW2ROBLOXPARTMAP_H
 
-#include "placeholder.h"
-
 #include <string>
 #include <vector>
 

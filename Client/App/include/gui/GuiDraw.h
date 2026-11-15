@@ -2,7 +2,6 @@
 #define GUI_GUIDRAW_H
 
 #include "gui/Widget.h"
-#include "placeholder.h"
 #include "rbxgraphics/Adorn.h"
 #include "rbxgraphics/TextureProxyBase.h"
 #include "util/Rect.h"

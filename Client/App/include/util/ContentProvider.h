@@ -1,7 +1,6 @@
 #ifndef UTIL_CONTENTPROVIDER_H
 #define UTIL_CONTENTPROVIDER_H
 
-#include "placeholder.h"
 #include "util/Name.h"
 #include "util/boost.hpp"
 

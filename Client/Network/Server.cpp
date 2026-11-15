@@ -5,7 +5,6 @@
 #include "network/NetworkSettings.h"
 #include "network/Player.h"
 #include "network/Players.h"
-#include "placeholder.h"
 #include "util/StandardOut.h"
 
 #include <BitStream.h>

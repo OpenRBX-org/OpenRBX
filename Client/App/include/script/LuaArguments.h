@@ -1,7 +1,6 @@
 #ifndef SCRIPT_LUAARGUMENTS_H
 #define SCRIPT_LUAARGUMENTS_H
 
-#include "placeholder.h"
 #include "reflection/function.h"
 #include "reflection/type.h"
 #include "script/LuaAtomicClasses.h"

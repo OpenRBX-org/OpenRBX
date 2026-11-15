@@ -1,6 +1,5 @@
 #include "v8kernel/Pair.h"
 
-#include "placeholder.h"
 #include "util/Math.h"
 #include "util/Velocity.h"
 #include "v8kernel/Body.h"

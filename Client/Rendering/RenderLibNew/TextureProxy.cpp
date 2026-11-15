@@ -1,7 +1,6 @@
 #include "renderlibnew/TextureProxy.h"
 
 #include "appdraw/VisualEngine.h"
-#include "placeholder.h"
 #include "util/standardout.h"
 
 #include <G3D/GImage.h>

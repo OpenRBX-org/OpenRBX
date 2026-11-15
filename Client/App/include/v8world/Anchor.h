@@ -1,8 +1,6 @@
 #ifndef V8WORLD_ANCHOR_H
 #define V8WORLD_ANCHOR_H
 
-#include "placeholder.h"
-
 namespace RBX {
 
 class Primitive;

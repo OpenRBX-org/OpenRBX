@@ -1,8 +1,6 @@
 #ifndef UTIL_HITTESTFILTER_H
 #define UTIL_HITTESTFILTER_H
 
-#include "placeholder.h"
-
 namespace RBX {
 
 class Primitive;

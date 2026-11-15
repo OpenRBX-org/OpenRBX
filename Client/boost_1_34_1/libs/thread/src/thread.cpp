@@ -271,7 +271,7 @@ void thread::sleep(const xtime& xt)
         threads::mac::detail::safe_delay_until(&sWakeTime);
 #endif
         xtime cur;
-        xtime_get(&cur, TIME_UTC);
+        xtime_get(&cur, TIME_UTC_);
         if (xtime_cmp(xt, cur) <= 0)
             return;
     }
@@ -292,7 +292,7 @@ void thread::yield()
     assert(res == 0);
 #   else
     xtime xt;
-    xtime_get(&xt, TIME_UTC);
+    xtime_get(&xt, TIME_UTC_);
     sleep(xt);
 #   endif
 #elif defined(BOOST_HAS_MPTASKS)

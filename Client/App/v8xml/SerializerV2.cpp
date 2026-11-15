@@ -1,6 +1,5 @@
 #include "v8xml/SerializerV2.h"
 
-#include "placeholder.h"
 #include "util/ContentProvider.h"
 #include "util/Name.h"
 #include "util/standardout.h"

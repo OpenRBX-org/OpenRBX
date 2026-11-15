@@ -1,7 +1,6 @@
 #ifndef V8KERNEL_PAIR_H
 #define V8KERNEL_PAIR_H
 
-#include "placeholder.h"
 #include "util/NormalId.h"
 
 #include <G3D/CoordinateFrame.h>

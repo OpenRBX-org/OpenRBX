@@ -1,7 +1,6 @@
 #ifndef V8WORLD_GLUEJOINT_H
 #define V8WORLD_GLUEJOINT_H
 
-#include "placeholder.h"
 #include "util/Face.h"
 #include "util/NormalId.h"
 #include "v8world/MultiJoint.h"

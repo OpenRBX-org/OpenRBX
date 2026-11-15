@@ -1,8 +1,6 @@
 #ifndef UTIL_VELOCITY_H
 #define UTIL_VELOCITY_H
 
-#include "placeholder.h"
-
 #include <G3D/Matrix3.h>
 #include <G3D/Vector3.h>
 

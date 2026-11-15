@@ -1,7 +1,6 @@
 #ifndef REFLECTION_REFLECTION_H
 #define REFLECTION_REFLECTION_H
 
-#include "placeholder.h"
 #include "reflection/object.h"
 #include "reflection/property.h"
 #include "reflection/signal.h"

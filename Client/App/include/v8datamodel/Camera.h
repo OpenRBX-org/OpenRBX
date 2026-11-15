@@ -1,7 +1,6 @@
 #ifndef V8DATAMODEL_CAMERA_H
 #define V8DATAMODEL_CAMERA_H
 
-#include "placeholder.h"
 #include "util/Extents.h"
 #include "util/FrameInterpolator.h"
 #include "util/Math.h"

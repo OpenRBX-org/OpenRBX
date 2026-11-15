@@ -1,7 +1,6 @@
 #ifndef V8WORLD_MOTORJOINT_H
 #define V8WORLD_MOTORJOINT_H
 
-#include "placeholder.h"
 #include "v8kernel/Link.h"
 #include "v8world/Joint.h"
 

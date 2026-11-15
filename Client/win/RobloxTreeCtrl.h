@@ -1,8 +1,6 @@
 #ifndef ROBLOXTREECTRL_H
 #define ROBLOXTREECTRL_H
 
-#include "placeholder.h"
-
 #include <boost/shared_ptr.hpp>
 #include <boost/thread/recursive_mutex.hpp>
 #include <map>
@@ -52,7 +50,7 @@ protected:
 
 	CRobloxTreeCtrlNode* m_unk0x94;
 	std::map<RBX::Instance*, CRobloxTreeCtrlNode*> m_unk0x98;
-	undefined m_unk0xa4;
+	bool m_unk0xa4;
 	CImageList m_unk0xa8;
 	boost::recursive_mutex m_unk0xb0;
 };

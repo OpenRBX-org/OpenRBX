@@ -1,7 +1,6 @@
 #ifndef V8DATAMODEL_DECAL_H
 #define V8DATAMODEL_DECAL_H
 
-#include "placeholder.h"
 #include "reflection/property.h"
 #include "util/TextureId.h"
 #include "v8datamodel/FaceInstance.h"

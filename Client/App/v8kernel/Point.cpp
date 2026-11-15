@@ -1,6 +1,5 @@
 #include "v8kernel/Point.h"
 
-#include "placeholder.h"
 #include "v8kernel/Body.h"
 
 #include <cstddef>

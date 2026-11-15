@@ -1,6 +1,5 @@
 #include "v8world/JointStage.h"
 
-#include "placeholder.h"
 #include "v8world/ClumpStage2.h"
 #include "v8world/Joint.h"
 #include "v8world/Primitive.h"

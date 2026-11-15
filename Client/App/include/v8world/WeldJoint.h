@@ -1,7 +1,6 @@
 #ifndef V8WORLD_WELDJOINT_H
 #define V8WORLD_WELDJOINT_H
 
-#include "placeholder.h"
 #include "util/NormalId.h"
 #include "v8world/RigidJoint.h"
 

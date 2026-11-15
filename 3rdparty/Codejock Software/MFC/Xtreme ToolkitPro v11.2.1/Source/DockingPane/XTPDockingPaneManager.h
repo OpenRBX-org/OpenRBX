@@ -961,6 +961,8 @@ protected:
 	//-----------------------------------------------------------------------
 	virtual void OnActivatePane(BOOL bActive, CXTPDockingPane* pPane);
 
+	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
+
 protected:
 //{{AFX_CODEJOCK_PRIVATE
 	DECLARE_MESSAGE_MAP()

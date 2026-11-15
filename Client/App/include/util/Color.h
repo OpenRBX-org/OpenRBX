@@ -1,8 +1,6 @@
 #ifndef UTIL_COLOR_H
 #define UTIL_COLOR_H
 
-#include "placeholder.h"
-
 #include <G3D/Color3.h>
 
 namespace RBX {

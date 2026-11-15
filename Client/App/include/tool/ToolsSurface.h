@@ -1,7 +1,6 @@
 #ifndef TOOL_TOOLSSURFACE_H
 #define TOOL_TOOLSSURFACE_H
 
-#include "placeholder.h"
 #include "tool/ToolsArrow.h"
 #include "util/Name.h"
 #include "util/NormalId.h"

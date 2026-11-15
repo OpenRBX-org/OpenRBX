@@ -1,8 +1,6 @@
 #ifndef LUAOBJECTWRITER_H
 #define LUAOBJECTWRITER_H
 
-#include "placeholder.h"
-
 #include <ostream>
 #include <string>
 

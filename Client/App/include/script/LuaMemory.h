@@ -1,8 +1,6 @@
 #ifndef SCRIPT_LUAMEMORY_H
 #define SCRIPT_LUAMEMORY_H
 
-#include "placeholder.h"
-
 #include <stddef.h>
 
 class LuaAllocator

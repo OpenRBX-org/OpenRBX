@@ -1,7 +1,6 @@
 #ifndef UTIL_EXTENTS_H
 #define UTIL_EXTENTS_H
 
-#include "placeholder.h"
 #include "util/NormalId.h"
 #include "util/Vector3int32.h"
 

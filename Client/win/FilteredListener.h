@@ -2,7 +2,6 @@
 #define FILTEREDLISTENER_H
 
 #include "MarshaledListener.h"
-#include "placeholder.h"
 
 namespace RBX {
 

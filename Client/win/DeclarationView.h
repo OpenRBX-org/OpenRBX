@@ -1,8 +1,6 @@
 #ifndef DECLARATIONVIEW_H
 #define DECLARATIONVIEW_H
 
-#include "placeholder.h"
-
 #include <afxhtml.h>
 
 namespace RBX {

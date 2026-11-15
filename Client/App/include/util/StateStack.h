@@ -1,7 +1,6 @@
 #ifndef UTIL_STATESTACK_H
 #define UTIL_STATESTACK_H
 
-#include "placeholder.h"
 #include "util/Name.h"
 
 #include <string>

@@ -2,7 +2,6 @@
 #define GUI_MENUITEM_H
 
 #include "gui/Widget.h"
-#include "placeholder.h"
 
 #include <string>
 

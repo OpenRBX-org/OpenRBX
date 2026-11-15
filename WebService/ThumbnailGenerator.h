@@ -1,7 +1,6 @@
 #ifndef THUMBNAILGENERATOR_H
 #define THUMBNAILGENERATOR_H
 
-#include "placeholder.h"
 #include "v8tree/Instance.h"
 #include "v8tree/Service.h"
 

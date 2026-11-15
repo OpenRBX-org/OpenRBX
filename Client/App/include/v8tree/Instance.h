@@ -1,7 +1,6 @@
 #ifndef V8TREE_INSTANCE_H
 #define V8TREE_INSTANCE_H
 
-#include "placeholder.h"
 #include "reflection/property.h"
 #include "reflection/reflection.h"
 #include "reflection/signal.h"

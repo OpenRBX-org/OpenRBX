@@ -3,7 +3,6 @@
 
 #include "gui/GUI.h"
 #include "gui/ProfanityFilter.h"
-#include "placeholder.h"
 #include "util/Events.h"
 #include "util/RunStateOwner.h"
 

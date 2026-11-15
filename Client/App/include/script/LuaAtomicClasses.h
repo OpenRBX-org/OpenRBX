@@ -2,7 +2,6 @@
 #define SCRIPT_LUAATOMICCLASSES_H
 
 #include "lua/LuaBridge.h"
-#include "placeholder.h"
 #include "v8datamodel/BrickColor.h"
 
 #include <G3D/Color3.h>

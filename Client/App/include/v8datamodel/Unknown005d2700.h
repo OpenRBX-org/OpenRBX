@@ -1,7 +1,6 @@
 #ifndef V8DATAMODEL_UNKNOWN005D2700_H
 #define V8DATAMODEL_UNKNOWN005D2700_H
 
-#include "placeholder.h"
 #include "tool/GrabTool.h"
 #include "tool/NullTool.h"
 #include "tool/ToolsArrow.h"

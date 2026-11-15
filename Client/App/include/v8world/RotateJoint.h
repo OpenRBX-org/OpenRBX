@@ -1,7 +1,6 @@
 #ifndef V8WORLD_ROTATEJOINT_H
 #define V8WORLD_ROTATEJOINT_H
 
-#include "placeholder.h"
 #include "util/NormalId.h"
 #include "v8world/MultiJoint.h"
 #include "v8world/SurfaceData.h"

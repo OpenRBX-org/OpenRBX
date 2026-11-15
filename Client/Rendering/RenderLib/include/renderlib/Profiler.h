@@ -1,8 +1,6 @@
 #ifndef RENDERLIB_PROFILER_H
 #define RENDERLIB_PROFILER_H
 
-#include "placeholder.h"
-
 #include <string>
 
 namespace RBX {

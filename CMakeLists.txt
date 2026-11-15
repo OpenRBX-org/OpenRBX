@@ -28,14 +28,6 @@ if (NOT bits EQUAL 32)
   message(WARNING "Only 32-bit binaries are supported")
 endif()
 
-set(OPENRBX_MSVC8 FALSE)
-if (MSVC)
-  if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "14.0" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS "15.0")
-    set(OPENRBX_MSVC8 TRUE)
-  endif()
-endif()
-message(STATUS "MSVC 8 toolchain: ${OPENRBX_MSVC8}")
-
 function(add_cxx_warning WARNING)
   if (OPENRBX_WERROR)
     set(compiler_option "-Werror=${WARNING}")
@@ -65,9 +57,7 @@ function(openrbx_compile_defaults NAME)
   endif()
   if (MSVC)
     target_compile_options(${NAME} PRIVATE /W3)
-    if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "15")
-      target_compile_definitions(${NAME} PRIVATE _CRT_SECURE_NO_WARNINGS)
-    endif()
+    target_compile_definitions(${NAME} PRIVATE _CRT_SECURE_NO_WARNINGS)
   endif()
 endfunction()
 
@@ -460,7 +450,6 @@ set(OPENRBX_ENGINE_INCLUDE_DIRS
   "${PROJECT_SOURCE_DIR}/Client/Rendering/AppDraw/include"
   "${PROJECT_SOURCE_DIR}/Client/RbxGraphics/include"
   "${PROJECT_SOURCE_DIR}/Client/Network/raknet30/Source"
-  "${PROJECT_SOURCE_DIR}/util"
 )
 
 set(OPENRBX_3RDPARTY_INCLUDE_DIRS
@@ -532,9 +521,7 @@ add_engine_library(lua
   SOURCES ${OPENRBX_LUA_SOURCES}
 )
 
-if (OPENRBX_MSVC8)
-  list(APPEND OPENRBX_APP_SOURCES Client/boost_1_34_1/libs/iostreams/src/zlib.cpp)
-endif()
+list(APPEND OPENRBX_APP_SOURCES Client/boost_1_34_1/libs/iostreams/src/zlib.cpp)
 
 add_engine_library(app
   DEFINITIONS _CRT_SECURE_NO_WARNINGS _RELEASE BOOST_IOSTREAMS_NO_LIB
@@ -609,32 +596,30 @@ foreach(lib appdraw_rbxgfx appdraw_client)
   endif()
 endforeach()
 
-if (OPENRBX_MSVC8)
-  set(OPENRBX_TOOLKITPRO "${OPENRBX_3RDPARTY}/Codejock Software/MFC/Xtreme ToolkitPro v11.2.1")
-  set(OPENRBX_TOOLKITPRO_WORKSPACE "${OPENRBX_TOOLKITPRO}/Workspace/ToolkitPro")
-  file(READ "${OPENRBX_TOOLKITPRO_WORKSPACE}/ToolkitProStatic_vc80.vcproj" OPENRBX_TOOLKITPRO_VCPROJ)
-  string(REGEX MATCHALL "RelativePath=\"[^\"]+\\.cpp\"" OPENRBX_TOOLKITPRO_FILES "${OPENRBX_TOOLKITPRO_VCPROJ}")
-  set(OPENRBX_TOOLKITPRO_SOURCES)
-  foreach(entry ${OPENRBX_TOOLKITPRO_FILES})
-    string(REGEX REPLACE "RelativePath=\"(.*)\"" "\\1" path "${entry}")
-    string(REPLACE "\\" "/" path "${path}")
-    list(APPEND OPENRBX_TOOLKITPRO_SOURCES "${OPENRBX_TOOLKITPRO_WORKSPACE}/${path}")
-  endforeach()
+set(OPENRBX_TOOLKITPRO "${OPENRBX_3RDPARTY}/Codejock Software/MFC/Xtreme ToolkitPro v11.2.1")
+set(OPENRBX_TOOLKITPRO_WORKSPACE "${OPENRBX_TOOLKITPRO}/Workspace/ToolkitPro")
+file(READ "${OPENRBX_TOOLKITPRO_WORKSPACE}/ToolkitProStatic_vc80.vcproj" OPENRBX_TOOLKITPRO_VCPROJ)
+string(REGEX MATCHALL "RelativePath=\"[^\"]+\\.cpp\"" OPENRBX_TOOLKITPRO_FILES "${OPENRBX_TOOLKITPRO_VCPROJ}")
+set(OPENRBX_TOOLKITPRO_SOURCES)
+foreach(entry ${OPENRBX_TOOLKITPRO_FILES})
+  string(REGEX REPLACE "RelativePath=\"(.*)\"" "\\1" path "${entry}")
+  string(REPLACE "\\" "/" path "${path}")
+  list(APPEND OPENRBX_TOOLKITPRO_SOURCES "${OPENRBX_TOOLKITPRO_WORKSPACE}/${path}")
+endforeach()
 
-  add_library(toolkitpro STATIC ${OPENRBX_TOOLKITPRO_SOURCES})
-  openrbx_compile_defaults(toolkitpro)
-  target_compile_definitions(toolkitpro PRIVATE WIN32 _LIB NDEBUG _MBCS _AFXDLL ZLIB_WINAPI)
-  target_include_directories(toolkitpro PRIVATE
-    "${OPENRBX_TOOLKITPRO_WORKSPACE}"
-    "${OPENRBX_TOOLKITPRO}/Source"
-    "${OPENRBX_TOOLKITPRO}/Source/Common"
-  )
-  target_compile_options(toolkitpro PRIVATE /O2 /Ob1 /GF /Gy /Zc:wchar_t)
-  set_property(TARGET toolkitpro PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
-  set_property(TARGET toolkitpro PROPERTY OUTPUT_NAME "ToolkitPro1121vc80DS")
+add_library(toolkitpro STATIC ${OPENRBX_TOOLKITPRO_SOURCES})
+openrbx_compile_defaults(toolkitpro)
+target_compile_definitions(toolkitpro PRIVATE WIN32 _LIB NDEBUG _MBCS _AFXDLL ZLIB_WINAPI)
+target_include_directories(toolkitpro PRIVATE
+  "${OPENRBX_TOOLKITPRO_WORKSPACE}"
+  "${OPENRBX_TOOLKITPRO}/Source"
+  "${OPENRBX_TOOLKITPRO}/Source/Common"
+)
+target_compile_options(toolkitpro PRIVATE /O2 /Ob1 /GF /Gy /Zc:wchar_t)
+set_property(TARGET toolkitpro PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
+set_property(TARGET toolkitpro PROPERTY OUTPUT_NAME "ToolkitPro1121vc140DS")
 
-  set(OPENRBX_OGRE "${PROJECT_SOURCE_DIR}/Client/Rendering/OgreSDK")
-endif()
+set(OPENRBX_OGRE "${PROJECT_SOURCE_DIR}/Client/Rendering/OgreSDK")
 
 set(OPENRBX_WEBSERVICE_SOURCES
   WebService/ThumbnailGenerator.cpp
@@ -648,8 +633,7 @@ add_library(webservice SHARED
   ${OPENRBX_WEBSERVICE_SOURCES}
 )
 openrbx_compile_defaults(webservice)
-target_compile_definitions(webservice PRIVATE ${OPENRBX_COMMON_DEFINITIONS} _USRDLL _CRT_SECURE_NO_WARNINGS
-  _ATL_NO_COM_SUPPORT)
+target_compile_definitions(webservice PRIVATE ${OPENRBX_COMMON_DEFINITIONS} _USRDLL _ATL_NO_COM_SUPPORT)
 
 target_include_directories(webservice PRIVATE
   "${PROJECT_SOURCE_DIR}/WebService"
@@ -657,6 +641,7 @@ target_include_directories(webservice PRIVATE
   ${OPENRBX_ENGINE_INCLUDE_DIRS}
   ${OPENRBX_3RDPARTY_INCLUDE_DIRS}
   "${OPENRBX_MESA_INCLUDE_DIR}"
+  "${OPENRBX_3RDPARTY}/ATL Server/include"
 )
 
 
@@ -702,167 +687,132 @@ set_property(TARGET webservice PROPERTY PREFIX "")
 set_property(TARGET webservice PROPERTY SUFFIX ".dll")
 
 
-if (OPENRBX_MSVC8)
-  set(OPENRBX_ROBLOX_MIDL_DIR "${CMAKE_CURRENT_BINARY_DIR}/roblox_midl")
-  file(MAKE_DIRECTORY "${OPENRBX_ROBLOX_MIDL_DIR}")
-  add_custom_command(
-    OUTPUT "${OPENRBX_ROBLOX_MIDL_DIR}/Roblox_h.h" "${OPENRBX_ROBLOX_MIDL_DIR}/Roblox_i.c"
-    COMMAND midl /nologo /env win32 /h Roblox_h.h /iid Roblox_i.c /tlb Roblox.tlb /proxy Roblox_p.c /dlldata dlldata.c
-            "${PROJECT_SOURCE_DIR}/Client/win/Roblox.idl"
-    DEPENDS "${PROJECT_SOURCE_DIR}/Client/win/Roblox.idl"
-    WORKING_DIRECTORY "${OPENRBX_ROBLOX_MIDL_DIR}"
-  )
+set(OPENRBX_ROBLOX_MIDL_DIR "${CMAKE_CURRENT_BINARY_DIR}/roblox_midl")
+file(MAKE_DIRECTORY "${OPENRBX_ROBLOX_MIDL_DIR}")
+add_custom_command(
+  OUTPUT "${OPENRBX_ROBLOX_MIDL_DIR}/Roblox_h.h" "${OPENRBX_ROBLOX_MIDL_DIR}/Roblox_i.c"
+  COMMAND midl /nologo /env win32 /h Roblox_h.h /iid Roblox_i.c /tlb Roblox.tlb /proxy Roblox_p.c /dlldata dlldata.c
+          "${PROJECT_SOURCE_DIR}/Client/win/Roblox.idl"
+  DEPENDS "${PROJECT_SOURCE_DIR}/Client/win/Roblox.idl"
+  WORKING_DIRECTORY "${OPENRBX_ROBLOX_MIDL_DIR}"
+)
 
-  add_executable(roblox WIN32
-    Client/win/AboutRobloxDialog.cpp
-    Client/win/App.cpp
-    Client/win/Unknown00409ef0.cpp
-    Client/win/BrowserView.cpp
-    Client/win/ChatPrompt.cpp
-    Client/win/ChildFrm.cpp
-    Client/win/ClipboardVerbs.cpp
-    Client/win/DHTMLWindow.cpp
-    Client/win/DxUserInput.cpp
-    Client/win/UserInputUtil.cpp
-    Client/win/ErrorUploader.cpp
-    Client/win/InsertObjectDialog.cpp
-    Client/win/InstanceExplorer.cpp
-    Client/win/LogManager.cpp
-    Client/win/LuaHtmlView.cpp
-    Client/win/LDraw2RobloxColorMap.cpp
-    Client/win/LDraw2RobloxMapRoot.cpp
-    Client/win/LDraw2RobloxPartMap.cpp
-    Client/win/LDrawCommand.cpp
-    Client/win/LDrawParser.cpp
-    Client/win/LuaFunction.cpp
-    Client/win/LuaWriter.cpp
-    Client/win/MainFrm.cpp
-    Client/win/MarshalWindow.cpp
-    Client/win/MultiPlayerPane.cpp
-    Client/win/NullDoc.cpp
-    Client/win/ObjectBrowser.cpp
-    Client/win/PropGrid.cpp
-    Client/win/RBXImage.cpp
-    Client/win/RenderSettings.cpp
-    Client/win/Roblox.cpp
-    Client/win/RobloxDoc.cpp
-    Client/win/RobloxReportView.cpp
-    Client/win/RobloxView.cpp
-    Client/win/RobloxWnd.cpp
-    Client/win/SaveToRobloxDialog.cpp
-    Client/win/ScintillaCtrl.cpp
-    Client/win/ScintillaDocView.cpp
-    Client/win/ScriptDoc.cpp
-    Client/win/SecureHtmlView.cpp
-    Client/win/SelectionCaption.cpp
-    Client/win/SettingsDialog.cpp
-    Client/win/VersionInfo.cpp
-    Client/win/WebToolbox.cpp
-    Client/win/Workspace.cpp
-    Client/win/ActiveDocView.cpp
-    Client/win/ReflectionMetadata.cpp
-    Client/win/RobloxTreeCtrl.cpp
-    Client/win/Content.cpp
-    Client/win/Roblox.rc
-    "${OPENRBX_ROBLOX_MIDL_DIR}/Roblox_h.h"
-    "${OPENRBX_ROBLOX_MIDL_DIR}/Roblox_i.c"
-  )
-  openrbx_compile_defaults(roblox)
-  target_compile_definitions(roblox PRIVATE ${OPENRBX_COMMON_DEFINITIONS} _CRT_SECURE_NO_WARNINGS _AFXDLL _XTP_STATICLINK)
-  target_precompile_headers(roblox PRIVATE "${PROJECT_SOURCE_DIR}/Client/win/StdAfx.h")
-  set_source_files_properties("${OPENRBX_ROBLOX_MIDL_DIR}/Roblox_i.c" PROPERTIES SKIP_PRECOMPILE_HEADERS ON)
+add_executable(roblox WIN32
+  Client/win/AboutRobloxDialog.cpp
+  Client/win/App.cpp
+  Client/win/Unknown00409ef0.cpp
+  Client/win/BrowserView.cpp
+  Client/win/ChatPrompt.cpp
+  Client/win/ChildFrm.cpp
+  Client/win/ClipboardVerbs.cpp
+  Client/win/DHTMLWindow.cpp
+  Client/win/DxUserInput.cpp
+  Client/win/UserInputUtil.cpp
+  Client/win/ErrorUploader.cpp
+  Client/win/InsertObjectDialog.cpp
+  Client/win/InstanceExplorer.cpp
+  Client/win/LogManager.cpp
+  Client/win/LuaHtmlView.cpp
+  Client/win/LDraw2RobloxColorMap.cpp
+  Client/win/LDraw2RobloxMapRoot.cpp
+  Client/win/LDraw2RobloxPartMap.cpp
+  Client/win/LDrawCommand.cpp
+  Client/win/LDrawParser.cpp
+  Client/win/LuaFunction.cpp
+  Client/win/LuaWriter.cpp
+  Client/win/MainFrm.cpp
+  Client/win/MarshalWindow.cpp
+  Client/win/MultiPlayerPane.cpp
+  Client/win/NullDoc.cpp
+  Client/win/ObjectBrowser.cpp
+  Client/win/PropGrid.cpp
+  Client/win/RBXImage.cpp
+  Client/win/RenderSettings.cpp
+  Client/win/Roblox.cpp
+  Client/win/RobloxDoc.cpp
+  Client/win/RobloxReportView.cpp
+  Client/win/RobloxView.cpp
+  Client/win/RobloxWnd.cpp
+  Client/win/SaveToRobloxDialog.cpp
+  Client/win/ScintillaCtrl.cpp
+  Client/win/ScintillaDocView.cpp
+  Client/win/ScriptDoc.cpp
+  Client/win/SecureHtmlView.cpp
+  Client/win/SelectionCaption.cpp
+  Client/win/SettingsDialog.cpp
+  Client/win/VersionInfo.cpp
+  Client/win/WebToolbox.cpp
+  Client/win/Workspace.cpp
+  Client/win/ActiveDocView.cpp
+  Client/win/ReflectionMetadata.cpp
+  Client/win/RobloxTreeCtrl.cpp
+  Client/win/Content.cpp
+  Client/win/Roblox.rc
+  "${OPENRBX_ROBLOX_MIDL_DIR}/Roblox_h.h"
+  "${OPENRBX_ROBLOX_MIDL_DIR}/Roblox_i.c"
+)
+openrbx_compile_defaults(roblox)
+target_compile_definitions(roblox PRIVATE ${OPENRBX_COMMON_DEFINITIONS} _AFXDLL _XTP_STATICLINK)
+target_precompile_headers(roblox PRIVATE "${PROJECT_SOURCE_DIR}/Client/win/StdAfx.h")
+set_source_files_properties("${OPENRBX_ROBLOX_MIDL_DIR}/Roblox_i.c" PROPERTIES SKIP_PRECOMPILE_HEADERS ON)
 
-  target_include_directories(roblox PRIVATE
-    "${PROJECT_SOURCE_DIR}/Client/win"
-    "${OPENRBX_ROBLOX_MIDL_DIR}"
-    ${OPENRBX_ENGINE_INCLUDE_DIRS}
-    ${OPENRBX_RENDERLIBNEW_INCLUDE_DIRS}
-    ${OPENRBX_3RDPARTY_INCLUDE_DIRS}
-    "${OPENRBX_MESA_INCLUDE_DIR}"
-    "${OPENRBX_TOOLKITPRO}/Source"
-    "${OPENRBX_OGRE}/include"
-    "${OPENRBX_3RDPARTY}/scintilla/include"
-    "${OPENRBX_3RDPARTY}/Microsoft DirectX SDK (November 2007)/Include"
-  )
+target_include_directories(roblox PRIVATE
+  "${PROJECT_SOURCE_DIR}/Client/win"
+  "${OPENRBX_ROBLOX_MIDL_DIR}"
+  ${OPENRBX_ENGINE_INCLUDE_DIRS}
+  ${OPENRBX_RENDERLIBNEW_INCLUDE_DIRS}
+  ${OPENRBX_3RDPARTY_INCLUDE_DIRS}
+  "${OPENRBX_MESA_INCLUDE_DIR}"
+  "${OPENRBX_TOOLKITPRO}/Source"
+  "${OPENRBX_OGRE}/include"
+  "${OPENRBX_3RDPARTY}/scintilla/include"
+  "${OPENRBX_3RDPARTY}/Microsoft DirectX SDK (November 2007)/Include"
+)
 
-  set(OPENRBX_CLIENT_ENGINE_LIBRARIES)
-  foreach(lib rbxview renderlib rbxviewnew renderlibnew network_client app appdraw_rbxgfx appdraw appdraw_client lua)
-    if (TARGET ${lib})
-      list(APPEND OPENRBX_CLIENT_ENGINE_LIBRARIES ${lib})
-    endif()
-  endforeach()
+set(OPENRBX_CLIENT_ENGINE_LIBRARIES)
+foreach(lib rbxview renderlib rbxviewnew renderlibnew network_client app appdraw_rbxgfx appdraw appdraw_client lua)
+  if (TARGET ${lib})
+    list(APPEND OPENRBX_CLIENT_ENGINE_LIBRARIES ${lib})
+  endif()
+endforeach()
 
-  add_dependencies(roblox runtime_files)
-  target_link_libraries(roblox PRIVATE
-    toolkitpro
-    rgmain
-    mfc80
-    mfcs80
-    ${OPENRBX_CLIENT_ENGINE_LIBRARIES}
-    ${OPENRBX_G3D_LIBS}
-    ${OPENRBX_BOOST_LIBS}
-    ${OPENRBX_MESA_LIBS}
-    fmodex
-    advapi32
-    dbghelp
-    gdi32
-    iphlpapi
-    ole32
-    oleaut32
-    setupapi
-    shell32
-    shlwapi
-    user32
-    version
-    wininet
-    winmm
-    ws2_32
-    "${OPENRBX_3RDPARTY}/Microsoft DirectX SDK (November 2007)/Lib/x86/dinput8.lib"
-    "${OPENRBX_3RDPARTY}/Microsoft DirectX SDK (November 2007)/Lib/x86/dxguid.lib"
-  )
+add_dependencies(roblox runtime_files)
+target_link_libraries(roblox PRIVATE
+  toolkitpro
+  rgmain
+  ${OPENRBX_CLIENT_ENGINE_LIBRARIES}
+  ${OPENRBX_G3D_LIBS}
+  ${OPENRBX_BOOST_LIBS}
+  ${OPENRBX_MESA_LIBS}
+  fmodex
+  advapi32
+  dbghelp
+  gdi32
+  iphlpapi
+  ole32
+  oleaut32
+  setupapi
+  shell32
+  shlwapi
+  user32
+  version
+  wininet
+  winmm
+  ws2_32
+  "${OPENRBX_3RDPARTY}/Microsoft DirectX SDK (November 2007)/Lib/x86/dinput8.lib"
+  "${OPENRBX_3RDPARTY}/Microsoft DirectX SDK (November 2007)/Lib/x86/dxguid.lib"
+)
 
-  target_link_options(roblox PRIVATE "-MAP:$<TARGET_FILE_DIR:roblox>/$<TARGET_FILE_BASE_NAME:roblox>.map" "/FIXED:NO" "/MANIFEST:NO")
-  foreach(lib zlib.lib G3D.lib G3D-debug.lib GLG3D.lib GLG3D-debug.lib sdl.lib sdlmain.lib glut32.lib)
-    target_link_options(roblox PRIVATE "/NODEFAULTLIB:${lib}")
-  endforeach()
+target_link_options(roblox PRIVATE "-MAP:$<TARGET_FILE_DIR:roblox>/$<TARGET_FILE_BASE_NAME:roblox>.map" "/FIXED:NO" "/MANIFEST:NO")
+foreach(lib zlib.lib G3D.lib G3D-debug.lib GLG3D.lib GLG3D-debug.lib sdl.lib sdlmain.lib glut32.lib)
+  target_link_options(roblox PRIVATE "/NODEFAULTLIB:${lib}")
+endforeach()
 
-  set_property(TARGET roblox PROPERTY OUTPUT_NAME "Roblox")
-endif()
+set_property(TARGET roblox PROPERTY OUTPUT_NAME "Roblox")
 
-if (OPENRBX_MSVC8)
-  target_link_options(webservice PRIVATE "/OPT:REF,ICF")
-  target_link_options(roblox PRIVATE "/OPT:REF,ICF")
-
-  set_property(TARGET webservice roblox PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
-
-  set_property(TARGET webservice roblox PROPERTY MSVC_DEBUG_INFORMATION_FORMAT "$<$<CONFIG:Debug,RelWithDebInfo>:ProgramDatabase>")
-
-  set(CMAKE_CXX_FLAGS "/EHsc /TP /GR /nologo")
-  set(CMAKE_CXX_FLAGS_DEBUG "/Od /D_DEBUG")
-  set(CMAKE_CXX_FLAGS_RELEASE "/O2 /DNDEBUG")
-  set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "/O2 /Zi /DNDEBUG")
-  set(CMAKE_CXX_FLAGS_MINSIZEREL "/O1 /DNDEBUG")
-
-  set(CMAKE_C_FLAGS "/nologo")
-  set(CMAKE_C_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
-  set(CMAKE_C_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
-  set(CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
-  set(CMAKE_C_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS_MINSIZEREL}")
-
-  set(CMAKE_STATIC_LINKER_FLAGS "/machine:I386")
-
-  set(CMAKE_SHARED_LINKER_FLAGS "/machine:I386")
-  set(CMAKE_SHARED_LINKER_FLAGS_DEBUG "/incremental:yes /debug")
-  set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "/incremental:no")
-  set(CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO "/incremental:no /debug")
-  set(CMAKE_SHARED_LINKER_FLAGS_MINSIZEREL "/incremental:no")
-
-  set(CMAKE_EXE_LINKER_FLAGS "/machine:I386")
-  set(CMAKE_EXE_LINKER_FLAGS_DEBUG "/incremental:yes /debug")
-  set(CMAKE_EXE_LINKER_FLAGS_RELEASE "/incremental:no")
-  set(CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO "/incremental:no /debug")
-  set(CMAKE_EXE_LINKER_FLAGS_MINSIZEREL "/incremental:no")
-endif()
+target_link_options(webservice PRIVATE "/OPT:REF,ICF")
+target_link_options(roblox PRIVATE "/OPT:REF,ICF")
+set_property(TARGET webservice roblox PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 
 find_program(CLANGFORMAT_BIN NAMES clang-format)
 if (EXISTS "${CLANGFORMAT_BIN}")

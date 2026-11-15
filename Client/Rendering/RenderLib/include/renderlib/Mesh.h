@@ -1,8 +1,6 @@
 #ifndef RENDERLIB_MESH_H
 #define RENDERLIB_MESH_H
 
-#include "placeholder.h"
-
 #include <G3D/Array.h>
 #include <G3D/CoordinateFrame.h>
 #include <G3D/MeshAlg.h>

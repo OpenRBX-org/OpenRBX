@@ -1,7 +1,5 @@
 #include "util/Math.h"
 
-#include "placeholder.h"
-
 #include <G3D/Line.h>
 #include <G3D/g3dmath.h>
 #include <algorithm>

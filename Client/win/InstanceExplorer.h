@@ -2,7 +2,6 @@
 #define INSTANCEEXPLORER_H
 
 #include "MarshaledListener.h"
-#include "placeholder.h"
 #include "util/ContentProvider.h"
 #include "v8datamodel/Commands.h"
 #include "v8datamodel/Decal.h"

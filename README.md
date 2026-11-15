@@ -17,21 +17,20 @@ OpenRBX is a source port of Roblox as it was released in December 2007. It is bu
 
 ### Compiling from source
 
-For now OpenRBX still builds only for 32-bit Windows with the compiler the original used. This will change as the port progresses.
+For now OpenRBX builds only for 32-bit Windows. This will change as the port progresses.
 
 | Platform | Toolchain | Notes |
 |----------|-----------|-------|
-| Windows (x86) | Visual C++ 8.0 SP1 | Builds the client and the RBXGS web service. |
+| Windows (x86) | Visual Studio 2022 or later | Builds the client and the RBXGS web service. |
 
 #### Prerequisites
 
 * [Git](https://git-scm.com/downloads)
-* Visual C++ 8.0 SP1. [MSVC800-SP1](https://github.com/Asphaltian/MSVC800-SP1) is a portable copy that doesn't need installing.
-* [CMake](https://cmake.org/)
+* [Visual Studio](https://visualstudio.microsoft.com/) 2022 or later with the Desktop development with C++ workload and the C++ MFC and C++ ATL components. It ships CMake and Ninja.
 
 #### Building
 
-Open a command prompt and run `Common7\Tools\vsvars32.bat` from the toolchain folder, then:
+Open an x64_x86 Cross Tools Command Prompt from the Visual Studio start menu folder, then:
 
 ```bat
 :: Clone the repo
@@ -39,7 +38,7 @@ git clone https://github.com/OpenRBX-org/OpenRBX.git
 cd OpenRBX
 
 :: Configure and build
-cmake -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=RelWithDebInfo
+cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo
 cmake --build build
 ```
 

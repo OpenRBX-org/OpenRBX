@@ -1,8 +1,6 @@
 #ifndef UTIL_NAVKEYS_H
 #define UTIL_NAVKEYS_H
 
-#include "placeholder.h"
-
 namespace RBX {
 
 class NavKeys

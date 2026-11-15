@@ -77,7 +77,7 @@ static startup_time_info g_sStartupTimeInfo;
 
 int xtime_get(struct xtime* xtp, int clock_type)
 {
-    if (clock_type == TIME_UTC)
+    if (clock_type == TIME_UTC_)
     {
 #if defined(BOOST_HAS_FTIME)
         FILETIME ft;

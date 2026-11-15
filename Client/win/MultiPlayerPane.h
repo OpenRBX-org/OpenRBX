@@ -1,8 +1,6 @@
 #ifndef MULTIPLAYERPANE_H
 #define MULTIPLAYERPANE_H
 
-#include "placeholder.h"
-
 class CChatPrompt;
 
 namespace RBX {

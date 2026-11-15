@@ -1,7 +1,6 @@
 #ifndef V8DATAMODEL_SURFACES_H
 #define V8DATAMODEL_SURFACES_H
 
-#include "placeholder.h"
 #include "util/NormalId.h"
 #include "util/Vector6.h"
 #include "v8datamodel/Surface.h"

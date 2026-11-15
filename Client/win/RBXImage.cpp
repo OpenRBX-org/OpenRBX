@@ -14,7 +14,7 @@ int RBXImage::FUN_00445c70()
 
 RBXImage::RBXImage()
 	: m_unk0x04(NULL), m_unk0x08(NULL), m_unk0x0c(0), m_unk0x10(0), m_unk0x14(0), m_unk0x18(0), m_unk0x1c(false),
-	  m_unk0x1d(false), m_unk0x20(-1), m_unk0x24(0), m_unk0x28(0), m_unk0x2c(0)
+	  m_unk0x1d(false), m_unk0x20(-1)
 {
 }
 

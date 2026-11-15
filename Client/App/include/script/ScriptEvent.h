@@ -1,7 +1,6 @@
 #ifndef SCRIPT_SCRIPTEVENT_H
 #define SCRIPT_SCRIPTEVENT_H
 
-#include "placeholder.h"
 #include "script/ThreadRef.h"
 #include "util/RunStateOwner.h"
 

@@ -3,7 +3,6 @@
 
 #include "IObjectSafetyRobloxImpl.h"
 #include "Roblox_h.h"
-#include "placeholder.h"
 #include "util/Events.h"
 #include "util/RunStateOwner.h"
 #include "v8datamodel/DataModel.h"

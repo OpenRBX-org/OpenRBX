@@ -1,7 +1,6 @@
 #ifndef TOOL_RUNDRAGGER_H
 #define TOOL_RUNDRAGGER_H
 
-#include "placeholder.h"
 #include "util/Face.h"
 #include "util/NormalId.h"
 #include "v8datamodel/Workspace.h"

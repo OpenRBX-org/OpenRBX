@@ -3,7 +3,6 @@
 
 #include "ActiveDocView.h"
 #include "FilteredListener.h"
-#include "placeholder.h"
 #include "v8datamodel/DataModel.h"
 #include "v8datamodel/Selection.h"
 

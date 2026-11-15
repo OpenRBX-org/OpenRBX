@@ -1,7 +1,6 @@
 #ifndef V8WORLD_BLOCK_H
 #define V8WORLD_BLOCK_H
 
-#include "placeholder.h"
 #include "v8kernel/Pair.h"
 #include "v8world/Geometry.h"
 

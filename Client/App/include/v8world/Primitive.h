@@ -1,7 +1,6 @@
 #ifndef V8WORLD_PRIMITIVE_H
 #define V8WORLD_PRIMITIVE_H
 
-#include "placeholder.h"
 #include "util/ComputeProp.h"
 #include "util/Extents.h"
 #include "util/Face.h"

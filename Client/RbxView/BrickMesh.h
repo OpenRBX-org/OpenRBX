@@ -2,7 +2,6 @@
 #define RBXVIEW_BRICKMESH_H
 
 #include "MeshFactory.h"
-#include "placeholder.h"
 #include "renderlib/Mesh.h"
 
 #include <G3D/ReferenceCount.h>

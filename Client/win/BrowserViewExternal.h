@@ -3,7 +3,6 @@
 
 #include "Roblox_h.h"
 #include "_IBrowserViewExternalEventsCP.h"
-#include "placeholder.h"
 
 #include <atlbase.h>
 #include <atlcom.h>

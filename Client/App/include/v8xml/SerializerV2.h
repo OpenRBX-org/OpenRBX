@@ -1,7 +1,6 @@
 #ifndef V8XML_SERIALIZERV2_H
 #define V8XML_SERIALIZERV2_H
 
-#include "placeholder.h"
 #include "util/Handle.h"
 #include "util/object.h"
 #include "v8tree/Instance.h"

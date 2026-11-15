@@ -235,7 +235,7 @@ bool recursive_timed_mutex::do_timedlock(const xtime& xt)
         if (res == WAIT_TIMEOUT)
         {
             xtime cur;
-            xtime_get(&cur, TIME_UTC);
+            xtime_get(&cur, TIME_UTC_);
             if (xtime_cmp(xt, cur) > 0)
                 continue;
         }

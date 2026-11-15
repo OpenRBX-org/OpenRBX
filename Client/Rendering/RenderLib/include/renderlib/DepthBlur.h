@@ -1,8 +1,6 @@
 #ifndef RENDERLIB_DEPTHBLUR_H
 #define RENDERLIB_DEPTHBLUR_H
 
-#include "placeholder.h"
-
 #include <G3D/Rect2D.h>
 #include <GLG3D/RenderDevice.h>
 #include <GLG3D/Shader.h>

@@ -1,4 +1,3 @@
-#include "compat.h"
 #include "network/Player.h"
 #include "network/Players.h"
 #include "util/Events.h"

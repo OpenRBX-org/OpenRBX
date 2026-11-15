@@ -1,7 +1,6 @@
 #ifndef V8DATAMODEL_STATS_H
 #define V8DATAMODEL_STATS_H
 
-#include "placeholder.h"
 #include "v8tree/Instance.h"
 #include "v8tree/Service.h"
 

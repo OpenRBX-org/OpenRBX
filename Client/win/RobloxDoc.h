@@ -4,7 +4,6 @@
 #include "ClipboardVerbs.h"
 #include "VerbBinder.h"
 #include "Workspace.h"
-#include "placeholder.h"
 #include "v8datamodel/Unknown005d2700.h"
 
 #include <boost/scoped_ptr.hpp>

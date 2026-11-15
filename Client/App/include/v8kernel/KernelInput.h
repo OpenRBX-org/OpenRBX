@@ -1,7 +1,6 @@
 #ifndef V8KERNEL_KERNELINPUT_H
 #define V8KERNEL_KERNELINPUT_H
 
-#include "placeholder.h"
 #include "v8kernel/Constants.h"
 
 namespace RBX {

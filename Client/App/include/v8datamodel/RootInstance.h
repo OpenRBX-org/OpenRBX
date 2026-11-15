@@ -1,7 +1,6 @@
 #ifndef V8DATAMODEL_ROOTINSTANCE_H
 #define V8DATAMODEL_ROOTINSTANCE_H
 
-#include "placeholder.h"
 #include "util/ComputeProp.h"
 #include "util/Extents.h"
 #include "util/InsertMode.h"

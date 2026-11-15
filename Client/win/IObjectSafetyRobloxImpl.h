@@ -2,7 +2,6 @@
 #define IOBJECTSAFETYROBLOXIMPL_H
 
 #include "LogManager.h"
-#include "placeholder.h"
 
 #include <atlbase.h>
 #include <atlcom.h>

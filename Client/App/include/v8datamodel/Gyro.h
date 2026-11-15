@@ -1,7 +1,6 @@
 #ifndef V8DATAMODEL_GYRO_H
 #define V8DATAMODEL_GYRO_H
 
-#include "placeholder.h"
 #include "reflection/function.h"
 #include "reflection/property.h"
 #include "reflection/signal.h"

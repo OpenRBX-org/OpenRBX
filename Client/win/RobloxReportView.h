@@ -3,7 +3,6 @@
 
 #include "ActiveDocView.h"
 #include "MarshaledListener.h"
-#include "placeholder.h"
 #include "v8datamodel/DataModel.h"
 #include "v8datamodel/Stats.h"
 #include "v8tree/Instance.h"
@@ -63,7 +62,6 @@ public:
 		virtual void VTable0x08(const RBX::Instance* source, RBX::ChildAdded event);
 
 	public:
-		undefined4 m_unk0x94;
 		boost::shared_ptr<RBX::Stats::Item> m_unk0x98;
 	};
 

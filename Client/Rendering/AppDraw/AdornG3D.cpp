@@ -2,7 +2,6 @@
 
 #include "appdraw/DrawPrimitives.h"
 #include "appdraw/Fonts.h"
-#include "placeholder.h"
 #include "renderlib/TextureProxy.h"
 #include "util/Rect.h"
 

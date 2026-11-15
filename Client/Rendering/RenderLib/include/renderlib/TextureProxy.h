@@ -1,7 +1,6 @@
 #ifndef RENDERLIB_TEXTUREPROXY_H
 #define RENDERLIB_TEXTUREPROXY_H
 
-#include "placeholder.h"
 #include "rbxgraphics/TextureProxyBase.h"
 
 #include <G3D/Color3.h>

@@ -1,8 +1,6 @@
 #ifndef LDRAWPARSER_H
 #define LDRAWPARSER_H
 
-#include "placeholder.h"
-
 #include <ostream>
 #include <string>
 

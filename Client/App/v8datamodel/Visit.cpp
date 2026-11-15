@@ -1,15 +1,14 @@
-#include <time.h>
-#undef TIME_UTC
+#include "v8datamodel/Visit.h"
 
 #include "reflection/reflection.h"
 #include "util/Http.h"
 #include "util/StandardOut.h"
-#include "v8datamodel/Visit.h"
 
 #include <G3D/format.h>
 #include <boost/bind.hpp>
 #include <boost/thread/thread.hpp>
 #include <boost/thread/xtime.hpp>
+#include <time.h>
 
 namespace RBX {
 
@@ -43,7 +42,7 @@ worker_thread::work_result Visit::ping(std::string url, int interval)
 	}
 
 	boost::xtime xt;
-	boost::xtime_get(&xt, boost::TIME_UTC);
+	boost::xtime_get(&xt, boost::TIME_UTC_);
 	xt.sec += interval;
 	boost::thread::sleep(xt);
 

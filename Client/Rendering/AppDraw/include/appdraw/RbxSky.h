@@ -1,8 +1,6 @@
 #ifndef APPDRAW_RBXSKY_H
 #define APPDRAW_RBXSKY_H
 
-#include "placeholder.h"
-
 #include <OgreMaterial.h>
 #include <OgreString.h>
 #include <OgreTexture.h>
@@ -45,7 +43,6 @@ private:
 	SceneNode* m_unk0x44;
 	SceneNode* m_unk0x48;
 	SceneNode* m_unk0x4c;
-	undefined m_unk0x50[0x54 - 0x50];
 	MaterialPtr m_unk0x54;
 	MaterialPtr m_unk0x60;
 	MaterialPtr m_unk0x6c;

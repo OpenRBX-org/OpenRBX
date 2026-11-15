@@ -2,7 +2,6 @@
 #define HUMANOID_GETTINGUP_H
 
 #include "humanoid/Balancing.h"
-#include "placeholder.h"
 #include "util/Name.h"
 
 namespace RBX {

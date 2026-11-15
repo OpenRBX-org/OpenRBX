@@ -1,7 +1,6 @@
 #ifndef LUA_LUA_HPP
 #define LUA_LUA_HPP
 
-#include "placeholder.h"
 
 #include <lua.h>
 

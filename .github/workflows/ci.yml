@@ -17,7 +17,7 @@ jobs:
       - uses: actions/checkout@v6
       - name: Run clang-format
         run: |
-          find WebService Client util \( -iname '*.h' -o -iname '*.cpp' \) \
+          find WebService Client \( -iname '*.h' -o -iname '*.cpp' \) \
             -not -path 'Client/boost_1_34_1/*' \
             -not -path 'Client/App/lua-5.1.1/*' \
             -not -path 'Client/Network/raknet30/*' \
@@ -42,26 +42,17 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { name: 'MSVC 8.0 SP1 (x86)', msvc8: true,  config: 'RelWithDebInfo', package: true }
-          - { name: 'MSVC (x86)',         msvc8: false, config: 'Debug', vc-arch: 'amd64_x86', clang-tidy: true, targets: 'app network' }
+          - { name: 'MSVC (x86)',            config: 'RelWithDebInfo', targets: 'all', package: true }
+          - { name: 'MSVC (x86) clang-tidy', config: 'Debug', targets: 'app network', clang-tidy: true }
     steps:
       - uses: actions/checkout@v6
 
-      - name: Checkout MSVC 8.0 SP1 toolchain
-        if: ${{ matrix.msvc8 }}
-        uses: actions/checkout@v6
-        with:
-          repository: Asphaltian/MSVC800-SP1
-          path: msvc800sp1
-
       - name: Setup vcvars
-        if: ${{ !matrix.msvc8 }}
         uses: ilammy/msvc-dev-cmd@v1
         with:
-          arch: ${{ matrix.vc-arch }}
+          arch: amd64_x86
 
       - name: Setup ninja
-        if: ${{ !matrix.msvc8 }}
         uses: ashutoshvarma/setup-ninja@master
 
       - name: Install LLVM
@@ -70,73 +61,7 @@ jobs:
         with:
           version: '21'
 
-      - name: Key the vendored builds
-        if: ${{ matrix.msvc8 }}
-        id: vendored
-        shell: bash
-        run: |
-          {
-            echo "g3d=$(git rev-parse HEAD:Client/Rendering/g3d)"
-            echo "mesa=$(git rev-parse HEAD:Client/Rendering/Mesa-6.5)"
-            echo "boost=$(git rev-parse HEAD:Client/boost_1_34_1)"
-          } >>"$GITHUB_OUTPUT"
-
-      - name: Restore G3D
-        if: ${{ matrix.msvc8 }}
-        uses: actions/cache@v5
-        with:
-          path: |
-            build/3rdparty/CMakeFiles/graphics3d.dir
-            build/3rdparty/CMakeFiles/glg3d.dir
-            build/3rdparty/graphics3d.lib
-            build/3rdparty/glg3d.lib
-          key: g3d-${{ steps.vendored.outputs.g3d }}-${{ hashFiles('3rdparty/CMakeLists.txt') }}
-
-      - name: Restore Mesa
-        if: ${{ matrix.msvc8 }}
-        uses: actions/cache@v5
-        with:
-          path: |
-            build/3rdparty/CMakeFiles/mesa_core.dir
-            build/3rdparty/CMakeFiles/opengl32.dir
-            build/3rdparty/CMakeFiles/glu32.dir
-            build/3rdparty/CMakeFiles/osmesa32.dir
-            build/3rdparty/mesa_core.lib
-            build/3rdparty/OPENGL32.*
-            build/3rdparty/GLU32.*
-            build/3rdparty/OSMESA32.*
-          key: mesa-${{ steps.vendored.outputs.mesa }}-${{ hashFiles('3rdparty/CMakeLists.txt') }}
-
-      - name: Restore Boost
-        if: ${{ matrix.msvc8 }}
-        uses: actions/cache@v5
-        with:
-          path: |
-            build/3rdparty/CMakeFiles/boost_signals.dir
-            build/3rdparty/CMakeFiles/boost_thread.dir
-            build/3rdparty/CMakeFiles/boost_date_time.dir
-            build/3rdparty/libboost_signals-vc80-mt-1_34_1.lib
-            build/3rdparty/libboost_thread-vc80-mt-1_34_1.lib
-            build/3rdparty/libboost_date_time-vc80-mt-1_34_1.lib
-          key: boost-${{ steps.vendored.outputs.boost }}-${{ hashFiles('3rdparty/CMakeLists.txt') }}
-
-      - name: Backdate the inputs that never change
-        if: ${{ matrix.msvc8 }}
-        shell: pwsh
-        run: |
-          Get-ChildItem 3rdparty, Client/boost_1_34_1, Client/App/lua-5.1.1, Client/Network/raknet30, Client/fmod, Client/Rendering/g3d, Client/Rendering/SDL-1.2.6, Client/Rendering/Mesa-6.5, Client/Rendering/OgreSDK, msvc800sp1 -Recurse -File |
-            ForEach-Object { $_.LastWriteTime = '2000-01-01' }
-
-      - name: Build (MSVC 8.0 SP1)
-        if: ${{ matrix.msvc8 }}
-        shell: cmd
-        run: |
-          call .\msvc800sp1\Common7\Tools\vsvars32.bat
-          cmake -S . -B build -G "NMake Makefiles" -DCMAKE_BUILD_TYPE=${{ matrix.config }}
-          cmake --build build
-
-      - name: Build (CMake)
-        if: ${{ !matrix.msvc8 }}
+      - name: Build
         shell: pwsh
         run: |
           cmake -S . -B build -G Ninja `

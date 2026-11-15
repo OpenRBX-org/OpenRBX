@@ -1,8 +1,6 @@
 #ifndef UTIL_INDEXARRAY_H
 #define UTIL_INDEXARRAY_H
 
-#include "placeholder.h"
-
 #include <G3D/Array.h>
 #include <boost/noncopyable.hpp>
 

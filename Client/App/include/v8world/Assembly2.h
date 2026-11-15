@@ -1,7 +1,6 @@
 #ifndef V8WORLD_ASSEMBLY2_H
 #define V8WORLD_ASSEMBLY2_H
 
-#include "placeholder.h"
 #include "util/ComputeProp.h"
 #include "util/RunningAverage.h"
 #include "v8world/IPipelined.h"

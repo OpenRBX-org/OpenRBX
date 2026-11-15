@@ -4,7 +4,6 @@
 #include "MarshaledListener.h"
 #include "NullDoc.h"
 #include "ScintillaDocView.h"
-#include "placeholder.h"
 #include "util/RunStateOwner.h"
 #include "v8tree/Instance.h"
 

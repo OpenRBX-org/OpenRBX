@@ -2,7 +2,6 @@
 #define APPDRAW_RBXSUBENTITY_H
 
 #include "appdraw/RbxSceneNode.h"
-#include "placeholder.h"
 
 #include <OgreMatrix4.h>
 #include <OgreSceneNode.h>

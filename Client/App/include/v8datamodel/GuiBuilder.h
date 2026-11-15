@@ -1,7 +1,6 @@
 #ifndef V8DATAMODEL_GUIBUILDER_H
 #define V8DATAMODEL_GUIBUILDER_H
 
-#include "placeholder.h"
 #include "v8datamodel/Workspace.h"
 
 #include <boost/shared_ptr.hpp>

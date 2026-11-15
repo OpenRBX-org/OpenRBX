@@ -2,7 +2,6 @@
 #define LUAFUNCTION_H
 
 #include "Roblox_h.h"
-#include "placeholder.h"
 #include "reflection/type.h"
 #include "script/ThreadRef.h"
 

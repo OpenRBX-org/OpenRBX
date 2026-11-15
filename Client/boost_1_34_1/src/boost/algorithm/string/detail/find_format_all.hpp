@@ -72,7 +72,7 @@ namespace boost {
                 store_type M( FindResult, FormatResult, Formatter );
 
                 // Initialize last match
-                input_iterator_type LastMatch=begin(Input);
+                input_iterator_type LastMatch=::boost::begin(Input);
 
                 // Iterate through all matches
                 while( M )
@@ -80,15 +80,15 @@ namespace boost {
                     // Copy the beginning of the sequence
                     std::copy( LastMatch, M.begin(), Output );
                     // Copy formated result
-                    std::copy( begin(M.format_result()), end(M.format_result()), Output );
+                    std::copy( ::boost::begin(M.format_result()), ::boost::end(M.format_result()), Output );
 
                     // Proceed to the next match
                     LastMatch=M.end();
-                    M=Finder( LastMatch, end(Input) );
+                    M=Finder( LastMatch, ::boost::end(Input) );
                 }
 
                 // Copy the rest of the sequence
-                std::copy( LastMatch, end(Input), Output );
+                std::copy( LastMatch, ::boost::end(Input), Output );
 
                 return Output;
             }
@@ -139,7 +139,7 @@ namespace boost {
                 store_type M( FindResult, FormatResult, Formatter );
 
                 // Initialize last match
-                input_iterator_type LastMatch=begin(Input);
+                input_iterator_type LastMatch=::boost::begin(Input);
 
                 // Output temporary
                 InputT Output;
@@ -148,17 +148,17 @@ namespace boost {
                 while( M )
                 {
                     // Copy the beginning of the sequence
-                    insert( Output, end(Output), LastMatch, M.begin() );
+                    insert( Output, ::boost::end(Output), LastMatch, M.begin() );
                     // Copy formated result
-                    insert( Output, end(Output), M.format_result() );
+                    insert( Output, ::boost::end(Output), M.format_result() );
 
                     // Proceed to the next match
                     LastMatch=M.end();
-                    M=Finder( LastMatch, end(Input) );
+                    M=Finder( LastMatch, ::boost::end(Input) );
                 }
 
                 // Copy the rest of the sequence
-                insert( Output, end(Output), LastMatch, end(Input) );
+                insert( Output, ::boost::end(Output), LastMatch, ::boost::end(Input) );
 
                 return Output;
             }

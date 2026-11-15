@@ -1,8 +1,6 @@
 #ifndef SECURITY_SECURITYCONTEXT_H
 #define SECURITY_SECURITYCONTEXT_H
 
-#include "placeholder.h"
-
 #include <G3D/format.h>
 #include <boost/thread/tss.hpp>
 #include <stdexcept>

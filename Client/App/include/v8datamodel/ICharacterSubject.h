@@ -1,7 +1,6 @@
 #ifndef V8DATAMODEL_ICHARACTERSUBJECT_H
 #define V8DATAMODEL_ICHARACTERSUBJECT_H
 
-#include "placeholder.h"
 #include "util/ExponentialRunningAverage.h"
 #include "util/ICameraSubject.h"
 

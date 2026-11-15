@@ -1,7 +1,6 @@
 #ifndef UTIL_RUNNINGAVERAGE_H
 #define UTIL_RUNNINGAVERAGE_H
 
-#include "placeholder.h"
 #include "util/Quaternion.h"
 
 #include <G3D/CoordinateFrame.h>

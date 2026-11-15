@@ -1,7 +1,6 @@
 #ifndef APPDRAW_PART_H
 #define APPDRAW_PART_H
 
-#include "placeholder.h"
 #include "util/SurfaceType.h"
 #include "util/Vector6.h"
 

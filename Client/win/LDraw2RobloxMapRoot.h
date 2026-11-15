@@ -3,7 +3,6 @@
 
 #include "LDraw2RobloxColorMap.h"
 #include "LDraw2RobloxPartMap.h"
-#include "placeholder.h"
 
 #include <map>
 #include <string>

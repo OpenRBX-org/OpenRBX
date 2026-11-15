@@ -1,7 +1,6 @@
 #ifndef RENDERLIBNEW_RENDERSCENE_H
 #define RENDERLIBNEW_RENDERSCENE_H
 
-#include "placeholder.h"
 #include "renderlib/RenderStats.h"
 #include "renderlibnew/EffectSettings.h"
 #include "renderlibnew/RenderSurface.h"
@@ -65,7 +64,6 @@ public:
 	G3D::Color4 colorClearValue;
 
 private:
-	undefined4 m_unk0x31c;
 
 public:
 	G3D::LightingParameters desiredSkyParameters;

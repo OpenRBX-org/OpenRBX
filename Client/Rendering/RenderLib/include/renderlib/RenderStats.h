@@ -1,8 +1,6 @@
 #ifndef RENDERLIB_RENDERSTATS_H
 #define RENDERLIB_RENDERSTATS_H
 
-#include "placeholder.h"
-
 #include <G3D/Stopwatch.h>
 
 class RenderStats

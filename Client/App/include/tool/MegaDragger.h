@@ -1,8 +1,6 @@
 #ifndef TOOL_MEGADRAGGER_H
 #define TOOL_MEGADRAGGER_H
 
-#include "placeholder.h"
-
 #include <G3D/Matrix3.h>
 #include <G3D/Vector3.h>
 #include <boost/weak_ptr.hpp>

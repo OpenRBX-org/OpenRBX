@@ -2,7 +2,6 @@
 #define LUAHTMLVIEW_H
 
 #include "SecureHtmlView.h"
-#include "placeholder.h"
 
 #include <atlbase.h>
 #include <atlcom.h>

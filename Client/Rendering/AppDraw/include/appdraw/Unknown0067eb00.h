@@ -1,8 +1,6 @@
 #ifndef APPDRAW_UNKNOWN0067EB00_H
 #define APPDRAW_UNKNOWN0067EB00_H
 
-#include "placeholder.h"
-
 #include <OgreColourValue.h>
 #include <OgreManualObject.h>
 #include <OgreSceneManager.h>

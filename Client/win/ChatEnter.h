@@ -2,7 +2,6 @@
 #define CHATENTER_H
 
 #include "gui/GUI.h"
-#include "placeholder.h"
 
 class CChatPrompt;
 

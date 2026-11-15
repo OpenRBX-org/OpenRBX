@@ -4,7 +4,6 @@
 #include "DxUserInput.h"
 #include "RenderSettings.h"
 #include "ViewBase.h"
-#include "placeholder.h"
 #include "rbxgraphics/Adorn.h"
 #include "util/IMetric.h"
 #include "util/Profiling.h"
@@ -122,7 +121,6 @@ private:
 	std::auto_ptr<RBX::ViewBase> m_unk0xa8;
 	std::auto_ptr<RBX::Adorn> m_unk0xac;
 	Ogre::VisualEngine* m_unk0xb0;
-	undefined m_unk0xb4[0xb8 - 0xb4];
 };
 
 #endif // ROBLOXWND_H

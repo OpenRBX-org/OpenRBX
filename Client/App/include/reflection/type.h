@@ -1,7 +1,6 @@
 #ifndef REFLECTION_TYPE_H
 #define REFLECTION_TYPE_H
 
-#include "placeholder.h"
 #include "reflection/descriptor.h"
 #include "util/Utilities.h"
 

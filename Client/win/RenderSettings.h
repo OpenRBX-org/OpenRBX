@@ -1,7 +1,6 @@
 #ifndef RENDERSETTINGS_H
 #define RENDERSETTINGS_H
 
-#include "placeholder.h"
 #include "v8datamodel/GlobalSettings.h"
 
 #include <G3D/Vector2int16.h>

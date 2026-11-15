@@ -1,7 +1,6 @@
 #ifndef V8WORLD_IWORLDSTAGE_H
 #define V8WORLD_IWORLDSTAGE_H
 
-#include "placeholder.h"
 #include "v8kernel/IStage.h"
 
 namespace RBX {

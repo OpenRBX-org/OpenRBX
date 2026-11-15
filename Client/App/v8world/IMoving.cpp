@@ -1,7 +1,5 @@
 #include "v8world/IMoving.h"
 
-#include "placeholder.h"
-
 #include <cstddef>
 
 namespace RBX {

@@ -2,7 +2,6 @@
 #define PROPGRID_H
 
 #include "ActiveDocView.h"
-#include "placeholder.h"
 #include "util/Events.h"
 #include "util/Sound.h"
 #include "util/TextureId.h"
@@ -81,7 +80,6 @@ protected:
 	RBX::DataModel* m_unk0x194;
 	std::vector<Item*> m_unk0x198;
 	std::map<const RBX::Reflection::PropertyDescriptor*, Item*> m_unk0x1a8;
-	std::map<undefined4, undefined4> m_unk0x1b4;
 	bool m_unk0x1c0;
 	bool m_unk0x1c1;
 	std::set<Item*> m_unk0x1c4;

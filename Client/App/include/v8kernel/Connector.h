@@ -1,7 +1,6 @@
 #ifndef V8KERNEL_CONNECTOR_H
 #define V8KERNEL_CONNECTOR_H
 
-#include "placeholder.h"
 #include "util/IndexArray.h"
 #include "util/NormalId.h"
 #include "v8kernel/KernelIndex.h"

@@ -2,7 +2,6 @@
 #define LDRAWCOMMAND_H
 
 #include "LuaObjectWriter.h"
-#include "placeholder.h"
 
 #include <ostream>
 #include <string>

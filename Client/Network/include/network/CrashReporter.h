@@ -1,8 +1,6 @@
 #ifndef NETWORK_CRASHREPORTER_H
 #define NETWORK_CRASHREPORTER_H
 
-#include "placeholder.h"
-
 #include <windows.h>
 
 enum CrashReportAction

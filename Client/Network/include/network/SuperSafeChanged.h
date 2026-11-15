@@ -1,8 +1,6 @@
 #ifndef NETWORK_SUPERSAFECHANGED_H
 #define NETWORK_SUPERSAFECHANGED_H
 
-#include "placeholder.h"
-
 namespace RBX {
 
 class SuperSafeChanged

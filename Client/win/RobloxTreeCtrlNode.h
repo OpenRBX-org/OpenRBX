@@ -1,7 +1,6 @@
 #ifndef ROBLOXTREECTRLNODE_H
 #define ROBLOXTREECTRLNODE_H
 
-#include "placeholder.h"
 #include "util/Events.h"
 #include "v8tree/Instance.h"
 
@@ -23,7 +22,7 @@ public:
 
 	virtual void VTable0x08();
 	virtual void VTable0x0c();
-	virtual void VTable0x10(undefined4 p_unk0x04);
+	virtual void VTable0x10(UINT p_unk0x04);
 	virtual void VTable0x14(NMTVDISPINFO* dispInfo);
 	virtual HTREEITEM VTable0x18();
 
@@ -46,9 +45,9 @@ protected:
 	boost::shared_ptr<RBX::Instance> m_unk0x0c;
 	std::map<RBX::Instance*, CRobloxTreeCtrlNode*> m_unk0x14;
 	std::set<CRobloxTreeCtrlNode*> m_unk0x20;
-	undefined m_unk0x2c_bit0 : 1;
-	undefined m_unk0x2c_bit1 : 1;
-	undefined m_unk0x2d;
+	bool m_unk0x2c_bit0 : 1;
+	bool m_unk0x2c_bit1 : 1;
+	bool m_unk0x2d;
 	CRobloxTreeCtrl* m_unk0x30;
 	CRobloxTreeCtrlNode* m_unk0x34;
 	std::set<boost::shared_ptr<RBX::Instance> > m_unk0x38;

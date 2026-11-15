@@ -1,4 +1,3 @@
-#include "placeholder.h"
 #include "util/Utilities.h"
 
 #include <ostream>

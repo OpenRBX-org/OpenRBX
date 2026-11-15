@@ -1,8 +1,6 @@
 #ifndef CHATPROMPT_H
 #define CHATPROMPT_H
 
-#include "placeholder.h"
-
 #include <boost/shared_ptr.hpp>
 
 class ChatEnter;

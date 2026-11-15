@@ -165,7 +165,7 @@ bool timed_mutex::do_timedlock(const xtime& xt)
         if (res == WAIT_TIMEOUT)
         {
             boost::xtime cur;
-            boost::xtime_get(&cur, boost::TIME_UTC);
+            boost::xtime_get(&cur, boost::TIME_UTC_);
             if (boost::xtime_cmp(xt, cur) > 0)
                 continue;
         }

@@ -1,7 +1,6 @@
 #ifndef V8KERNEL_BODY_H
 #define V8KERNEL_BODY_H
 
-#include "placeholder.h"
 #include "util/IndexArray.h"
 #include "util/Math.h"
 #include "util/PV.h"

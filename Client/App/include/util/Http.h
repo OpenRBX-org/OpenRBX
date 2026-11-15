@@ -1,8 +1,6 @@
 #ifndef UTIL_HTTP_H
 #define UTIL_HTTP_H
 
-#include "placeholder.h"
-
 #include <istream>
 #include <string>
 

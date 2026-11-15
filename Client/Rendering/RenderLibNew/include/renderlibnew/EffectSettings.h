@@ -1,8 +1,6 @@
 #ifndef RENDERLIBNEW_EFFECTSETTINGS_H
 #define RENDERLIBNEW_EFFECTSETTINGS_H
 
-#include "placeholder.h"
-
 #include <G3D/ReferenceCount.h>
 #include <GLG3D/LightingParameters.h>
 #include <GLG3D/ToneMap.h>

@@ -1,7 +1,6 @@
 #ifndef V8DATAMODEL_VISIT_H
 #define V8DATAMODEL_VISIT_H
 
-#include "placeholder.h"
 #include "util/Handle.h"
 #include "util/boost.hpp"
 #include "v8tree/Instance.h"

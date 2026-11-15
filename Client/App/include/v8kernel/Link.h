@@ -1,8 +1,6 @@
 #ifndef V8KERNEL_LINK_H
 #define V8KERNEL_LINK_H
 
-#include "placeholder.h"
-
 #include <G3D/CoordinateFrame.h>
 
 namespace RBX {

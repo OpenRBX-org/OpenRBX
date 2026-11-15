@@ -2,7 +2,6 @@
 #define GUI_WIDGET_H
 
 #include "gui/GUI.h"
-#include "placeholder.h"
 
 #include <G3D/Color3.h>
 #include <G3D/Color4.h>

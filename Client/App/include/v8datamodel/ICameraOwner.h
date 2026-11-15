@@ -1,7 +1,6 @@
 #ifndef V8DATAMODEL_ICAMERAOWNER_H
 #define V8DATAMODEL_ICAMERAOWNER_H
 
-#include "placeholder.h"
 #include "util/Extents.h"
 
 #include <boost/weak_ptr.hpp>

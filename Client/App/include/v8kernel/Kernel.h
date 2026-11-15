@@ -1,7 +1,6 @@
 #ifndef V8KERNEL_KERNEL_H
 #define V8KERNEL_KERNEL_H
 
-#include "placeholder.h"
 #include "util/Profiling.h"
 #include "v8kernel/IStage.h"
 

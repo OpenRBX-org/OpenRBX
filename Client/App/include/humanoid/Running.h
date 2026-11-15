@@ -2,7 +2,6 @@
 #define HUMANOID_RUNNING_H
 
 #include "humanoid/Balancing.h"
-#include "placeholder.h"
 #include "util/IRenderable.h"
 #include "util/Name.h"
 

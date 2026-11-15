@@ -1,7 +1,6 @@
 #ifndef UTIL_BOOST_HPP
 #define UTIL_BOOST_HPP
 
-#include "placeholder.h"
 
 #include <boost/function.hpp>
 #include <boost/noncopyable.hpp>

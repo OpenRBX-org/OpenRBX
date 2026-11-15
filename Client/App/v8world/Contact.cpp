@@ -1,6 +1,5 @@
 #include "v8world/Contact.h"
 
-#include "placeholder.h"
 #include "util/Math.h"
 #include "util/StlExtra.h"
 #include "v8kernel/Body.h"

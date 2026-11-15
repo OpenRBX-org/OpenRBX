@@ -1,6 +1,5 @@
 #include "v8datamodel/Hopper.h"
 
-#include "compat.h"
 #include "reflection/enumconverter.h"
 #include "reflection/property.h"
 #include "reflection/signal.h"

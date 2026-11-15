@@ -2,7 +2,6 @@
 #define MAINFRM_H
 
 #include "SelectionTreeCtrl.h"
-#include "placeholder.h"
 #include "util/Events.h"
 #include "v8datamodel/BrickColor.h"
 

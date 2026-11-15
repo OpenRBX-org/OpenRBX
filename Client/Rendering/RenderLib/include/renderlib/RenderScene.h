@@ -1,7 +1,6 @@
 #ifndef RENDERLIB_RENDERSCENE_H
 #define RENDERLIB_RENDERSCENE_H
 
-#include "placeholder.h"
 #include "renderlib/Chunk.h"
 #include "renderlib/EffectSettings.h"
 #include "renderlib/RenderStats.h"

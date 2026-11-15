@@ -2,7 +2,6 @@
 #define APPDRAW_VISUALENGINE_H
 
 #include "appdraw/TwoDManager.h"
-#include "placeholder.h"
 
 #include <OgreAxisAlignedBox.h>
 #include <OgreEdgeListBuilder.h>
@@ -78,7 +77,6 @@ public:
 
 	private:
 		int m_unk0x00;
-		undefined4 m_unk0x04;
 		Unk0x08 m_unk0x08[100];
 	};
 

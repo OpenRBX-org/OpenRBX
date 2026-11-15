@@ -89,7 +89,7 @@ void RunService::runProc(boost::shared_ptr<DataModel> dataModel)
 
 		boost::xtime xt;
 
-		boost::xtime_get(&xt, boost::TIME_UTC);
+		boost::xtime_get(&xt, boost::TIME_UTC_);
 		xt.nsec += (int) (waitTime * 1000000000.0);
 
 		bool signalled;
@@ -103,7 +103,7 @@ void RunService::runProc(boost::shared_ptr<DataModel> dataModel)
 		if (!signalled) {
 			boost::xtime xt;
 
-			boost::xtime_get(&xt, boost::TIME_UTC);
+			boost::xtime_get(&xt, boost::TIME_UTC_);
 			xt.sec += 1;
 
 			boost::mutex::scoped_lock lock(runMutex);

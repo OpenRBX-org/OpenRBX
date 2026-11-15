@@ -1,8 +1,6 @@
 #ifndef V8DATAMODEL_IEQUIPABLE_H
 #define V8DATAMODEL_IEQUIPABLE_H
 
-#include "placeholder.h"
-
 #include <G3D/CoordinateFrame.h>
 #include <boost/shared_ptr.hpp>
 #include <string>

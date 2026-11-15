@@ -1,7 +1,6 @@
 #ifndef V8DATAMODEL_SCRIPTMOUSECOMMAND_H
 #define V8DATAMODEL_SCRIPTMOUSECOMMAND_H
 
-#include "placeholder.h"
 #include "v8datamodel/Mouse.h"
 #include "v8datamodel/MouseCommand.h"
 

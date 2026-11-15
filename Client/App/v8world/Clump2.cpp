@@ -1,6 +1,5 @@
 #include "v8world/Clump2.h"
 
-#include "placeholder.h"
 #include "v8kernel/Body.h"
 #include "v8world/Assembly2.h"
 #include "v8world/IPipelined.h"

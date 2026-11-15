@@ -2,7 +2,6 @@
 #define HUMANOID_BALANCING_H
 
 #include "humanoid/Humanoid.h"
-#include "placeholder.h"
 #include "util/HitTestFilter.h"
 
 #include <G3D/Vector3.h>

@@ -1,7 +1,6 @@
 #ifndef RENDERLIB_CHUNK_H
 #define RENDERLIB_CHUNK_H
 
-#include "placeholder.h"
 #include "renderlib/Material.h"
 #include "renderlib/Mesh.h"
 #include "renderlib/RenderStats.h"

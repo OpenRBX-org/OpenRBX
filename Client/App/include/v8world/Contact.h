@@ -1,7 +1,6 @@
 #ifndef V8WORLD_CONTACT_H
 #define V8WORLD_CONTACT_H
 
-#include "placeholder.h"
 #include "v8kernel/Connector.h"
 #include "v8world/Ball.h"
 #include "v8world/Block.h"

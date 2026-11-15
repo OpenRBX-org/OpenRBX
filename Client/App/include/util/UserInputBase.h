@@ -1,7 +1,6 @@
 #ifndef UTIL_USERINPUTBASE_H
 #define UTIL_USERINPUTBASE_H
 
-#include "placeholder.h"
 #include "util/ContentProvider.h"
 #include "util/NavKeys.h"
 

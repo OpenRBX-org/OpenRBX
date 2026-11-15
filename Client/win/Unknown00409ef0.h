@@ -1,8 +1,6 @@
 #ifndef UNKNOWN00409EF0_H
 #define UNKNOWN00409EF0_H
 
-#include "placeholder.h"
-
 #include <string>
 
 class Unknown00409ef0

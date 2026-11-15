@@ -1,7 +1,6 @@
 #ifndef UTIL_OBJECT_H
 #define UTIL_OBJECT_H
 
-#include "placeholder.h"
 #include "util/Name.h"
 
 #include <boost/enable_shared_from_this.hpp>

@@ -1,8 +1,6 @@
 #ifndef OBJECTBROWSER_H
 #define OBJECTBROWSER_H
 
-#include "placeholder.h"
-
 class CObjectBrowser : public CView
 {
 	DECLARE_DYNCREATE(CObjectBrowser)

@@ -1,7 +1,6 @@
 #ifndef V8KERNEL_KERNELDATA_H
 #define V8KERNEL_KERNELDATA_H
 
-#include "placeholder.h"
 #include "util/IndexArray.h"
 #include "v8kernel/Body.h"
 #include "v8kernel/Connector.h"

@@ -6,8 +6,6 @@
 #include <winsock2.h>
 // clang-format on
 
-#include "placeholder.h"
-
 #include <G3D/System.h>
 #include <atlisapi.h>
 #include <atlsoap.h>

@@ -1,7 +1,6 @@
 #ifndef RENDERLIB_EFFECTSETTINGS_H
 #define RENDERLIB_EFFECTSETTINGS_H
 
-#include "placeholder.h"
 #include "renderlib/DepthBlur.h"
 
 #include <G3D/ReferenceCount.h>

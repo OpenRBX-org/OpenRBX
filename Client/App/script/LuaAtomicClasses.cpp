@@ -2,7 +2,6 @@
 
 #include "lua/LuaBridge.h"
 #include "lua/lua.hpp"
-#include "placeholder.h"
 #include "v8datamodel/BrickColor.h"
 
 #include <G3D/Color3.h>

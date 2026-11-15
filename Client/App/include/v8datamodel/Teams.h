@@ -1,7 +1,6 @@
 #ifndef V8DATAMODEL_TEAMS_H
 #define V8DATAMODEL_TEAMS_H
 
-#include "placeholder.h"
 #include "util/Handle.h"
 #include "util/Utilities.h"
 #include "v8datamodel/BrickColor.h"

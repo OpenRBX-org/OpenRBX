@@ -1,7 +1,6 @@
 #ifndef DXUSERINPUT_H
 #define DXUSERINPUT_H
 
-#include "placeholder.h"
 #include "util/Events.h"
 #include "util/RunStateOwner.h"
 #include "util/UIEvent.h"
@@ -23,7 +22,6 @@ class DxUserInput : public RBX::UserInputBase,
 					public RBX::Listener<RBX::RunService, RBX::Heartbeat>
 {
 private:
-	undefined4 m_unk0x30;
 	mutable ATL::CCriticalSection m_unk0x34;
 	CFrameWnd* m_unk0x4c;
 	ACCEL* m_unk0x50;

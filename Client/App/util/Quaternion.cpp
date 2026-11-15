@@ -1,7 +1,5 @@
 #include "util/Quaternion.h"
 
-#include "placeholder.h"
-
 namespace RBX {
 
 Quaternion& Quaternion::operator=(const Quaternion& other)

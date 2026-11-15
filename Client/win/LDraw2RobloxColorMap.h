@@ -1,8 +1,6 @@
 #ifndef LDRAW2ROBLOXCOLORMAP_H
 #define LDRAW2ROBLOXCOLORMAP_H
 
-#include "placeholder.h"
-
 namespace RBX {
 namespace LDraw2Lua {
 

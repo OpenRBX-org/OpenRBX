@@ -1,8 +1,6 @@
 #ifndef UTIL_SCOPEDASSIGN_H
 #define UTIL_SCOPEDASSIGN_H
 
-#include "placeholder.h"
-
 namespace RBX {
 
 template <class T>

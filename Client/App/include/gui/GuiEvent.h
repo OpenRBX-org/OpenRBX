@@ -1,7 +1,6 @@
 #ifndef GUI_GUIEVENT_H
 #define GUI_GUIEVENT_H
 
-#include "placeholder.h"
 #include "util/UIEvent.h"
 
 namespace RBX {

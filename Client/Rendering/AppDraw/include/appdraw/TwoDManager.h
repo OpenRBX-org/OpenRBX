@@ -1,8 +1,6 @@
 #ifndef APPDRAW_TWODMANAGER_H
 #define APPDRAW_TWODMANAGER_H
 
-#include "placeholder.h"
-
 #include <G3D/Color4.h>
 #include <OgreHardwareIndexBuffer.h>
 #include <OgreHardwareVertexBuffer.h>

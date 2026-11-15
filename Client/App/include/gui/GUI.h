@@ -3,7 +3,6 @@
 
 #include "gui/GuiEvent.h"
 #include "gui/Layout.h"
-#include "placeholder.h"
 #include "rbxgraphics/Adorn.h"
 #include "util/Name.h"
 #include "util/Rect.h"

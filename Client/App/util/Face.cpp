@@ -1,6 +1,5 @@
 #include "util/Face.h"
 
-#include "placeholder.h"
 #include "util/Math.h"
 
 #include <G3D/Plane.h>

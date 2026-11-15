@@ -2,7 +2,6 @@
 #define NETWORKIDOBJECT_H
 
 #include "RakNetTypes.h"
-#include "placeholder.h"
 
 class NetworkIDManager;
 

@@ -1,8 +1,6 @@
 #ifndef UTIL_EVALUATOR_H
 #define UTIL_EVALUATOR_H
 
-#include "placeholder.h"
-
 #include <string>
 
 namespace RBX {

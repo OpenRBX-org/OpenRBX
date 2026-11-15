@@ -86,7 +86,7 @@ struct test_task
             return test_size;
 
         boost::xtime now;
-        boost::xtime_get(&now, boost::TIME_UTC);
+        boost::xtime_get(&now, boost::TIME_UTC_);
         unsigned long seconds = now.sec - start_time.sec;
         if (seconds < 4)
         {
@@ -169,7 +169,7 @@ check_not_contained_in(
 void concurrent_creation_of_objects()
 {
     {
-        boost::xtime_get(&start_time, boost::TIME_UTC);
+        boost::xtime_get(&start_time, boost::TIME_UTC_);
         boost::thread thread1(boost::ref(test1));
         boost::thread thread2(boost::ref(test2));
         boost::thread thread3(boost::ref(test3));

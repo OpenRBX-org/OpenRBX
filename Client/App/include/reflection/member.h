@@ -1,7 +1,6 @@
 #ifndef REFLECTION_MEMBER_H
 #define REFLECTION_MEMBER_H
 
-#include "placeholder.h"
 #include "reflection/descriptor.h"
 
 #include <algorithm>

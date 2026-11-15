@@ -115,8 +115,8 @@ namespace boost {
                     RangeT& Col,
                     FinderT Finder ) :
                 detail::find_iterator_base<IteratorT>(Finder,0),
-                m_Match(begin(Col),begin(Col)),
-                m_End(end(Col))
+                m_Match(::boost::begin(Col),::boost::begin(Col)),
+                m_End(::boost::end(Col))
             {
                 increment();
             }
@@ -186,7 +186,7 @@ namespace boost {
             FinderT Finder)
         {
             return find_iterator<BOOST_STRING_TYPENAME range_result_iterator<RangeT>::type>(
-                begin(Collection), end(Collection), Finder);
+                ::boost::begin(Collection), ::boost::end(Collection), Finder);
         }
 
 //  split iterator -----------------------------------------------//
@@ -278,9 +278,9 @@ namespace boost {
                     RangeT& Col,
                     FinderT Finder ) :
                 detail::find_iterator_base<IteratorT>(Finder,0),
-                m_Match(begin(Col),begin(Col)),
-                m_Next(begin(Col)),
-                m_End(end(Col)),
+                m_Match(::boost::begin(Col),::boost::begin(Col)),
+                m_Next(::boost::begin(Col)),
+                m_End(::boost::end(Col)),
                 m_bEof(false)
             {
                 increment();
@@ -362,7 +362,7 @@ namespace boost {
             FinderT Finder)
         {
             return split_iterator<BOOST_STRING_TYPENAME range_result_iterator<RangeT>::type>(
-                begin(Collection), end(Collection), Finder);
+                ::boost::begin(Collection), ::boost::end(Collection), Finder);
         }
 
 

@@ -1,8 +1,6 @@
 #ifndef V8KERNEL_COFM_H
 #define V8KERNEL_COFM_H
 
-#include "placeholder.h"
-
 #include <G3D/Matrix3.h>
 #include <G3D/Vector3.h>
 

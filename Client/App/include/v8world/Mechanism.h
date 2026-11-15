@@ -1,8 +1,6 @@
 #ifndef V8WORLD_MECHANISM_H
 #define V8WORLD_MECHANISM_H
 
-#include "placeholder.h"
-
 #include <boost/noncopyable.hpp>
 #include <cstddef>
 #include <list>

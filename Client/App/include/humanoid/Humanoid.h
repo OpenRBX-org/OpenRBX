@@ -1,7 +1,6 @@
 #ifndef HUMANOID_HUMANOID_H
 #define HUMANOID_HUMANOID_H
 
-#include "placeholder.h"
 #include "util/Handle.h"
 #include "util/IControllable.h"
 #include "util/IRenderable.h"

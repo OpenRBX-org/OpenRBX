@@ -1,6 +1,5 @@
 #include "v8world/MotorJoint.h"
 
-#include "placeholder.h"
 #include "util/Math.h"
 #include "v8kernel/Body.h"
 #include "v8world/Primitive.h"

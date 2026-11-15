@@ -1,8 +1,6 @@
 #ifndef NULLDOC_H
 #define NULLDOC_H
 
-#include "placeholder.h"
-
 class CBrowserFrameWnd : public CXTPFrameWnd
 {
 	DECLARE_DYNCREATE(CBrowserFrameWnd)

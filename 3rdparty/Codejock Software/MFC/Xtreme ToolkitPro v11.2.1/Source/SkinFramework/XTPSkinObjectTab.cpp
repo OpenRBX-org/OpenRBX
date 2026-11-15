@@ -35,6 +35,7 @@ static char THIS_FILE[]=__FILE__;
 
 
 #define DT_HIDEPREFIX       0x00100000
+#define TMT_STOCKIMAGEFILE  3007
 
 AFX_INLINE BOOL IsLeft(DWORD dwStyle)
 {

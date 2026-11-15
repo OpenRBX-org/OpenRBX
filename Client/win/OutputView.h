@@ -2,7 +2,6 @@
 #define OUTPUTVIEW_H
 
 #include "SecureHtmlView.h"
-#include "placeholder.h"
 #include "util/StandardOut.h"
 
 #include <atlbase.h>

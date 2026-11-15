@@ -1,8 +1,6 @@
 #ifndef UTIL_PROFILING_H
 #define UTIL_PROFILING_H
 
-#include "placeholder.h"
-
 #include <boost/noncopyable.hpp>
 #include <cstddef>
 #include <string>

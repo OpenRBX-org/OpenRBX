@@ -1,7 +1,6 @@
 #ifndef V8DATAMODEL_MOUSE_H
 #define V8DATAMODEL_MOUSE_H
 
-#include "placeholder.h"
 #include "util/TextureId.h"
 #include "util/UIEvent.h"
 #include "v8tree/Instance.h"

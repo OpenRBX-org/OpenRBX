@@ -1,7 +1,6 @@
 #ifndef APPDRAW_RBXFONT_H
 #define APPDRAW_RBXFONT_H
 
-#include "placeholder.h"
 #include "rbxgraphics/Adorn.h"
 
 #include <G3D/BinaryInput.h>

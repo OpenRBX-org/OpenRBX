@@ -1,8 +1,6 @@
 #ifndef UTIL_FILESYSTEM_H
 #define UTIL_FILESYSTEM_H
 
-#include "placeholder.h"
-
 #include <string>
 
 namespace RBX {

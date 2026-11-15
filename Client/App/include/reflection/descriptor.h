@@ -1,7 +1,6 @@
 #ifndef REFLECTION_DESCRIPTOR_H
 #define REFLECTION_DESCRIPTOR_H
 
-#include "placeholder.h"
 #include "util/Name.h"
 
 #include <boost/noncopyable.hpp>

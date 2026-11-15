@@ -1,8 +1,6 @@
 #ifndef V8DATAMODEL_BRICKCOLOR_H
 #define V8DATAMODEL_BRICKCOLOR_H
 
-#include "placeholder.h"
-
 #include <G3D/Color3.h>
 #include <G3D/Color3uint8.h>
 #include <G3D/Color4.h>

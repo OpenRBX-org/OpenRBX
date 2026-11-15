@@ -282,6 +282,15 @@ void CXTPDockingPaneManager::SyncPanesState()
 	}
 }
 
+BOOL CXTPDockingPaneManager::PreCreateWindow(CREATESTRUCT& cs)
+{
+	if (!CWnd::PreCreateWindow(cs))
+		return FALSE;
+
+	cs.hMenu = NULL;
+	return TRUE;
+}
+
 LRESULT CXTPDockingPaneManager::OnSizeParent(WPARAM, LPARAM lParam)
 {
 	if (GetTopPane() != NULL)

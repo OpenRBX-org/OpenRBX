@@ -1,7 +1,6 @@
 #ifndef RBXVIEW_PART_H
 #define RBXVIEW_PART_H
 
-#include "placeholder.h"
 #include "renderlib/Chunk.h"
 #include "renderlib/Material.h"
 #include "renderlib/Mesh.h"

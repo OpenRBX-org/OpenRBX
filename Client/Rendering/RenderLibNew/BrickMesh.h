@@ -2,7 +2,6 @@
 #define RENDERLIBNEW_BRICKMESH_H
 
 #include "MeshFactory.h"
-#include "placeholder.h"
 #include "renderlibnew/Mesh.h"
 
 #include <G3D/ReferenceCount.h>

@@ -1,7 +1,6 @@
 #ifndef V8DATAMODEL_TOOLSPART_H
 #define V8DATAMODEL_TOOLSPART_H
 
-#include "placeholder.h"
 #include "util/Events.h"
 #include "util/Name.h"
 #include "v8datamodel/BrickColor.h"

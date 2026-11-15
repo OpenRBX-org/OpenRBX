@@ -2,7 +2,6 @@
 #define RENDERLIBNEW_VIEW_H
 
 #include "ViewBase.h"
-#include "placeholder.h"
 #include "renderlibnew/RenderScene.h"
 
 #include <boost/shared_ptr.hpp>

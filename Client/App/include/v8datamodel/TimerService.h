@@ -1,7 +1,6 @@
 #ifndef V8DATAMODEL_TIMERSERVICE_H
 #define V8DATAMODEL_TIMERSERVICE_H
 
-#include "placeholder.h"
 #include "util/Handle.h"
 #include "util/RunStateOwner.h"
 #include "v8tree/Instance.h"

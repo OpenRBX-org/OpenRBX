@@ -1,7 +1,6 @@
 #ifndef NETWORK_STREAMING_H
 #define NETWORK_STREAMING_H
 
-#include "placeholder.h"
 #include "reflection/property.h"
 #include "util/ContentProvider.h"
 #include "util/Guid.h"

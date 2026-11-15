@@ -1,7 +1,6 @@
 #ifndef V8WORLD_WORLD_H
 #define V8WORLD_WORLD_H
 
-#include "placeholder.h"
 #include "util/Events.h"
 #include "util/IndexArray.h"
 #include "util/Profiling.h"

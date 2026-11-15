@@ -2,7 +2,6 @@
 #define SETTINGSPROPGRID_H
 
 #include "PropGrid.h"
-#include "placeholder.h"
 
 class CSettingsPropGrid : public CSelectionPropGrid
 {

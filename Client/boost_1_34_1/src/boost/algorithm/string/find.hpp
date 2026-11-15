@@ -53,7 +53,7 @@ namespace boost {
             RangeT& Input, 
             FinderT Finder)
         {
-            return Finder(begin(Input),end(Input));
+            return Finder(::boost::begin(Input),::boost::end(Input));
         }
 
 //  find_first  -----------------------------------------------//
@@ -80,7 +80,7 @@ namespace boost {
             const Range2T& Search)
         {
             return first_finder(Search)(
-                begin(Input),end(Input));
+                ::boost::begin(Input),::boost::end(Input));
         }
 
         //! Find first algorithm ( case insensitive )
@@ -108,7 +108,7 @@ namespace boost {
             const std::locale& Loc=std::locale())
         {
             return first_finder(Search,is_iequal(Loc))(
-                begin(Input),end(Input));
+                ::boost::begin(Input),::boost::end(Input));
         }
 
 //  find_last  -----------------------------------------------//
@@ -135,7 +135,7 @@ namespace boost {
             const Range2T& Search)
         {
             return last_finder(Search)(
-                begin(Input),end(Input));
+                ::boost::begin(Input),::boost::end(Input));
         }
 
         //! Find last algorithm ( case insensitive )
@@ -163,7 +163,7 @@ namespace boost {
             const std::locale& Loc=std::locale())
         {
             return last_finder(Search, is_iequal(Loc))(
-                begin(Input),end(Input));
+                ::boost::begin(Input),::boost::end(Input));
         }
 
 //  find_nth ----------------------------------------------------------------------//
@@ -192,7 +192,7 @@ namespace boost {
             int Nth)
         {
             return nth_finder(Search,Nth)(
-                begin(Input),end(Input));
+                ::boost::begin(Input),::boost::end(Input));
         }
 
         //! Find n-th algorithm ( case insensitive ).
@@ -224,7 +224,7 @@ namespace boost {
             const std::locale& Loc=std::locale())
         {
             return nth_finder(Search,Nth,is_iequal(Loc))(
-                begin(Input),end(Input));
+                ::boost::begin(Input),::boost::end(Input));
         }
 
 //  find_head ----------------------------------------------------------------------//
@@ -255,7 +255,7 @@ namespace boost {
             int N)
         {
             return head_finder(N)(
-                begin(Input),end(Input));      
+                ::boost::begin(Input),::boost::end(Input));      
         }
 
 //  find_tail ----------------------------------------------------------------------//
@@ -287,7 +287,7 @@ namespace boost {
             int N)
         {
             return tail_finder(N)(
-                begin(Input),end(Input));      
+                ::boost::begin(Input),::boost::end(Input));      
         }
 
 //  find_token --------------------------------------------------------------------//
@@ -318,7 +318,7 @@ namespace boost {
             token_compress_mode_type eCompress=token_compress_off)
         {
             return token_finder(Pred, eCompress)(
-                begin(Input),end(Input));       
+                ::boost::begin(Input),::boost::end(Input));       
         }
 
     } // namespace algorithm

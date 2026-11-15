@@ -1,6 +1,5 @@
 #include "v8world/AssemblyStage2.h"
 
-#include "placeholder.h"
 #include "v8world/Assembly2.h"
 #include "v8world/Contact.h"
 #include "v8world/Joint.h"

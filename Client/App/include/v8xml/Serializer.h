@@ -1,8 +1,6 @@
 #ifndef V8XML_SERIALIZER_H
 #define V8XML_SERIALIZER_H
 
-#include "placeholder.h"
-
 class ArchiveBinder;
 class XmlNameValuePair;
 

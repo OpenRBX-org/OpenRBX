@@ -1,8 +1,6 @@
 #ifndef V8WORLD_IMOVING_H
 #define V8WORLD_IMOVING_H
 
-#include "placeholder.h"
-
 #include <set>
 
 namespace RBX {

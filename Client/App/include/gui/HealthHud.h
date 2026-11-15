@@ -2,7 +2,6 @@
 #define GUI_HEALTHHUD_H
 
 #include "gui/GUI.h"
-#include "placeholder.h"
 
 #include <boost/shared_ptr.hpp>
 

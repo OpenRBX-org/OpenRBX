@@ -2,7 +2,6 @@
 #define STANDARDOUTPUTVIEW_H
 
 #include "OutputView.h"
-#include "placeholder.h"
 #include "util/StandardOut.h"
 
 #include <boost/thread/mutex.hpp>

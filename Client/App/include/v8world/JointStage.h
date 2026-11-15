@@ -1,7 +1,6 @@
 #ifndef V8WORLD_JOINTSTAGE_H
 #define V8WORLD_JOINTSTAGE_H
 
-#include "placeholder.h"
 #include "v8world/IWorldStage.h"
 
 #include <map>

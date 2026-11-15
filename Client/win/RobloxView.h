@@ -7,7 +7,6 @@
 #include "WebToolbox.h"
 #include "network/Players.h"
 #include "network/SuperSafeChanged.h"
-#include "placeholder.h"
 #include "util/Events.h"
 #include "v8datamodel/DataModel.h"
 #include "v8tree/Service.h"
@@ -127,7 +126,6 @@ protected:
 private:
 	friend class InsertModelFromRobloxVerb;
 
-	undefined4 m_unk0x84;
 	CRobloxWnd m_unk0x88;
 	boost::shared_ptr<RBX::DataModel> m_unk0x140;
 	CMenu m_unk0x148;

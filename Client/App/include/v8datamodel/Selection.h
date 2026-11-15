@@ -1,8 +1,6 @@
 #ifndef V8DATAMODEL_SELECTION_H
 #define V8DATAMODEL_SELECTION_H
 
-#include "compat.h"
-#include "placeholder.h"
 #include "util/Events.h"
 #include "util/Handle.h"
 #include "util/Utilities.h"
@@ -13,6 +11,7 @@
 #include <algorithm>
 #include <boost/bind.hpp>
 #include <boost/shared_ptr.hpp>
+#include <iterator>
 #include <vector>
 
 namespace RBX {
@@ -93,7 +92,7 @@ public:
 		return std::find(selection->begin(), selection->end(), shared_from(instance)) != selection->end();
 	}
 
-	class AddIterator : public std::_Outit
+	class AddIterator : public std::iterator<std::output_iterator_tag, void, void, void, void>
 	{
 	private:
 		Selection* selection;
@@ -113,7 +112,7 @@ public:
 		}
 	};
 
-	class RemoveIterator : public std::_Outit
+	class RemoveIterator : public std::iterator<std::output_iterator_tag, void, void, void, void>
 	{
 	private:
 		Selection* selection;
@@ -133,7 +132,7 @@ public:
 		}
 	};
 
-	class ToggleIterator : public std::_Outit
+	class ToggleIterator : public std::iterator<std::output_iterator_tag, void, void, void, void>
 	{
 	private:
 		Selection* selection;

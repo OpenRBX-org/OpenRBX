@@ -1,7 +1,6 @@
 #ifndef V8DATAMODEL_MESSAGE_H
 #define V8DATAMODEL_MESSAGE_H
 
-#include "placeholder.h"
 #include "util/Handle.h"
 #include "util/IRenderable.h"
 #include "v8tree/Instance.h"

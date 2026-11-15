@@ -1,7 +1,6 @@
 #ifndef V8WORLD_SURFACEDATA_H
 #define V8WORLD_SURFACEDATA_H
 
-#include "placeholder.h"
 #include "util/SurfaceType.h"
 #include "v8world/Controller.h"
 

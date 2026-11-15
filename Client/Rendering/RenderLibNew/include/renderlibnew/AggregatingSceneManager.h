@@ -1,7 +1,6 @@
 #ifndef RENDERLIBNEW_AGGREGATINGSCENEMANAGER_H
 #define RENDERLIBNEW_AGGREGATINGSCENEMANAGER_H
 
-#include "placeholder.h"
 #include "renderlibnew/Chunk.h"
 #include "renderlibnew/Material.h"
 #include "renderlibnew/RenderScene.h"
@@ -53,7 +52,6 @@ public:
 	typedef G3D::ReferenceCountedPointer<Bucket> BucketRef;
 
 private:
-	undefined4 m_unk0x08;
 	std::map<BucketKey, BucketRef> buckets;
 	std::set<G3D::WeakReferenceCountedPointer<Chunk> > invalidSleepingModels;
 	std::set<G3D::WeakReferenceCountedPointer<Chunk> > invalidMovingModels;

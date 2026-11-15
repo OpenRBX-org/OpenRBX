@@ -2,7 +2,6 @@
 #define LOGMANAGER_H
 
 #include "network/CrashReporter.h"
-#include "placeholder.h"
 #include "util/Log.h"
 #include "util/boost.hpp"
 

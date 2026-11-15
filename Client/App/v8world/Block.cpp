@@ -1,6 +1,5 @@
 #include "v8world/Block.h"
 
-#include "placeholder.h"
 #include "util/Math.h"
 
 #include <G3D/AABox.h>

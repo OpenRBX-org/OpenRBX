@@ -2,7 +2,6 @@
 #define HUMANOID_FALLINGDOWN_H
 
 #include "humanoid/Humanoid.h"
-#include "placeholder.h"
 #include "util/Name.h"
 
 namespace RBX {

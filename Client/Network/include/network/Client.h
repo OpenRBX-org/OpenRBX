@@ -2,7 +2,6 @@
 #define NETWORK_CLIENT_H
 
 #include "network/Replicator.h"
-#include "placeholder.h"
 #include "reflection/signal.h"
 #include "util/Events.h"
 #include "v8tree/Service.h"

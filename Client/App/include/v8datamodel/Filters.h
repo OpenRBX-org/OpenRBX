@@ -1,7 +1,6 @@
 #ifndef V8DATAMODEL_FILTERS_H
 #define V8DATAMODEL_FILTERS_H
 
-#include "placeholder.h"
 #include "util/HitTestFilter.h"
 
 #include <boost/shared_ptr.hpp>

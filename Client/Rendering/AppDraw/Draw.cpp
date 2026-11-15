@@ -1,7 +1,6 @@
 #include "appdraw/Draw.h"
 
 #include "appdraw/Part.h"
-#include "placeholder.h"
 #include "rbxgraphics/Adorn.h"
 #include "util/Math.h"
 

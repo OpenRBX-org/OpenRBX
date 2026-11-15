@@ -1,7 +1,6 @@
 #ifndef TOOL_DRAGTOOL_H
 #define TOOL_DRAGTOOL_H
 
-#include "placeholder.h"
 #include "util/Extents.h"
 #include "util/NormalId.h"
 

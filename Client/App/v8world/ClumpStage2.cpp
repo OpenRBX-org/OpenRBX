@@ -1,6 +1,5 @@
 #include "v8world/ClumpStage2.h"
 
-#include "placeholder.h"
 #include "util/Guid.h"
 #include "v8world/Assembly2.h"
 #include "v8world/AssemblyStage2.h"

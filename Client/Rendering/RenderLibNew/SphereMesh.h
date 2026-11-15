@@ -2,7 +2,6 @@
 #define RENDERLIBNEW_SPHEREMESH_H
 
 #include "MeshFactory.h"
-#include "placeholder.h"
 #include "renderlibnew/Mesh.h"
 #include "util/NormalId.h"
 

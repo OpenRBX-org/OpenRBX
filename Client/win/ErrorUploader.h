@@ -1,7 +1,6 @@
 #ifndef ERRORUPLOADER_H
 #define ERRORUPLOADER_H
 
-#include "placeholder.h"
 #include "util/boost.hpp"
 
 #include <boost/bind.hpp>

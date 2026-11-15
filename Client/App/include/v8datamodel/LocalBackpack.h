@@ -4,7 +4,6 @@
 #include "gui/GUI.h"
 #include "gui/Widget.h"
 #include "network/Player.h"
-#include "placeholder.h"
 #include "v8datamodel/Hopper.h"
 #include "v8tree/Service.h"
 

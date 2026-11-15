@@ -1,7 +1,5 @@
 #include "util/NormalId.h"
 
-#include "placeholder.h"
-
 namespace RBX {
 
 NormalId intToNormalId(int value)

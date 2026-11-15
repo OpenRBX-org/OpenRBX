@@ -8,7 +8,7 @@
 
 IMPLEMENT_DYNAMIC(CSecureHtmlView, CHtmlView)
 
-CSecureHtmlView::CSecureHtmlView() : m_unk0xf0(0)
+CSecureHtmlView::CSecureHtmlView() : m_unk0xf0(false)
 {
 }
 

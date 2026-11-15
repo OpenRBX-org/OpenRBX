@@ -39,7 +39,7 @@ namespace boost {
                 // Construction
                 template< typename SearchT >
                 first_finderF( const SearchT& Search, PredicateT Comp ) :
-                    m_Search(begin(Search), end(Search)), m_Comp(Comp) {}
+                    m_Search(::boost::begin(Search), ::boost::end(Search)), m_Comp(Comp) {}
                 first_finderF(
                         search_iterator_type SearchBegin,
                         search_iterator_type SearchEnd,
@@ -106,7 +106,7 @@ namespace boost {
                 // Construction
                 template< typename SearchT >
                 last_finderF( const SearchT& Search, PredicateT Comp ) :
-                    m_Search(begin(Search), end(Search)), m_Comp(Comp) {}
+                    m_Search(::boost::begin(Search), ::boost::end(Search)), m_Comp(Comp) {}
                 last_finderF(
                         search_iterator_type SearchBegin,
                         search_iterator_type SearchEnd,
@@ -152,7 +152,7 @@ namespace boost {
                     while( M )
                     {
                         Last=M;
-                        M=first_finder( end(M), End );
+                        M=first_finder( ::boost::end(M), End );
                     }
 
                     return Last;
@@ -222,7 +222,7 @@ namespace boost {
                         const SearchT& Search,
                         int Nth,
                         PredicateT Comp) :
-                    m_Search(begin(Search), end(Search)),
+                    m_Search(::boost::begin(Search), ::boost::end(Search)),
                     m_Nth(Nth),
                     m_Comp(Comp) {}
                 nth_finderF(
@@ -277,7 +277,7 @@ namespace boost {
                     for( unsigned int n=0; n<=N; ++n )
                     {
                         // find next match
-                        M=first_finder( end(M), End );
+                        M=first_finder( ::boost::end(M), End );
 
                         if ( !M )
                         {
@@ -312,7 +312,7 @@ namespace boost {
                     for( unsigned int n=1; n<=N; ++n )
                     {
                         // find next match
-                        M=last_finder( Begin, begin(M) );
+                        M=last_finder( Begin, ::boost::begin(M) );
 
                         if ( !M )
                         {

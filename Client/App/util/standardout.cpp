@@ -1,6 +1,5 @@
 #include "util/standardout.h"
 
-#include "placeholder.h"
 #include "util/Log.h"
 
 #include <G3D/format.h>

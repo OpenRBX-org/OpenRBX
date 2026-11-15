@@ -1,7 +1,6 @@
 #ifndef V8DATAMODEL_JOINTSSERVICE_H
 #define V8DATAMODEL_JOINTSSERVICE_H
 
-#include "placeholder.h"
 #include "util/Events.h"
 #include "util/IRenderable.h"
 #include "v8datamodel/JointInstance.h"

@@ -1,7 +1,6 @@
 #ifndef V8WORLD_MULTIJOINT_H
 #define V8WORLD_MULTIJOINT_H
 
-#include "placeholder.h"
 #include "v8world/Joint.h"
 
 namespace RBX {

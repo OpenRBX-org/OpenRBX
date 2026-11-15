@@ -1,10 +1,6 @@
 #ifndef UTIL_RUNSTATEOWNER_H
 #define UTIL_RUNSTATEOWNER_H
 
-#include <time.h>
-#undef TIME_UTC
-
-#include "placeholder.h"
 #include "util/Events.h"
 #include "util/Handle.h"
 #include "v8tree/Instance.h"
@@ -15,6 +11,7 @@
 #include <boost/thread/condition.hpp>
 #include <boost/thread/mutex.hpp>
 #include <map>
+#include <time.h>
 
 namespace boost {
 class thread;

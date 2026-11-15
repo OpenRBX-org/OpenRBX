@@ -1,7 +1,6 @@
 #ifndef V8DATAMODEL_FLAGSTAND_H
 #define V8DATAMODEL_FLAGSTAND_H
 
-#include "placeholder.h"
 #include "util/Handle.h"
 #include "v8datamodel/BrickColor.h"
 #include "v8datamodel/PartInstance.h"

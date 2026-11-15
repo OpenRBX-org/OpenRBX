@@ -1,8 +1,6 @@
 #ifndef UTIL_IMETRIC_H
 #define UTIL_IMETRIC_H
 
-#include "placeholder.h"
-
 #include <string>
 
 namespace RBX {

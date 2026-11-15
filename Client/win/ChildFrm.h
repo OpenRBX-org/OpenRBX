@@ -1,8 +1,6 @@
 #ifndef CHILDFRM_H
 #define CHILDFRM_H
 
-#include "placeholder.h"
-
 class CChildFrame : public CMDIChildWnd
 {
 	DECLARE_DYNCREATE(CChildFrame)

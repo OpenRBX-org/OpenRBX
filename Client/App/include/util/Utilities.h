@@ -1,8 +1,6 @@
 #ifndef UTIL_UTILITIES_H
 #define UTIL_UTILITIES_H
 
-#include "placeholder.h"
-
 #include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
 #include <iosfwd>

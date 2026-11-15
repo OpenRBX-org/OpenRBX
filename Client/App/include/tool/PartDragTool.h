@@ -1,7 +1,6 @@
 #ifndef TOOL_PARTDRAGTOOL_H
 #define TOOL_PARTDRAGTOOL_H
 
-#include "placeholder.h"
 #include "tool/MegaDragger.h"
 #include "tool/RunDragger.h"
 #include "util/Name.h"

@@ -1,8 +1,6 @@
 #ifndef V8DATAMODEL_SAFECHAT_H
 #define V8DATAMODEL_SAFECHAT_H
 
-#include "placeholder.h"
-
 #include <boost/scoped_ptr.hpp>
 #include <string>
 #include <vector>

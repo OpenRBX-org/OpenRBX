@@ -1,8 +1,6 @@
 #ifndef UTIL_HASH_H
 #define UTIL_HASH_H
 
-#include "placeholder.h"
-
 #include <string>
 
 namespace RBX {

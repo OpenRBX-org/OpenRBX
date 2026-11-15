@@ -1,7 +1,5 @@
 #include "renderlib/Profiler.h"
 
-#include "placeholder.h"
-
 #include <G3D/RegistryUtil.h>
 #include <GLG3D/DXCaps.h>
 #include <GLG3D/GLCaps.h>

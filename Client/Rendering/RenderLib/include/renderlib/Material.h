@@ -1,7 +1,6 @@
 #ifndef RENDERLIB_MATERIAL_H
 #define RENDERLIB_MATERIAL_H
 
-#include "placeholder.h"
 #include "renderlib/TextureProxy.h"
 
 #include <G3D/Array.h>

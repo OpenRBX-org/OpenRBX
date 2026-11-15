@@ -1,8 +1,6 @@
 #ifndef V8WORLD_JOINTBUILDER_H
 #define V8WORLD_JOINTBUILDER_H
 
-#include "placeholder.h"
-
 namespace RBX {
 
 class Joint;

@@ -61,11 +61,11 @@ namespace boost {
             typedef BOOST_STRING_TYPENAME 
                 range_const_iterator<Range2T>::type Iterator2T;
 
-            Iterator1T InputEnd=end(Input);
-            Iterator2T TestEnd=end(Test);
+            Iterator1T InputEnd=::boost::end(Input);
+            Iterator2T TestEnd=::boost::end(Test);
 
-            Iterator1T it=begin(Input);
-            Iterator2T pit=begin(Test);
+            Iterator1T it=::boost::begin(Input);
+            Iterator2T pit=::boost::begin(Test);
             for(;
                 it!=InputEnd && pit!=TestEnd;
                 ++it,++pit)
@@ -142,10 +142,10 @@ namespace boost {
 
             return detail::
                 ends_with_iter_select( 
-                    begin(Input), 
-                    end(Input), 
-                    begin(Test), 
-                    end(Test), 
+                    ::boost::begin(Input), 
+                    ::boost::end(Input), 
+                    ::boost::begin(Test), 
+                    ::boost::end(Test), 
                     Comp,
                     category());
         }
@@ -213,7 +213,7 @@ namespace boost {
             }
             
             // Use the temporary variable to make VACPP happy
-            bool bResult=(first_finder(Test,Comp)(begin(Input), end(Input)));
+            bool bResult=(first_finder(Test,Comp)(::boost::begin(Input), ::boost::end(Input)));
             return bResult;
         }
 
@@ -279,11 +279,11 @@ namespace boost {
             typedef BOOST_STRING_TYPENAME 
                 range_const_iterator<Range2T>::type Iterator2T;
                 
-            Iterator1T InputEnd=end(Input);
-            Iterator2T TestEnd=end(Test);
+            Iterator1T InputEnd=::boost::end(Input);
+            Iterator2T TestEnd=::boost::end(Test);
 
-            Iterator1T it=begin(Input);
-            Iterator2T pit=begin(Test);
+            Iterator1T it=::boost::begin(Input);
+            Iterator2T pit=::boost::begin(Test);
             for(;
                 it!=InputEnd && pit!=TestEnd;
                 ++it,++pit)
@@ -358,10 +358,10 @@ namespace boost {
             PredicateT Pred)
         {
             return std::lexicographical_compare(
-                begin(Arg1),
-                end(Arg1),
-                begin(Arg2),
-                end(Arg2),
+                ::boost::begin(Arg1),
+                ::boost::end(Arg1),
+                ::boost::begin(Arg2),
+                ::boost::end(Arg2),
                 Pred);
         }
 
@@ -375,10 +375,10 @@ namespace boost {
             const Range2T& Arg2)
         {
             return std::lexicographical_compare(
-                begin(Arg1),
-                end(Arg1),
-                begin(Arg2),
-                end(Arg2),
+                ::boost::begin(Arg1),
+                ::boost::end(Arg1),
+                ::boost::begin(Arg2),
+                ::boost::end(Arg2),
                 is_less());
         }
 
@@ -403,10 +403,10 @@ namespace boost {
             const Range2T& Arg2)
         {
             return std::lexicographical_compare(
-                begin(Arg1),
-                end(Arg1),
-                begin(Arg2),
-                end(Arg2),
+                ::boost::begin(Arg1),
+                ::boost::end(Arg1),
+                ::boost::begin(Arg2),
+                ::boost::end(Arg2),
                 is_iless());
         }
         
@@ -432,8 +432,8 @@ namespace boost {
             typedef BOOST_STRING_TYPENAME 
                 range_const_iterator<RangeT>::type Iterator1T;
 
-            Iterator1T InputEnd=end(Input);
-            for( Iterator1T It=begin(Input); It!=InputEnd; ++It)
+            Iterator1T InputEnd=::boost::end(Input);
+            for( Iterator1T It=::boost::begin(Input); It!=InputEnd; ++It)
             {
                 if (!Pred(*It))
                     return false;

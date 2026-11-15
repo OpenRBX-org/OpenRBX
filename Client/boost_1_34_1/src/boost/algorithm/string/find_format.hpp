@@ -72,7 +72,7 @@ namespace boost {
                 Output,
                 Input,
                 Formatter,
-                Finder( begin(Input), end(Input) ) );
+                Finder( ::boost::begin(Input), ::boost::end(Input) ) );
         }
 
         //! Generic replace algorithm
@@ -100,7 +100,7 @@ namespace boost {
             return detail::find_format_copy_impl(
                 Input,
                 Formatter,
-                Finder(begin(Input), end(Input)));
+                Finder(::boost::begin(Input), ::boost::end(Input)));
         }
 
         //! Generic replace algorithm
@@ -133,7 +133,7 @@ namespace boost {
             detail::find_format_impl(
                 Input,
                 Formatter,
-                Finder(begin(Input), end(Input)));
+                Finder(::boost::begin(Input), ::boost::end(Input)));
         }
 
 
@@ -181,7 +181,7 @@ namespace boost {
                 Input,
                 Finder,
                 Formatter,
-                Finder(begin(Input), end(Input)));
+                Finder(::boost::begin(Input), ::boost::end(Input)));
         }
 
         //! Generic replace all algorithm
@@ -210,7 +210,7 @@ namespace boost {
                 Input,
                 Finder,
                 Formatter,
-                Finder( begin(Input), end(Input) ) );
+                Finder( ::boost::begin(Input), ::boost::end(Input) ) );
         }
 
         //! Generic replace all algorithm

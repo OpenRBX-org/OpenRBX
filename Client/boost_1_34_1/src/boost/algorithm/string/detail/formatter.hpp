@@ -69,7 +69,7 @@ namespace boost {
                 template< typename Range2T >
                 const RangeT& operator()(const Range2T& Replace) const
                 {
-                    return RangeT(begin(Replace), end(Replace));
+                    return RangeT(::boost::begin(Replace), ::boost::end(Replace));
                 }
             };
 

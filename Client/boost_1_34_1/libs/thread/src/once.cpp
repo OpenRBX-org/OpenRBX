@@ -83,44 +83,9 @@ void *remote_call_proxy(void *pData)
 
 #elif defined(BOOST_HAS_WINTHREADS)
 namespace {
-// The signature for InterlockedCompareExchange has changed with the
-// addition of Win64 support. I can't determine any (consistent and
-// portable) way of using conditional compilation to detect this, so
-// we use these type wrappers.  Unfortunately, the various vendors
-// use different calling conventions and other signature anamolies,
-// and thus have unique types as well.  This is known to work on VC6,
-// VC7, Borland 5.5.2 and gcc 3.2.  Are there other signatures for
-// other platforms?
-inline LONG ice_wrapper(LONG (__stdcall *ice)(LONG*, LONG, LONG),
-    volatile LONG* dest, LONG exch, LONG cmp)
-{
-    return (*ice)(const_cast<LONG*>(dest), exch, cmp);
-}
-
-inline LONG ice_wrapper(LONG (__stdcall *ice)(volatile LONG*, LONG, LONG),
-    volatile LONG* dest, LONG exch, LONG cmp)
-{
-    return (*ice)(dest, exch, cmp);
-}
-
-inline LONG ice_wrapper(LPVOID (__stdcall *ice)(LPVOID*, LPVOID, LPVOID),
-    volatile LONG* dest, LONG exch, LONG cmp)
-{
-    return (LONG)(*ice)((LPVOID*)dest, (LPVOID)exch, (LPVOID)cmp);
-}
-
-// The friendly form of InterlockedCompareExchange that defers
-// according to the above function type wrappers.
 inline LONG compare_exchange(volatile LPLONG dest, LONG exch, LONG cmp)
 {
-#ifdef _WIN64
-    // Original patch from Anthony Williams.
-    // I (Roland Schwarz) am trying this for RC_1_34_0, since x64 regressions are
-    // currently not run on x64 platforms for HEAD
-    return InterlockedCompareExchange(dest, exch,cmp);
-#else    
-    return ice_wrapper(&InterlockedCompareExchange, dest, exch, cmp);
-#endif
+    return InterlockedCompareExchange(dest, exch, cmp);
 }
 }
 #endif

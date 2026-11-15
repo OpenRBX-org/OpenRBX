@@ -1,8 +1,6 @@
 #ifndef GUI_PROFANITYFILTER_H
 #define GUI_PROFANITYFILTER_H
 
-#include "placeholder.h"
-
 #include <set>
 #include <string>
 

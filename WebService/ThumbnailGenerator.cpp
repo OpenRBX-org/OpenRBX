@@ -204,7 +204,7 @@ static void waitForContent()
 {
 	while (!RBX::ContentProvider::singleton().isRequestQueueEmpty()) {
 		boost::xtime xt;
-		boost::xtime_get(&xt, boost::TIME_UTC);
+		boost::xtime_get(&xt, boost::TIME_UTC_);
 		boost::thread::sleep(xt);
 	}
 }
@@ -437,13 +437,6 @@ template const RBX::FactoryProduct<RBX::Script, RBX::Instance, RBX::sScript>::Cr
 	RBX::FactoryProduct<RBX::Script, RBX::Instance, RBX::sScript>::creator;
 template const RBX::FactoryProduct<RBX::LocalScript, RBX::Script, RBX::sLocalScript>::Creator
 	RBX::FactoryProduct<RBX::LocalScript, RBX::Script, RBX::sLocalScript>::creator;
-
-typedef std::vector<boost::shared_ptr<RBX::Instance> > InstanceVector;
-template InstanceVector::size_type InstanceVector::size() const;
-template InstanceVector::iterator InstanceVector::begin();
-template InstanceVector::iterator InstanceVector::end();
-template InstanceVector::iterator InstanceVector::erase(InstanceVector::iterator);
-template void InstanceVector::resize(InstanceVector::size_type);
 
 template RBX::Lighting* RBX::ServiceProvider::find<RBX::Lighting>() const;
 

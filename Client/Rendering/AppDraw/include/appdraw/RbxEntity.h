@@ -2,7 +2,6 @@
 #define APPDRAW_RBXENTITY_H
 
 #include "appdraw/VisualEngine.h"
-#include "placeholder.h"
 
 #include <OgreAxisAlignedBox.h>
 #include <OgreEntity.h>

@@ -59,7 +59,7 @@ namespace boost {
             match_flag_type Flags=match_default )
         {
             return regex_finder(Rx,Flags)(
-                begin(Input), end(Input) );
+                ::boost::begin(Input), ::boost::end(Input) );
         }
 
 //  replace_regex --------------------------------------------------------------------//
@@ -511,8 +511,8 @@ namespace boost {
             typedef typename range_const_iterator<SequenceSequenceT>::type InputIteratorT;
 
             // Parse input
-            InputIteratorT itBegin=begin(Input);
-            InputIteratorT itEnd=end(Input);
+            InputIteratorT itBegin=::boost::begin(Input);
+            InputIteratorT itEnd=::boost::end(Input);
 
             // Construct container to hold the result
             ResultT Result;
@@ -521,23 +521,23 @@ namespace boost {
             // Roll to the first element that will be added
             while(
                 itBegin!=itEnd && 
-                !regex_match(begin(*itBegin), end(*itBegin), Rx, Flags)) ++itBegin;
+                !regex_match(::boost::begin(*itBegin), ::boost::end(*itBegin), Rx, Flags)) ++itBegin;
 
             // Add this element
             if(itBegin!=itEnd)
             {
-                detail::insert(Result, end(Result), *itBegin);
+                detail::insert(Result, ::boost::end(Result), *itBegin);
                 ++itBegin;
             }
 
             for(;itBegin!=itEnd; ++itBegin)
             {
-                if(regex_match(begin(*itBegin), end(*itBegin), Rx, Flags))
+                if(regex_match(::boost::begin(*itBegin), ::boost::end(*itBegin), Rx, Flags))
                 {
                     // Add separator
-                    detail::insert(Result, end(Result), Separator);
+                    detail::insert(Result, ::boost::end(Result), Separator);
                     // Add element
-                    detail::insert(Result, end(Result), *itBegin);
+                    detail::insert(Result, ::boost::end(Result), *itBegin);
                 }
             }
 
@@ -579,8 +579,8 @@ namespace boost {
             typedef typename range_const_iterator<SequenceSequenceT>::type InputIteratorT;
 
             // Parse input
-            InputIteratorT itBegin=begin(Input);
-            InputIteratorT itEnd=end(Input);
+            InputIteratorT itBegin=::boost::begin(Input);
+            InputIteratorT itEnd=::boost::end(Input);
 
             // Construct container to hold the result
             ResultT Result;
@@ -589,23 +589,23 @@ namespace boost {
             // Roll to the first element that will be added
             while(
                 itBegin!=itEnd && 
-                !regex_match(begin(*itBegin), end(*itBegin), Rx, Flags)) ++itBegin;
+                !regex_match(::boost::begin(*itBegin), ::boost::end(*itBegin), Rx, Flags)) ++itBegin;
 
             // Add this element
             if(itBegin!=itEnd)
             {
-                detail::insert(Result, end(Result), *itBegin);
+                detail::insert(Result, ::boost::end(Result), *itBegin);
                 ++itBegin;
             }
 
             for(;itBegin!=itEnd; ++itBegin)
             {
-                if(regex_match(begin(*itBegin), end(*itBegin), Rx, Flags))
+                if(regex_match(::boost::begin(*itBegin), ::boost::end(*itBegin), Rx, Flags))
                 {
                     // Add separator
-                    detail::insert(Result, end(Result), Separator);
+                    detail::insert(Result, ::boost::end(Result), Separator);
                     // Add element
-                    detail::insert(Result, end(Result), *itBegin);
+                    detail::insert(Result, ::boost::end(Result), *itBegin);
                 }
             }
 

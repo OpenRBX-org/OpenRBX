@@ -1,7 +1,6 @@
 #ifndef MEMBERTREEVIEW_H
 #define MEMBERTREEVIEW_H
 
-#include "placeholder.h"
 #include "reflection/EnumConverter.h"
 #include "reflection/function.h"
 #include "reflection/object.h"

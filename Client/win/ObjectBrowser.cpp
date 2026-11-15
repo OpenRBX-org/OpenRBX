@@ -786,7 +786,7 @@ void COutputView::FUN_0043b490(RBX::MessageType type, const char* text, __time64
 
 CStandardOutputView::CStandardOutputView()
 {
-	m_unk0xf0 = 1;
+	m_unk0xf0 = true;
 	boost::mutex::scoped_lock lock(RBX::StandardOut::singleton()->sync);
 	RBX::startListening<RBX::StandardOut, RBX::StandardOutMessage>(RBX::StandardOut::singleton(), this);
 }

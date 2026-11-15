@@ -1,6 +1,5 @@
 #include "v8datamodel/DataModel.h"
 
-#include "compat.h"
 #include "gui/GUI.h"
 #include "gui/GuiEvent.h"
 #include "network/Players.h"

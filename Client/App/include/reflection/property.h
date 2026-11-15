@@ -1,7 +1,6 @@
 #ifndef REFLECTION_PROPERTY_H
 #define REFLECTION_PROPERTY_H
 
-#include "placeholder.h"
 #include "reflection/enumconverter.h"
 #include "reflection/member.h"
 #include "reflection/type.h"

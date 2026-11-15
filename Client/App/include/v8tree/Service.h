@@ -1,7 +1,6 @@
 #ifndef V8TREE_SERVICE_H
 #define V8TREE_SERVICE_H
 
-#include "placeholder.h"
 #include "util/Events.h"
 #include "util/object.h"
 #include "v8tree/Instance.h"

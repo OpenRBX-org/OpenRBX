@@ -1,6 +1,5 @@
 #include "v8world/Ball.h"
 
-#include "placeholder.h"
 #include "util/Math.h"
 
 #include <G3D/CollisionDetection.h>

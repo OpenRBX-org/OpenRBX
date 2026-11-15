@@ -1,4 +1,4 @@
-#define _WIN32_WINNT 0x0400
+#define _WIN32_WINNT 0x0501
 #define _WIN32_DCOM
 
 #include "WebService.h"
@@ -16,7 +16,6 @@ class DataModel;
 #include "VersionInfo.h"
 #include "ViewBase.h"
 #include "network/API.h"
-#include "placeholder.h"
 #include "reflection/type.h"
 #include "script/ScriptContext.h"
 #include "util/ContentProvider.h"
@@ -780,7 +779,3 @@ template const RBX::FactoryProduct<RBX::Soundscape::SoundService, RBX::Instance,
 	Creator RBX::FactoryProduct<RBX::Soundscape::SoundService, RBX::Instance, RBX::Soundscape::sSoundService>::creator;
 template const RBX::FactoryProduct<RBX::Soundscape::SoundChannel, RBX::Instance, RBX::Soundscape::sSoundChannel>::
 	Creator RBX::FactoryProduct<RBX::Soundscape::SoundChannel, RBX::Instance, RBX::Soundscape::sSoundChannel>::creator;
-
-typedef std::vector<RBX::Reflection::Value> ValueVector;
-template ValueVector::const_iterator ValueVector::begin() const;
-template ValueVector::const_iterator ValueVector::end() const;

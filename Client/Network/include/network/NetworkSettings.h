@@ -1,7 +1,6 @@
 #ifndef NETWORK_NETWORKSETTINGS_H
 #define NETWORK_NETWORKSETTINGS_H
 
-#include "placeholder.h"
 #include "v8datamodel/GlobalSettings.h"
 
 namespace RBX {

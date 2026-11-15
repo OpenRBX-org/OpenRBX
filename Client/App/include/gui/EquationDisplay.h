@@ -2,7 +2,6 @@
 #define GUI_EQUATIONDISPLAY_H
 
 #include "gui/GUI.h"
-#include "placeholder.h"
 
 #include <string>
 

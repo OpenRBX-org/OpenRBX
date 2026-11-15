@@ -1,6 +1,5 @@
 #include "v8world/WeldJoint.h"
 
-#include "placeholder.h"
 #include "v8world/Primitive.h"
 #include "v8world/SurfaceData.h"
 

@@ -1,6 +1,5 @@
 #include "v8tree/Instance.h"
 
-#include "placeholder.h"
 #include "v8xml/SerializerV2.h"
 
 #include <algorithm>

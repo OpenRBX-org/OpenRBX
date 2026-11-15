@@ -1,7 +1,6 @@
 #ifndef UTIL_ICAMERASUBJECT_H
 #define UTIL_ICAMERASUBJECT_H
 
-#include "placeholder.h"
 #include "util/ILocation.h"
 
 #include <G3D/CoordinateFrame.h>

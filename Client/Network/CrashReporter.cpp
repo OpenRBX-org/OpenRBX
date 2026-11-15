@@ -1,7 +1,6 @@
 #include "network/CrashReporter.h"
 
 #include "FileOperations.h"
-#include "placeholder.h"
 
 #include <dbghelp.h>
 #include <stdio.h>

@@ -1,8 +1,6 @@
 #ifndef V8WORLD_GEOMETRY_H
 #define V8WORLD_GEOMETRY_H
 
-#include "placeholder.h"
-
 #include <G3D/Matrix3.h>
 #include <G3D/Ray.h>
 #include <G3D/Vector3.h>

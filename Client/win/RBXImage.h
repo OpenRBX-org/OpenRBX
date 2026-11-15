@@ -1,8 +1,6 @@
 #ifndef RBXIMAGE_H
 #define RBXIMAGE_H
 
-#include "placeholder.h"
-
 #include <windows.h>
 
 class RBXImage
@@ -34,9 +32,6 @@ private:
 	bool m_unk0x1c;
 	bool m_unk0x1d;
 	int m_unk0x20;
-	undefined4 m_unk0x24;
-	undefined4 m_unk0x28;
-	undefined4 m_unk0x2c;
 };
 
 #endif // RBXIMAGE_H

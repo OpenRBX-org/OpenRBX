@@ -2,7 +2,6 @@
 #define SCRIPT_THREADREF_H
 
 #include "lua/LuaBridge.h"
-#include "placeholder.h"
 #include "reflection/type.h"
 
 #include <boost/shared_ptr.hpp>

@@ -3,7 +3,6 @@
 
 #include "ErrorUploader.h"
 #include "LogManager.h"
-#include "placeholder.h"
 
 #include <G3D/Color3uint8.h>
 #include <afxdhtml.h>

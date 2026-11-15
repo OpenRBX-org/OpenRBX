@@ -1,7 +1,6 @@
 #ifndef V8DATAMODEL_SEAT_H
 #define V8DATAMODEL_SEAT_H
 
-#include "placeholder.h"
 #include "v8datamodel/PartInstance.h"
 #include "v8tree/Instance.h"
 

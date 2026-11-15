@@ -1,7 +1,6 @@
 #ifndef V8DATAMODEL_MODELINSTANCE_H
 #define V8DATAMODEL_MODELINSTANCE_H
 
-#include "placeholder.h"
 #include "util/ComputeProp.h"
 #include "util/Extents.h"
 #include "util/ICameraSubject.h"

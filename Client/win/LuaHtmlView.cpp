@@ -3,7 +3,6 @@
 #include "DHTMLWindow.h"
 #include "LuaFunction.h"
 #include "Marshaller.h"
-#include "placeholder.h"
 #include "reflection/property.h"
 #include "util/StandardOut.h"
 #include "v8datamodel/DataModel.h"
@@ -309,7 +308,7 @@ void CLuaHtmlView::FUN_0042f370()
 
 CLuaHtmlView::CLuaHtmlView() : m_unk0xf8(NULL)
 {
-	m_unk0xf0 = 1;
+	m_unk0xf0 = true;
 }
 
 CLuaHtmlView::~CLuaHtmlView()

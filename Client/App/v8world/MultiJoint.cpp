@@ -1,6 +1,5 @@
 #include "v8world/MultiJoint.h"
 
-#include "placeholder.h"
 #include "v8kernel/Connector.h"
 #include "v8kernel/Kernel.h"
 #include "v8world/Primitive.h"

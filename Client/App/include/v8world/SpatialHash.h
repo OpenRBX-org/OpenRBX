@@ -1,7 +1,6 @@
 #ifndef V8WORLD_SPATIALHASH_H
 #define V8WORLD_SPATIALHASH_H
 
-#include "placeholder.h"
 #include "util/Extents.h"
 #include "util/Vector3int32.h"
 

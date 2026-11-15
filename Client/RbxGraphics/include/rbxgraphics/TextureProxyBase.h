@@ -1,8 +1,6 @@
 #ifndef RBXGRAPHICS_TEXTUREPROXYBASE_H
 #define RBXGRAPHICS_TEXTUREPROXYBASE_H
 
-#include "placeholder.h"
-
 #include <G3D/ReferenceCount.h>
 #include <G3D/Vector2.h>
 #include <string>

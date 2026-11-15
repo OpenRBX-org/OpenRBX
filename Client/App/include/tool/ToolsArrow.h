@@ -1,7 +1,6 @@
 #ifndef TOOL_TOOLSARROW_H
 #define TOOL_TOOLSARROW_H
 
-#include "placeholder.h"
 #include "util/Extents.h"
 #include "util/Name.h"
 #include "util/NormalId.h"
