@@ -2422,7 +2422,7 @@ AFX_INLINE UINT CXTPCalendarView::GetStartEditSubjectTimeOut() const {
 }
 
 AFX_INLINE BOOL CXTPCalendarView::IsEditingSubject() const {
-	return m_ptrEditingViewEvent != NULL;
+	return static_cast<CXTPCalendarViewEvent*>(m_ptrEditingViewEvent) != NULL;
 }
 
 AFX_INLINE void CXTPCalendarView::EmptyUndoBuffer() {

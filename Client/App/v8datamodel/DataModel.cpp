@@ -14,8 +14,8 @@
 #include "util/Log.h"
 #include "util/Name.h"
 #include "util/Sound.h"
+#include "util/Thread.h"
 #include "util/UserInputBase.h"
-#include "util/boost.hpp"
 #include "util/standardout.h"
 #include "v8datamodel/Accoutrement.h"
 #include "v8datamodel/Backpack.h"
@@ -39,15 +39,14 @@
 #include "v8xml/XmlSerializer.h"
 
 #include <G3D/format.h>
-#include <boost/bind.hpp>
-#include <boost/thread/thread.hpp>
 #include <sstream>
+#include <thread>
 
 namespace RBX {
 
 const char sDataModel[] = "DataModel";
 
-typedef boost::shared_ptr<const std::vector<boost::shared_ptr<Instance> > > Instances;
+typedef std::shared_ptr<const std::vector<std::shared_ptr<Instance> > > Instances;
 
 static Reflection::BoundFuncDesc<DataModel, Instances(ContentId), 1> getContentFunctionOld(
 	&DataModel::get, "get", "url", Reflection::FunctionDescriptor::AnyCaller
@@ -428,7 +427,7 @@ std::string DataModel::evaluate(const std::string& valueName) const
 
 void DataModel::loadContent(ContentId contentId)
 {
-	std::auto_ptr<std::istream> stream = ContentProvider::singleton().getContent(contentId);
+	std::unique_ptr<std::istream> stream = ContentProvider::singleton().getContent(contentId);
 
 	StandardOut::singleton()->print(MESSAGE_INFO, "DataModel Loading %s", contentId.c_str());
 
@@ -441,13 +440,8 @@ void DataModel::Lock::doLock(const DataModel* dataModel)
 {
 	if (dataModel) {
 		mutex = dataModel->mutex;
-		lock = new boost::recursive_mutex::scoped_lock(*mutex);
+		lock = std::unique_lock<std::recursive_mutex>(*mutex);
 	}
-}
-
-DataModel::Lock::~Lock()
-{
-	delete lock;
 }
 
 void DataModel::processGui(const UIEvent& event)
@@ -536,7 +530,7 @@ void DataModel::save(ContentId contentId)
 {
 	std::stringstream stream;
 	{
-		boost::scoped_ptr<XmlElement> root(SerializerV2::newRootElement());
+		std::unique_ptr<XmlElement> root(SerializerV2::newRootElement());
 
 		writeChildren(root.get());
 
@@ -549,15 +543,13 @@ void DataModel::save(ContentId contentId)
 	Http(contentId.toString()).post(stream, true, response);
 }
 
-boost::shared_ptr<const std::vector<boost::shared_ptr<Instance> > > DataModel::get(ContentId contentId)
+std::shared_ptr<const std::vector<std::shared_ptr<Instance> > > DataModel::get(ContentId contentId)
 {
-	std::auto_ptr<std::istream> stream = ContentProvider::singleton().getContent(contentId);
+	std::unique_ptr<std::istream> stream = ContentProvider::singleton().getContent(contentId);
 	TextXmlParser machine(stream->rdbuf());
-	std::auto_ptr<XmlElement> root = machine.parse();
+	std::unique_ptr<XmlElement> root = machine.parse();
 
-	boost::shared_ptr<std::vector<boost::shared_ptr<Instance> > > result(
-		new std::vector<boost::shared_ptr<Instance> >()
-	);
+	std::shared_ptr<std::vector<std::shared_ptr<Instance> > > result(new std::vector<std::shared_ptr<Instance> >());
 
 	Serializer serializer;
 	serializer.loadInstances(root.get(), *result);
@@ -645,11 +637,11 @@ DataModel::~DataModel()
 	stopListening(runService, this);
 }
 
-void DataModel::closeDataModel(boost::shared_ptr<DataModel> dataModel, bool joinRunThread)
+void DataModel::closeDataModel(std::shared_ptr<DataModel> dataModel, bool joinRunThread)
 {
 	dataModel->isInitialized = false;
 
-	boost::shared_ptr<RunService> runService;
+	std::shared_ptr<RunService> runService;
 	{
 		DataModel::Lock lock(dataModel);
 		runService = dataModel->runService;
@@ -672,16 +664,16 @@ DataModel::DataModel()
 	: VerbContainer(NULL), workspace(Creatable<Instance>::create<Workspace>(this)),
 	  guiRoot(Creatable<Instance>::create<GuiRoot>()), guiHooks(Creatable<Instance>::create<GuiRoot>()),
 	  guiTarget(NULL), forceArrowCursor(true), drawId(0), dirty(false), isInitialized(false),
-	  mutex(new boost::recursive_mutex()), timeState(new TimeState())
+	  mutex(new std::recursive_mutex()), timeState(new TimeState())
 {
 	setName("Level");
 }
 
-boost::shared_ptr<DataModel> DataModel::createDataModel()
+std::shared_ptr<DataModel> DataModel::createDataModel()
 {
 	ContentProvider::singleton().clearContentCache();
 
-	boost::shared_ptr<DataModel> dataModel = Creatable<Instance>::create<DataModel>();
+	std::shared_ptr<DataModel> dataModel = Creatable<Instance>::create<DataModel>();
 
 	{
 		DataModel::Lock lock(dataModel);
@@ -699,9 +691,11 @@ std::string DataModel::httpGet(std::string url, bool synchronous)
 	}
 
 	if (url.size() > 0) {
-		boost::function0<void> f = boost::bind(&doHttpGet, url);
-		boost::function0<void> g = boost::bind(&StandardOut::print_exception, f, MESSAGE_ERROR, false);
-		boost::thread(background_function(g, "rbx_httpGet"));
+		std::function<void()> request = [url] { doHttpGet(url); };
+		std::thread thread(background_function(
+			[request] { StandardOut::print_exception(request, MESSAGE_ERROR, false); }, "rbx_httpGet"
+		));
+		thread.detach();
 	}
 
 	return "";
@@ -713,9 +707,11 @@ std::string DataModel::httpPost(std::string url, std::string data, bool synchron
 		return doHttpPost(url, data);
 	}
 
-	boost::function0<void> f = boost::bind(&doHttpPost, url, data);
-	boost::function0<void> g = boost::bind(&StandardOut::print_exception, f, MESSAGE_ERROR, false);
-	boost::thread(background_function(g, "rbx_httpPost"));
+	std::function<void()> request = [url, data] { doHttpPost(url, data); };
+	std::thread thread(
+		background_function([request] { StandardOut::print_exception(request, MESSAGE_ERROR, false); }, "rbx_httpPost")
+	);
+	thread.detach();
 
 	return "";
 }

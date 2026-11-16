@@ -1,10 +1,10 @@
 #ifndef UTIL_UTILITIES_H
 #define UTIL_UTILITIES_H
 
-#include <boost/noncopyable.hpp>
-#include <boost/shared_ptr.hpp>
 #include <iosfwd>
+#include <memory>
 #include <string>
+#include <vector>
 
 namespace RBX {
 
@@ -28,28 +28,31 @@ public:
 };
 
 template <class T>
-class CopyOnWrite : public boost::noncopyable
+class CopyOnWrite
 {
 public:
+	CopyOnWrite(const CopyOnWrite&) = delete;
+	CopyOnWrite& operator=(const CopyOnWrite&) = delete;
+
 	CopyOnWrite() {}
 
 	CopyOnWrite(const T& value) : object(new T(value)) {}
 
-	operator typename boost::shared_ptr<T>::unspecified_bool_type() const { return object; }
+	explicit operator bool() const { return object != NULL; }
 
 	const T& operator*() const { return *object; }
 
 	const T* operator->() const { return object.get(); }
 
-	boost::shared_ptr<const T> read() const { return object; }
+	std::shared_ptr<const T> read() const { return object; }
 
-	boost::shared_ptr<T>& write()
+	std::shared_ptr<T>& write()
 	{
 		if (!object) {
-			object = boost::shared_ptr<T>(new T());
+			object = std::shared_ptr<T>(new T());
 		}
 		else if (object.use_count() > 1) {
-			object = boost::shared_ptr<T>(new T(*object));
+			object = std::shared_ptr<T>(new T(*object));
 		}
 
 		return object;
@@ -58,7 +61,7 @@ public:
 	void reset() { object.reset(); }
 
 private:
-	boost::shared_ptr<T> object;
+	std::shared_ptr<T> object;
 };
 
 template <class T>
@@ -68,6 +71,16 @@ public:
 	static std::string convertToString(const T& value);
 	static bool convertToValue(const std::string& text, T& value);
 };
+
+template <class T>
+T lexicalCast(const std::string& text);
+
+std::string readStream(std::istream& stream);
+
+void toLower(std::string& text);
+void trim(std::string& text);
+std::vector<std::string> split(const std::string& text, const char* delimiters);
+std::vector<std::string> tokenize(const std::string& text, const char* delimiters);
 
 } // namespace RBX
 

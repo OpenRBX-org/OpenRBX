@@ -9,8 +9,8 @@
 #include <G3D/Color3.h>
 #include <G3D/Color4.h>
 #include <GLG3D/LightingParameters.h>
-#include <boost/date_time/posix_time/posix_time_types.hpp>
-#include <boost/shared_ptr.hpp>
+#include <chrono>
+#include <memory>
 #include <string>
 
 namespace RBX {
@@ -26,7 +26,7 @@ private:
 	G3D::Color3 ambientBottom;
 	bool hasSky;
 	G3D::Color4 clearColor;
-	boost::posix_time::time_duration timeOfDay;
+	std::chrono::seconds timeOfDay;
 
 public:
 	Lighting();
@@ -38,7 +38,7 @@ public:
 	bool isSkySuppressed() const { return !hasSky; }
 	void suppressSky(const bool value) { hasSky = !value; }
 
-	boost::shared_ptr<Sky> sky;
+	std::shared_ptr<Sky> sky;
 
 	const G3D::LightingParameters& getSkyParameters() const { return skyParameters; }
 	G3D::Color4 getClearColor() const { return clearColor; }
@@ -55,7 +55,7 @@ public:
 
 	std::string getTimeStr() const;
 	void setTimeStr(const std::string& value);
-	void setTime(const boost::posix_time::time_duration& value);
+	void setTime(std::chrono::seconds value);
 	double getGameTime() const;
 	double getMinutesAfterMidnight();
 	void setMinutesAfterMidnight(double value);

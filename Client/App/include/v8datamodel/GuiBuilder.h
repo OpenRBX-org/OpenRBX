@@ -3,7 +3,7 @@
 
 #include "v8datamodel/Workspace.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <string>
 
 namespace RBX {
@@ -19,20 +19,20 @@ class Verb;
 class GuiBuilder
 {
 private:
-	boost::shared_ptr<TopMenuBar> buildMenu();
-	boost::shared_ptr<TopMenuBar> buildRightPalette(Adorn* adorn);
-	boost::shared_ptr<TopMenuBar> buildPanelControlPalette(Adorn* adorn, GuiRoot* guiRoot);
-	boost::shared_ptr<TopMenuBar> buildScoreHud();
-	boost::shared_ptr<TopMenuBar> buildScoreHud(int offset);
-	boost::shared_ptr<TopMenuBar> buildControlHud(Adorn* adorn, int offset);
-	boost::shared_ptr<TopMenuBar> buildMessageHud(int offset);
-	boost::shared_ptr<TopMenuBar> buildChatHud();
-	void buildChatMenu(ChatOption* option, std::string prefix, boost::shared_ptr<UnifiedWidget> parent);
-	boost::shared_ptr<TopMenuBar> buildChatMenu(Adorn* adorn);
-	boost::shared_ptr<TopMenuBar> buildHealthHud();
-	boost::shared_ptr<TopMenuBar> buildStatsHud1();
-	boost::shared_ptr<TopMenuBar> buildStatsHud2();
-	void buildRightPaletteItems(Adorn* adorn, boost::shared_ptr<TopMenuBar> palette);
+	std::shared_ptr<TopMenuBar> buildMenu();
+	std::shared_ptr<TopMenuBar> buildRightPalette(Adorn* adorn);
+	std::shared_ptr<TopMenuBar> buildPanelControlPalette(Adorn* adorn, GuiRoot* guiRoot);
+	std::shared_ptr<TopMenuBar> buildScoreHud();
+	std::shared_ptr<TopMenuBar> buildScoreHud(int offset);
+	std::shared_ptr<TopMenuBar> buildControlHud(Adorn* adorn, int offset);
+	std::shared_ptr<TopMenuBar> buildMessageHud(int offset);
+	std::shared_ptr<TopMenuBar> buildChatHud();
+	void buildChatMenu(ChatOption* option, std::string prefix, std::shared_ptr<UnifiedWidget> parent);
+	std::shared_ptr<TopMenuBar> buildChatMenu(Adorn* adorn);
+	std::shared_ptr<TopMenuBar> buildHealthHud();
+	std::shared_ptr<TopMenuBar> buildStatsHud1();
+	std::shared_ptr<TopMenuBar> buildStatsHud2();
+	void buildRightPaletteItems(Adorn* adorn, std::shared_ptr<TopMenuBar> palette);
 	TopMenuBar* buildColorPanel(Adorn* adorn, GuiRoot* guiRoot);
 
 	DataModel* dataModel;

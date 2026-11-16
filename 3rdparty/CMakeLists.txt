@@ -30,51 +30,6 @@ if (MSVC)
   target_compile_options(glg3d PRIVATE /W3)
 endif()
 
-set(BOOST "${PROJECT_SOURCE_DIR}/Client/boost_1_34_1")
-
-add_library(boost_signals STATIC
-  "${BOOST}/libs/signals/src/connection.cpp"
-  "${BOOST}/libs/signals/src/named_slot_map.cpp"
-  "${BOOST}/libs/signals/src/signal_base.cpp"
-  "${BOOST}/libs/signals/src/slot.cpp"
-  "${BOOST}/libs/signals/src/trackable.cpp"
-)
-
-add_library(boost_thread STATIC
-  "${BOOST}/libs/thread/src/barrier.cpp"
-  "${BOOST}/libs/thread/src/condition.cpp"
-  "${BOOST}/libs/thread/src/exceptions.cpp"
-  "${BOOST}/libs/thread/src/mutex.cpp"
-  "${BOOST}/libs/thread/src/once.cpp"
-  "${BOOST}/libs/thread/src/recursive_mutex.cpp"
-  "${BOOST}/libs/thread/src/thread.cpp"
-  "${BOOST}/libs/thread/src/tss_dll.cpp"
-  "${BOOST}/libs/thread/src/tss_hooks.cpp"
-  "${BOOST}/libs/thread/src/tss_pe.cpp"
-  "${BOOST}/libs/thread/src/tss.cpp"
-  "${BOOST}/libs/thread/src/xtime.cpp"
-)
-target_compile_definitions(boost_thread PRIVATE BOOST_THREAD_BUILD_LIB=1)
-
-add_library(boost_date_time STATIC
-  "${BOOST}/libs/date_time/src/gregorian/greg_month.cpp"
-  "${BOOST}/libs/date_time/src/gregorian/greg_weekday.cpp"
-  "${BOOST}/libs/date_time/src/gregorian/date_generators.cpp"
-)
-target_compile_definitions(boost_date_time PRIVATE DATE_TIME_INLINE BOOST_DATE_TIME_STATIC_LINK)
-
-set_target_properties(boost_signals PROPERTIES OUTPUT_NAME "libboost_signals-vc80-mt-1_34_1")
-set_target_properties(boost_thread  PROPERTIES OUTPUT_NAME "libboost_thread-vc80-mt-1_34_1")
-set_target_properties(boost_date_time PROPERTIES OUTPUT_NAME "libboost_date_time-vc80-mt-1_34_1")
-
-foreach(name boost_signals boost_thread boost_date_time)
-  target_include_directories(${name} PRIVATE "${BOOST}/src")
-  target_compile_definitions(${name} PRIVATE NDEBUG BOOST_ALL_NO_LIB=1)
-  if (MSVC)
-    target_compile_options(${name} PRIVATE /Zc:forScope /Zc:wchar_t /O2 /Ob2 /W3 /EHs /GR /wd4675)
-  endif()
-endforeach()
-
 set(MESA "${PROJECT_SOURCE_DIR}/Client/Rendering/Mesa-6.5")
 
 set(OPENRBX_MESA_CORE_SOURCES
@@ -403,7 +358,7 @@ target_link_libraries(glu32 PRIVATE msvcrt winmm opengl32 kernel32 user32 gdi32 
 target_link_options(glu32 PRIVATE ${OPENRBX_MESA_LINK_OPTIONS}
   "/DEF:${MESA}/src/glu/sgi/glu.def")
 
-foreach(name graphics3d glg3d boost_signals boost_thread mesa_core opengl32 osmesa32 glu32)
+foreach(name graphics3d glg3d mesa_core opengl32 osmesa32 glu32)
   set_target_properties(${name} PROPERTIES
     C_CLANG_TIDY "" CXX_CLANG_TIDY "" CXX_INCLUDE_WHAT_YOU_USE "")
 endforeach()

@@ -124,7 +124,7 @@ void Classes::FUN_00447d00(const ClassDescriptor& descriptor)
 		return;
 	}
 
-	boost::shared_ptr<Class> metadata = Creatable<Instance>::create<Class>();
+	std::shared_ptr<Class> metadata = Creatable<Instance>::create<Class>();
 	metadata->setName(descriptor.name.toString());
 	metadata->browsable = false;
 	metadata->setParent(this);
@@ -138,7 +138,7 @@ void Reflection::FUN_00447e50(std::string fileName)
 
 	std::ifstream stream(fileName.c_str(), std::ios_base::in | std::ios_base::binary);
 	TextXmlParser parser(stream.rdbuf());
-	std::auto_ptr<XmlElement> root(parser.parse());
+	std::unique_ptr<XmlElement> root(parser.parse());
 
 	MergeBinder binder;
 	readChildren(root.get(), binder);
@@ -159,9 +159,9 @@ void Reflection::FUN_00447e50(std::string fileName)
 	}
 }
 
-boost::shared_ptr<Reflection> Reflection::FUN_004480c0()
+std::shared_ptr<Reflection> Reflection::FUN_004480c0()
 {
-	static boost::shared_ptr<Reflection> g_unk0x00953a24;
+	static std::shared_ptr<Reflection> g_unk0x00953a24;
 	if (!g_unk0x00953a24) {
 		g_unk0x00953a24 = Creatable<Instance>::create<Reflection>();
 

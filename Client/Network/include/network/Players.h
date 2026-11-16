@@ -5,14 +5,13 @@
 #include "network/SuperSafeChanged.h"
 #include "reflection/reflection.h"
 #include "util/Events.h"
-#include "util/boost.hpp"
+#include "util/Thread.h"
 #include "v8tree/Instance.h"
 #include "v8tree/Service.h"
 
-#include <boost/scoped_ptr.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/thread/mutex.hpp>
 #include <list>
+#include <memory>
+#include <mutex>
 #include <queue>
 #include <string>
 
@@ -30,8 +29,8 @@ extern char sPlayers[];
 struct ChatMessage
 {
 	const std::string message;
-	const boost::shared_ptr<Player> source;
-	const boost::shared_ptr<Player> destination;
+	const std::shared_ptr<Player> source;
+	const std::shared_ptr<Player> destination;
 };
 
 struct AbuseReport
@@ -55,11 +54,11 @@ class AbuseReporter
 	struct data
 	{
 		std::queue<AbuseReport> queue;
-		boost::mutex requestSync;
+		std::mutex requestSync;
 	};
 
-	boost::shared_ptr<data> _data;
-	boost::scoped_ptr<worker_thread> requestProcessor;
+	std::shared_ptr<data> _data;
+	std::unique_ptr<worker_thread> requestProcessor;
 
 public:
 	AbuseReporter(std::string abuseUrl);
@@ -67,7 +66,7 @@ public:
 	void add(AbuseReport& r, const std::list<ChatMessage>& chatHistory);
 
 private:
-	static worker_thread::work_result processRequests(boost::shared_ptr<data> _data, std::string abuseUrl);
+	static worker_thread::work_result processRequests(std::shared_ptr<data> _data, std::string abuseUrl);
 };
 
 class Players : public DescribedNonCreatable<Players, Instance, sPlayers>,
@@ -76,14 +75,14 @@ class Players : public DescribedNonCreatable<Players, Instance, sPlayers>,
 				public Notifier<Players, SuperSafeChanged>,
 				public Listener<Player, CharacterAdded>
 {
-	boost::scoped_ptr<AbuseReporter> abuseReporter;
+	std::unique_ptr<AbuseReporter> abuseReporter;
 	std::list<ChatMessage> chatHistory;
 
 	class Plugin;
 
-	boost::scoped_ptr<Plugin> plugin;
-	CopyOnWrite<std::vector<boost::shared_ptr<Instance> > > players;
-	boost::shared_ptr<Player> localPlayer;
+	std::unique_ptr<Plugin> plugin;
+	CopyOnWrite<std::vector<std::shared_ptr<Instance> > > players;
+	std::shared_ptr<Player> localPlayer;
 	RakPeerInterface* peer;
 	int maxPlayers;
 
@@ -97,7 +96,7 @@ public:
 	virtual ~Players();
 
 	bool superSafeOn() const;
-	boost::shared_ptr<Instance> createLocalPlayer(int userId);
+	std::shared_ptr<Instance> createLocalPlayer(int userId);
 
 	Player* getLocalPlayer() const { return localPlayer.get(); }
 	int getNumPlayers() const;
@@ -108,22 +107,22 @@ public:
 
 	void setMaxPlayers(int value);
 
-	boost::shared_ptr<const std::vector<boost::shared_ptr<Instance> > > getPlayers() { return players.read(); }
+	std::shared_ptr<const std::vector<std::shared_ptr<Instance> > > getPlayers() { return players.read(); }
 
 	void chat(std::string message);
 	void reportAbuse(Player* player, std::string comment);
 	std::list<ChatMessage>::const_iterator chatHistory_begin();
 	std::list<ChatMessage>::const_iterator chatHistory_end();
 	bool canReportAbuse() const;
-	void reportAbuse(boost::shared_ptr<Instance> player, std::string comment);
+	void reportAbuse(std::shared_ptr<Instance> player, std::string comment);
 
 	void setAbuseReportUrl(std::string value);
 
 	bool OnReceive(RakPeerInterface* peer, Packet* packet);
 	void setConnection(RakPeerInterface* peer);
 
-	boost::shared_ptr<Instance> playerFromCharacter(boost::shared_ptr<Instance> character);
-	boost::shared_ptr<Instance> getPlayerByID(int userID);
+	std::shared_ptr<Instance> playerFromCharacter(std::shared_ptr<Instance> character);
+	std::shared_ptr<Instance> getPlayerByID(int userID);
 
 	static Player* getPlayerFromCharacter(Instance* character);
 

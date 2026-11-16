@@ -7,7 +7,6 @@
 #include "util/StandardOut.h"
 
 #include <G3D/format.h>
-#include <boost/bind.hpp>
 #include <exception>
 #include <stdexcept>
 
@@ -19,16 +18,15 @@ template const RBX::FactoryProduct<DHTMLWindowService, RBX::Instance, sDHTMLWind
 
 Marshaller* g_unk0x00952f1c;
 
-static RBX::Reflection::BoundFuncDesc<DHTMLWindowService, boost::shared_ptr<RBX::Instance>(int, int), 2>
-	g_unk0x00952f20(
-		&DHTMLWindowService::FUN_0041cf60,
-		"NewWindow",
-		"width",
-		500,
-		"height",
-		300,
-		RBX::Reflection::FunctionDescriptor::AnyCaller
-	);
+static RBX::Reflection::BoundFuncDesc<DHTMLWindowService, std::shared_ptr<RBX::Instance>(int, int), 2> g_unk0x00952f20(
+	&DHTMLWindowService::FUN_0041cf60,
+	"NewWindow",
+	"width",
+	500,
+	"height",
+	300,
+	RBX::Reflection::FunctionDescriptor::AnyCaller
+);
 
 static RBX::Reflection::BoundFuncDesc<DHTMLWindow, void(std::string), 1> g_unk0x00952f60(
 	&DHTMLWindow::FUN_0041d1f0, "Navigate", "url", "about:blank", RBX::Reflection::FunctionDescriptor::AnyCaller
@@ -54,7 +52,7 @@ static RBX::Reflection::BoundFuncDesc<DHTMLWindow, void(), 0> g_unk0x00953078(
 	&DHTMLWindow::FUN_00413f40, "Close", RBX::Reflection::FunctionDescriptor::AnyCaller
 );
 
-static RBX::Reflection::BoundFuncDesc<DHTMLWindow, void(boost::shared_ptr<RBX::Instance>, std::string, std::string), 3>
+static RBX::Reflection::BoundFuncDesc<DHTMLWindow, void(std::shared_ptr<RBX::Instance>, std::string, std::string), 3>
 	g_unk0x009530a8(
 		&DHTMLWindow::FUN_0041d880,
 		"Bind",
@@ -72,14 +70,14 @@ RBX::Reflection::SignalDesc<DHTMLWindow, void(std::string)> DHTMLWindow::g_unk0x
 
 std::map<DWORD, Marshaller*> Marshaller::g_unk0x00953144;
 
-boost::recursive_mutex Marshaller::g_unk0x00953150;
+std::recursive_mutex Marshaller::g_unk0x00953150;
 
 LRESULT Marshaller::FUN_00418660(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
 {
 	try {
-		boost::function0<void> function;
+		std::function<void()> function;
 		{
-			boost::mutex::scoped_lock lock(m_unk0x40);
+			std::lock_guard<std::mutex> lock(m_unk0x40);
 			function = m_unk0x2c.front();
 			m_unk0x2c.pop_front();
 		}
@@ -100,7 +98,7 @@ Marshaller::Marshaller(DWORD threadId) : m_unk0x24(0)
 
 Marshaller* Marshaller::FUN_0041a4a0()
 {
-	boost::recursive_mutex::scoped_lock lock(g_unk0x00953150);
+	std::lock_guard<std::recursive_mutex> lock(g_unk0x00953150);
 	DWORD threadId = GetCurrentThreadId();
 	std::map<DWORD, Marshaller*>::iterator it = g_unk0x00953144.find(threadId);
 	if (it != g_unk0x00953144.end()) {
@@ -134,49 +132,49 @@ void DHTMLWindow::onServiceProvider(const RBX::ServiceProvider* oldProvider, con
 	RBX::Instance::onServiceProvider(oldProvider, newProvider);
 
 	if (oldProvider) {
-		g_unk0x00952f1c->FUN_00418fd0(boost::bind(&DHTMLWindow::FUN_004155f0, RBX::shared_from(this)));
+		g_unk0x00952f1c->FUN_00418fd0([self = RBX::shared_from(this)] { self->FUN_004155f0(); });
 	}
 
-	boost::recursive_mutex::scoped_lock lock(m_unk0xf8);
+	std::lock_guard<std::recursive_mutex> lock(m_unk0xf8);
 	if (newProvider) {
-		g_unk0x00952f1c->FUN_00418fd0(boost::bind(&DHTMLWindow::FUN_00417550, RBX::shared_from(this)));
+		g_unk0x00952f1c->FUN_00418fd0([self = RBX::shared_from(this)] { self->FUN_00417550(); });
 	}
 }
 
 void DHTMLWindow::FUN_0041c1d0()
 {
-	g_unk0x00952f1c->FUN_00418fd0(boost::bind(&DHTMLWindow::FUN_00415550, RBX::shared_from(this)));
+	g_unk0x00952f1c->FUN_00418fd0([self = RBX::shared_from(this)] { self->FUN_00415550(); });
 }
 
-boost::shared_ptr<RBX::Instance> DHTMLWindowService::FUN_0041cf60(int width, int height)
+std::shared_ptr<RBX::Instance> DHTMLWindowService::FUN_0041cf60(int width, int height)
 {
-	boost::shared_ptr<DHTMLWindow> window = RBX::Creatable<RBX::Instance>::create<DHTMLWindow>();
-	g_unk0x00952f1c->FUN_00418fd0(boost::bind(&DHTMLWindow::FUN_004153f0, window, width, height));
+	std::shared_ptr<DHTMLWindow> window = RBX::Creatable<RBX::Instance>::create<DHTMLWindow>();
+	g_unk0x00952f1c->FUN_00418fd0([window, width, height] { window->FUN_004153f0(width, height); });
 	window->setParent(this);
 	return window;
 }
 
 void DHTMLWindow::FUN_0041d0a0(int x, int y)
 {
-	g_unk0x00952f1c->FUN_00418fd0(boost::bind(&DHTMLWindow::FUN_00415670, RBX::shared_from(this), x, y));
+	g_unk0x00952f1c->FUN_00418fd0([self = RBX::shared_from(this), x, y] { self->FUN_00415670(x, y); });
 }
 
 void DHTMLWindow::FUN_0041d110(RBX::Lua::FunctionRef function)
 {
-	g_unk0x00952f1c->FUN_00418fd0(boost::bind(&DHTMLWindow::FUN_00415710, RBX::shared_from(this), function));
+	g_unk0x00952f1c->FUN_00418fd0([self = RBX::shared_from(this), function] { self->FUN_00415710(function); });
 }
 
 void DHTMLWindow::FUN_0041d1f0(std::string url)
 {
-	g_unk0x00952f1c->FUN_00418fd0(boost::bind(&DHTMLWindow::FUN_004157b0, RBX::shared_from(this), url));
+	g_unk0x00952f1c->FUN_00418fd0([self = RBX::shared_from(this), url] { self->FUN_004157b0(url); });
 }
 
 void DHTMLWindow::FUN_0041d2d0(std::string html)
 {
-	g_unk0x00952f1c->FUN_00418fd0(boost::bind(&DHTMLWindow::FUN_00415860, RBX::shared_from(this), html));
+	g_unk0x00952f1c->FUN_00418fd0([self = RBX::shared_from(this), html] { self->FUN_00415860(html); });
 }
 
-void DHTMLWindow::FUN_0041d880(boost::shared_ptr<RBX::Instance> instance, std::string property, std::string name)
+void DHTMLWindow::FUN_0041d880(std::shared_ptr<RBX::Instance> instance, std::string property, std::string name)
 {
 	if (!instance) {
 		throw std::runtime_error("The object to bind to must not be nil");
@@ -189,14 +187,12 @@ void DHTMLWindow::FUN_0041d880(boost::shared_ptr<RBX::Instance> instance, std::s
 	}
 
 	const RBX::Reflection::PropertyDescriptor* descriptor = &(*iter).getDescriptor();
-	g_unk0x00952f1c->FUN_00418fd0(
-		boost::bind(&DHTMLWindow::FUN_00415910, RBX::shared_from(this), instance, descriptor, name)
-	);
+	g_unk0x00952f1c->FUN_00418fd0([self = RBX::shared_from(this), instance, descriptor, name] {
+		self->FUN_00415910(instance, descriptor, name);
+	});
 }
 
 void DHTMLWindow::FUN_0041dc70()
 {
-	g_unk0x00952f1c->FUN_00418fd0(
-		boost::bind(&DHTMLWindow::FUN_004152c0, RBX::shared_from(this), &CLuaHtmlView::FUN_0042f370)
-	);
+	g_unk0x00952f1c->FUN_00418fd0([self = RBX::shared_from(this)] { self->FUN_004152c0(&CLuaHtmlView::FUN_0042f370); });
 }

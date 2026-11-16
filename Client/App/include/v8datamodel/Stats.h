@@ -4,9 +4,9 @@
 #include "v8tree/Instance.h"
 #include "v8tree/Service.h"
 
-#include <boost/bind.hpp>
-#include <boost/function.hpp>
+#include <functional>
 #include <string>
+#include <utility>
 
 namespace G3D {
 class Stopwatch;
@@ -72,7 +72,7 @@ public:
 	Item* createChildItem(const char* name);
 
 	template <class T>
-	Item* createChildItem(const char* name, boost::function0<T> func);
+	Item* createChildItem(const char* name, std::function<T()> func);
 
 	Item* createBoundChildItem(const Profiling::Profiler& p);
 
@@ -99,14 +99,12 @@ void Item::formatValue<G3D::Stopwatch>(const G3D::Stopwatch& value);
 template <class T>
 class TypedStatsItem : public Item
 {
-	static const T& deref(const T* value) { return *value; }
-
 protected:
-	const boost::function0<T> func;
+	const std::function<T()> func;
 
 public:
-	TypedStatsItem(boost::function0<T> func) : func(func) {}
-	TypedStatsItem(const T* value) : func(boost::bind(&deref, value)) {}
+	TypedStatsItem(std::function<T()> func) : func(std::move(func)) {}
+	TypedStatsItem(const T* value) : func([value] { return *value; }) {}
 
 	virtual void update() { formatValue(func()); }
 };
@@ -133,9 +131,9 @@ public:
 };
 
 template <class T>
-Item* Item::createChildItem(const char* name, boost::function0<T> func)
+Item* Item::createChildItem(const char* name, std::function<T()> func)
 {
-	boost::shared_ptr<Item> item = Creatable<Instance>::create<TypedStatsItem<T> >(func);
+	std::shared_ptr<Item> item = Creatable<Instance>::create<TypedStatsItem<T> >(func);
 	item->setName(name);
 	item->setParent(this);
 	return item.get();
@@ -144,7 +142,7 @@ Item* Item::createChildItem(const char* name, boost::function0<T> func)
 template <class T>
 Item* Item::createBoundChildItem(const char* name, const T& v)
 {
-	boost::shared_ptr<Item> item = Creatable<Instance>::create<TypedStatsItem<T> >(&v);
+	std::shared_ptr<Item> item = Creatable<Instance>::create<TypedStatsItem<T> >(&v);
 	item->setName(name);
 	item->setParent(this);
 	return item.get();

@@ -2,27 +2,28 @@
 
 #include "util/ContentProvider.h"
 #include "util/StandardOut.h"
+#include "util/Utilities.h"
 
 #include <G3D/format.h>
 #include <atlbase.h>
 #include <atlstr.h>
 #include <atlutil.h>
-#include <boost/iostreams/categories.hpp>
-#include <boost/iostreams/copy.hpp>
-#include <boost/iostreams/filter/gzip.hpp>
-#include <boost/iostreams/filtering_stream.hpp>
-#include <boost/noncopyable.hpp>
-#include <boost/scoped_ptr.hpp>
-#include <boost/thread/mutex.hpp>
+#include <memory>
+#include <mutex>
+#include <new>
 #include <sstream>
 #include <stdexcept>
 #include <wininet.h>
+#include <zlib.h>
 
-class CHINTERNET : boost::noncopyable
+class CHINTERNET
 {
 	HINTERNET handle;
 
 public:
+	CHINTERNET(const CHINTERNET&) = delete;
+	CHINTERNET& operator=(const CHINTERNET&) = delete;
+
 	CHINTERNET(HINTERNET handle) : handle(handle) {}
 	CHINTERNET() : handle(NULL) {}
 
@@ -38,29 +39,234 @@ public:
 	~CHINTERNET() { InternetCloseHandle(handle); }
 };
 
-class HttpRequest_source : public boost::iostreams::device<boost::iostreams::input>
+class HttpRequest_source
 {
 	HINTERNET request;
+	char buffer[4096];
+	int position;
+	int size;
 
 public:
-	HttpRequest_source(HINTERNET request) : request(request) {}
+	HttpRequest_source(HINTERNET request) : request(request), position(0), size(0) {}
 
 	int read(char* s, int n);
-};
 
-class String_sink : public boost::iostreams::device<boost::iostreams::output>
-{
-public:
-	std::string& s;
-
-	String_sink(std::string& s) : s(s) {}
-
-	int write(const char* s, int n)
+	bool fill()
 	{
-		this->s.append(s, n);
-		return n;
+		while (position == size) {
+			const int amount = read(buffer, sizeof(buffer));
+
+			if (amount == -1) {
+				return false;
+			}
+
+			position = 0;
+			size = amount;
+		}
+
+		return true;
 	}
+
+	int get() { return fill() ? static_cast<unsigned char>(buffer[position++]) : EOF; }
+
+	const char* data() const { return buffer + position; }
+	int available() const { return size - position; }
+	void consume() { position = size; }
 };
+
+namespace {
+
+enum GzipError
+{
+	GzipZlibError = 1,
+	GzipBadCrc = 2,
+	GzipBadLength = 3,
+	GzipBadHeader = 4,
+	GzipBadFooter = 5
+};
+
+struct GzipException
+{
+	int error;
+	int zlibError;
+};
+
+void checkZlib(int result)
+{
+	if (result == Z_MEM_ERROR) {
+		throw std::bad_alloc();
+	}
+
+	if (result != Z_OK && result != Z_STREAM_END) {
+		throw std::runtime_error("zlib error");
+	}
+}
+
+void appendUint32(std::string& output, uLong value)
+{
+	for (int shift = 0; shift < 32; shift += 8) {
+		output += static_cast<char>(0xFF & (value >> shift));
+	}
+}
+
+uLong readUint32(const std::string& input, std::string::size_type offset)
+{
+	uLong value = 0;
+
+	for (int i = 0; i < 4; ++i) {
+		value |= static_cast<uLong>(static_cast<unsigned char>(input[offset + i])) << (8 * i);
+	}
+
+	return value;
+}
+
+std::string gzipCompress(const std::string& input)
+{
+	static const char header[] = {0x1f, static_cast<char>(0x8b), Z_DEFLATED, 0, 0, 0, 0, 0, 0, static_cast<char>(0xff)};
+
+	std::string output(header, sizeof(header));
+
+	z_stream stream = {};
+	checkZlib(deflateInit2(&stream, Z_DEFAULT_COMPRESSION, Z_DEFLATED, -MAX_WBITS, 8, Z_DEFAULT_STRATEGY));
+
+	stream.next_in = reinterpret_cast<Bytef*>(const_cast<char*>(input.data()));
+	stream.avail_in = static_cast<uInt>(input.size());
+
+	int result;
+
+	do {
+		char buffer[4096];
+		stream.next_out = reinterpret_cast<Bytef*>(buffer);
+		stream.avail_out = sizeof(buffer);
+
+		result = deflate(&stream, Z_FINISH);
+
+		if (result != Z_OK && result != Z_STREAM_END) {
+			deflateEnd(&stream);
+			checkZlib(result);
+		}
+
+		output.append(buffer, sizeof(buffer) - stream.avail_out);
+	} while (result != Z_STREAM_END);
+
+	const uLong totalIn = stream.total_in;
+	deflateEnd(&stream);
+
+	const Bytef* bytes = reinterpret_cast<const Bytef*>(input.data());
+	appendUint32(output, crc32(crc32(0, Z_NULL, 0), bytes, static_cast<uInt>(input.size())));
+	appendUint32(output, totalIn);
+
+	return output;
+}
+
+int readGzipByte(HttpRequest_source& source, int error)
+{
+	const int c = source.get();
+
+	if (c == EOF) {
+		throw GzipException{error, Z_OK};
+	}
+
+	return c;
+}
+
+void readGzipHeader(HttpRequest_source& source)
+{
+	int flags;
+
+	if (source.get() != 0x1f || source.get() != 0x8b || source.get() == EOF || (flags = source.get()) == EOF) {
+		throw GzipException{GzipBadHeader, Z_OK};
+	}
+
+	for (int i = 0; i < 6; ++i) {
+		readGzipByte(source, GzipBadHeader);
+	}
+
+	if (flags & 4) {
+		int length = readGzipByte(source, GzipBadHeader);
+		length += readGzipByte(source, GzipBadHeader) << 8;
+
+		while (length-- != 0 && source.get() != EOF) {
+		}
+	}
+
+	for (int field = 8; field <= 16; field <<= 1) {
+		if (flags & field) {
+			while (readGzipByte(source, GzipBadHeader) != 0) {
+			}
+		}
+	}
+
+	if (flags & 2) {
+		readGzipByte(source, GzipBadHeader);
+		readGzipByte(source, GzipBadHeader);
+	}
+}
+
+void gzipDecompress(HttpRequest_source& source, std::string& response)
+{
+	readGzipHeader(source);
+
+	z_stream stream = {};
+	checkZlib(inflateInit2(&stream, -MAX_WBITS));
+
+	uLong crc = crc32(0, Z_NULL, 0);
+	int result;
+
+	do {
+		if (stream.avail_in == 0 && source.fill()) {
+			stream.next_in = reinterpret_cast<Bytef*>(const_cast<char*>(source.data()));
+			stream.avail_in = source.available();
+			source.consume();
+		}
+
+		char buffer[4096];
+		stream.next_out = reinterpret_cast<Bytef*>(buffer);
+		stream.avail_out = sizeof(buffer);
+
+		result = inflate(&stream, Z_SYNC_FLUSH);
+
+		const uInt produced = sizeof(buffer) - stream.avail_out;
+		crc = crc32(crc, reinterpret_cast<const Bytef*>(buffer), produced);
+		response.append(buffer, produced);
+
+		if (result != Z_OK && result != Z_STREAM_END) {
+			inflateEnd(&stream);
+
+			if (result == Z_MEM_ERROR) {
+				throw std::bad_alloc();
+			}
+
+			throw GzipException{GzipZlibError, result};
+		}
+	} while (result != Z_STREAM_END);
+
+	std::string footer(reinterpret_cast<const char*>(stream.next_in), stream.avail_in);
+	const uLong totalOut = stream.total_out;
+	inflateEnd(&stream);
+
+	for (int c = source.get(); c != EOF; c = source.get()) {
+		footer += static_cast<char>(c);
+	}
+
+	if (footer.size() < 4) {
+		throw GzipException{GzipBadFooter, Z_OK};
+	}
+
+	if (readUint32(footer, 0) != crc) {
+		throw GzipException{GzipBadCrc, Z_OK};
+	}
+
+	if (footer.size() < 8) {
+		throw GzipException{GzipBadFooter, Z_OK};
+	}
+
+	if (static_cast<int>(readUint32(footer, 4)) != static_cast<int>(totalOut)) {
+		throw GzipException{GzipBadLength, Z_OK};
+	}
+}
+
+} // namespace
 
 namespace RBX {
 
@@ -151,13 +357,13 @@ bool Http::isRobloxSite(const char* url)
 	}
 }
 
-static boost::mutex trustCheckMutex;
+static std::mutex trustCheckMutex;
 
 bool Http::trustCheck(const char* url)
 {
 	{
-		boost::mutex::scoped_lock lock(trustCheckMutex);
-		static boost::scoped_ptr<bool> skipTrustCheck;
+		std::lock_guard<std::mutex> lock(trustCheckMutex);
+		static std::unique_ptr<bool> skipTrustCheck;
 		if (!skipTrustCheck) {
 			DWORD value = 0;
 			CRegKey key;
@@ -272,34 +478,24 @@ static void httpGetPost(
 		ThrowIfFailure(false, "HttpAddRequestHeaders failed");
 	}
 
-	boost::iostreams::gzip_params gzipParams;
-
 	if (!isPost) {
 		if (!HttpSendRequest(request, NULL, 0, NULL, 0)) {
 			ThrowIfFailure(false, "HttpSendRequest failed");
 		}
 	}
 	else {
-		std::string uploadData;
+		std::string uploadData = readStream(data);
 
-		try {
-			boost::iostreams::filtering_ostream out;
-			if (compressData) {
-				std::string contentEncodingHeader = "Content-Encoding: gzip\r\n";
-				if (!HttpAddRequestHeaders(
-						request, contentEncodingHeader.c_str(), contentEncodingHeader.size(), HTTP_ADDREQ_FLAG_ADD
-					)) {
-					ThrowIfFailure(false, "HttpAddRequestHeaders failed");
-				}
-				out.push(boost::iostreams::gzip_compressor(gzipParams));
+		if (compressData) {
+			std::string contentEncodingHeader = "Content-Encoding: gzip\r\n";
+			if (!HttpAddRequestHeaders(
+					request, contentEncodingHeader.c_str(), contentEncodingHeader.size(), HTTP_ADDREQ_FLAG_ADD
+				)) {
+				ThrowIfFailure(false, "HttpAddRequestHeaders failed");
 			}
-			out.push(String_sink(uploadData));
-			boost::iostreams::copy(data, out);
-		}
-		catch (boost::iostreams::gzip_error& e) {
-			throw std::runtime_error(
-				G3D::format("Upload GZip error %d, ZLib error %d, '%s'", e.error(), e.zlib_error_code(), url.c_str())
-			);
+			if (!uploadData.empty()) {
+				uploadData = gzipCompress(uploadData);
+			}
 		}
 
 		const size_t uploadSize = uploadData.size();
@@ -326,7 +522,7 @@ static void httpGetPost(
 				ThrowIfFailure(false, "HttpAddRequestHeaders failed");
 			}
 
-			boost::scoped_ptr<MD5Hasher> hasher(MD5Hasher::create());
+			std::unique_ptr<MD5Hasher> hasher(MD5Hasher::create());
 			hasher->addData(uploadData);
 			std::string contentHashHeader = G3D::format("Roblox-Content-Hash: %s\r\n", hasher->c_str());
 			if (!HttpAddRequestHeaders(
@@ -376,29 +572,33 @@ static void httpGetPost(
 			statusCode = atol(szBuffer);
 		}
 
-		try {
-			boost::iostreams::filtering_istream in;
+		bool gzip = false;
 
-			{
-				char buffer[256];
-				DWORD length = 256;
-				if (HttpQueryInfo(request, HTTP_QUERY_CONTENT_ENCODING, buffer, &length, NULL)) {
-					if (std::string(buffer) == "gzip") {
-						in.push(boost::iostreams::gzip_decompressor());
-					}
-				}
+		{
+			char buffer[256];
+			DWORD length = 256;
+			if (HttpQueryInfo(request, HTTP_QUERY_CONTENT_ENCODING, buffer, &length, NULL)) {
+				gzip = std::string(buffer) == "gzip";
 			}
+		}
 
-			in.push(HttpRequest_source(request));
-			boost::iostreams::copy(in, String_sink(response));
+		HttpRequest_source source(request);
+
+		if (gzip) {
+			try {
+				gzipDecompress(source, response);
+			}
+			catch (const GzipException& e) {
+				throw std::runtime_error(
+					G3D::format("GZip error %d, ZLib error %d, '%s'", e.error, e.zlibError, url.c_str())
+				);
+			}
 		}
-		catch (boost::iostreams::gzip_error& e) {
-			throw std::runtime_error(
-				G3D::format("GZip error %d, ZLib error %d, '%s'", e.error(), e.zlib_error_code(), url.c_str())
-			);
-		}
-		catch (boost::iostreams::zlib_error& e) {
-			throw std::runtime_error(G3D::format("ZLib error %d, '%s'", e.error(), url.c_str()));
+		else {
+			while (source.fill()) {
+				response.append(source.data(), source.available());
+				source.consume();
+			}
 		}
 
 		if (statusCode != 200) {

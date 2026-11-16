@@ -2,7 +2,7 @@
 #define V8DATAMODEL_IEQUIPABLE_H
 
 #include <G3D/CoordinateFrame.h>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <string>
 
 namespace RBX {
@@ -16,7 +16,7 @@ using G3D::CoordinateFrame;
 class __declspec(novtable) IEquipable
 {
 protected:
-	boost::shared_ptr<Weld> weld;
+	std::shared_ptr<Weld> weld;
 	Workspace* workspace;
 
 	void buildWeld(

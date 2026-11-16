@@ -7,7 +7,7 @@
 #include "v8world/IWorldStage.h"
 #include "v8world/Primitive.h"
 
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 #include <set>
 
 namespace RBX {
@@ -170,9 +170,9 @@ private:
 
 	G3D::Array<Primitive*> tempPrimitives;
 
-	boost::scoped_ptr<Profiling::CodeProfiler> profilingWorldStep;
-	boost::scoped_ptr<Profiling::CodeProfiler> profilingUiStep;
-	boost::scoped_ptr<Profiling::CodeProfiler> profilingBroadphase;
+	std::unique_ptr<Profiling::CodeProfiler> profilingWorldStep;
+	std::unique_ptr<Profiling::CodeProfiler> profilingUiStep;
+	std::unique_ptr<Profiling::CodeProfiler> profilingBroadphase;
 };
 
 } // namespace RBX

@@ -1,7 +1,6 @@
 #include "util/Name.h"
 
-#include <boost/thread/mutex.hpp>
-#include <boost/thread/once.hpp>
+#include <mutex>
 
 namespace RBX {
 
@@ -11,11 +10,11 @@ public:
 	~NamMap();
 };
 
-static boost::once_flag flag = BOOST_ONCE_INIT;
+static std::once_flag flag;
 
-boost::mutex& moo2()
+std::recursive_mutex& moo2()
 {
-	static boost::mutex mutex2;
+	static std::recursive_mutex mutex2;
 
 	return mutex2;
 }
@@ -52,9 +51,9 @@ const Name& Name::declare(const char* sName, int dictionaryIndex)
 		return getNullName();
 	}
 
-	boost::call_once(initMoo, flag);
+	std::call_once(flag, initMoo);
 
-	boost::mutex::scoped_lock lock(moo2());
+	std::lock_guard<std::recursive_mutex> lock(moo2());
 	NamMap::iterator iter = namMap().find(std::string(sName));
 
 	if (iter != namMap().end()) {
@@ -75,9 +74,9 @@ const Name& Name::declare(const char* sName, int dictionaryIndex)
 
 const Name& Name::getNullName()
 {
-	boost::call_once(initMoo, flag);
+	std::call_once(flag, initMoo);
 
-	boost::mutex::scoped_lock lock(moo2());
+	std::lock_guard<std::recursive_mutex> lock(moo2());
 	static const Name* nullName = &declare("", 0);
 
 	return *nullName;
@@ -85,9 +84,9 @@ const Name& Name::getNullName()
 
 const Name& Name::lookup(const std::string& sName)
 {
-	boost::call_once(initMoo, flag);
+	std::call_once(flag, initMoo);
 
-	boost::mutex::scoped_lock lock(moo2());
+	std::lock_guard<std::recursive_mutex> lock(moo2());
 	NamMap::iterator iter = namMap().find(sName);
 
 	if (iter != namMap().end()) {

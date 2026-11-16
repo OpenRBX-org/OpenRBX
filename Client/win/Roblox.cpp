@@ -33,9 +33,7 @@
 #include <afxpriv.h>
 #include <algorithm>
 #include <atlcom.h>
-#include <boost/bind.hpp>
 #include <exdispid.h>
-#include <functional>
 #include <shlwapi.h>
 #include <sstream>
 #include <stdexcept>
@@ -50,7 +48,7 @@ CRobloxModule _AtlModule;
 
 CString g_unk0x00954290;
 
-static boost::scoped_ptr<std::runtime_error> g_unk0x00954294;
+static std::unique_ptr<std::runtime_error> g_unk0x00954294;
 
 class CRbxDocTemplate : public CMultiDocTemplate
 {
@@ -370,7 +368,7 @@ BOOL CRobloxApp::FUN_0044ea70(std::string script)
 	return !FUN_0044e180(script);
 }
 
-void CScriptDoc::FUN_0044eaf0(boost::shared_ptr<RBX::Script> script)
+void CScriptDoc::FUN_0044eaf0(std::shared_ptr<RBX::Script> script)
 {
 	m_unk0x54 = script;
 	SetTitle(script->getName().c_str());
@@ -426,7 +424,7 @@ int CRobloxApp::ExitInstance()
 	return CWinApp::ExitInstance();
 }
 
-void CRobloxApp::FUN_0044ef90(boost::shared_ptr<RBX::Script> script)
+void CRobloxApp::FUN_0044ef90(std::shared_ptr<RBX::Script> script)
 {
 	CScriptDoc* doc =
 		static_cast<CScriptDoc*>(static_cast<CIDEDocManager*>(m_pDocManager)->m_unk0x28->OpenDocumentFile(NULL));
@@ -490,7 +488,7 @@ CDocument* CRobloxApp::FUN_0044fbc0()
 	return manager->m_unk0x24->FUN_0044f970();
 }
 
-static void FUN_0044ff90(boost::shared_ptr<RBX::Instance> instance)
+static void FUN_0044ff90(std::shared_ptr<RBX::Instance> instance)
 {
 	RBX::Log::current()->writeEntry(RBX::Log::Information, G3D::format("\t%s", instance->getName().c_str()).c_str());
 	std::for_each(instance->properties_begin(), instance->properties_end(), FUN_0044d9d0);
@@ -601,14 +599,14 @@ static void FUN_00450e30()
 		std::for_each(
 			debugSettings.properties_begin(),
 			debugSettings.properties_end(),
-			boost::bind(FUN_0044edf0, "Profile", &stream, _1)
+			[&stream](const RBX::Reflection::ConstProperty& property) { FUN_0044edf0("Profile", &stream, property); }
 		);
 
 		CRenderSettings& renderSettings = CRenderSettings::singleton();
 		std::for_each(
 			renderSettings.properties_begin(),
 			renderSettings.properties_end(),
-			boost::bind(FUN_0044edf0, "General", &stream, _1)
+			[&stream](const RBX::Reflection::ConstProperty& property) { FUN_0044edf0("General", &stream, property); }
 		);
 
 		stream.flush();
@@ -650,7 +648,7 @@ void CRobloxApp::FUN_00451100()
 
 BOOL CRobloxApp::FUN_00451550(std::vector<std::string>::iterator begin, std::vector<std::string>::iterator end)
 {
-	return std::find_if(begin, end, std::bind1st(std::mem_fun(&CRobloxApp::FUN_0044ea70), this)) == end;
+	return std::find_if(begin, end, [this](const std::string& script) { return FUN_0044ea70(script); }) == end;
 }
 
 void CRobloxCommandLineInfo::ParseParam(const TCHAR* pszParam, BOOL bFlag, BOOL bLast)

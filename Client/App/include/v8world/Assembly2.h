@@ -6,7 +6,6 @@
 #include "v8world/IPipelined.h"
 
 #include <G3D/Vector3.h>
-#include <boost/noncopyable.hpp>
 #include <vector>
 
 namespace RBX {
@@ -54,7 +53,7 @@ private:
 	RunningAverageState runningAverageState;
 };
 
-class Assembly : public IPipelined, public boost::noncopyable
+class Assembly : public IPipelined
 {
 	typedef RBX::PrimIterator PrimIterator;
 	typedef RBX::EdgeIterator EdgeIterator;
@@ -83,6 +82,9 @@ private:
 	static Joint* getJointToParent(Primitive* primitive);
 
 public:
+	Assembly(const Assembly&) = delete;
+	Assembly& operator=(const Assembly&) = delete;
+
 	Assembly(Primitive* root);
 	virtual ~Assembly();
 

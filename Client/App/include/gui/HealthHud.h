@@ -3,7 +3,7 @@
 
 #include "gui/GUI.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace RBX {
 
@@ -12,7 +12,7 @@ class Visit;
 class HealthHud : public GuiItem
 {
 private:
-	boost::shared_ptr<Visit> visit;
+	std::shared_ptr<Visit> visit;
 
 	virtual void render2d(Adorn* adorn);
 

@@ -8,7 +8,6 @@
 #include "v8datamodel/ForceField.h"
 #include "v8datamodel/Workspace.h"
 
-#include <boost/bind.hpp>
 #include <stdexcept>
 #include <stdlib.h>
 #include <vector>
@@ -37,7 +36,7 @@ BrickColor SpawnLocation::getTeamColor() const
 	return teamColor;
 }
 
-void SpawnLocation::onEvent_spawnerTouched(boost::shared_ptr<Instance> other)
+void SpawnLocation::onEvent_spawnerTouched(std::shared_ptr<Instance> other)
 {
 	if (!allowTeamChangeOnTouch) {
 		return;
@@ -60,7 +59,7 @@ SpawnerService::~SpawnerService()
 {
 }
 
-void SpawnerService::SpawnPlayer(boost::shared_ptr<ModelInstance> model, Network::Player* p)
+void SpawnerService::SpawnPlayer(std::shared_ptr<ModelInstance> model, Network::Player* p)
 {
 	Workspace* workspace = ServiceProvider::find<Workspace>(this);
 	if (!workspace) {
@@ -93,7 +92,7 @@ void SpawnerService::SpawnPlayer(boost::shared_ptr<ModelInstance> model, Network
 
 	int duration = location->forcefieldDuration;
 	if (duration > 0) {
-		boost::shared_ptr<ForceField> f = Creatable<Instance>::create<ForceField>();
+		std::shared_ptr<ForceField> f = Creatable<Instance>::create<ForceField>();
 		f->setParent(model.get());
 		DebrisService* debris = ServiceProvider::create<DebrisService>(this);
 
@@ -126,7 +125,7 @@ void SpawnLocation::onServiceProvider(const ServiceProvider* oldProvider, const 
 
 	if (oldProvider == NULL) {
 		spawnerTouched = PartInstance::event_Touched.connect(
-			this, boost::bind(&SpawnLocation::onEvent_spawnerTouched, this, _1), 10
+			this, [this](const std::shared_ptr<Instance>& other) { onEvent_spawnerTouched(other); }, 10
 		);
 
 		SpawnerService* spawnerService = newProvider ? newProvider->create<SpawnerService>() : NULL;

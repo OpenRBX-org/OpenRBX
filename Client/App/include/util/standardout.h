@@ -3,12 +3,11 @@
 
 #include "util/Events.h"
 
-#include <boost/enable_shared_from_this.hpp>
-#include <boost/function.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/thread/mutex.hpp>
 #include <ctime>
 #include <exception>
+#include <functional>
+#include <memory>
+#include <mutex>
 #include <string>
 
 namespace RBX {
@@ -30,16 +29,16 @@ struct StandardOutMessage
 	__int64 time;
 };
 
-class StandardOut : public boost::enable_shared_from_this<StandardOut>, public Notifier<StandardOut, StandardOutMessage>
+class StandardOut : public std::enable_shared_from_this<StandardOut>, public Notifier<StandardOut, StandardOutMessage>
 {
 public:
-	static boost::shared_ptr<StandardOut> singleton();
-	static void print_exception(const boost::function0<void>& job, MessageType type, bool rethrow);
+	static std::shared_ptr<StandardOut> singleton();
+	static void print_exception(const std::function<void()>& job, MessageType type, bool rethrow);
 
 	void print(MessageType type, const std::exception& error);
 	void print(MessageType type, const char* format, ...);
 
-	boost::mutex sync;
+	std::recursive_mutex sync;
 };
 
 } // namespace RBX

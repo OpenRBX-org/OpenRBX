@@ -11,7 +11,6 @@
 #include <G3D/CoordinateFrame.h>
 #include <G3D/Vector2int16.h>
 #include <G3D/Vector3.h>
-#include <boost/cast.hpp>
 #include <memory>
 #include <string>
 #include <typeinfo>
@@ -124,10 +123,10 @@ protected:
 		ClassDescriptor& classDescriptor,
 		const char* name,
 		const char* category,
-		std::auto_ptr<GetSet> getset,
+		std::unique_ptr<GetSet> getset,
 		Functionality flags
 	)
-		: PropertyDescriptor(classDescriptor, Type::singleton<T>(), name, category, flags), getset(getset)
+		: PropertyDescriptor(classDescriptor, Type::singleton<T>(), name, category, flags), getset(std::move(getset))
 	{
 	}
 
@@ -136,10 +135,10 @@ protected:
 		const Type& type,
 		const char* name,
 		const char* category,
-		std::auto_ptr<GetSet> getset,
+		std::unique_ptr<GetSet> getset,
 		Functionality flags
 	)
-		: PropertyDescriptor(classDescriptor, type, name, category, flags), getset(getset)
+		: PropertyDescriptor(classDescriptor, type, name, category, flags), getset(std::move(getset))
 	{
 	}
 
@@ -149,7 +148,7 @@ private:
 	virtual void readValue(DescribedBase* instance, const XmlElement* element, IReferenceBinder& binder) const;
 
 protected:
-	std::auto_ptr<GetSet> getset;
+	std::unique_ptr<GetSet> getset;
 };
 
 template <class T>
@@ -465,21 +464,21 @@ public:
 	};
 
 	template <class Getter, class Setter>
-	static std::auto_ptr<typename TypedPropertyDescriptor<T>::GetSet> getset(Getter get, Setter set)
+	static std::unique_ptr<typename TypedPropertyDescriptor<T>::GetSet> getset(Getter get, Setter set)
 	{
-		return std::auto_ptr<typename TypedPropertyDescriptor<T>::GetSet>(new GetSetImpl<Getter, Setter>(get, set));
+		return std::unique_ptr<typename TypedPropertyDescriptor<T>::GetSet>(new GetSetImpl<Getter, Setter>(get, set));
 	}
 
 	template <class Getter, class Setter>
-	static std::auto_ptr<typename TypedPropertyDescriptor<T>::GetSet> getset(Getter get, int set)
+	static std::unique_ptr<typename TypedPropertyDescriptor<T>::GetSet> getset(Getter get, int set)
 	{
-		return std::auto_ptr<typename TypedPropertyDescriptor<T>::GetSet>(new GetImpl<Getter>(get));
+		return std::unique_ptr<typename TypedPropertyDescriptor<T>::GetSet>(new GetImpl<Getter>(get));
 	}
 
 	template <class Getter, class Setter>
-	static std::auto_ptr<typename TypedPropertyDescriptor<T>::GetSet> getset(int get, Setter set)
+	static std::unique_ptr<typename TypedPropertyDescriptor<T>::GetSet> getset(int get, Setter set)
 	{
-		return std::auto_ptr<typename TypedPropertyDescriptor<T>::GetSet>(new SetImpl<Setter>(set));
+		return std::unique_ptr<typename TypedPropertyDescriptor<T>::GetSet>(new SetImpl<Setter>(set));
 	}
 
 	template <class Getter, class Setter>
@@ -550,7 +549,7 @@ public:
 			  Class::classDescriptor(),
 			  name,
 			  category,
-			  std::auto_ptr<typename TypedPropertyDescriptor<T>::GetSet>(),
+			  std::unique_ptr<typename TypedPropertyDescriptor<T>::GetSet>(),
 			  flags
 		  )
 	{
@@ -569,7 +568,7 @@ public:
 			  Class::classDescriptor(),
 			  name,
 			  category,
-			  std::auto_ptr<typename TypedPropertyDescriptor<T>::GetSet>(),
+			  std::unique_ptr<typename TypedPropertyDescriptor<T>::GetSet>(),
 			  flags
 		  )
 	{
@@ -589,7 +588,7 @@ public:
 	template <class T>
 	T getValue() const
 	{
-		return boost::polymorphic_cast<const TypedPropertyDescriptor<T>*>(descriptor)->getValue(instance);
+		return polymorphicCast<const TypedPropertyDescriptor<T>*>(descriptor)->getValue(instance);
 	}
 
 	const DescribedBase* getInstance() const { return instance; }
@@ -645,7 +644,7 @@ public:
 	template <class T>
 	void setValue(const T& value)
 	{
-		boost::polymorphic_cast<const TypedPropertyDescriptor<T>*>(descriptor)
+		polymorphicCast<const TypedPropertyDescriptor<T>*>(descriptor)
 			->setValue(const_cast<DescribedBase*>(instance), value);
 	}
 };

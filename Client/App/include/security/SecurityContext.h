@@ -2,7 +2,7 @@
 #define SECURITY_SECURITYCONTEXT_H
 
 #include <G3D/format.h>
-#include <boost/thread/tss.hpp>
+#include <memory>
 #include <stdexcept>
 
 namespace RBX {
@@ -65,9 +65,9 @@ private:
 
 	Context(Identities identity) : identity(identity) {}
 
-	static boost::thread_specific_ptr<Context>& ptr()
+	static std::unique_ptr<Context>& ptr()
 	{
-		static boost::thread_specific_ptr<Context> value;
+		static thread_local std::unique_ptr<Context> value;
 
 		return value;
 	}

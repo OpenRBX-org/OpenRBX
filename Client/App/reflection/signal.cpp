@@ -40,7 +40,7 @@ SignalDescriptor::SignalDescriptor(ClassDescriptor& classDescriptor, const char*
 	classDescriptor.MemberDescriptorContainer<SignalDescriptor>::declare(this);
 }
 
-boost::shared_ptr<SignalInstance> SignalDescriptor::getSignalInstance(SignalSource& source) const
+std::shared_ptr<SignalInstance> SignalDescriptor::getSignalInstance(SignalSource& source) const
 {
 	if (source.signals.get() == NULL) {
 		source.signals.reset(new SignalSource::SignalMap());
@@ -53,7 +53,7 @@ boost::shared_ptr<SignalInstance> SignalDescriptor::getSignalInstance(SignalSour
 		}
 	}
 
-	boost::shared_ptr<SignalInstance> si(newSignalInstance(source));
+	std::shared_ptr<SignalInstance> si(newSignalInstance(source));
 
 	(*source.signals)[this] = si;
 
@@ -64,7 +64,7 @@ boost::shared_ptr<SignalInstance> SignalDescriptor::getSignalInstance(SignalSour
 	return si;
 }
 
-boost::shared_ptr<SignalInstance> Signal::getSignalInstance() const
+std::shared_ptr<SignalInstance> Signal::getSignalInstance() const
 {
 	return descriptor->getSignalInstance(*instance);
 }

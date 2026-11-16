@@ -14,11 +14,11 @@
 #include "v8datamodel/DataModel.h"
 #include "v8datamodel/SafeChat.h"
 
-#include <boost/lexical_cast.hpp>
+#include <string>
 
 namespace RBX {
 
-boost::shared_ptr<TopMenuBar> GuiBuilder::buildMenu()
+std::shared_ptr<TopMenuBar> GuiBuilder::buildMenu()
 {
 	Layout layout;
 	layout.xLocation = Rect::LEFT;
@@ -26,7 +26,7 @@ boost::shared_ptr<TopMenuBar> GuiBuilder::buildMenu()
 	layout.layoutStyle = Layout::HORIZONTAL;
 	layout.backdropColor = GuiItem::translucentBackdrop();
 
-	boost::shared_ptr<RelativePanel> menu = Creatable<Instance>::create<RelativePanel>(layout);
+	std::shared_ptr<RelativePanel> menu = Creatable<Instance>::create<RelativePanel>(layout);
 	menu->setName("MainMenu");
 
 	menu->addGuiItem(Creatable<Instance>::create<MenuItem>(getVerb("TogglePlayMode"), "Tools"));
@@ -45,23 +45,22 @@ boost::shared_ptr<TopMenuBar> GuiBuilder::buildMenu()
 	return menu;
 }
 
-void GuiBuilder::buildRightPaletteItems(Adorn* adorn, boost::shared_ptr<TopMenuBar> palette)
+void GuiBuilder::buildRightPaletteItems(Adorn* adorn, std::shared_ptr<TopMenuBar> palette)
 {
 	palette->addGuiItem(
 		Creatable<Instance>::create<ImageButton>(adorn, getVerb("FirstPersonIndicator"), "FirstPersonIndicator")
 	);
 	palette->addGuiItem(Creatable<Instance>::create<ImageButton>(adorn, getVerb("ReportAbuse"), "ReportAbuse"));
 
-	boost::shared_ptr<TopMenuBar> cameraLeft = Creatable<Instance>::create<TopMenuBar>("CameraLeft", Layout::VERTICAL);
+	std::shared_ptr<TopMenuBar> cameraLeft = Creatable<Instance>::create<TopMenuBar>("CameraLeft", Layout::VERTICAL);
 	cameraLeft->addGuiItem(Creatable<Instance>::create<ImageButton>(adorn, getVerb("CameraTiltUp"), "Tilt Up"));
 	cameraLeft->addGuiItem(Creatable<Instance>::create<ImageButton>(adorn, getVerb("CameraTiltDown"), "Tilt Down"));
 
-	boost::shared_ptr<TopMenuBar> cameraRight =
-		Creatable<Instance>::create<TopMenuBar>("CameraRight", Layout::VERTICAL);
+	std::shared_ptr<TopMenuBar> cameraRight = Creatable<Instance>::create<TopMenuBar>("CameraRight", Layout::VERTICAL);
 	cameraRight->addGuiItem(Creatable<Instance>::create<ImageButton>(adorn, getVerb("CameraZoomIn"), "Zoom In"));
 	cameraRight->addGuiItem(Creatable<Instance>::create<ImageButton>(adorn, getVerb("CameraZoomOut"), "Zoom Out"));
 
-	boost::shared_ptr<TopMenuBar> cameraPanel =
+	std::shared_ptr<TopMenuBar> cameraPanel =
 		Creatable<Instance>::create<TopMenuBar>("CameraPanel", Layout::HORIZONTAL);
 	cameraPanel->addGuiItem(cameraLeft);
 	cameraPanel->addGuiItem(cameraRight);
@@ -69,7 +68,7 @@ void GuiBuilder::buildRightPaletteItems(Adorn* adorn, boost::shared_ptr<TopMenuB
 	palette->addGuiItem(cameraPanel);
 }
 
-boost::shared_ptr<TopMenuBar> GuiBuilder::buildChatHud()
+std::shared_ptr<TopMenuBar> GuiBuilder::buildChatHud()
 {
 	Layout layout;
 	layout.xLocation = Rect::LEFT;
@@ -78,33 +77,33 @@ boost::shared_ptr<TopMenuBar> GuiBuilder::buildChatHud()
 	layout.offset.y = 100;
 	layout.layoutStyle = Layout::VERTICAL;
 
-	boost::shared_ptr<RelativePanel> hud = Creatable<Instance>::create<RelativePanel>(layout);
+	std::shared_ptr<RelativePanel> hud = Creatable<Instance>::create<RelativePanel>(layout);
 	hud->setName("ChatHud");
 	hud->addGuiItem(Creatable<Instance>::create<ChatOutput>());
 
 	return hud;
 }
 
-void GuiBuilder::buildChatMenu(ChatOption* option, std::string prefix, boost::shared_ptr<UnifiedWidget> parent)
+void GuiBuilder::buildChatMenu(ChatOption* option, std::string prefix, std::shared_ptr<UnifiedWidget> parent)
 {
 	for (unsigned int i = 0; i < option->children.size(); ++i) {
 		ChatOption* child = option->children[i];
-		std::string code = prefix + " " + boost::lexical_cast<std::string>(i);
+		std::string code = prefix + " " + std::to_string(i);
 
-		boost::shared_ptr<ChatWidget> widget = Creatable<Instance>::create<ChatWidget>(child->text, code);
+		std::shared_ptr<ChatWidget> widget = Creatable<Instance>::create<ChatWidget>(child->text, code);
 		parent->addGuiItem(widget);
 
 		buildChatMenu(child, code, widget);
 	}
 }
 
-boost::shared_ptr<TopMenuBar> GuiBuilder::buildChatMenu(Adorn* adorn)
+std::shared_ptr<TopMenuBar> GuiBuilder::buildChatMenu(Adorn* adorn)
 {
-	boost::shared_ptr<PercentPanel> panel =
+	std::shared_ptr<PercentPanel> panel =
 		Creatable<Instance>::create<PercentPanel>(Rect::LEFT, Rect::BOTTOM, G3D::Vector2(2.0f, 26.0f));
 	panel->setName("ChatMenuPanel");
 
-	boost::shared_ptr<ChatButton> chatButton = Creatable<Instance>::create<ChatButton>(adorn, "Chat");
+	std::shared_ptr<ChatButton> chatButton = Creatable<Instance>::create<ChatButton>(adorn, "Chat");
 	panel->addGuiItem(chatButton);
 
 	ChatOption* root = SafeChat::singleton().getChatRoot();
@@ -114,7 +113,7 @@ boost::shared_ptr<TopMenuBar> GuiBuilder::buildChatMenu(Adorn* adorn)
 	return panel;
 }
 
-boost::shared_ptr<TopMenuBar> GuiBuilder::buildScoreHud()
+std::shared_ptr<TopMenuBar> GuiBuilder::buildScoreHud()
 {
 	Layout layout;
 	layout.xLocation = Rect::RIGHT;
@@ -123,14 +122,14 @@ boost::shared_ptr<TopMenuBar> GuiBuilder::buildScoreHud()
 	layout.offset.y = 10;
 	layout.layoutStyle = Layout::VERTICAL;
 
-	boost::shared_ptr<RelativePanel> hud = Creatable<Instance>::create<RelativePanel>(layout);
+	std::shared_ptr<RelativePanel> hud = Creatable<Instance>::create<RelativePanel>(layout);
 	hud->setName("ScoreHud");
 	hud->addGuiItem(Creatable<Instance>::create<ScoreHud>(dataModel));
 
 	return hud;
 }
 
-boost::shared_ptr<TopMenuBar> GuiBuilder::buildHealthHud()
+std::shared_ptr<TopMenuBar> GuiBuilder::buildHealthHud()
 {
 	Layout layout;
 	layout.xLocation = Rect::RIGHT;
@@ -139,14 +138,14 @@ boost::shared_ptr<TopMenuBar> GuiBuilder::buildHealthHud()
 	layout.offset.y = 200;
 	layout.layoutStyle = Layout::VERTICAL;
 
-	boost::shared_ptr<RelativePanel> hud = Creatable<Instance>::create<RelativePanel>(layout);
+	std::shared_ptr<RelativePanel> hud = Creatable<Instance>::create<RelativePanel>(layout);
 	hud->setName("HealthHud");
 	hud->addGuiItem(Creatable<Instance>::create<HealthHud>());
 
 	return hud;
 }
 
-boost::shared_ptr<TopMenuBar> GuiBuilder::buildControlHud(Adorn* adorn, int offset)
+std::shared_ptr<TopMenuBar> GuiBuilder::buildControlHud(Adorn* adorn, int offset)
 {
 	Layout layout;
 	layout.xLocation = Rect::RIGHT;
@@ -154,7 +153,7 @@ boost::shared_ptr<TopMenuBar> GuiBuilder::buildControlHud(Adorn* adorn, int offs
 	layout.offset.y = offset;
 	layout.layoutStyle = Layout::VERTICAL;
 
-	boost::shared_ptr<RelativePanel> hud = Creatable<Instance>::create<RelativePanel>(layout);
+	std::shared_ptr<RelativePanel> hud = Creatable<Instance>::create<RelativePanel>(layout);
 	hud->setName("ControlHud");
 	hud->addGuiItem(Creatable<Instance>::create<ArrowPanel>(adorn, dataModel, Controller::PRIMARY_CONTROLLER));
 	hud->addGuiItem(Creatable<Instance>::create<MenuSpacer>(5.0f, 5.0f));
@@ -163,21 +162,21 @@ boost::shared_ptr<TopMenuBar> GuiBuilder::buildControlHud(Adorn* adorn, int offs
 	return hud;
 }
 
-boost::shared_ptr<TopMenuBar> GuiBuilder::buildRightPalette(Adorn* adorn)
+std::shared_ptr<TopMenuBar> GuiBuilder::buildRightPalette(Adorn* adorn)
 {
 	Layout layout;
 	layout.xLocation = Rect::RIGHT;
 	layout.yLocation = Rect::BOTTOM;
 	layout.layoutStyle = Layout::VERTICAL;
 
-	boost::shared_ptr<RelativePanel> palette = Creatable<Instance>::create<RelativePanel>(layout);
+	std::shared_ptr<RelativePanel> palette = Creatable<Instance>::create<RelativePanel>(layout);
 	palette->setName("RightPalette");
 	buildRightPaletteItems(adorn, palette);
 
 	return palette;
 }
 
-boost::shared_ptr<TopMenuBar> GuiBuilder::buildStatsHud1()
+std::shared_ptr<TopMenuBar> GuiBuilder::buildStatsHud1()
 {
 	Layout layout;
 	layout.xLocation = Rect::LEFT;
@@ -187,7 +186,7 @@ boost::shared_ptr<TopMenuBar> GuiBuilder::buildStatsHud1()
 	layout.layoutStyle = Layout::VERTICAL;
 	layout.backdropColor = GuiItem::translucentBackdrop();
 
-	boost::shared_ptr<RelativePanel> hud = Creatable<Instance>::create<RelativePanel>(layout);
+	std::shared_ptr<RelativePanel> hud = Creatable<Instance>::create<RelativePanel>(layout);
 	hud->setName("StatsHud1");
 
 	hud->addGuiItem(Creatable<Instance>::create<TextDisplay>("", "-- Performance --"));
@@ -203,7 +202,7 @@ boost::shared_ptr<TopMenuBar> GuiBuilder::buildStatsHud1()
 	hud->addGuiItem(Creatable<Instance>::create<EquationDisplay>("FrameId       : ", "drawId"));
 
 	for (unsigned int i = 0; i < hud->numChildren(); ++i) {
-		boost::shared_ptr<TextDisplay> display = shared_from_dynamic_cast<TextDisplay>(hud->getChild(i));
+		std::shared_ptr<TextDisplay> display = shared_from_dynamic_cast<TextDisplay>(hud->getChild(i));
 		display->setFontSize(14);
 		display->setFontColor(G3D::Color4(G3D::Color3::purple()));
 		display->setBorderColor(G3D::Color4::clear());
@@ -215,7 +214,7 @@ boost::shared_ptr<TopMenuBar> GuiBuilder::buildStatsHud1()
 	return hud;
 }
 
-boost::shared_ptr<TopMenuBar> GuiBuilder::buildStatsHud2()
+std::shared_ptr<TopMenuBar> GuiBuilder::buildStatsHud2()
 {
 	Layout layout;
 	layout.xLocation = Rect::RIGHT;
@@ -225,7 +224,7 @@ boost::shared_ptr<TopMenuBar> GuiBuilder::buildStatsHud2()
 	layout.layoutStyle = Layout::VERTICAL;
 	layout.backdropColor = GuiItem::translucentBackdrop();
 
-	boost::shared_ptr<RelativePanel> hud = Creatable<Instance>::create<RelativePanel>(layout);
+	std::shared_ptr<RelativePanel> hud = Creatable<Instance>::create<RelativePanel>(layout);
 	hud->setName("StatsHud2");
 
 	hud->addGuiItem(Creatable<Instance>::create<TextDisplay>("", "----- World ----"));
@@ -250,7 +249,7 @@ boost::shared_ptr<TopMenuBar> GuiBuilder::buildStatsHud2()
 	hud->addGuiItem(Creatable<Instance>::create<EquationDisplay>("Energy T      : ", "energyTotal"));
 
 	for (unsigned int i = 0; i < hud->numChildren(); ++i) {
-		boost::shared_ptr<TextDisplay> display = shared_from_dynamic_cast<TextDisplay>(hud->getChild(i));
+		std::shared_ptr<TextDisplay> display = shared_from_dynamic_cast<TextDisplay>(hud->getChild(i));
 		display->setFontSize(14);
 		display->setFontColor(G3D::Color4(G3D::Color3::purple()));
 		display->setBorderColor(G3D::Color4::clear());

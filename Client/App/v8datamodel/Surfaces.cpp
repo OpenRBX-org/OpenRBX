@@ -100,7 +100,7 @@ public:
 			  PartInstance::classDescriptor(),
 			  name,
 			  category,
-			  std::auto_ptr<typename Reflection::TypedPropertyDescriptor<T>::GetSet>(
+			  std::unique_ptr<typename Reflection::TypedPropertyDescriptor<T>::GetSet>(
 				  new SurfaceGetSet<normalId, T, Getter, Setter>(get, set)
 			  ),
 			  flags
@@ -112,7 +112,7 @@ public:
 template <int normalId, class T>
 class SurfaceEnumPropDescriptor : public Reflection::EnumPropertyDescriptor
 {
-	std::auto_ptr<typename Reflection::TypedPropertyDescriptor<T>::GetSet> getset;
+	std::unique_ptr<typename Reflection::TypedPropertyDescriptor<T>::GetSet> getset;
 
 public:
 	template <class Getter, class Setter>

@@ -5,10 +5,11 @@
 #include "util/Utilities.h"
 
 #include <G3D/format.h>
-#include <boost/any.hpp>
-#include <boost/shared_ptr.hpp>
+#include <any>
 #include <list>
+#include <memory>
 #include <stdexcept>
+#include <tuple>
 #include <typeinfo>
 #include <vector>
 
@@ -21,6 +22,36 @@ namespace RBX {
 class ContentId;
 class Instance;
 namespace Reflection {
+
+template <class Signature>
+struct FunctionTraits;
+
+template <class R, class... Args>
+struct FunctionTraits<R(Args...)>
+{
+	typedef R Result;
+	typedef std::tuple<Args...> Arguments;
+
+	static constexpr int arity = sizeof...(Args);
+};
+
+template <class Signature>
+using ResultType = typename FunctionTraits<Signature>::Result;
+
+template <class Signature, int index>
+using ArgumentType = std::tuple_element_t<index, typename FunctionTraits<Signature>::Arguments>;
+
+template <class Target, class Source>
+Target polymorphicCast(Source* source)
+{
+	Target target = dynamic_cast<Target>(source);
+
+	if (target == NULL) {
+		throw std::bad_cast();
+	}
+
+	return target;
+}
 
 class Type : public Descriptor
 {
@@ -75,7 +106,7 @@ public:
 	T get() const
 	{
 		if (isType<T>()) {
-			return boost::any_cast<const T&>(value);
+			return std::any_cast<const T&>(value);
 		}
 
 		Value v(*this);
@@ -102,13 +133,13 @@ public:
 	template <class T>
 	T cast() const
 	{
-		return boost::any_cast<T>(value);
+		return std::any_cast<T>(value);
 	}
 
 	template <class T>
 	T cast()
 	{
-		return boost::any_cast<T>(value);
+		return std::any_cast<T>(value);
 	}
 
 	template <class T>
@@ -119,22 +150,22 @@ private:
 	T& genericConvert();
 
 	const Type* _type;
-	boost::any value;
+	std::any value;
 };
 
 template <class T>
 T& Value::genericConvert()
 {
-	if (T* t = boost::any_cast<T>(&value)) {
+	if (T* t = std::any_cast<T>(&value)) {
 		return *t;
 	}
 
 	if (isType<std::string>()) {
 		T v;
-		if (StringConverter<T>::convertToValue(*boost::any_cast<std::string>(&value), v)) {
+		if (StringConverter<T>::convertToValue(*std::any_cast<std::string>(&value), v)) {
 			value = v;
 			_type = &Type::singleton<T>();
-			return *boost::any_cast<T>(&value);
+			return *std::any_cast<T>(&value);
 		}
 	}
 
@@ -164,12 +195,12 @@ ContentId& Value::convert<ContentId>();
 template <>
 std::string& Value::convert<std::string>();
 template <>
-boost::shared_ptr<const std::vector<boost::shared_ptr<Instance> > >& Value::convert<
-	boost::shared_ptr<const std::vector<boost::shared_ptr<Instance> > > >();
+std::shared_ptr<const std::vector<std::shared_ptr<Instance> > >& Value::convert<
+	std::shared_ptr<const std::vector<std::shared_ptr<Instance> > > >();
 template <>
 std::vector<Value>& Value::convert<std::vector<Value> >();
 template <>
-boost::shared_ptr<Instance>& Value::convert<boost::shared_ptr<Instance> >();
+std::shared_ptr<Instance>& Value::convert<std::shared_ptr<Instance> >();
 
 class SignatureDescriptor
 {

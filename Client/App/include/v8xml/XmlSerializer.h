@@ -4,7 +4,6 @@
 #include "util/ContentProvider.h"
 #include "util/Handle.h"
 
-#include <boost/noncopyable.hpp>
 #include <deque>
 #include <iosfwd>
 #include <map>
@@ -16,9 +15,12 @@
 class XmlAttribute;
 class XmlElement;
 
-class __declspec(novtable) XmlWriter : public boost::noncopyable
+class __declspec(novtable) XmlWriter
 {
 public:
+	XmlWriter(const XmlWriter&) = delete;
+	XmlWriter& operator=(const XmlWriter&) = delete;
+
 	virtual void serialize(const XmlElement* element) = 0;
 
 	int getHandleIndex(RBX::InstanceHandle h)
@@ -75,10 +77,13 @@ private:
 	std::set<RBX::ContentId> embeddedContent;
 };
 
-class XmlParser : public boost::noncopyable
+class XmlParser
 {
 public:
-	virtual std::auto_ptr<XmlElement> parse() = 0;
+	XmlParser(const XmlParser&) = delete;
+	XmlParser& operator=(const XmlParser&) = delete;
+
+	virtual std::unique_ptr<XmlElement> parse() = 0;
 
 protected:
 	XmlParser(std::streambuf* buffer);
@@ -94,7 +99,7 @@ class TextXmlParser : public XmlParser
 public:
 	TextXmlParser(std::streambuf* buffer) : XmlParser(buffer) {}
 
-	virtual std::auto_ptr<XmlElement> parse();
+	virtual std::unique_ptr<XmlElement> parse();
 
 private:
 	void skipWhitespace();

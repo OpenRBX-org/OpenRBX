@@ -5,7 +5,6 @@
 #include "util/standardout.h"
 #include "v8datamodel/TimerService.h"
 
-#include <boost/bind.hpp>
 #include <stdexcept>
 
 namespace RBX {
@@ -16,14 +15,14 @@ static Reflection::PropDescriptor<DebrisService, int> prop_MaxItems(
 	"MaxItems", "Data", &DebrisService::getMaxItems, &DebrisService::setMaxItems
 );
 
-static Reflection::BoundFuncDesc<DebrisService, void(boost::shared_ptr<Instance>, double), 2> func_AddItem(
+static Reflection::BoundFuncDesc<DebrisService, void(std::shared_ptr<Instance>, double), 2> func_AddItem(
 	&DebrisService::addItem, "AddItem", "item", "lifetime", 10.0, Reflection::FunctionDescriptor::AnyCaller
 );
 
-static void cleanup(boost::weak_ptr<Instance> item)
+static void cleanup(std::weak_ptr<Instance> item)
 {
 	try {
-		boost::shared_ptr<Instance> i = item.lock();
+		std::shared_ptr<Instance> i = item.lock();
 		if (i) {
 			i->setParent(NULL);
 		}
@@ -46,10 +45,10 @@ DebrisService::DebrisService()
 {
 }
 
-void DebrisService::addItem(boost::shared_ptr<Instance> item, double lifetime)
+void DebrisService::addItem(std::shared_ptr<Instance> item, double lifetime)
 {
 	if (timer) {
-		timer->delay(boost::bind(&RBX::cleanup, item), lifetime);
+		timer->delay([item] { RBX::cleanup(item); }, lifetime);
 	}
 
 	queue.push(item);

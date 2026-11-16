@@ -17,7 +17,6 @@
 #include "v8xml/XmlElement.h"
 
 #include <G3D/debugAssert.h>
-#include <boost/bind.hpp>
 
 namespace RBX {
 
@@ -61,7 +60,7 @@ static Reflection::PropDescriptor<Tool, int> prop_FrontendActivationState(
 
 Reflection::BoundProp<bool, 1> Tool::prop_Enabled("Enabled", "State", &Tool::enabled);
 
-static Reflection::SignalDesc<Tool, void(boost::shared_ptr<Instance>)> event_Equipped("Equipped", "mouse");
+static Reflection::SignalDesc<Tool, void(std::shared_ptr<Instance>)> event_Equipped("Equipped", "mouse");
 static Reflection::SignalDesc<Tool, void()> event_Unequipped("Unequipped");
 static Reflection::SignalDesc<Tool, void()> event_Activated("Activated");
 static Reflection::SignalDesc<Tool, void()> event_Deactivated("Deactivated");
@@ -181,14 +180,14 @@ void Tool::rebuildBackendState()
 	setDesiredState(desiredState, ServiceProvider::findServiceProvider(this));
 }
 
-void Tool::onEvent_AddedBackend(boost::shared_ptr<Instance> child)
+void Tool::onEvent_AddedBackend(std::shared_ptr<Instance> child)
 {
 	if (child.get() != this) {
 		rebuildBackendState();
 	}
 }
 
-void Tool::onEvent_RemovedBackend(boost::shared_ptr<Instance> child)
+void Tool::onEvent_RemovedBackend(std::shared_ptr<Instance> child)
 {
 	if (ServiceProvider::findServiceProvider(this) && child.get() != this) {
 		if (child.get() == weld.get()) {
@@ -231,7 +230,7 @@ bool Tool::characterCanUnequipTool(ModelInstance* character)
 	return true;
 }
 
-void Tool::onEvent_HandleTouched(boost::shared_ptr<Instance> other)
+void Tool::onEvent_HandleTouched(std::shared_ptr<Instance> other)
 {
 	if (backendToolState == IN_WORKSPACE) {
 		Instance* character = other->getParent();
@@ -280,7 +279,7 @@ void Tool::upTo_Equipped()
 {
 	handleTouched.disconnect();
 
-	std::vector<boost::weak_ptr<PartInstance> > parts;
+	std::vector<std::weak_ptr<PartInstance> > parts;
 	PartInstance::findParts(this, parts);
 	DragUtilities::unJoinFromOutsiders(parts);
 
@@ -298,7 +297,9 @@ void Tool::connectTouchEvent()
 {
 	if (const PartInstance* handle = getHandleConst()) {
 		handleTouched = PartInstance::event_Touched.connect(
-			const_cast<PartInstance*>(handle), boost::bind(&Tool::onEvent_HandleTouched, this, _1), 10
+			const_cast<PartInstance*>(handle),
+			[this](const std::shared_ptr<Instance>& other) { onEvent_HandleTouched(other); },
+			10
 		);
 	}
 	else {
@@ -308,19 +309,24 @@ void Tool::connectTouchEvent()
 
 void Tool::upTo_InCharacter()
 {
-	characterChildAdded =
-		Instance::event_childAdded.connect(getParent(), boost::bind(&Tool::onEvent_AddedBackend, this, _1), 10);
-	characterChildRemoved =
-		Instance::event_childRemoved.connect(getParent(), boost::bind(&Tool::onEvent_RemovedBackend, this, _1), 10);
+	characterChildAdded = Instance::event_childAdded.connect(
+		getParent(), [this](const std::shared_ptr<Instance>& instance) { onEvent_AddedBackend(instance); }, 10
+	);
+	characterChildRemoved = Instance::event_childRemoved.connect(
+		getParent(), [this](const std::shared_ptr<Instance>& instance) { onEvent_RemovedBackend(instance); }, 10
+	);
 }
 
 void Tool::upTo_HasTorso()
 {
 	PartInstance* torso = Humanoid::modelIsCharacter(getParent())->getTorso();
 
-	torsoChildAdded = Instance::event_childAdded.connect(torso, boost::bind(&Tool::onEvent_AddedBackend, this, _1), 10);
-	torsoChildRemoved =
-		Instance::event_childRemoved.connect(torso, boost::bind(&Tool::onEvent_RemovedBackend, this, _1), 10);
+	torsoChildAdded = Instance::event_childAdded.connect(
+		torso, [this](const std::shared_ptr<Instance>& instance) { onEvent_AddedBackend(instance); }, 10
+	);
+	torsoChildRemoved = Instance::event_childRemoved.connect(
+		torso, [this](const std::shared_ptr<Instance>& instance) { onEvent_RemovedBackend(instance); }, 10
+	);
 }
 
 void Tool::downFrom_Equipped()
@@ -363,9 +369,9 @@ void Tool::onEquipping()
 	}
 }
 
-boost::shared_ptr<Mouse> Tool::getMouse()
+std::shared_ptr<Mouse> Tool::getMouse()
 {
-	boost::shared_ptr<Mouse> mouse;
+	std::shared_ptr<Mouse> mouse;
 
 	if (toolMouseCommand) {
 		mouse = toolMouseCommand->getMouse();

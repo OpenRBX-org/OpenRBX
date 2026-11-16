@@ -22,7 +22,6 @@
 
 #include <G3D/GCamera.h>
 #include <algorithm>
-#include <boost/bind.hpp>
 #include <windows.h>
 
 namespace RBX {
@@ -50,9 +49,7 @@ void RootInstance::moveSafe(MegaDragger& megaDragger, G3D::Vector3 move, MoveTyp
 	megaDragger.finishDragging();
 }
 
-void RootInstance::moveSafe(
-	std::vector<boost::weak_ptr<PartInstance> >& partArray, G3D::Vector3 move, MoveType moveType
-)
+void RootInstance::moveSafe(std::vector<std::weak_ptr<PartInstance> >& partArray, G3D::Vector3 move, MoveType moveType)
 {
 	MegaDragger megaDragger(NULL, partArray, this);
 
@@ -66,7 +63,7 @@ void RootInstance::onDescendentAdded(Instance* instance)
 	ControllersUsed.setDirty();
 }
 
-void RootInstance::onDescendentRemoving(const boost::shared_ptr<Instance>& instance)
+void RootInstance::onDescendentRemoving(const std::shared_ptr<Instance>& instance)
 {
 	ControllersUsed.setDirty();
 	ModelInstance::onDescendentRemoving(instance);
@@ -83,7 +80,7 @@ G3D::Vector3 RootInstance::computeIdeInsertPoint() const
 	return insertPoint;
 }
 
-void RootInstance::moveToIdeInsertPoint(std::vector<boost::weak_ptr<PartInstance> >& partArray)
+void RootInstance::moveToIdeInsertPoint(std::vector<std::weak_ptr<PartInstance> >& partArray)
 {
 	if (!partArray.empty()) {
 		Extents extents = DragUtilities::computeExtents(partArray);
@@ -114,12 +111,14 @@ ControllerTypeArray RootInstance::computeControllersUsed() const
 }
 
 void RootInstance::insertRaw(
-	const std::vector<boost::shared_ptr<Instance> >& instances,
+	const std::vector<std::shared_ptr<Instance> >& instances,
 	Instance* requestedParent,
-	std::vector<boost::weak_ptr<PartInstance> >& partArray
+	std::vector<std::weak_ptr<PartInstance> >& partArray
 )
 {
-	std::for_each(instances.begin(), instances.end(), boost::bind(&Instance::setParent, _1, requestedParent));
+	std::for_each(instances.begin(), instances.end(), [requestedParent](const std::shared_ptr<Instance>& instance) {
+		instance->setParent(requestedParent);
+	});
 
 	for (unsigned int i = 0; i < instances.size(); ++i) {
 		PartInstance::findParts(instances[i].get(), partArray);
@@ -145,7 +144,7 @@ G3D::Vector3 RootInstance::computeCharacterInsertPoint(const Extents& extents) c
 		G3D::Vector3 halfSize = extents.size() * 0.5f;
 		halfSize.y = 0.0f;
 
-		std::vector<boost::weak_ptr<PartInstance> > partArray;
+		std::vector<std::weak_ptr<PartInstance> > partArray;
 		PartInstance::findParts(character, partArray);
 		Extents modelExtents = DragUtilities::computeExtents(partArray);
 
@@ -173,7 +172,7 @@ void RootInstance::moveToPoint(PVInstance* pv, G3D::Vector3 point)
 	}
 }
 
-void RootInstance::moveToCharacterInsertPoint(std::vector<boost::weak_ptr<PartInstance> >& partArray)
+void RootInstance::moveToCharacterInsertPoint(std::vector<std::weak_ptr<PartInstance> >& partArray)
 {
 	if (!partArray.empty()) {
 		Extents extents = DragUtilities::computeExtents(partArray);
@@ -188,9 +187,9 @@ void RootInstance::moveToCharacterInsertPoint(std::vector<boost::weak_ptr<PartIn
 	}
 }
 
-void RootInstance::insertToTree(const std::vector<boost::shared_ptr<Instance> >& instances, Instance* requestedParent)
+void RootInstance::insertToTree(const std::vector<std::shared_ptr<Instance> >& instances, Instance* requestedParent)
 {
-	std::vector<boost::weak_ptr<PartInstance> > partArray;
+	std::vector<std::weak_ptr<PartInstance> > partArray;
 	insertRaw(instances, requestedParent, partArray);
 
 	if (!partArray.empty()) {
@@ -199,7 +198,7 @@ void RootInstance::insertToTree(const std::vector<boost::shared_ptr<Instance> >&
 }
 
 void RootInstance::insertCharacterView(
-	const std::vector<boost::shared_ptr<Instance> >& instances, std::vector<boost::weak_ptr<PartInstance> >& partArray
+	const std::vector<std::shared_ptr<Instance> >& instances, std::vector<std::weak_ptr<PartInstance> >& partArray
 )
 {
 	if (instances.size() == 1) {
@@ -221,8 +220,8 @@ void RootInstance::insertCharacterView(
 }
 
 void RootInstance::insertIdeView(
-	const std::vector<boost::shared_ptr<Instance> >& instances,
-	std::vector<boost::weak_ptr<PartInstance> >& partArray,
+	const std::vector<std::shared_ptr<Instance> >& instances,
+	std::vector<std::weak_ptr<PartInstance> >& partArray,
 	PromptMode promptMode
 )
 {
@@ -258,9 +257,9 @@ void RootInstance::insertIdeView(
 	}
 }
 
-void RootInstance::insert3dView(const std::vector<boost::shared_ptr<Instance> >& instances, PromptMode promptMode)
+void RootInstance::insert3dView(const std::vector<std::shared_ptr<Instance> >& instances, PromptMode promptMode)
 {
-	std::vector<boost::weak_ptr<PartInstance> > partArray;
+	std::vector<std::weak_ptr<PartInstance> > partArray;
 
 	if (Network::Players::findLocalCharacter(this)) {
 		insertCharacterView(instances, partArray);
@@ -282,7 +281,7 @@ void RootInstance::insertSpawnLocation(SpawnLocation* s)
 		Teams* teams = ServiceProvider::create<Teams>(this);
 
 		if (!teams->teamExists(s->getTeamColor())) {
-			boost::shared_ptr<Team> t = Creatable<Instance>::create<Team>();
+			std::shared_ptr<Team> t = Creatable<Instance>::create<Team>();
 			t->setParent(teams);
 			t->setTeamColor(s->getTeamColor());
 			t->setName(s->getTeamColor().name() + " Team");
@@ -291,13 +290,13 @@ void RootInstance::insertSpawnLocation(SpawnLocation* s)
 }
 
 void RootInstance::insertInstances(
-	const std::vector<boost::shared_ptr<Instance> >& instances,
+	const std::vector<std::shared_ptr<Instance> >& instances,
 	Instance* requestedParent,
 	InsertMode insertMode,
 	PromptMode promptMode
 )
 {
-	std::vector<boost::shared_ptr<Instance> > remaining;
+	std::vector<std::shared_ptr<Instance> > remaining;
 
 	for (unsigned int i = 0; i < instances.size(); ++i) {
 		Instance* instance = instances[i].get();
@@ -330,7 +329,9 @@ void RootInstance::insertInstances(
 		if (requestedParent) {
 			if (!contains(requestedParent)) {
 				std::for_each(
-					remaining.begin(), remaining.end(), boost::bind(&Instance::setParent, _1, requestedParent)
+					remaining.begin(), remaining.end(), [requestedParent](const std::shared_ptr<Instance>& instance) {
+						instance->setParent(requestedParent);
+					}
 				);
 			}
 		}
@@ -340,7 +341,7 @@ void RootInstance::insertInstances(
 
 		switch (insertMode) {
 		case INSERT_RAW: {
-			std::vector<boost::weak_ptr<PartInstance> > partArray;
+			std::vector<std::weak_ptr<PartInstance> > partArray;
 			insertRaw(remaining, requestedParent, partArray);
 			return;
 		}

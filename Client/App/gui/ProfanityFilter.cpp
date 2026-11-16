@@ -1,8 +1,8 @@
 #include "gui/ProfanityFilter.h"
 
 #include "util/ContentProvider.h"
+#include "util/Utilities.h"
 
-#include <boost/algorithm/string.hpp>
 #include <fstream>
 #include <vector>
 
@@ -10,7 +10,7 @@ namespace RBX {
 
 bool WordList::ContainsProfanity(std::string p_unk0x04)
 {
-	boost::algorithm::to_lower(p_unk0x04);
+	toLower(p_unk0x04);
 	return blacklist.find(p_unk0x04) != blacklist.end();
 }
 
@@ -25,8 +25,8 @@ WordList::WordList()
 	std::string line;
 
 	while (std::getline(file, line, '\n')) {
-		boost::algorithm::to_lower(line);
-		boost::algorithm::trim(line);
+		toLower(line);
+		trim(line);
 		blacklist.insert(line);
 	}
 
@@ -39,10 +39,9 @@ ProfanityFilter::ProfanityFilter()
 
 bool ProfanityFilter::ContainsProfanity(std::string p_unk0x04)
 {
-	boost::algorithm::to_lower(p_unk0x04);
+	toLower(p_unk0x04);
 
-	std::vector<std::string> words;
-	boost::algorithm::split(words, p_unk0x04, boost::algorithm::is_any_of(" !.?,:;><[]{}|\\/@#$%^&*()_-+=\""));
+	std::vector<std::string> words = split(p_unk0x04, " !.?,:;><[]{}|\\/@#$%^&*()_-+=\"");
 
 	for (unsigned int i = 0; i < words.size(); i++) {
 		if (wordlist.ContainsProfanity(words[i])) {

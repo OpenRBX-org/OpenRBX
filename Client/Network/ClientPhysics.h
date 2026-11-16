@@ -4,8 +4,7 @@
 #include "util/RunStateOwner.h"
 
 #include <G3D/CoordinateFrame.h>
-#include <boost/shared_ptr.hpp>
-#include <boost/weak_ptr.hpp>
+#include <memory>
 
 namespace RBX {
 
@@ -17,14 +16,14 @@ class ClientPhysics : public Listener<RunService, Heartbeat>
 {
 private:
 	double lastUpdateTime;
-	boost::weak_ptr<RunService> runService;
+	std::weak_ptr<RunService> runService;
 	PartInstance* part;
 	G3D::CoordinateFrame lastPos;
 
 public:
 	ClientPhysics(PartInstance* part);
 
-	void update(const boost::shared_ptr<RunService>& runService);
+	void update(const std::shared_ptr<RunService>& runService);
 	void sleep();
 
 	virtual ~ClientPhysics();

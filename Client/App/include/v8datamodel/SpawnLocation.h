@@ -3,14 +3,14 @@
 
 #include "reflection/property.h"
 #include "util/Handle.h"
+#include "util/Signals.h"
 #include "v8datamodel/BrickColor.h"
 #include "v8datamodel/PartInstance.h"
 #include "v8tree/Instance.h"
 #include "v8tree/Service.h"
 
-#include <boost/shared_ptr.hpp>
-#include <boost/signals/connection.hpp>
 #include <list>
+#include <memory>
 
 namespace RBX {
 
@@ -28,9 +28,9 @@ class SpawnLocation : public DescribedCreatable<SpawnLocation, PartInstance, sSp
 {
 private:
 	BrickColor teamColor;
-	boost::signals::scoped_connection spawnerTouched;
+	Signals::ScopedConnection spawnerTouched;
 
-	void onEvent_spawnerTouched(boost::shared_ptr<Instance> other);
+	void onEvent_spawnerTouched(std::shared_ptr<Instance> other);
 
 public:
 	SpawnLocation();
@@ -57,7 +57,7 @@ public:
 
 	void RegisterSpawner(SpawnLocation* spawner) { spawners.push_back(spawner); }
 	void UnregisterSpawner(SpawnLocation* spawner) { spawners.remove(spawner); }
-	void SpawnPlayer(boost::shared_ptr<ModelInstance> model, Network::Player* p);
+	void SpawnPlayer(std::shared_ptr<ModelInstance> model, Network::Player* p);
 
 private:
 	std::list<SpawnLocation*> spawners;

@@ -1,7 +1,7 @@
 #ifndef CHATPROMPT_H
 #define CHATPROMPT_H
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 class ChatEnter;
 
@@ -39,9 +39,9 @@ protected:
 
 private:
 	CWnd* m_unk0x88;
-	boost::shared_ptr<ChatEnter> m_unk0x8c;
+	std::shared_ptr<ChatEnter> m_unk0x8c;
 	CBrush m_unk0x94;
-	boost::shared_ptr<RBX::DataModel> m_unk0x9c;
+	std::shared_ptr<RBX::DataModel> m_unk0x9c;
 	RBX::Network::Players* m_unk0xa4;
 };
 

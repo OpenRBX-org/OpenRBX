@@ -7,7 +7,6 @@
 #include "v8datamodel/DataModel.h"
 #include "v8datamodel/Selection.h"
 
-#include <boost/shared_ptr.hpp>
 #include <memory>
 #include <set>
 
@@ -24,16 +23,14 @@ public:
 	virtual BOOL OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo);
 
 	virtual RBX::Selection* VTable0x148();
-	virtual boost::shared_ptr<RBX::DataModel> VTable0x14c() const;
+	virtual std::shared_ptr<RBX::DataModel> VTable0x14c() const;
 	virtual void VTable0x150(RBX::Instance* instance);
 	virtual void VTable0x154(CRobloxTreeCtrlNode* node);
 	virtual void VTable0x158(CRobloxTreeCtrlNode* node);
 	virtual void VTable0x15c();
 
 protected:
-	virtual void VTable0x00(
-		boost::shared_ptr<RBX::DataModel> newDataModel, boost::shared_ptr<RBX::DataModel> oldDataModel
-	);
+	virtual void VTable0x00(std::shared_ptr<RBX::DataModel> newDataModel, std::shared_ptr<RBX::DataModel> oldDataModel);
 	virtual void onEvent(const RBX::Selection* source, RBX::SelectionChanged event);
 
 	virtual void SelectAllIgnore(BOOL bSelect, HTREEITEM hIgnore);
@@ -60,16 +57,16 @@ private:
 	void FUN_00423170(TVITEM* item, bool select);
 	HTREEITEM FUN_00423cc0(HTREEITEM item);
 	void FUN_00426f50();
-	void FUN_004285a0(boost::shared_ptr<RBX::DataModel> dataModel);
+	void FUN_004285a0(std::shared_ptr<RBX::DataModel> dataModel);
 
 	CMenu m_unk0xc4;
 	bool m_unk0xcc;
 	bool m_unk0xcd;
 	bool m_unk0xce;
-	std::set<boost::shared_ptr<RBX::Instance> > m_unk0xd0;
+	std::set<std::shared_ptr<RBX::Instance>, std::owner_less<std::shared_ptr<RBX::Instance> > > m_unk0xd0;
 	std::set<CRobloxTreeCtrlNode*> m_unk0xdc;
-	boost::shared_ptr<RBX::DataModel> m_unk0xe8;
-	std::auto_ptr<CImageList> m_unk0xf0;
+	std::shared_ptr<RBX::DataModel> m_unk0xe8;
+	std::unique_ptr<CImageList> m_unk0xf0;
 };
 
 #endif // SELECTIONTREECTRL_H

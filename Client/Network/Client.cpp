@@ -31,7 +31,7 @@ static Reflection::BoundFuncDesc<Client, void(int), 1> f_disconnect(
 	&Client::disconnect, "Disconnect", "blockDuration", 3000, Reflection::FunctionDescriptor::NeedTrustedCaller
 );
 
-Reflection::SignalDesc<Client, void(std::string, boost::shared_ptr<Instance>)> Client::event_ConnectionAccepted(
+Reflection::SignalDesc<Client, void(std::string, std::shared_ptr<Instance>)> Client::event_ConnectionAccepted(
 	"ConnectionAccepted", "peer", "replicator"
 );
 
@@ -149,7 +149,7 @@ PluginReceiveResult Client::OnReceive(RakPeerInterface* peer, Packet* packet)
 
 			serverId = systemAddress;
 
-			boost::shared_ptr<Replicator> proxy = Creatable<Instance>::create<Replicator>(systemAddress, rakPeer.get());
+			std::shared_ptr<Replicator> proxy = Creatable<Instance>::create<Replicator>(systemAddress, rakPeer.get());
 			proxy->setParent(this);
 
 			event_ConnectionAccepted.fire(this, systemAddress.ToString(), proxy);

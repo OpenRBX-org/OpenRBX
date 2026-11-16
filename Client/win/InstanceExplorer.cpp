@@ -46,12 +46,12 @@ RBX::ContentId FUN_0041e900(const char* path)
 	return RBX::ContentProvider::singleton().registerContent(stream, FUN_0043c120(path));
 }
 
-boost::shared_ptr<RBX::Decal> InsertDecal::VTable0x14()
+std::shared_ptr<RBX::Decal> InsertDecal::VTable0x14()
 {
 	return RBX::Creatable<RBX::Instance>::create<RBX::Decal>();
 }
 
-boost::shared_ptr<RBX::Decal> InsertTexture::VTable0x14()
+std::shared_ptr<RBX::Decal> InsertTexture::VTable0x14()
 {
 	return RBX::Creatable<RBX::Instance>::create<RBX::Texture>();
 }
@@ -81,7 +81,7 @@ void InsertDecal::doIt(RBX::IDataState* dataState)
 	CFileDialog dialog(TRUE, NULL, NULL, 0, filter);
 	if (dialog.DoModal() == IDOK) {
 		RBX::ContentId id = FUN_0041e900(dialog.GetPathName());
-		boost::shared_ptr<RBX::Decal> decal = VTable0x14();
+		std::shared_ptr<RBX::Decal> decal = VTable0x14();
 		decal->setTexture(id);
 		decal->setName(std::string(dialog.GetFileTitle()));
 		decal->setParent(FUN_0041f500());
@@ -126,7 +126,7 @@ void InsertObject::doIt(RBX::IDataState* dataState)
 		AfxGetApp()->WriteProfileString("InsertObject", "ClassName", dialog.m_unk0x74);
 
 		const RBX::Name& className = RBX::Name::lookup(dialog.m_unk0x74);
-		boost::shared_ptr<RBX::Instance> instance = RBX::AbstractFactoryProduct<RBX::Instance>::create(className);
+		std::shared_ptr<RBX::Instance> instance = RBX::AbstractFactoryProduct<RBX::Instance>::create(className);
 		if (!instance) {
 			CString message;
 			message.Format(133, dialog.m_unk0x74);
@@ -201,7 +201,7 @@ void CInstanceExplorer::VTable0x08(const RBX::Instance* source, RBX::DescendentR
 	populate();
 }
 
-CInstanceRecord::CInstanceRecord(boost::shared_ptr<RBX::Instance> instance) : m_unk0x54(instance)
+CInstanceRecord::CInstanceRecord(std::shared_ptr<RBX::Instance> instance) : m_unk0x54(instance)
 {
 	AddItem(new CNameItem(instance.get()));
 	AddItem(new CXTPReportRecordItemText(instance->getClassName().toString().c_str()));

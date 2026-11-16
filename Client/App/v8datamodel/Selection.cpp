@@ -7,12 +7,12 @@
 #include <algorithm>
 
 static RBX::Reflection::
-	BoundFuncDesc<RBX::Selection, boost::shared_ptr<const std::vector<boost::shared_ptr<RBX::Instance> > >(), 0>
+	BoundFuncDesc<RBX::Selection, std::shared_ptr<const std::vector<std::shared_ptr<RBX::Instance> > >(), 0>
 		func_getSelection(
 			&RBX::Selection::getSelection2, "Get", RBX::Reflection::FunctionDescriptor::NeedTrustedCaller
 		);
 static RBX::Reflection::
-	BoundFuncDesc<RBX::Selection, void(boost::shared_ptr<const std::vector<boost::shared_ptr<RBX::Instance> > >), 1>
+	BoundFuncDesc<RBX::Selection, void(std::shared_ptr<const std::vector<std::shared_ptr<RBX::Instance> > >), 1>
 		func_setSelection(
 			&RBX::Selection::setSelection, "Set", "selection", RBX::Reflection::FunctionDescriptor::NeedTrustedCaller
 		);
@@ -26,9 +26,9 @@ void Selection::removeFilteredSelection(ISelectionBase* fs)
 	filteredSelections.erase(std::find(filteredSelections.begin(), filteredSelections.end(), fs));
 }
 
-void Selection::raiseAdded(boost::shared_ptr<Instance> instance)
+void Selection::raiseAdded(std::shared_ptr<Instance> instance)
 {
-	SelectionChanged event(instance, boost::shared_ptr<Instance>());
+	SelectionChanged event(instance, std::shared_ptr<Instance>());
 
 	for (std::vector<ISelectionBase*>::iterator iter = filteredSelections.begin(); iter != filteredSelections.end();
 		 ++iter) {
@@ -38,9 +38,9 @@ void Selection::raiseAdded(boost::shared_ptr<Instance> instance)
 	Notifier<Selection, SelectionChanged>::raise(event);
 }
 
-void Selection::raiseRemoved(boost::shared_ptr<Instance> source)
+void Selection::raiseRemoved(std::shared_ptr<Instance> source)
 {
-	SelectionChanged event(boost::shared_ptr<Instance>(), source);
+	SelectionChanged event(std::shared_ptr<Instance>(), source);
 
 	for (std::vector<ISelectionBase*>::iterator iter = filteredSelections.begin(); iter != filteredSelections.end();
 		 ++iter) {
@@ -61,10 +61,10 @@ void Selection::addFilteredSelection(ISelectionBase* fs)
 
 void Selection::toggleSelection(Instance* instance)
 {
-	boost::shared_ptr<Instance> shared = shared_from(instance);
+	std::shared_ptr<Instance> shared = shared_from(instance);
 
-	boost::shared_ptr<std::vector<boost::shared_ptr<Instance> > > sel = selection.write();
-	std::vector<boost::shared_ptr<Instance> >::iterator iter = std::find(sel->begin(), sel->end(), shared);
+	std::shared_ptr<std::vector<std::shared_ptr<Instance> > > sel = selection.write();
+	std::vector<std::shared_ptr<Instance> >::iterator iter = std::find(sel->begin(), sel->end(), shared);
 	if (iter == sel->end()) {
 		sel->push_back(shared);
 		instance->Notifier<Instance, AncestorChanged>::addListener(this);
@@ -79,10 +79,10 @@ void Selection::toggleSelection(Instance* instance)
 
 void Selection::addToSelection(Instance* instance)
 {
-	boost::shared_ptr<Instance> shared = shared_from(instance);
+	std::shared_ptr<Instance> shared = shared_from(instance);
 
-	boost::shared_ptr<std::vector<boost::shared_ptr<Instance> > > sel = selection.write();
-	std::vector<boost::shared_ptr<Instance> >::iterator iter = std::find(sel->begin(), sel->end(), shared);
+	std::shared_ptr<std::vector<std::shared_ptr<Instance> > > sel = selection.write();
+	std::vector<std::shared_ptr<Instance> >::iterator iter = std::find(sel->begin(), sel->end(), shared);
 	if (iter == sel->end()) {
 		sel->push_back(shared);
 		instance->Notifier<Instance, AncestorChanged>::addListener(this);
@@ -93,7 +93,7 @@ void Selection::addToSelection(Instance* instance)
 void Selection::clearSelection()
 {
 	while (selection->size() > 0) {
-		boost::shared_ptr<Instance> instance = selection->back();
+		std::shared_ptr<Instance> instance = selection->back();
 		selection.write()->pop_back();
 		instance->Notifier<Instance, AncestorChanged>::removeListener(this);
 		raiseRemoved(instance);
@@ -102,17 +102,17 @@ void Selection::clearSelection()
 
 void Selection::setSelection(Instance* instance)
 {
-	boost::shared_ptr<Instance> inst = shared_from(instance);
+	std::shared_ptr<Instance> inst = shared_from(instance);
 
 	while (selection->size() > 0) {
-		boost::shared_ptr<Instance> item = selection->back();
+		std::shared_ptr<Instance> item = selection->back();
 
 		if (item == inst) {
 			if (selection->size() == 1) {
 				return;
 			}
 
-			boost::shared_ptr<std::vector<boost::shared_ptr<Instance> > > sel = selection.write();
+			std::shared_ptr<std::vector<std::shared_ptr<Instance> > > sel = selection.write();
 			sel->back() = sel->front();
 			sel->front() = item;
 		}
@@ -132,13 +132,12 @@ void Selection::setSelection(Instance* instance)
 
 void Selection::removeFromSelection(const Instance* instance)
 {
-	boost::shared_ptr<std::vector<boost::shared_ptr<Instance> > > sel = selection.write();
+	std::shared_ptr<std::vector<std::shared_ptr<Instance> > > sel = selection.write();
 
-	std::vector<boost::shared_ptr<Instance> >::iterator iter =
-		std::find(sel->begin(), sel->end(), shared_from(instance));
+	std::vector<std::shared_ptr<Instance> >::iterator iter = std::find(sel->begin(), sel->end(), shared_from(instance));
 
 	if (iter != sel->end()) {
-		boost::shared_ptr<Instance> nonConst = *iter;
+		std::shared_ptr<Instance> nonConst = *iter;
 
 		sel->erase(iter);
 
@@ -148,7 +147,7 @@ void Selection::removeFromSelection(const Instance* instance)
 	}
 }
 
-Selection::Selection() : selection(std::vector<boost::shared_ptr<Instance> >())
+Selection::Selection() : selection(std::vector<std::shared_ptr<Instance> >())
 {
 	setName("Selection");
 }

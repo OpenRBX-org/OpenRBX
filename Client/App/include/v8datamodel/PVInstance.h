@@ -13,7 +13,7 @@
 #include <G3D/Ray.h>
 #include <G3D/ReferenceCount.h>
 #include <G3D/Vector3.h>
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 
 namespace RBX {
 
@@ -44,7 +44,7 @@ private:
 	bool showControllerFlag;
 
 protected:
-	boost::scoped_ptr<CoordinateFrame> legacyOffset;
+	std::unique_ptr<CoordinateFrame> legacyOffset;
 
 	PVInstance(const char* name);
 

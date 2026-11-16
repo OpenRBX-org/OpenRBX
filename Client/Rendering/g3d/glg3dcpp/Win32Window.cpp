@@ -78,7 +78,7 @@ static void printPixelFormatDescription(int, HDC, TextOutput&);
     for a discussion of why this is necessary. */
 static const char* G3DWndClass();
 
-std::auto_ptr<Win32Window> Win32Window::_shareWindow(NULL);
+std::unique_ptr<Win32Window> Win32Window::_shareWindow;
 
 
 Win32Window::Win32Window(const GWindow::Settings& s, bool creatingShareWindow)

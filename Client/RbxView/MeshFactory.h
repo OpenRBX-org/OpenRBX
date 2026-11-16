@@ -201,12 +201,12 @@ typename MeshFactory<T, N>::DecalCache MeshFactory<T, N>::decalCache;
 template <class T, int N>
 typename MeshFactory<T, N>::TextureCache MeshFactory<T, N>::textureCache;
 
-} // namespace View
-} // namespace RBX
-
-inline unsigned int hashCode(const RBX::View::RenderSurfaceTypes& surfaceTypes)
+inline unsigned int hashCode(const RenderSurfaceTypes& surfaceTypes)
 {
 	return surfaceTypes.hashCode();
 }
+
+} // namespace View
+} // namespace RBX
 
 #endif // RBXVIEW_MESHFACTORY_H

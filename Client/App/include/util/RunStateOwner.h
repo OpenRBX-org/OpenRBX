@@ -6,16 +6,13 @@
 #include "v8tree/Instance.h"
 #include "v8tree/Service.h"
 
-#include <boost/scoped_ptr.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/thread/condition.hpp>
-#include <boost/thread/mutex.hpp>
+#include <atomic>
+#include <condition_variable>
 #include <map>
+#include <memory>
+#include <mutex>
+#include <thread>
 #include <time.h>
-
-namespace boost {
-class thread;
-}
 
 namespace RBX {
 
@@ -78,15 +75,15 @@ private:
 	typedef std::map<IRunView*, bool> Views;
 
 	RunState runState;
-	boost::mutex runMutex;
-	bool stopRequested;
-	boost::condition runViewsDoneCondition;
-	boost::condition stateChangedCondition;
+	std::mutex runMutex;
+	std::atomic<bool> stopRequested;
+	std::condition_variable runViewsDoneCondition;
+	std::condition_variable stateChangedCondition;
 	float framePeriod;
-	boost::scoped_ptr<boost::thread> runThread;
-	boost::mutex viewMutex;
+	std::thread runThread;
+	std::recursive_mutex viewMutex;
 	Views views;
-	int invalidRunViewCount;
+	std::atomic<int> invalidRunViewCount;
 	int stepCount;
 	double stepTime;
 
@@ -141,7 +138,7 @@ public:
 	virtual void onAncestorChanged(const AncestorChanged& event);
 
 private:
-	void runProc(boost::shared_ptr<DataModel> dataModel);
+	void runProc(std::shared_ptr<DataModel> dataModel);
 };
 
 } // namespace RBX

@@ -5,13 +5,13 @@
 #include "renderlib/Material.h"
 #include "renderlib/Mesh.h"
 #include "util/Events.h"
+#include "util/Signals.h"
 #include "v8world/IMoving.h"
 
 #include <G3D/CoordinateFrame.h>
 #include <G3D/ReferenceCount.h>
 #include <G3D/Vector3.h>
-#include <boost/shared_ptr.hpp>
-#include <boost/signals/connection.hpp>
+#include <memory>
 
 namespace RBX {
 
@@ -38,11 +38,11 @@ private:
 
 	virtual void updateMesh() = 0;
 
-	boost::signals::scoped_connection childAddedConnection;
-	boost::signals::scoped_connection childRemovedConnection;
-	boost::signals::scoped_connection ancestorChangedConnection;
-	boost::signals::scoped_connection propertyChangedConnection;
-	boost::signals::scoped_connection shapePropertyChangedConnection;
+	Signals::ScopedConnection childAddedConnection;
+	Signals::ScopedConnection childRemovedConnection;
+	Signals::ScopedConnection ancestorChangedConnection;
+	Signals::ScopedConnection propertyChangedConnection;
+	Signals::ScopedConnection shapePropertyChangedConnection;
 
 public:
 	virtual ~PartChunk();
@@ -51,14 +51,14 @@ public:
 	virtual bool cullable() const;
 
 protected:
-	boost::shared_ptr<PartInstance> partInstance;
+	std::shared_ptr<PartInstance> partInstance;
 	G3D::ReferenceCountedPointer<Render::Material> material;
 	bool materialInvalid;
 	G3D::ReferenceCountedPointer<Render::Mesh> mesh;
 	View* view;
 	SpecialShape* specialShape;
 
-	PartChunk(float polygonOffset, const boost::shared_ptr<PartInstance>& partInstance, View* view);
+	PartChunk(float polygonOffset, const std::shared_ptr<PartInstance>& partInstance, View* view);
 
 	void invalidateMaterial();
 	void invalidateMesh();
@@ -69,16 +69,16 @@ protected:
 	virtual const G3D::CoordinateFrame& cframe();
 
 private:
-	void onAncestorChanged(boost::shared_ptr<Instance> ancestor);
-	void onChildAdded(boost::shared_ptr<Instance> child);
-	void onChildRemoved(boost::shared_ptr<Instance> child);
+	void onAncestorChanged(std::shared_ptr<Instance> ancestor);
+	void onChildAdded(std::shared_ptr<Instance> child);
+	void onChildRemoved(std::shared_ptr<Instance> child);
 	void onSpecialShapeChanged();
 };
 
 class Part : public PartChunk, public Listener<PartInstance, CanAggregateChanged>
 {
 public:
-	Part(const boost::shared_ptr<PartInstance>& partInstance, View* view);
+	Part(const std::shared_ptr<PartInstance>& partInstance, View* view);
 
 	virtual ~Part();
 
@@ -97,9 +97,9 @@ private:
 class Decal : public PartChunk
 {
 private:
-	boost::shared_ptr<RBX::Decal> decal;
-	boost::signals::scoped_connection decalAncestorChangedConnection;
-	boost::signals::scoped_connection decalPropertyChangedConnection;
+	std::shared_ptr<RBX::Decal> decal;
+	Signals::ScopedConnection decalAncestorChangedConnection;
+	Signals::ScopedConnection decalPropertyChangedConnection;
 
 public:
 	Decal(RBX::Decal& decal, PartInstance& parentPart, View* view);
@@ -110,7 +110,7 @@ public:
 
 protected:
 	void onDecalPropertyChanged(const Reflection::PropertyDescriptor* descriptor);
-	void onDecalAncestorChanged(boost::shared_ptr<Instance> ancestor);
+	void onDecalAncestorChanged(std::shared_ptr<Instance> ancestor);
 
 private:
 	virtual void updateMesh();
@@ -119,9 +119,9 @@ private:
 class Texture : public PartChunk
 {
 private:
-	boost::shared_ptr<RBX::Texture> texture;
-	boost::signals::scoped_connection textureAncestorChangedConnection;
-	boost::signals::scoped_connection texturePropertyChangedConnection;
+	std::shared_ptr<RBX::Texture> texture;
+	Signals::ScopedConnection textureAncestorChangedConnection;
+	Signals::ScopedConnection texturePropertyChangedConnection;
 
 public:
 	Texture(RBX::Texture& texture, PartInstance& parentPart, View* view);
@@ -132,7 +132,7 @@ public:
 
 protected:
 	void onTexturePropertyChanged(const Reflection::PropertyDescriptor* descriptor);
-	void onTextureAncestorChanged(boost::shared_ptr<Instance> ancestor);
+	void onTextureAncestorChanged(std::shared_ptr<Instance> ancestor);
 
 private:
 	virtual void updateMesh();

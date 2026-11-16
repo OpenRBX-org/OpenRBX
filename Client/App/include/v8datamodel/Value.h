@@ -5,7 +5,7 @@
 #include "reflection/signal.h"
 #include "v8tree/Instance.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace RBX {
 
@@ -54,11 +54,11 @@ private:
 class ObjectValue : public DescribedCreatable<ObjectValue, Instance, sObjectValue>
 {
 private:
-	boost::shared_ptr<Instance> value;
+	std::shared_ptr<Instance> value;
 
 public:
 	static Reflection::RefPropDescriptor<ObjectValue, Instance> desc_Value;
-	static Reflection::SignalDesc<ObjectValue, void(boost::shared_ptr<Instance>)> desc_ValueChanged;
+	static Reflection::SignalDesc<ObjectValue, void(std::shared_ptr<Instance>)> desc_ValueChanged;
 
 	ObjectValue() { setName("Value"); }
 

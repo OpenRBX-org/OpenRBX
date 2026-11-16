@@ -10,7 +10,7 @@
 #include "v8datamodel/PVInstance.h"
 
 #include <G3D/CoordinateFrame.h>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace RBX {
 
@@ -32,7 +32,7 @@ public:
 private:
 	mutable CoordinateFrame modelInPrimary;
 	mutable PartInstance* primaryPart;
-	boost::shared_ptr<PartInstance> candidatePrimaryPart;
+	std::shared_ptr<PartInstance> candidatePrimaryPart;
 
 	void updatePrimaryPart(PartInstance* part) const;
 

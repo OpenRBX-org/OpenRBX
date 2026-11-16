@@ -11,7 +11,6 @@
 #include "v8kernel/Connector.h"
 #include "v8tree/Instance.h"
 
-#include <boost/shared_ptr.hpp>
 #include <memory>
 
 namespace RBX {
@@ -35,7 +34,7 @@ class Humanoid : public DescribedCreatable<Humanoid, Instance, sHumanoid>,
 {
 	void resetTimer();
 	void getPrimitives(std::vector<Primitive*>&);
-	void getAccoutrements(std::vector<boost::shared_ptr<Accoutrement> >&);
+	void getAccoutrements(std::vector<std::shared_ptr<Accoutrement> >&);
 
 public:
 	enum WalkMode
@@ -117,7 +116,7 @@ public:
 	const G3D::Vector3& getTargetPoint() const { return targetPoint; }
 
 	void moveTo(const G3D::Vector3& worldPosition, PartInstance* part);
-	void moveTo2(G3D::Vector3 worldPosition, boost::shared_ptr<Instance> part);
+	void moveTo2(G3D::Vector3 worldPosition, std::shared_ptr<Instance> part);
 
 	G3D::Vector3 updateWalkDirection();
 	void buildJoints();
@@ -198,14 +197,14 @@ private:
 	bool imDead : 1;
 	bool hadHeadJoint : 1;
 	bool sit : 1;
-	mutable boost::shared_ptr<PartInstance> head;
-	mutable boost::shared_ptr<PartInstance> torso;
-	mutable boost::shared_ptr<PartInstance> leftLeg;
-	mutable boost::shared_ptr<PartInstance> rightLeg;
-	mutable boost::shared_ptr<PartInstance> rightArm;
-	mutable boost::shared_ptr<PartInstance> leftArm;
+	mutable std::shared_ptr<PartInstance> head;
+	mutable std::shared_ptr<PartInstance> torso;
+	mutable std::shared_ptr<PartInstance> leftLeg;
+	mutable std::shared_ptr<PartInstance> rightLeg;
+	mutable std::shared_ptr<PartInstance> rightArm;
+	mutable std::shared_ptr<PartInstance> leftArm;
 	World* world;
-	std::auto_ptr<State> currentState;
+	std::unique_ptr<State> currentState;
 };
 
 } // namespace RBX

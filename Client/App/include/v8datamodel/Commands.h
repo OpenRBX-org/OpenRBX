@@ -7,7 +7,7 @@
 #include "v8tree/Verb.h"
 #include "v8world/Controller.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <string>
 #include <typeinfo>
 
@@ -20,7 +20,7 @@ class DataModel;
 class RunService;
 class Selection;
 
-void FUN_00597490(XmlElement* container, boost::shared_ptr<Instance> instance);
+void FUN_00597490(XmlElement* container, std::shared_ptr<Instance> instance);
 
 class FirstPersonCommand : public Verb
 {
@@ -183,7 +183,7 @@ public:
 class EditSelectionVerb : public Verb
 {
 protected:
-	boost::shared_ptr<Workspace> workspace;
+	std::shared_ptr<Workspace> workspace;
 	ServiceClient<Selection> selection;
 	DataModel* dataModel;
 

@@ -1,13 +1,11 @@
 #include "util/RunStateOwner.h"
 
+#include "util/Thread.h"
 #include "util/Timer.h"
-#include "util/boost.hpp"
 #include "v8datamodel/DataModel.h"
 
 #include <algorithm>
-#include <boost/bind.hpp>
-#include <boost/thread/thread.hpp>
-#include <boost/thread/xtime.hpp>
+#include <chrono>
 
 namespace RBX {
 
@@ -31,11 +29,15 @@ static Reflection::BoundFuncDesc<RunService, void(), 0> resetFunction(
 
 void RunService::endRunThread(bool join)
 {
-	stopRequested = true;
+	{
+		std::lock_guard<std::mutex> lock(runMutex);
+		stopRequested = true;
+	}
+
 	stateChangedCondition.notify_all();
 
-	if (join) {
-		runThread->join();
+	if (join && runThread.joinable()) {
+		runThread.join();
 	}
 }
 
@@ -70,7 +72,7 @@ void RunService::setRunState(RunState state)
 	Notifier<RunService, RunTransition>::raise(transition);
 }
 
-void RunService::runProc(boost::shared_ptr<DataModel> dataModel)
+void RunService::runProc(std::shared_ptr<DataModel> dataModel)
 {
 	double desiredTime = getRealTime();
 
@@ -78,7 +80,7 @@ void RunService::runProc(boost::shared_ptr<DataModel> dataModel)
 		const double timeLeft = desiredTime - getRealTime();
 
 		{
-			boost::mutex::scoped_lock lock(viewMutex);
+			std::lock_guard<std::recursive_mutex> lock(viewMutex);
 
 			for (Views::iterator iter = views.begin(); iter != views.end(); ++iter) {
 				iter->first->AdjustThrottle(timeLeft);
@@ -86,30 +88,26 @@ void RunService::runProc(boost::shared_ptr<DataModel> dataModel)
 		}
 
 		const double waitTime = std::max(0.0, timeLeft);
-
-		boost::xtime xt;
-
-		boost::xtime_get(&xt, boost::TIME_UTC_);
-		xt.nsec += (int) (waitTime * 1000000000.0);
+		const std::chrono::steady_clock::time_point wakeTime =
+			std::chrono::steady_clock::now() +
+			std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::duration<double>(waitTime));
 
 		bool signalled;
 
 		{
-			boost::mutex::scoped_lock lock(runMutex);
+			std::unique_lock<std::mutex> lock(runMutex);
 
-			signalled = stateChangedCondition.timed_wait(lock, xt);
+			signalled = stateChangedCondition.wait_until(lock, wakeTime, [this] { return stopRequested.load(); });
 		}
 
 		if (!signalled) {
-			boost::xtime xt;
+			const std::chrono::steady_clock::time_point timeout =
+				std::chrono::steady_clock::now() + std::chrono::seconds(1);
 
-			boost::xtime_get(&xt, boost::TIME_UTC_);
-			xt.sec += 1;
-
-			boost::mutex::scoped_lock lock(runMutex);
+			std::unique_lock<std::mutex> lock(runMutex);
 
 			if (invalidRunViewCount != 0) {
-				runViewsDoneCondition.timed_wait(lock, xt);
+				runViewsDoneCondition.wait_until(lock, timeout);
 			}
 		}
 
@@ -136,13 +134,13 @@ void RunService::runProc(boost::shared_ptr<DataModel> dataModel)
 
 void RunService::invalidateRunViews()
 {
-	boost::mutex::scoped_lock lock(viewMutex);
+	std::lock_guard<std::recursive_mutex> lock(viewMutex);
 
 	if (invalidRunViewCount != 0) {
 		return;
 	}
 
-	invalidRunViewCount = views.size();
+	invalidRunViewCount = static_cast<int>(views.size());
 
 	if (invalidRunViewCount > 0) {
 		for (Views::iterator iter = views.begin(); iter != views.end(); ++iter) {
@@ -156,7 +154,7 @@ void RunService::invalidateRunViews()
 
 void RunService::runViewValid(IRunView* runView)
 {
-	boost::mutex::scoped_lock lock(viewMutex);
+	std::lock_guard<std::recursive_mutex> lock(viewMutex);
 
 	if (invalidRunViewCount == 0) {
 		return;
@@ -176,11 +174,14 @@ void RunService::runViewValid(IRunView* runView)
 
 RunService::~RunService()
 {
+	if (runThread.joinable()) {
+		runThread.detach();
+	}
 }
 
 void RunService::removeRunView(IRunView* runView)
 {
-	boost::mutex::scoped_lock lock(viewMutex);
+	std::lock_guard<std::recursive_mutex> lock(viewMutex);
 
 	runViewValid(runView);
 	views.erase(runView);
@@ -188,25 +189,25 @@ void RunService::removeRunView(IRunView* runView)
 
 void RunService::addRunView(IRunView* runView)
 {
-	boost::mutex::scoped_lock lock(viewMutex);
+	std::lock_guard<std::recursive_mutex> lock(viewMutex);
 
 	views[runView] = true;
 }
 
 RunService::RunService()
-	: runState(RS_NORMAL), stopRequested(false), framePeriod(1.0f / 30.0f), runThread(NULL), invalidRunViewCount(0),
-	  stepCount(0), stepTime(0.0), runDisabled(false)
+	: runState(RS_NORMAL), stopRequested(false), framePeriod(1.0f / 30.0f), invalidRunViewCount(0), stepCount(0),
+	  stepTime(0.0), runDisabled(false)
 {
 	setName("Run Service");
 }
 
 void RunService::start()
 {
-	boost::shared_ptr<DataModel> dataModel = shared_from(dynamic_cast<DataModel*>(getParent()));
+	std::shared_ptr<DataModel> dataModel = shared_from(dynamic_cast<DataModel*>(getParent()));
 
-	runThread.reset(new boost::thread(
-		background_function(boost::bind(&RunService::runProc, shared_from(this), dataModel), "rbx_runProc")
-	));
+	runThread = std::thread(
+		background_function([self = shared_from(this), dataModel] { self->runProc(dataModel); }, "rbx_runProc")
+	);
 }
 
 void RunService::raiseHeartbeat(float time, float step)

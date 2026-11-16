@@ -74,7 +74,6 @@ add_cxx_warning(parentheses)
 
 set(OPENRBX_3RDPARTY "${PROJECT_SOURCE_DIR}/3rdparty")
 
-set(OPENRBX_BOOST_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/Client/boost_1_34_1/src")
 set(OPENRBX_G3D_INCLUDE_DIR   "${PROJECT_SOURCE_DIR}/Client/Rendering/g3d/include")
 set(OPENRBX_LUA_INCLUDE_DIR   "${PROJECT_SOURCE_DIR}/Client/App/lua-5.1.1/src")
 set(OPENRBX_SDL_INCLUDE_DIR   "${PROJECT_SOURCE_DIR}/Client/Rendering/SDL-1.2.6/include")
@@ -109,7 +108,6 @@ add_custom_target(runtime_files DEPENDS ${OPENRBX_RUNTIME_OUTPUTS})
 
 add_subdirectory(3rdparty)
 
-set(OPENRBX_BOOST_LIBS boost_signals boost_thread boost_date_time)
 set(OPENRBX_G3D_LIBS   graphics3d glg3d)
 set(OPENRBX_MESA_LIBS  opengl32 glu32 osmesa32)
 
@@ -143,7 +141,7 @@ set(OPENRBX_APP_SOURCES
   Client/App/util/IRenderable.cpp
   Client/App/v8tree/Instance.cpp
   Client/App/v8tree/Verb.cpp
-  Client/App/util/boost.cpp
+  Client/App/util/Thread.cpp
   Client/App/util/ExponentialRunningAverage.cpp
   Client/App/util/Extents.cpp
   Client/App/util/Face.cpp
@@ -459,7 +457,6 @@ set(OPENRBX_ENGINE_INCLUDE_DIRS
 )
 
 set(OPENRBX_3RDPARTY_INCLUDE_DIRS
-  "${OPENRBX_BOOST_INCLUDE_DIR}"
   "${OPENRBX_G3D_INCLUDE_DIR}"
   "${OPENRBX_LUA_INCLUDE_DIR}"
   ${OPENRBX_G3D_EXTRA_INCLUDE_DIRS}
@@ -484,6 +481,7 @@ function(add_engine_library NAME)
   endif()
   add_library(${NAME} OBJECT ${ARGS_SOURCES})
   openrbx_compile_defaults(${NAME})
+  set_target_properties(${NAME} PROPERTIES CXX_STANDARD 23 CXX_SCAN_FOR_MODULES OFF)
   target_compile_definitions(${NAME} PRIVATE ${OPENRBX_COMMON_DEFINITIONS} ${ARGS_DEFINITIONS})
   target_include_directories(${NAME} PRIVATE ${OPENRBX_ENGINE_INCLUDE_DIRS} ${OPENRBX_3RDPARTY_INCLUDE_DIRS})
   if (MSVC)
@@ -527,10 +525,8 @@ add_engine_library(lua
   SOURCES ${OPENRBX_LUA_SOURCES}
 )
 
-list(APPEND OPENRBX_APP_SOURCES Client/boost_1_34_1/libs/iostreams/src/zlib.cpp)
-
 add_engine_library(app
-  DEFINITIONS _CRT_SECURE_NO_WARNINGS _RELEASE BOOST_IOSTREAMS_NO_LIB
+  DEFINITIONS _CRT_SECURE_NO_WARNINGS _RELEASE
   SOURCES ${OPENRBX_APP_SOURCES}
 )
 
@@ -638,6 +634,8 @@ add_library(webservice SHARED
   ${OPENRBX_WEBSERVICE_SOURCES}
 )
 openrbx_compile_defaults(webservice)
+set_target_properties(webservice PROPERTIES CXX_STANDARD 23 CXX_SCAN_FOR_MODULES OFF)
+target_compile_options(webservice PRIVATE /permissive)
 target_compile_definitions(webservice PRIVATE ${OPENRBX_COMMON_DEFINITIONS} _USRDLL _ATL_NO_COM_SUPPORT)
 
 target_include_directories(webservice PRIVATE
@@ -656,7 +654,6 @@ endif()
 
 target_link_libraries(webservice PRIVATE
   ${OPENRBX_G3D_LIBS}
-  ${OPENRBX_BOOST_LIBS}
   ${OPENRBX_MESA_LIBS}
 )
 
@@ -757,6 +754,8 @@ add_executable(roblox WIN32
   "${OPENRBX_ROBLOX_MIDL_DIR}/Roblox_i.c"
 )
 openrbx_compile_defaults(roblox)
+set_target_properties(roblox PROPERTIES CXX_STANDARD 23 CXX_SCAN_FOR_MODULES OFF)
+target_compile_options(roblox PRIVATE /permissive)
 target_compile_definitions(roblox PRIVATE ${OPENRBX_COMMON_DEFINITIONS} _AFXDLL _XTP_STATICLINK _XTPLIB_NOAUTOLINK)
 target_precompile_headers(roblox PRIVATE "${PROJECT_SOURCE_DIR}/Client/win/StdAfx.h")
 set_source_files_properties("${OPENRBX_ROBLOX_MIDL_DIR}/Roblox_i.c" PROPERTIES SKIP_PRECOMPILE_HEADERS ON)
@@ -787,7 +786,6 @@ target_link_libraries(roblox PRIVATE
   rgmain
   ${OPENRBX_CLIENT_ENGINE_LIBRARIES}
   ${OPENRBX_G3D_LIBS}
-  ${OPENRBX_BOOST_LIBS}
   ${OPENRBX_MESA_LIBS}
   fmodex
   advapi32

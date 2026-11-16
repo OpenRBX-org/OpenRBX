@@ -7,7 +7,7 @@
 #include "v8datamodel/Decal.h"
 #include "v8tree/Instance.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 class InsertDecal : public RBX::EditSelectionVerb
 {
@@ -16,7 +16,7 @@ public:
 
 	virtual bool isEnabled() const;
 	virtual void doIt(RBX::IDataState* dataState);
-	virtual boost::shared_ptr<RBX::Decal> VTable0x14();
+	virtual std::shared_ptr<RBX::Decal> VTable0x14();
 
 private:
 	RBX::Instance* FUN_0041f500() const;
@@ -27,7 +27,7 @@ class InsertTexture : public InsertDecal
 public:
 	InsertTexture(RBX::DataModel* dataModel) : InsertDecal(dataModel, "InsertTexture") {}
 
-	virtual boost::shared_ptr<RBX::Decal> VTable0x14();
+	virtual std::shared_ptr<RBX::Decal> VTable0x14();
 };
 
 class InsertObject : public RBX::RunStateVerb
@@ -56,10 +56,10 @@ public:
 		RBX::Instance* m_unk0x7c;
 	};
 
-	CInstanceRecord(boost::shared_ptr<RBX::Instance> instance);
+	CInstanceRecord(std::shared_ptr<RBX::Instance> instance);
 	virtual ~CInstanceRecord();
 
-	boost::shared_ptr<RBX::Instance> m_unk0x54;
+	std::shared_ptr<RBX::Instance> m_unk0x54;
 };
 
 class CInstanceExplorer
@@ -94,7 +94,7 @@ private:
 		}
 	}
 
-	boost::shared_ptr<RBX::Instance> m_unk0x3a4;
+	std::shared_ptr<RBX::Instance> m_unk0x3a4;
 	bool m_unk0x3ac;
 };
 

@@ -2,17 +2,14 @@
 #define UTIL_CONTENTPROVIDER_H
 
 #include "util/Name.h"
-#include "util/boost.hpp"
+#include "util/Thread.h"
 
-#include <boost/date_time/posix_time/posix_time_types.hpp>
-#include <boost/noncopyable.hpp>
-#include <boost/scoped_ptr.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/thread/mutex.hpp>
+#include <chrono>
 #include <iosfwd>
 #include <list>
 #include <map>
 #include <memory>
+#include <mutex>
 #include <string>
 #include <vector>
 
@@ -73,40 +70,43 @@ public:
 	static std::string convertToLegacyHash(std::string hash);
 };
 
-class ContentProvider : boost::noncopyable
+class ContentProvider
 {
-	boost::mutex requestSync;
+	std::recursive_mutex requestSync;
 	std::list<ContentId> requestQueue;
 
 	struct FailedUrl
 	{
 		std::string url;
-		boost::posix_time::ptime expiration;
+		std::chrono::time_point<std::chrono::steady_clock, std::chrono::seconds> expiration;
 
 		FailedUrl(const char* url);
 
-		bool expired() const { return boost::posix_time::second_clock::local_time() >= expiration; }
+		bool expired() const;
 	};
 
 	std::list<FailedUrl> failedUrls;
-	boost::mutex contentCacheMutex;
+	std::mutex contentCacheMutex;
 
 	struct CachedContent
 	{
-		boost::shared_ptr<const std::string> data;
-		boost::shared_ptr<const std::string> filename;
+		std::shared_ptr<const std::string> data;
+		std::shared_ptr<const std::string> filename;
 	};
 
 	typedef std::map<ContentId, CachedContent> ContentCache;
 
 	ContentCache contentCache;
 	std::string assetFolderPath;
-	boost::scoped_ptr<worker_thread> requestProcessor;
+	std::unique_ptr<worker_thread> requestProcessor;
 
 	ContentProvider();
 	~ContentProvider();
 
 public:
+	ContentProvider(const ContentProvider&) = delete;
+	ContentProvider& operator=(const ContentProvider&) = delete;
+
 	static ContentProvider& singleton()
 	{
 		static ContentProvider sing;
@@ -120,7 +120,7 @@ public:
 
 	bool isUrlBad(const char* url);
 
-	void load(ContentId id, std::vector<boost::shared_ptr<Instance> >& instances);
+	void load(ContentId id, std::vector<std::shared_ptr<Instance> >& instances);
 
 	void clearContentCache();
 
@@ -128,13 +128,13 @@ public:
 
 	bool hasContent(ContentId id);
 
-	boost::shared_ptr<const std::string> requestContentString(ContentId id);
+	std::shared_ptr<const std::string> requestContentString(ContentId id);
 
 	bool requestContentFile(ContentId id, std::string& filename);
 
-	boost::shared_ptr<const std::string> getContentString(ContentId id);
+	std::shared_ptr<const std::string> getContentString(ContentId id);
 
-	std::auto_ptr<std::istream> getContent(ContentId ticket);
+	std::unique_ptr<std::istream> getContent(ContentId ticket);
 
 	std::string getFile(ContentId id);
 

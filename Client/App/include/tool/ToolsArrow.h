@@ -74,7 +74,7 @@ extern char sAxisMoveTool[];
 class AxisMoveTool : public Named<ArrowToolBase, sAxisMoveTool>
 {
 private:
-	std::auto_ptr<MegaDragger> dragger;
+	std::unique_ptr<MegaDragger> dragger;
 	std::string cursor;
 	bool m_unk0x44;
 	G3D::Vector2int16 m_unk0x46;

@@ -7,14 +7,14 @@
 #include "v8datamodel/Stats.h"
 #include "v8tree/Instance.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 class MutexRef
 {
 public:
-	MutexRef(boost::shared_ptr<RBX::DataModel> dataModel) : m_unk0x00(dataModel) {}
+	MutexRef(std::shared_ptr<RBX::DataModel> dataModel) : m_unk0x00(dataModel) {}
 
-	boost::shared_ptr<RBX::DataModel> m_unk0x00;
+	std::shared_ptr<RBX::DataModel> m_unk0x00;
 };
 
 class CRobloxReportView
@@ -35,7 +35,7 @@ public:
 		class CNameItem : public MutexRef, public CXTPReportRecordItem
 		{
 		public:
-			CNameItem(RBX::Stats::Item* item, boost::shared_ptr<RBX::DataModel> dataModel);
+			CNameItem(RBX::Stats::Item* item, std::shared_ptr<RBX::DataModel> dataModel);
 
 			virtual CString GetCaption(CXTPReportColumn* pColumn);
 
@@ -46,7 +46,7 @@ public:
 		class CValueItem : public MutexRef, public CXTPReportRecordItem
 		{
 		public:
-			CValueItem(RBX::Stats::Item* item, boost::shared_ptr<RBX::DataModel> dataModel);
+			CValueItem(RBX::Stats::Item* item, std::shared_ptr<RBX::DataModel> dataModel);
 
 			virtual CString GetCaption(CXTPReportColumn* pColumn);
 
@@ -54,7 +54,7 @@ public:
 			RBX::Stats::Item* m_unk0x84;
 		};
 
-		CStatsItemRecord(boost::shared_ptr<RBX::Stats::Item> item, boost::shared_ptr<RBX::DataModel> dataModel);
+		CStatsItemRecord(std::shared_ptr<RBX::Stats::Item> item, std::shared_ptr<RBX::DataModel> dataModel);
 		virtual ~CStatsItemRecord();
 
 	protected:
@@ -62,7 +62,7 @@ public:
 		virtual void VTable0x08(const RBX::Instance* source, RBX::ChildAdded event);
 
 	public:
-		boost::shared_ptr<RBX::Stats::Item> m_unk0x98;
+		std::shared_ptr<RBX::Stats::Item> m_unk0x98;
 	};
 
 protected:
@@ -74,7 +74,7 @@ public:
 	virtual void OnInitialUpdate();
 
 	void FUN_0045b450();
-	void FUN_0045cc90(boost::shared_ptr<RBX::DataModel> dataModel);
+	void FUN_0045cc90(std::shared_ptr<RBX::DataModel> dataModel);
 
 protected:
 	virtual void VTable0x08(const RBX::Instance* source, RBX::ChildRemoved event);
@@ -87,8 +87,8 @@ protected:
 
 private:
 	UINT_PTR m_unk0x3a4;
-	boost::shared_ptr<RBX::DataModel> m_unk0x3a8;
-	boost::shared_ptr<RBX::Stats::StatsService> m_unk0x3b0;
+	std::shared_ptr<RBX::DataModel> m_unk0x3a8;
+	std::shared_ptr<RBX::Stats::StatsService> m_unk0x3b0;
 };
 
 class CRobloxReportDocView : public CRobloxReportView
@@ -112,9 +112,7 @@ public:
 	virtual void OnInitialUpdate();
 
 protected:
-	virtual void VTable0x00(
-		boost::shared_ptr<RBX::DataModel> newDataModel, boost::shared_ptr<RBX::DataModel> oldDataModel
-	);
+	virtual void VTable0x00(std::shared_ptr<RBX::DataModel> newDataModel, std::shared_ptr<RBX::DataModel> oldDataModel);
 
 	DECLARE_MESSAGE_MAP()
 };

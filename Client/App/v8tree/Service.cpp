@@ -6,14 +6,13 @@ namespace RBX {
 
 const char sServiceProvider[] = "ServiceProvider";
 
-Reflection::BoundFuncDesc<ServiceProvider, boost::shared_ptr<Instance>(std::string), 1> ServiceProvider::func_service(
+Reflection::BoundFuncDesc<ServiceProvider, std::shared_ptr<Instance>(std::string), 1> ServiceProvider::func_service(
 	&ServiceProvider::findServiceByClassNameString, "service", "name", Reflection::FunctionDescriptor::AnyCaller
 );
 
-Reflection::BoundFuncDesc<ServiceProvider, boost::shared_ptr<Instance>(std::string), 1> ServiceProvider::
-	func_GetService(
-		&ServiceProvider::findServiceByClassNameString, "GetService", "name", Reflection::FunctionDescriptor::AnyCaller
-	);
+Reflection::BoundFuncDesc<ServiceProvider, std::shared_ptr<Instance>(std::string), 1> ServiceProvider::func_GetService(
+	&ServiceProvider::findServiceByClassNameString, "GetService", "name", Reflection::FunctionDescriptor::AnyCaller
+);
 
 unsigned int ServiceProvider::newIndex()
 {
@@ -39,7 +38,7 @@ Instance* ServiceProvider::create(Instance* context, const Name& name)
 	while (context != NULL) {
 		ServiceProvider* provider = dynamic_cast<ServiceProvider*>(context);
 		if (provider) {
-			boost::shared_ptr<Instance> child = provider->createChild(name);
+			std::shared_ptr<Instance> child = provider->createChild(name);
 			if (child) {
 				child->setParent(provider);
 			}
@@ -52,7 +51,7 @@ Instance* ServiceProvider::create(Instance* context, const Name& name)
 	return NULL;
 }
 
-boost::shared_ptr<Instance> ServiceProvider::findServiceByClassNameString(std::string sName)
+std::shared_ptr<Instance> ServiceProvider::findServiceByClassNameString(std::string sName)
 {
 	const Name& name = Name::lookup(sName);
 	if (&Name::getNullName() == &name) {
@@ -62,20 +61,20 @@ boost::shared_ptr<Instance> ServiceProvider::findServiceByClassNameString(std::s
 	return shared_from(create(this, name));
 }
 
-boost::shared_ptr<Instance> ServiceProvider::findServiceByClassName(const Name& className) const
+std::shared_ptr<Instance> ServiceProvider::findServiceByClassName(const Name& className) const
 {
-	std::map<const Name*, boost::shared_ptr<Instance> >::const_iterator iter = serviceMap.find(&className);
+	std::map<const Name*, std::shared_ptr<Instance> >::const_iterator iter = serviceMap.find(&className);
 
 	if (iter != serviceMap.end()) {
 		return iter->second;
 	}
 
-	return boost::shared_ptr<Instance>();
+	return std::shared_ptr<Instance>();
 }
 
 void ServiceProvider::onChildRemoving(Instance* instance)
 {
-	std::map<const Name*, boost::shared_ptr<Instance> >::iterator iter = serviceMap.find(&instance->getClassName());
+	std::map<const Name*, std::shared_ptr<Instance> >::iterator iter = serviceMap.find(&instance->getClassName());
 
 	if (iter != serviceMap.end()) {
 		Notifier<ServiceProvider, ServiceRemoving>::raise(instance);
@@ -85,8 +84,8 @@ void ServiceProvider::onChildRemoving(Instance* instance)
 void ServiceProvider::onAddListener(Listener<ServiceProvider, ServiceAdded>* listener) const
 {
 	if (getChildren()) {
-		std::vector<boost::shared_ptr<Instance> >::const_iterator end = getChildren()->end();
-		for (std::vector<boost::shared_ptr<Instance> >::const_iterator iter = getChildren()->begin(); iter != end;
+		std::vector<std::shared_ptr<Instance> >::const_iterator end = getChildren()->end();
+		for (std::vector<std::shared_ptr<Instance> >::const_iterator iter = getChildren()->begin(); iter != end;
 			 ++iter) {
 			if (dynamic_cast<Service*>(iter->get())) {
 				Notifier<ServiceProvider, ServiceAdded>::raise(iter->get(), listener);
@@ -116,7 +115,7 @@ void ServiceProvider::clearServices()
 
 shared_ptr<Instance> ServiceProvider::createChild(const Name& className)
 {
-	boost::shared_ptr<Instance> instance = findServiceByClassName(className);
+	std::shared_ptr<Instance> instance = findServiceByClassName(className);
 	if (instance) {
 		return instance;
 	}

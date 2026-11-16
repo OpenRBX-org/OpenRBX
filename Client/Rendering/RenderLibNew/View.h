@@ -3,9 +3,8 @@
 
 #include "ViewBase.h"
 #include "renderlibnew/RenderScene.h"
+#include "util/Signals.h"
 
-#include <boost/shared_ptr.hpp>
-#include <boost/signals/connection.hpp>
 #include <map>
 #include <memory>
 
@@ -29,23 +28,23 @@ class MaterialFactory;
 class View : public ViewBase
 {
 private:
-	boost::shared_ptr<DataModel> dataModel;
+	std::shared_ptr<DataModel> dataModel;
 	std::map<Instance*, RenderNew::Model*> models;
-	boost::signals::scoped_connection lightingChangedConnection;
-	boost::signals::scoped_connection workspaceDescendentAddedConnection;
+	Signals::ScopedConnection lightingChangedConnection;
+	Signals::ScopedConnection workspaceDescendentAddedConnection;
 	bool lightingValid;
 
 public:
-	std::auto_ptr<RenderNew::SceneManager> sceneManager;
-	std::auto_ptr<RenderNew::RenderScene> renderLibScene;
-	std::auto_ptr<G3D::TextureManager> textureManager;
-	std::auto_ptr<MaterialFactory> materialFactory;
+	std::unique_ptr<RenderNew::SceneManager> sceneManager;
+	std::unique_ptr<RenderNew::RenderScene> renderLibScene;
+	std::unique_ptr<G3D::TextureManager> textureManager;
+	std::unique_ptr<MaterialFactory> materialFactory;
 
 private:
 	bool m_unk0x54;
 
 public:
-	View(boost::shared_ptr<DataModel> dataModel);
+	View(std::shared_ptr<DataModel> dataModel);
 	virtual ~View();
 
 	virtual void render(void* rd);
@@ -58,7 +57,7 @@ public:
 	virtual RenderStats& getRenderStats();
 
 private:
-	virtual void onWorkspaceDescendentAdded(boost::shared_ptr<Instance> descendent);
+	virtual void onWorkspaceDescendentAdded(std::shared_ptr<Instance> descendent);
 	virtual void updateLighting();
 	virtual void invalidateLighting(bool updateSkybox);
 

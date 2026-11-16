@@ -18,7 +18,7 @@ static Vector3 vector3Abs(const Vector3& value)
 	return Vector3(fabsf(value.x), fabsf(value.y), fabsf(value.z));
 }
 
-struct myLess : public std::binary_function<Vector3, Vector3, bool>
+struct myLess
 {
 	bool operator()(const Vector3& a, const Vector3& b) const
 	{
@@ -248,7 +248,7 @@ Vector2 Block::getProjectedVertex(const Vector3& vertex, NormalId normalID)
 	return answer;
 }
 
-int Block::getClosestEdge(const Matrix3& rotation, NormalId normalID, Vector3& crossAxis)
+int Block::getClosestEdge(const Matrix3& rotation, NormalId normalID, const Vector3& crossAxis)
 {
 	Vector3 axisInBody = crossAxis * rotation;
 

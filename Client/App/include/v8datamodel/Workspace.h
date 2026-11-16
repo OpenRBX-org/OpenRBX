@@ -15,8 +15,6 @@
 #include "v8tree/Verb.h"
 #include "v8world/IMoving.h"
 
-#include <boost/scoped_ptr.hpp>
-#include <boost/shared_ptr.hpp>
 #include <memory>
 #include <set>
 
@@ -64,7 +62,7 @@ private:
 	virtual bool askAddChild(const Instance* instance) const;
 	virtual void onChildChanged(Instance* instance, const PropertyChanged& event);
 	virtual void onDescendentAdded(Instance* instance);
-	virtual void onDescendentRemoving(const boost::shared_ptr<Instance>& instance);
+	virtual void onDescendentRemoving(const std::shared_ptr<Instance>& instance);
 
 public:
 	virtual void render2d(Adorn* adorn);
@@ -122,36 +120,36 @@ public:
 	void reset();
 	void setThrottleEnabled(bool value);
 	void joinAllHack();
-	void insertItems(XmlElement*, std::vector<boost::shared_ptr<Instance> >&, InsertMode, PromptMode);
+	void insertItems(XmlElement*, std::vector<std::shared_ptr<Instance> >&, InsertMode, PromptMode);
 
 	float step(float timeInterval);
 
 	void insertContent(
 		ContentId contentId,
-		std::vector<boost::shared_ptr<Instance> >& items,
+		std::vector<std::shared_ptr<Instance> >& items,
 		InsertMode insertMode,
 		PromptMode promptMode
 	);
-	boost::shared_ptr<const std::vector<boost::shared_ptr<Instance> > > insertContent(ContentId contentId);
+	std::shared_ptr<const std::vector<std::shared_ptr<Instance> > > insertContent(ContentId contentId);
 
-	void makeJoints(boost::shared_ptr<const std::vector<boost::shared_ptr<Instance> > > instances);
-	void breakJoints(boost::shared_ptr<const std::vector<boost::shared_ptr<Instance> > > instances);
+	void makeJoints(std::shared_ptr<const std::vector<std::shared_ptr<Instance> > > instances);
+	void breakJoints(std::shared_ptr<const std::vector<std::shared_ptr<Instance> > > instances);
 	void setCursor(Adorn*);
 
 private:
-	void handleFallenParts(const G3D::Array<boost::shared_ptr<PartInstance> >& fallenParts);
+	void handleFallenParts(const G3D::Array<std::shared_ptr<PartInstance> >& fallenParts);
 
 public:
 	void raiseDrawChanged() const { Notifier<Workspace, DrawChanged>::raise(DrawChanged()); }
 
 private:
-	boost::shared_ptr<Instance> statsItem;
+	std::shared_ptr<Instance> statsItem;
 	IDataState* dataState;
 	bool arrowCameraControls;
-	std::auto_ptr<MouseCommand> currentCommand;
-	std::auto_ptr<MouseCommand> stickyCommand;
+	std::unique_ptr<MouseCommand> currentCommand;
+	std::unique_ptr<MouseCommand> stickyCommand;
 	UIEvent idleMouseEvent;
-	boost::shared_ptr<Camera> currentCamera;
+	std::shared_ptr<Camera> currentCamera;
 	int flySteps;
 	bool isSimulating;
 	std::set<Script*> pendingScripts;
@@ -159,16 +157,16 @@ private:
 	bool inMouselookMode;
 
 public:
-	boost::scoped_ptr<Profiling::CodeProfiler> profileWorkspaceStep;
-	boost::scoped_ptr<Profiling::CodeProfiler> profileRunServiceStepped;
-	boost::scoped_ptr<Profiling::CodeProfiler> profileRunServiceHeartbeat;
-	boost::scoped_ptr<Profiling::ThreadProfiler> profileRun;
+	std::unique_ptr<Profiling::CodeProfiler> profileWorkspaceStep;
+	std::unique_ptr<Profiling::CodeProfiler> profileRunServiceStepped;
+	std::unique_ptr<Profiling::CodeProfiler> profileRunServiceHeartbeat;
+	std::unique_ptr<Profiling::ThreadProfiler> profileRun;
 	int imageServerViewHack;
 
 	template <class _InIt>
-	boost::shared_ptr<ModelInstance> FUN_005984c0(_InIt first, _InIt last)
+	std::shared_ptr<ModelInstance> FUN_005984c0(_InIt first, _InIt last)
 	{
-		boost::shared_ptr<ModelInstance> model = Creatable<Instance>::create<ModelInstance>();
+		std::shared_ptr<ModelInstance> model = Creatable<Instance>::create<ModelInstance>();
 		model->setParent(this);
 
 		for (; first != last; ++first) {

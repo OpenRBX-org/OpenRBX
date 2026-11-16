@@ -13,8 +13,6 @@
 #include <GLG3D/GWindow.h>
 #include <GLG3D/RenderDevice.h>
 #include <atlbase.h>
-#include <boost/scoped_ptr.hpp>
-#include <boost/shared_ptr.hpp>
 #include <memory>
 
 class CWorkspace;
@@ -102,24 +100,24 @@ private:
 
 	CRenderSettings::GraphicsMode m_unk0x5c;
 	int m_unk0x60;
-	boost::shared_ptr<RenderStatsItem> m_unk0x64;
+	std::shared_ptr<RenderStatsItem> m_unk0x64;
 	CComPtr<IWorkspace> m_unk0x6c;
-	boost::shared_ptr<RBX::DataModel> m_unk0x70;
+	std::shared_ptr<RBX::DataModel> m_unk0x70;
 	bool m_unk0x78;
-	boost::scoped_ptr<DxUserInput> m_unk0x7c;
+	std::unique_ptr<DxUserInput> m_unk0x7c;
 	bool m_unk0x80;
 	bool m_unk0x81;
 	bool m_unk0x82;
 	bool m_unk0x83;
 	double m_unk0x88;
-	std::auto_ptr<RBX::Profiling::CodeProfiler> m_unk0x90;
+	std::unique_ptr<RBX::Profiling::CodeProfiler> m_unk0x90;
 	bool m_unk0x94;
 	DWORD m_unk0x98;
 	G3D::GWindow* m_unk0x9c;
 	bool m_unk0xa0;
-	std::auto_ptr<G3D::RenderDevice> m_unk0xa4;
-	std::auto_ptr<RBX::ViewBase> m_unk0xa8;
-	std::auto_ptr<RBX::Adorn> m_unk0xac;
+	std::unique_ptr<G3D::RenderDevice> m_unk0xa4;
+	std::unique_ptr<RBX::ViewBase> m_unk0xa8;
+	std::unique_ptr<RBX::Adorn> m_unk0xac;
 	Ogre::VisualEngine* m_unk0xb0;
 };
 

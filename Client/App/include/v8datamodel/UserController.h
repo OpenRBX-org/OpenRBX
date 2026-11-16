@@ -10,8 +10,7 @@
 
 #include <G3D/ReferenceCount.h>
 #include <G3D/Vector3.h>
-#include <boost/shared_ptr.hpp>
-#include <boost/weak_ptr.hpp>
+#include <memory>
 
 namespace RBX {
 
@@ -43,10 +42,10 @@ public:
 class SteppingController : public Controller, public Listener<RunService, Heartbeat>
 {
 private:
-	boost::shared_ptr<RunService> runService;
+	std::shared_ptr<RunService> runService;
 
 protected:
-	boost::weak_ptr<const PVInstance> controlledInstance;
+	std::weak_ptr<const PVInstance> controlledInstance;
 
 	SteppingController(const PVInstance* _controlledInstance);
 	virtual ~SteppingController();
@@ -59,7 +58,7 @@ private:
 
 protected:
 	float buffer[NUM_INPUT_TYPES];
-	boost::weak_ptr<const PVInstance> target;
+	std::weak_ptr<const PVInstance> target;
 
 	AIController(const PVInstance* controlledInstance);
 	virtual ~AIController();
@@ -136,7 +135,7 @@ public:
 class PlayerController : public SteppingController
 {
 private:
-	boost::weak_ptr<ControllerService> controllerService;
+	std::weak_ptr<ControllerService> controllerService;
 	int stepsRotating;
 
 	const UserInputBase* getHardwareDevice() const;

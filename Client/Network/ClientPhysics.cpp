@@ -66,7 +66,7 @@ void ClientPhysics::onEvent(const RunService* source, Heartbeat event)
 	}
 }
 
-void ClientPhysics::update(const boost::shared_ptr<RunService>& runService)
+void ClientPhysics::update(const std::shared_ptr<RunService>& runService)
 {
 	lastUpdateTime = G3D::System::getLocalTime();
 

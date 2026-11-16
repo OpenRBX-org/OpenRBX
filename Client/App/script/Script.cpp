@@ -6,7 +6,7 @@
 #include "util/Name.h"
 #include "v8datamodel/Team.h"
 
-#include <boost/thread/once.hpp>
+#include <mutex>
 
 namespace RBX {
 
@@ -26,8 +26,8 @@ Reflection::BoundProp<bool, 1> Script::prop_Disabled("Disabled", "Behavior", &Sc
 
 } // namespace RBX
 
-static boost::shared_ptr<const std::string> helloWorld;
-static boost::once_flag flagInitScriptCpp = BOOST_ONCE_INIT;
+static std::shared_ptr<const std::string> helloWorld;
+static std::once_flag flagInitScriptCpp;
 
 namespace RBX {
 
@@ -35,7 +35,7 @@ Script::~Script()
 {
 }
 
-boost::shared_ptr<const std::string> Script::requestCode()
+std::shared_ptr<const std::string> Script::requestCode()
 {
 	if (scriptId.isNull()) {
 		return embeddedSource;
@@ -55,7 +55,7 @@ namespace RBX {
 
 Script::Script() : DescribedCreatable<Script, Instance, sScript>("Script"), disabled(false), owner(NULL)
 {
-	boost::call_once(initScriptCpp, flagInitScriptCpp);
+	std::call_once(flagInitScriptCpp, initScriptCpp);
 
 	embeddedSource = helloWorld;
 }

@@ -12,7 +12,7 @@
 #include <G3D/CoordinateFrame.h>
 #include <G3D/Ray.h>
 #include <G3D/Vector3.h>
-#include <boost/weak_ptr.hpp>
+#include <memory>
 
 namespace RBX {
 
@@ -41,8 +41,8 @@ private:
 		float hitOutsideExtents();
 	};
 
-	boost::weak_ptr<PartInstance> dragPart;
-	boost::weak_ptr<PartInstance> snapPart;
+	std::weak_ptr<PartInstance> dragPart;
+	std::weak_ptr<PartInstance> snapPart;
 	Workspace* workspace;
 	Primitive* drag;
 	G3D::Vector3 dragPointLocal;
@@ -82,7 +82,7 @@ public:
 	RunDragger();
 	~RunDragger();
 
-	void init(Workspace* _workspace, boost::weak_ptr<PartInstance> _dragPart, const G3D::Vector3& _dragPointWorld);
+	void init(Workspace* _workspace, std::weak_ptr<PartInstance> _dragPart, const G3D::Vector3& _dragPointWorld);
 	bool snap(const G3D::Ray& _mouseRay);
 
 	static void turnUpright(PartInstance* part);

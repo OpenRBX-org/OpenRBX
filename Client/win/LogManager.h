@@ -3,12 +3,12 @@
 
 #include "network/CrashReporter.h"
 #include "util/Log.h"
-#include "util/boost.hpp"
+#include "util/Thread.h"
 
 #include <atlpath.h>
-#include <boost/scoped_ptr.hpp>
 #include <exception>
 #include <imagehlp.h>
+#include <memory>
 #include <string>
 #include <vector>
 #include <windows.h>
@@ -57,7 +57,7 @@ public:
 
 class MainLogManager : public RBX::ILogProvider, public LogManager
 {
-	boost::scoped_ptr<RobloxCrashReporter> crashReporter;
+	std::unique_ptr<RobloxCrashReporter> crashReporter;
 
 public:
 	MainLogManager(const char* productName);

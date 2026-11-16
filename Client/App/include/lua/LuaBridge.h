@@ -4,9 +4,9 @@
 #include "util/Utilities.h"
 
 #include <G3D/format.h>
-#include <boost/shared_ptr.hpp>
 #include <lauxlib.h>
 #include <lua.h>
+#include <memory>
 #include <new>
 #include <stdexcept>
 
@@ -184,15 +184,15 @@ int Bridge<T, Tag>::on_index(lua_State* L)
 }
 
 template <class T>
-class SharedPtrBridge : protected Bridge<boost::shared_ptr<T>, 0>
+class SharedPtrBridge : protected Bridge<std::shared_ptr<T>, 0>
 {
 public:
-	static void registerClass(lua_State* L) { Bridge<boost::shared_ptr<T>, 0>::registerClass(L); }
+	static void registerClass(lua_State* L) { Bridge<std::shared_ptr<T>, 0>::registerClass(L); }
 	static void registerClassLibrary(lua_State* L);
 
-	static void push(lua_State* L, boost::shared_ptr<T> instance);
+	static void push(lua_State* L, std::shared_ptr<T> instance);
 
-	static boost::shared_ptr<T> getPtr(lua_State* L, unsigned int index);
+	static std::shared_ptr<T> getPtr(lua_State* L, unsigned int index);
 
 	template <class U>
 	static bool getPtr(lua_State* L, unsigned int index, U& value);
@@ -203,15 +203,15 @@ template <class U>
 bool SharedPtrBridge<T>::getPtr(lua_State* L, unsigned int index, U& value)
 {
 	if (lua_type(L, index) == LUA_TNIL) {
-		value = boost::shared_ptr<T>();
+		value = std::shared_ptr<T>();
 		return true;
 	}
 
-	return Bridge<boost::shared_ptr<T>, 0>::getValue(L, index, value);
+	return Bridge<std::shared_ptr<T>, 0>::getValue(L, index, value);
 }
 
 template <class T>
-void SharedPtrBridge<T>::push(lua_State* L, boost::shared_ptr<T> instance)
+void SharedPtrBridge<T>::push(lua_State* L, std::shared_ptr<T> instance)
 {
 	if (instance.get() == NULL) {
 		lua_pushnil(L);
@@ -240,13 +240,13 @@ void SharedPtrBridge<T>::push(lua_State* L, boost::shared_ptr<T> instance)
 }
 
 template <class T>
-boost::shared_ptr<T> SharedPtrBridge<T>::getPtr(lua_State* L, unsigned int index)
+std::shared_ptr<T> SharedPtrBridge<T>::getPtr(lua_State* L, unsigned int index)
 {
 	if (lua_type(L, index) == LUA_TNIL) {
-		return boost::shared_ptr<T>();
+		return std::shared_ptr<T>();
 	}
 
-	return getObject(L, index);
+	return Bridge<std::shared_ptr<T>, 0>::getObject(L, index);
 }
 
 } // namespace Lua

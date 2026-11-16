@@ -2,11 +2,11 @@
 #define V8DATAMODEL_VISIT_H
 
 #include "util/Handle.h"
-#include "util/boost.hpp"
+#include "util/Thread.h"
 #include "v8tree/Instance.h"
 #include "v8tree/Service.h"
 
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 #include <string>
 
 namespace RBX {
@@ -16,7 +16,7 @@ class Visit : public DescribedCreatable<Visit, Instance, sVisit>, public Service
 {
 private:
 	std::string uploadUrl;
-	boost::scoped_ptr<worker_thread> pingThread;
+	std::unique_ptr<worker_thread> pingThread;
 
 public:
 	Visit();

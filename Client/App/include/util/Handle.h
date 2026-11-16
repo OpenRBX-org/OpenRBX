@@ -1,7 +1,7 @@
 #ifndef UTIL_HANDLE_H
 #define UTIL_HANDLE_H
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace RBX {
 
@@ -10,12 +10,12 @@ class Instance;
 class InstanceHandle
 {
 private:
-	boost::shared_ptr<Instance> target;
+	std::shared_ptr<Instance> target;
 
 public:
 	InstanceHandle() {}
 	InstanceHandle(Instance* target);
-	InstanceHandle(boost::shared_ptr<Instance>);
+	InstanceHandle(std::shared_ptr<Instance>);
 	InstanceHandle(const InstanceHandle& other) : target(other.target) {}
 
 	InstanceHandle& operator=(const InstanceHandle& other)
@@ -24,13 +24,13 @@ public:
 		return *this;
 	}
 
-	InstanceHandle& operator=(boost::shared_ptr<Instance>);
+	InstanceHandle& operator=(std::shared_ptr<Instance>);
 
 	bool empty() const;
 
-	boost::shared_ptr<Instance> getTarget() const { return target; }
+	std::shared_ptr<Instance> getTarget() const { return target; }
 
-	void linkTo(boost::shared_ptr<Instance> target);
+	void linkTo(std::shared_ptr<Instance> target);
 
 	bool operator==(const InstanceHandle&) const;
 	bool operator!=(const InstanceHandle&) const;

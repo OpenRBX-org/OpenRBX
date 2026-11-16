@@ -31,9 +31,9 @@ char sObjectValue[] = "ObjectValue";
 template <>
 const int Value<int, sIntValue>::defaultValue = 0;
 template <>
-Reflection::BoundProp<int, 1> Value<int, sIntValue>::desc_Value(
+Reflection::BoundProp<int, 1> Value<int, sIntValue>::desc_Value{
 	"Value", "Data", &Value<int, sIntValue>::value, &Value<int, sIntValue>::onValueChanged
-);
+};
 
 template <>
 Reflection::SignalDesc<Value<int, sIntValue>, void(int)> Value<int, sIntValue>::desc_ValueChanged("Changed", "value");
@@ -41,9 +41,9 @@ Reflection::SignalDesc<Value<int, sIntValue>, void(int)> Value<int, sIntValue>::
 template <>
 const bool Value<bool, sBoolValue>::defaultValue = false;
 template <>
-Reflection::BoundProp<bool, 1> Value<bool, sBoolValue>::desc_Value(
+Reflection::BoundProp<bool, 1> Value<bool, sBoolValue>::desc_Value{
 	"Value", "Data", &Value<bool, sBoolValue>::value, &Value<bool, sBoolValue>::onValueChanged
-);
+};
 
 template <>
 Reflection::SignalDesc<Value<bool, sBoolValue>, void(bool)> Value<bool, sBoolValue>::desc_ValueChanged(
@@ -53,9 +53,9 @@ Reflection::SignalDesc<Value<bool, sBoolValue>, void(bool)> Value<bool, sBoolVal
 template <>
 const double Value<double, sDoubleValue>::defaultValue = 0.0;
 template <>
-Reflection::BoundProp<double, 1> Value<double, sDoubleValue>::desc_Value(
+Reflection::BoundProp<double, 1> Value<double, sDoubleValue>::desc_Value{
 	"Value", "Data", &Value<double, sDoubleValue>::value, &Value<double, sDoubleValue>::onValueChanged
-);
+};
 
 template <>
 Reflection::SignalDesc<Value<double, sDoubleValue>, void(double)> Value<double, sDoubleValue>::desc_ValueChanged(
@@ -65,9 +65,9 @@ Reflection::SignalDesc<Value<double, sDoubleValue>, void(double)> Value<double, 
 template <>
 const std::string Value<std::string, sStringValue>::defaultValue = std::string();
 template <>
-Reflection::BoundProp<std::string, 1> Value<std::string, sStringValue>::desc_Value(
+Reflection::BoundProp<std::string, 1> Value<std::string, sStringValue>::desc_Value{
 	"Value", "Data", &Value<std::string, sStringValue>::value, &Value<std::string, sStringValue>::onValueChanged
-);
+};
 
 template <>
 Reflection::SignalDesc<Value<std::string, sStringValue>, void(std::string)> Value<std::string, sStringValue>::
@@ -76,9 +76,9 @@ Reflection::SignalDesc<Value<std::string, sStringValue>, void(std::string)> Valu
 template <>
 const G3D::Vector3 Value<G3D::Vector3, sVector3Value>::defaultValue = G3D::Vector3(0.0f, 0.0f, 0.0f);
 template <>
-Reflection::BoundProp<G3D::Vector3, 1> Value<G3D::Vector3, sVector3Value>::desc_Value(
+Reflection::BoundProp<G3D::Vector3, 1> Value<G3D::Vector3, sVector3Value>::desc_Value{
 	"Value", "Data", &Value<G3D::Vector3, sVector3Value>::value, &Value<G3D::Vector3, sVector3Value>::onValueChanged
-);
+};
 
 template <>
 Reflection::SignalDesc<Value<G3D::Vector3, sVector3Value>, void(G3D::Vector3)> Value<G3D::Vector3, sVector3Value>::
@@ -87,12 +87,12 @@ Reflection::SignalDesc<Value<G3D::Vector3, sVector3Value>, void(G3D::Vector3)> V
 template <>
 const G3D::CoordinateFrame Value<G3D::CoordinateFrame, sCFrameValue>::defaultValue = G3D::CoordinateFrame();
 template <>
-Reflection::BoundProp<G3D::CoordinateFrame, 1> Value<G3D::CoordinateFrame, sCFrameValue>::desc_Value(
+Reflection::BoundProp<G3D::CoordinateFrame, 1> Value<G3D::CoordinateFrame, sCFrameValue>::desc_Value{
 	"Value",
 	"Data",
 	&Value<G3D::CoordinateFrame, sCFrameValue>::value,
 	&Value<G3D::CoordinateFrame, sCFrameValue>::onValueChanged
-);
+};
 
 template <>
 Reflection::SignalDesc<Value<G3D::CoordinateFrame, sCFrameValue>, void(G3D::CoordinateFrame)> Value<
@@ -102,9 +102,9 @@ Reflection::SignalDesc<Value<G3D::CoordinateFrame, sCFrameValue>, void(G3D::Coor
 template <>
 const G3D::Color3 Value<G3D::Color3, sColor3Value>::defaultValue = G3D::Color3();
 template <>
-Reflection::BoundProp<G3D::Color3, 1> Value<G3D::Color3, sColor3Value>::desc_Value(
+Reflection::BoundProp<G3D::Color3, 1> Value<G3D::Color3, sColor3Value>::desc_Value{
 	"Value", "Data", &Value<G3D::Color3, sColor3Value>::value, &Value<G3D::Color3, sColor3Value>::onValueChanged
-);
+};
 
 template <>
 Reflection::SignalDesc<Value<G3D::Color3, sColor3Value>, void(G3D::Color3)> Value<G3D::Color3, sColor3Value>::
@@ -113,9 +113,9 @@ Reflection::SignalDesc<Value<G3D::Color3, sColor3Value>, void(G3D::Color3)> Valu
 template <>
 const BrickColor Value<BrickColor, sBrickColorValue>::defaultValue = BrickColor::random();
 template <>
-Reflection::BoundProp<BrickColor, 1> Value<BrickColor, sBrickColorValue>::desc_Value(
+Reflection::BoundProp<BrickColor, 1> Value<BrickColor, sBrickColorValue>::desc_Value{
 	"Value", "Data", &Value<BrickColor, sBrickColorValue>::value, &Value<BrickColor, sBrickColorValue>::onValueChanged
-);
+};
 
 template <>
 Reflection::SignalDesc<Value<BrickColor, sBrickColorValue>, void(BrickColor)> Value<BrickColor, sBrickColorValue>::
@@ -125,9 +125,7 @@ Reflection::RefPropDescriptor<ObjectValue, Instance> ObjectValue::desc_Value(
 	"Value", "Data", &ObjectValue::getValue, &ObjectValue::setValue
 );
 
-Reflection::SignalDesc<ObjectValue, void(boost::shared_ptr<Instance>)> ObjectValue::desc_ValueChanged(
-	"Changed", "value"
-);
+Reflection::SignalDesc<ObjectValue, void(std::shared_ptr<Instance>)> ObjectValue::desc_ValueChanged("Changed", "value");
 
 void registerValueClasses()
 {

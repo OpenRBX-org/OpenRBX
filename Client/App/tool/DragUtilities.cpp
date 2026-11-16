@@ -23,7 +23,7 @@ void DragUtilities::moveAndClean(PartInstance* part, const G3D::Vector3& delta)
 }
 
 void DragUtilities::pvsToParts(
-	const std::vector<PVInstance*>& pvInstances, std::vector<boost::weak_ptr<PartInstance> >& parts
+	const std::vector<PVInstance*>& pvInstances, std::vector<std::weak_ptr<PartInstance> >& parts
 )
 {
 	for (unsigned int i = 0; i < pvInstances.size(); i++) {
@@ -32,7 +32,7 @@ void DragUtilities::pvsToParts(
 }
 
 void DragUtilities::instancesToParts(
-	const std::vector<Instance*>& instances, std::vector<boost::weak_ptr<PartInstance> >& parts
+	const std::vector<Instance*>& instances, std::vector<std::weak_ptr<PartInstance> >& parts
 )
 {
 	for (unsigned int i = 0; i < instances.size(); i++) {
@@ -60,7 +60,7 @@ bool DragUtilities::hitObjectOrPlane(
 	return true;
 }
 
-bool DragUtilities::anyPartAlive(const std::vector<boost::weak_ptr<PartInstance> >& parts)
+bool DragUtilities::anyPartAlive(const std::vector<std::weak_ptr<PartInstance> >& parts)
 {
 	for (unsigned int i = 0; i < parts.size(); i++) {
 		if (PartInstance::nonNullInWorkspace(parts[i].lock())) {
@@ -72,13 +72,13 @@ bool DragUtilities::anyPartAlive(const std::vector<boost::weak_ptr<PartInstance>
 }
 
 World* DragUtilities::partsToPrimitives(
-	const std::vector<boost::weak_ptr<PartInstance> >& parts, G3D::Array<Primitive*>& primitives
+	const std::vector<std::weak_ptr<PartInstance> >& parts, G3D::Array<Primitive*>& primitives
 )
 {
 	World* answer = NULL;
 
 	for (unsigned int i = 0; i < parts.size(); i++) {
-		boost::shared_ptr<PartInstance> part = parts[i].lock();
+		std::shared_ptr<PartInstance> part = parts[i].lock();
 
 		if (PartInstance::nonNullInWorkspace(part)) {
 			primitives.append(part->getPrimitive());
@@ -92,7 +92,7 @@ World* DragUtilities::partsToPrimitives(
 	return answer;
 }
 
-void DragUtilities::unJoinFromOutsiders(const std::vector<boost::weak_ptr<PartInstance> >& parts)
+void DragUtilities::unJoinFromOutsiders(const std::vector<std::weak_ptr<PartInstance> >& parts)
 {
 	G3D::Array<Primitive*> primitives;
 	World* world = partsToPrimitives(parts, primitives);
@@ -102,7 +102,7 @@ void DragUtilities::unJoinFromOutsiders(const std::vector<boost::weak_ptr<PartIn
 	}
 }
 
-void DragUtilities::joinToOutsiders(const std::vector<boost::weak_ptr<PartInstance> >& parts)
+void DragUtilities::joinToOutsiders(const std::vector<std::weak_ptr<PartInstance> >& parts)
 {
 	G3D::Array<Primitive*> primitives;
 	World* world = partsToPrimitives(parts, primitives);
@@ -112,10 +112,10 @@ void DragUtilities::joinToOutsiders(const std::vector<boost::weak_ptr<PartInstan
 	}
 }
 
-void DragUtilities::join(const std::vector<boost::weak_ptr<PartInstance> >& parts)
+void DragUtilities::join(const std::vector<std::weak_ptr<PartInstance> >& parts)
 {
 	for (unsigned int i = 0; i < parts.size(); i++) {
-		boost::shared_ptr<PartInstance> part = parts[i].lock();
+		std::shared_ptr<PartInstance> part = parts[i].lock();
 
 		if (PartInstance::nonNullInWorkspace(part)) {
 			part->join();
@@ -123,12 +123,12 @@ void DragUtilities::join(const std::vector<boost::weak_ptr<PartInstance> >& part
 	}
 }
 
-void DragUtilities::unJoinAndSetDragging(const std::vector<boost::weak_ptr<PartInstance> >& parts)
+void DragUtilities::unJoinAndSetDragging(const std::vector<std::weak_ptr<PartInstance> >& parts)
 {
 	unJoinFromOutsiders(parts);
 
 	for (unsigned int i = 0; i < parts.size(); i++) {
-		boost::shared_ptr<PartInstance> part = parts[i].lock();
+		std::shared_ptr<PartInstance> part = parts[i].lock();
 
 		if (PartInstance::nonNullInWorkspace(part)) {
 			part->setDragging(true);
@@ -136,12 +136,12 @@ void DragUtilities::unJoinAndSetDragging(const std::vector<boost::weak_ptr<PartI
 	}
 }
 
-void DragUtilities::joinAndStopDragging(const std::vector<boost::weak_ptr<PartInstance> >& parts)
+void DragUtilities::joinAndStopDragging(const std::vector<std::weak_ptr<PartInstance> >& parts)
 {
 	joinToOutsiders(parts);
 
 	for (unsigned int i = 0; i < parts.size(); i++) {
-		boost::shared_ptr<PartInstance> part = parts[i].lock();
+		std::shared_ptr<PartInstance> part = parts[i].lock();
 
 		if (PartInstance::nonNullInWorkspace(part)) {
 			part->setDragging(false);
@@ -166,10 +166,10 @@ void DragUtilities::clean(PartInstance* part)
 	}
 }
 
-void DragUtilities::clean(const std::vector<boost::weak_ptr<PartInstance> >& parts)
+void DragUtilities::clean(const std::vector<std::weak_ptr<PartInstance> >& parts)
 {
 	for (unsigned int i = 0; i < parts.size(); i++) {
-		boost::shared_ptr<PartInstance> part = parts[i].lock();
+		std::shared_ptr<PartInstance> part = parts[i].lock();
 
 		if (part) {
 			clean(part.get());
@@ -178,11 +178,11 @@ void DragUtilities::clean(const std::vector<boost::weak_ptr<PartInstance> >& par
 }
 
 void DragUtilities::move(
-	const std::vector<boost::weak_ptr<PartInstance> >& parts, G3D::CoordinateFrame from, G3D::CoordinateFrame to
+	const std::vector<std::weak_ptr<PartInstance> >& parts, G3D::CoordinateFrame from, G3D::CoordinateFrame to
 )
 {
 	for (unsigned int i = 0; i < parts.size(); i++) {
-		boost::shared_ptr<PartInstance> part = parts[i].lock();
+		std::shared_ptr<PartInstance> part = parts[i].lock();
 
 		if (part) {
 			G3D::CoordinateFrame meInFrom = from.toObjectSpace(part->getCoordinateFrame());
@@ -192,7 +192,7 @@ void DragUtilities::move(
 	}
 }
 
-Extents DragUtilities::computeExtents(const std::vector<boost::weak_ptr<PartInstance> >& parts)
+Extents DragUtilities::computeExtents(const std::vector<std::weak_ptr<PartInstance> >& parts)
 {
 	G3D::Array<Primitive*> primitives;
 	partsToPrimitives(parts, primitives);

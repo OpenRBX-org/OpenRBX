@@ -108,9 +108,10 @@ bool ArchiveBinder::resolveIDREF(IDREFBinding binding)
 
 bool ArchiveBinder::resolveRefs()
 {
-	size_t resolvedCount = std::count_if(
-		idrefBindings.begin(), idrefBindings.end(), std::bind1st(std::mem_fun(&ArchiveBinder::resolveIDREF), this)
-	);
+	size_t resolvedCount =
+		std::count_if(idrefBindings.begin(), idrefBindings.end(), [this](const IDREFBinding& binding) {
+			return resolveIDREF(binding);
+		});
 
 	return MergeBinder::resolveRefs() && resolvedCount == idrefBindings.size();
 }
@@ -141,7 +142,7 @@ void SerializerV2::merge(const XmlElement* root, RBX::DataModel* dataModel)
 		const XmlAttribute* referent = child->findAttribute(name_referent);
 		RBX::InstanceHandle h;
 		referent->getValue(h);
-		boost::shared_ptr<RBX::Instance> instance = h.getTarget();
+		std::shared_ptr<RBX::Instance> instance = h.getTarget();
 
 		if (child->getTag() != tag_External) {
 			if (child->getTag() == name_DeleteItem) {
@@ -186,7 +187,7 @@ bool ArchiveBinder::processIDREF(
 	return true;
 }
 
-void SerializerV2::loadInstances(XmlElement* root, std::vector<boost::shared_ptr<RBX::Instance> >& instances)
+void SerializerV2::loadInstances(XmlElement* root, std::vector<std::shared_ptr<RBX::Instance> >& instances)
 {
 	if (root->getTag() == tag_roblox) {
 		const XmlAttribute* version = root->findAttribute(tag_version);
@@ -196,7 +197,7 @@ void SerializerV2::loadInstances(XmlElement* root, std::vector<boost::shared_ptr
 			while (itemElement) {
 				const RBX::Name* className = NULL;
 				if (itemElement->findAttributeValue(tag_class, className)) {
-					boost::shared_ptr<RBX::Instance> instance =
+					std::shared_ptr<RBX::Instance> instance =
 						RBX::AbstractFactoryProduct<RBX::Instance>::create(*className);
 					if (instance) {
 						instance->read(itemElement, binder);
@@ -242,7 +243,7 @@ void SerializerV2::load(XmlElement* root, RBX::DataModel* dataModel)
 void SerializerV2::loadXML(std::istream& stream, RBX::DataModel* dataModel)
 {
 	TextXmlParser machine(stream.rdbuf());
-	std::auto_ptr<XmlElement> root = machine.parse();
+	std::unique_ptr<XmlElement> root = machine.parse();
 
 	if (root->getTag() == tag_roblox) {
 		const XmlAttribute* version = root->findAttribute(tag_version);

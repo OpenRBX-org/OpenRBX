@@ -53,7 +53,7 @@ protected:
 class AutoJoint : public DescribedNonCreatable<AutoJoint, JointInstance, sAutoJoint>
 {
 private:
-	boost::shared_ptr<PartInstance> part[2];
+	std::shared_ptr<PartInstance> part[2];
 
 	void setPart(int i, PartInstance* value);
 	void setPartNull(int i);

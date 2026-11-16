@@ -5,9 +5,8 @@
 #include "util/StandardOut.h"
 
 #include <G3D/format.h>
-#include <boost/bind.hpp>
-#include <boost/thread/thread.hpp>
-#include <boost/thread/xtime.hpp>
+#include <chrono>
+#include <thread>
 #include <time.h>
 
 namespace RBX {
@@ -41,10 +40,7 @@ worker_thread::work_result Visit::ping(std::string url, int interval)
 		StandardOut::singleton()->print(MESSAGE_WARNING, message.c_str());
 	}
 
-	boost::xtime xt;
-	boost::xtime_get(&xt, boost::TIME_UTC_);
-	xt.sec += interval;
-	boost::thread::sleep(xt);
+	std::this_thread::sleep_for(std::chrono::seconds(interval));
 
 	return worker_thread::more;
 }
@@ -60,7 +56,7 @@ Visit::Visit() : uploadUrl("NoVisit")
 void Visit::setPing(std::string url, int interval)
 {
 	if (url != "") {
-		pingThread.reset(new worker_thread(boost::bind(&Visit::ping, url, interval), "rbx_visit"));
+		pingThread.reset(new worker_thread([url, interval] { return ping(url, interval); }, "rbx_visit"));
 	}
 	else {
 		pingThread.reset();

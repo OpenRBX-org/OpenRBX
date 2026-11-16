@@ -5,7 +5,7 @@
 #include "reflection/reflection.h"
 #include "v8tree/Instance.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 struct lua_State;
 
@@ -14,8 +14,8 @@ namespace RBX {
 namespace Lua {
 
 template <>
-inline int Bridge<boost::shared_ptr<Reflection::DescribedBase>, 0>::on_tostring(
-	const boost::shared_ptr<Reflection::DescribedBase>& value, lua_State* L
+inline int Bridge<std::shared_ptr<Reflection::DescribedBase>, 0>::on_tostring(
+	const std::shared_ptr<Reflection::DescribedBase>& value, lua_State* L
 )
 {
 	if (Instance* instance = dynamic_cast<Instance*>(value.get())) {
@@ -28,13 +28,13 @@ inline int Bridge<boost::shared_ptr<Reflection::DescribedBase>, 0>::on_tostring(
 }
 
 template <>
-int Bridge<boost::shared_ptr<Reflection::DescribedBase>, 0>::on_index(
-	const boost::shared_ptr<Reflection::DescribedBase>& value, const char* name, lua_State* L
+int Bridge<std::shared_ptr<Reflection::DescribedBase>, 0>::on_index(
+	const std::shared_ptr<Reflection::DescribedBase>& value, const char* name, lua_State* L
 );
 
 template <>
-void Bridge<boost::shared_ptr<Reflection::DescribedBase>, 0>::on_newindex(
-	boost::shared_ptr<Reflection::DescribedBase>& value, const char* name, lua_State* L
+void Bridge<std::shared_ptr<Reflection::DescribedBase>, 0>::on_newindex(
+	std::shared_ptr<Reflection::DescribedBase>& value, const char* name, lua_State* L
 );
 
 void newweaktable(lua_State* L, const char* mode);
@@ -60,7 +60,7 @@ public:
 
 	static int newInstance(lua_State* L);
 
-	static boost::shared_ptr<Instance> getInstance(lua_State* L, unsigned int index);
+	static std::shared_ptr<Instance> getInstance(lua_State* L, unsigned int index);
 
 private:
 	static const luaL_Reg classLibrary[];

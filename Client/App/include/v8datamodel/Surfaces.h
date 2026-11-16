@@ -5,15 +5,13 @@
 #include "util/Vector6.h"
 #include "v8datamodel/Surface.h"
 
-#include <boost/noncopyable.hpp>
-
 namespace RBX {
 
 namespace Reflection {
 class PropertyDescriptor;
 }
 
-class Surfaces : public boost::noncopyable
+class Surfaces
 {
 private:
 	Surface Top;
@@ -24,6 +22,9 @@ private:
 	Surface Back;
 
 public:
+	Surfaces(const Surfaces&) = delete;
+	Surfaces& operator=(const Surfaces&) = delete;
+
 	static const bool isSurfaceDescriptor(const Reflection::PropertyDescriptor& desc);
 
 	Surfaces(PartInstance* partInstance);

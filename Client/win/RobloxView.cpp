@@ -157,7 +157,7 @@ void CRobloxView::FUN_0045d8c0(CCmdUI* pCmdUI)
 	pCmdUI->SetCheck(m_unk0x1a8 != NULL);
 }
 
-boost::shared_ptr<RBX::DataModel> CRobloxView::FUN_00403290() const
+std::shared_ptr<RBX::DataModel> CRobloxView::FUN_00403290() const
 {
 	return m_unk0x140;
 }

@@ -8,7 +8,7 @@ namespace RBX {
 
 char sTimerService[] = "Timer";
 
-void TimerService::delay(boost::function0<void> func, double seconds)
+void TimerService::delay(std::function<void()> func, double seconds)
 {
 	Item item;
 	item.time = G3D::System::getLocalTime() + seconds;

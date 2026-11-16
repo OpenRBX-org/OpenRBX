@@ -2,14 +2,14 @@
 #define V8DATAMODEL_FLAGSTAND_H
 
 #include "util/Handle.h"
+#include "util/Signals.h"
 #include "v8datamodel/BrickColor.h"
 #include "v8datamodel/PartInstance.h"
 #include "v8tree/Instance.h"
 #include "v8tree/Service.h"
 
-#include <boost/shared_ptr.hpp>
-#include <boost/signals/connection.hpp>
 #include <list>
+#include <memory>
 
 namespace RBX {
 
@@ -22,9 +22,9 @@ extern char sFlagStand[];
 class FlagStand : public DescribedCreatable<FlagStand, PartInstance, sFlagStand>
 {
 private:
-	boost::signals::scoped_connection standTouched;
+	Signals::ScopedConnection standTouched;
 
-	void onEvent_standTouched(boost::shared_ptr<Instance> other);
+	void onEvent_standTouched(std::shared_ptr<Instance> other);
 
 public:
 	FlagStand();

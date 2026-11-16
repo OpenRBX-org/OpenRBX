@@ -522,7 +522,7 @@ void SoundChannel::update3D(FMOD::Channel* channel)
 FMOD::Sound* Sound::get()
 {
 	if (!fmod_sound) {
-		boost::shared_ptr<const std::string> data = ContentProvider::singleton().requestContentString(id);
+		std::shared_ptr<const std::string> data = ContentProvider::singleton().requestContentString(id);
 		if (!data) {
 			return NULL;
 		}
@@ -606,7 +606,7 @@ void SoundService::openFmod()
 } // namespace Soundscape
 } // namespace RBX
 
-static void releaseSound(const std::pair<RBX::Soundscape::SoundId, boost::shared_ptr<RBX::Soundscape::Sound> >& p)
+static void releaseSound(const std::pair<RBX::Soundscape::SoundId, std::shared_ptr<RBX::Soundscape::Sound> >& p)
 {
 	p.second->release();
 }
@@ -707,7 +707,7 @@ EnumDesc<Soundscape::ReverbType>::EnumDesc() : EnumDescriptor("ReverbType", type
 
 namespace Soundscape {
 
-boost::shared_ptr<Sound> SoundService::loadSound(SoundId id, bool is3D)
+std::shared_ptr<Sound> SoundService::loadSound(SoundId id, bool is3D)
 {
 	LoadedSounds& sounds = is3D ? loaded3DSounds : loadedSounds;
 
@@ -716,7 +716,7 @@ boost::shared_ptr<Sound> SoundService::loadSound(SoundId id, bool is3D)
 		return iter->second;
 	}
 
-	boost::shared_ptr<Sound> result(new Sound(system, id, is3D));
+	std::shared_ptr<Sound> result(new Sound(system, id, is3D));
 	sounds[id] = result;
 	return result;
 }
@@ -1024,7 +1024,7 @@ void SoundChannel::stop()
 
 void SoundService::loadStockSound(SoundType soundType, std::string file)
 {
-	boost::shared_ptr<StockSound> sound = Creatable<Instance>::create<StockSound>();
+	std::shared_ptr<StockSound> sound = Creatable<Instance>::create<StockSound>();
 
 	sound->setName(Reflection::EnumDesc<SoundType>::singleton().convertToString(soundType));
 	sound->setSoundId(ContentId::fromAssets(file));

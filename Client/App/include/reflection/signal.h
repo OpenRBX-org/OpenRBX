@@ -4,14 +4,10 @@
 #include "reflection/member.h"
 #include "reflection/property.h"
 #include "reflection/type.h"
+#include "util/Signals.h"
 #include "util/standardout.h"
 
-#include <boost/any.hpp>
-#include <boost/function.hpp>
-#include <boost/scoped_ptr.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/signal.hpp>
-#include <boost/type_traits/function_traits.hpp>
+#include <any>
 #include <functional>
 #include <map>
 #include <memory>
@@ -24,13 +20,16 @@ class Signal;
 class SignalDescriptor;
 class SignalSource;
 
-class SignalInstance : public boost::noncopyable
+class SignalInstance
 {
 public:
+	SignalInstance(const SignalInstance&) = delete;
+	SignalInstance& operator=(const SignalInstance&) = delete;
+
 	SignalSource* getSource() { return source; }
 
 	template <class Slot>
-	boost::signals::connection connectGeneric(Slot slot, boost::signals::connect_position position);
+	Signals::Connection connectGeneric(Slot slot, Signals::ConnectPosition position);
 
 	virtual ~SignalInstance();
 
@@ -47,7 +46,7 @@ public:
 class __declspec(novtable) SignalSource
 {
 public:
-	typedef std::map<const SignalDescriptor*, boost::shared_ptr<SignalInstance> > SignalMap;
+	typedef std::map<const SignalDescriptor*, std::shared_ptr<SignalInstance> > SignalMap;
 
 	virtual ~SignalSource();
 
@@ -56,7 +55,7 @@ public:
 private:
 	friend class SignalDescriptor;
 
-	boost::scoped_ptr<SignalMap> signals;
+	std::unique_ptr<SignalMap> signals;
 };
 
 class __declspec(novtable) GenericSlotWrapper
@@ -64,7 +63,7 @@ class __declspec(novtable) GenericSlotWrapper
 public:
 	virtual ~GenericSlotWrapper();
 
-	virtual void execute(const std::vector<boost::any>& arguments) = 0;
+	virtual void execute(const std::vector<std::any>& arguments) = 0;
 
 	template <class Slot>
 	static GenericSlotWrapper* create(Slot slot);
@@ -76,7 +75,7 @@ class TGenericSlotWrapper : public GenericSlotWrapper
 	friend class GenericSlotWrapper;
 
 public:
-	virtual void execute(const std::vector<boost::any>& arguments);
+	virtual void execute(const std::vector<std::any>& arguments);
 
 private:
 	TGenericSlotWrapper(const Slot& slot) : slot(slot) {}
@@ -85,7 +84,7 @@ private:
 };
 
 template <class Slot>
-void TGenericSlotWrapper<Slot>::execute(const std::vector<boost::any>& arguments)
+void TGenericSlotWrapper<Slot>::execute(const std::vector<std::any>& arguments)
 {
 	try {
 		slot(arguments);
@@ -115,14 +114,14 @@ protected:
 	SignalInstance* findSignalInstance(const SignalSource* source) const;
 
 private:
-	virtual boost::signals::connection connectGeneric(
-		SignalInstance* instance, GenericSlotWrapper* wrapper, boost::signals::connect_position position
+	virtual Signals::Connection connectGeneric(
+		SignalInstance* instance, GenericSlotWrapper* wrapper, Signals::ConnectPosition position
 	) const = 0;
 
 	virtual SignalInstance* newSignalInstance(SignalSource& source) const = 0;
 
 public:
-	boost::shared_ptr<SignalInstance> getSignalInstance(SignalSource& source) const;
+	std::shared_ptr<SignalInstance> getSignalInstance(SignalSource& source) const;
 	const SignatureDescriptor& getSignature() const;
 
 protected:
@@ -141,7 +140,7 @@ public:
 
 	const SignalDescriptor* getDescriptor() const { return descriptor; }
 
-	boost::shared_ptr<SignalInstance> getSignalInstance() const;
+	std::shared_ptr<SignalInstance> getSignalInstance() const;
 
 protected:
 	const SignalDescriptor* descriptor;
@@ -149,7 +148,7 @@ protected:
 };
 
 template <class Slot>
-boost::signals::connection SignalInstance::connectGeneric(Slot slot, boost::signals::connect_position pos)
+Signals::Connection SignalInstance::connectGeneric(Slot slot, Signals::ConnectPosition pos)
 {
 	return descriptor.connectGeneric(this, GenericSlotWrapper::create(slot), pos);
 }
@@ -158,11 +157,7 @@ template <class Signature>
 class __declspec(novtable) TSignalDesc : public SignalDescriptor
 {
 public:
-	typedef boost::function_traits<Signature> traits;
-
-	class TSignalInstance
-		: public SignalInstance,
-		  public boost::signal<Signature, boost::last_value<void>, int, std::less<int>, boost::function<Signature> >
+	class TSignalInstance : public SignalInstance, public Signals::Signal<Signature>
 	{
 	public:
 		TSignalInstance(SignalSource* source, const SignalDescriptor& descriptor) : SignalInstance(source, descriptor)
@@ -191,13 +186,13 @@ protected:
 	}
 
 public:
-	boost::signals::connection connect(SignalSource* source, const typename TSignalInstance::slot_type& slot, int group)
+	Signals::Connection connect(SignalSource* source, typename TSignalInstance::Function slot, int group)
 	{
 		if (source != NULL) {
-			return sig(*source).connect(group, slot, boost::signals::at_back);
+			return sig(*source).connect(group, std::move(slot), Signals::at_back);
 		}
 
-		return boost::signals::connection();
+		return Signals::Connection();
 	}
 
 	bool empty(const SignalSource* source)
@@ -217,14 +212,14 @@ protected:
 	public:
 		GenericSlotAdapter(GenericSlotWrapper* wrapper) : wrapper(wrapper) {}
 
-		void operator()() const { wrapper->execute(std::vector<boost::any>()); }
+		void operator()() const { wrapper->execute(std::vector<std::any>()); }
 
 	private:
-		boost::shared_ptr<GenericSlotWrapper> wrapper;
+		std::shared_ptr<GenericSlotWrapper> wrapper;
 	};
 
-	virtual boost::signals::connection connectGeneric(
-		SignalInstance* si, GenericSlotWrapper* wrapper, boost::signals::connect_position pos
+	virtual Signals::Connection connectGeneric(
+		SignalInstance* si, GenericSlotWrapper* wrapper, Signals::ConnectPosition pos
 	) const
 	{
 		return static_cast<typename TSignalDesc<Signature>::TSignalInstance*>(si)->connect(
@@ -251,7 +246,7 @@ template <class Signature>
 class __declspec(novtable) SignalDescImpl<1, Signature> : public TSignalDesc<Signature>
 {
 public:
-	void fire(SignalSource* source, typename boost::function_traits<Signature>::arg1_type arg1)
+	void fire(SignalSource* source, ArgumentType<Signature, 0> arg1)
 	{
 		typename TSignalDesc<Signature>::TSignalInstance* instance = this->findSig(source);
 
@@ -266,9 +261,9 @@ protected:
 	public:
 		GenericSlotAdapter(GenericSlotWrapper* wrapper) : wrapper(wrapper) {}
 
-		void operator()(typename boost::function_traits<Signature>::arg1_type arg1) const
+		void operator()(ArgumentType<Signature, 0> arg1) const
 		{
-			std::vector<boost::any> args(1);
+			std::vector<std::any> args(1);
 
 			args[0] = arg1;
 
@@ -276,11 +271,11 @@ protected:
 		}
 
 	private:
-		boost::shared_ptr<GenericSlotWrapper> wrapper;
+		std::shared_ptr<GenericSlotWrapper> wrapper;
 	};
 
-	virtual boost::signals::connection connectGeneric(
-		SignalInstance* si, GenericSlotWrapper* wrapper, boost::signals::connect_position pos
+	virtual Signals::Connection connectGeneric(
+		SignalInstance* si, GenericSlotWrapper* wrapper, Signals::ConnectPosition pos
 	) const
 	{
 		return static_cast<typename TSignalDesc<Signature>::TSignalInstance*>(si)->connect(
@@ -297,11 +292,7 @@ template <class Signature>
 class __declspec(novtable) SignalDescImpl<2, Signature> : public TSignalDesc<Signature>
 {
 public:
-	void fire(
-		SignalSource* source,
-		typename boost::function_traits<Signature>::arg1_type arg1,
-		typename boost::function_traits<Signature>::arg2_type arg2
-	)
+	void fire(SignalSource* source, ArgumentType<Signature, 0> arg1, ArgumentType<Signature, 1> arg2)
 	{
 		typename TSignalDesc<Signature>::TSignalInstance* instance = this->findSig(source);
 
@@ -316,12 +307,9 @@ protected:
 	public:
 		GenericSlotAdapter(GenericSlotWrapper* wrapper) : wrapper(wrapper) {}
 
-		void operator()(
-			typename boost::function_traits<Signature>::arg1_type arg1,
-			typename boost::function_traits<Signature>::arg2_type arg2
-		) const
+		void operator()(ArgumentType<Signature, 0> arg1, ArgumentType<Signature, 1> arg2) const
 		{
-			std::vector<boost::any> args(2);
+			std::vector<std::any> args(2);
 
 			args[0] = arg1;
 			args[1] = arg2;
@@ -330,11 +318,11 @@ protected:
 		}
 
 	private:
-		boost::shared_ptr<GenericSlotWrapper> wrapper;
+		std::shared_ptr<GenericSlotWrapper> wrapper;
 	};
 
-	virtual boost::signals::connection connectGeneric(
-		SignalInstance* si, GenericSlotWrapper* wrapper, boost::signals::connect_position pos
+	virtual Signals::Connection connectGeneric(
+		SignalInstance* si, GenericSlotWrapper* wrapper, Signals::ConnectPosition pos
 	) const
 	{
 		return static_cast<typename TSignalDesc<Signature>::TSignalInstance*>(si)->connect(
@@ -348,41 +336,35 @@ protected:
 };
 
 template <class Class, class Signature>
-class SignalDesc : public SignalDescImpl<boost::function_traits<Signature>::arity, Signature>
+class SignalDesc : public SignalDescImpl<FunctionTraits<Signature>::arity, Signature>
 {
 public:
 	SignalDesc(const char* name)
-		: SignalDescImpl<boost::function_traits<Signature>::arity, Signature>(Class::classDescriptor(), name)
+		: SignalDescImpl<FunctionTraits<Signature>::arity, Signature>(Class::classDescriptor(), name)
 	{
 	}
 
 	SignalDesc(const char* name, const char* arg1name)
-		: SignalDescImpl<boost::function_traits<Signature>::arity, Signature>(Class::classDescriptor(), name)
+		: SignalDescImpl<FunctionTraits<Signature>::arity, Signature>(Class::classDescriptor(), name)
 	{
 		SignatureDescriptor::Item arg1 = {
-			&Name::declare(arg1name, -1),
-			&Type::singleton<typename boost::function_traits<Signature>::arg1_type>(),
-			Value()
+			&Name::declare(arg1name, -1), &Type::singleton<ArgumentType<Signature, 0> >(), Value()
 		};
 
 		this->signature.arguments.push_back(arg1);
 	}
 
 	SignalDesc(const char* name, const char* arg1name, const char* arg2name)
-		: SignalDescImpl<boost::function_traits<Signature>::arity, Signature>(Class::classDescriptor(), name)
+		: SignalDescImpl<FunctionTraits<Signature>::arity, Signature>(Class::classDescriptor(), name)
 	{
 		SignatureDescriptor::Item arg1 = {
-			&Name::declare(arg1name, -1),
-			&Type::singleton<typename boost::function_traits<Signature>::arg1_type>(),
-			Value()
+			&Name::declare(arg1name, -1), &Type::singleton<ArgumentType<Signature, 0> >(), Value()
 		};
 
 		this->signature.arguments.push_back(arg1);
 
 		SignatureDescriptor::Item arg2 = {
-			&Name::declare(arg2name, -1),
-			&Type::singleton<typename boost::function_traits<Signature>::arg2_type>(),
-			Value()
+			&Name::declare(arg2name, -1), &Type::singleton<ArgumentType<Signature, 1> >(), Value()
 		};
 
 		this->signature.arguments.push_back(arg2);

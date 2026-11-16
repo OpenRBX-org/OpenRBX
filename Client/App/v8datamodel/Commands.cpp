@@ -23,7 +23,6 @@
 #include "v8xml/SerializerV2.h"
 
 #include <algorithm>
-#include <boost/bind.hpp>
 #include <memory>
 
 template class RBX::TToolVerb<RBX::ArrowTool, RBX::RunStateVerb>;
@@ -151,7 +150,7 @@ void SelectAllCommand::doIt(IDataState* dataState)
 	dataModel->getWorkspace()->selectAll();
 }
 
-static void FUN_00596ca0(boost::shared_ptr<Instance> instance)
+static void FUN_00596ca0(std::shared_ptr<Instance> instance)
 {
 	PartInstance::setLocked(instance.get(), true);
 }
@@ -192,7 +191,7 @@ void EngineStatsCommand::doIt(IDataState* dataState)
 	dataModel->getWorkspace()->getWorld()->getContactManager().getSpatialHash().doStats();
 }
 
-static void FUN_00596fc0(UndoState* undoState, RedoState* redoState, boost::shared_ptr<Instance> instance)
+static void FUN_00596fc0(UndoState* undoState, RedoState* redoState, std::shared_ptr<Instance> instance)
 {
 	undoState->addParentProperty(*instance);
 	redoState->addDelete(*instance);
@@ -239,7 +238,7 @@ static bool FUN_00597450(ModelInstance* model)
 	return model->numChildren() > 0;
 }
 
-void FUN_00597490(XmlElement* container, boost::shared_ptr<Instance> instance)
+void FUN_00597490(XmlElement* container, std::shared_ptr<Instance> instance)
 {
 	XmlElement* child = instance->write();
 
@@ -271,7 +270,7 @@ bool CameraVerb::isEnabled() const
 	return true;
 }
 
-static void FUN_00597890(boost::shared_ptr<Instance> instance)
+static void FUN_00597890(std::shared_ptr<Instance> instance)
 {
 	if (PartInstance* part = dynamic_cast<PartInstance*>(instance.get())) {
 		Surfaces& surfaces = part->getSurfaces();
@@ -283,7 +282,7 @@ static void FUN_00597890(boost::shared_ptr<Instance> instance)
 	}
 
 	if (instance->getChildren()) {
-		std::for_each(instance->getChildren()->begin(), instance->getChildren()->end(), boost::bind(&FUN_00597890, _1));
+		std::for_each(instance->getChildren()->begin(), instance->getChildren()->end(), FUN_00597890);
 	}
 }
 
@@ -295,14 +294,12 @@ public:
 	{
 	}
 
-	~Unknown00597dd0() {}
-
-	void operator()(boost::shared_ptr<Instance> instance);
+	void operator()(std::shared_ptr<Instance> instance);
 
 	const Name& m_unk0x00;
 	bool m_unk0x04;
-	std::auto_ptr<UndoState> m_unk0x08;
-	std::auto_ptr<RedoState> m_unk0x0c;
+	std::unique_ptr<UndoState> m_unk0x08;
+	std::unique_ptr<RedoState> m_unk0x0c;
 };
 
 EditSelectionVerb::EditSelectionVerb(std::string name, DataModel* dataModel)
@@ -361,8 +358,8 @@ bool JoinCommand::isEnabled() const
 	Selection* currentSelection = dataModel ? dataModel->create<Selection>() : NULL;
 
 	if (currentSelection->size() == 2) {
-		boost::shared_ptr<Instance> first = currentSelection->front();
-		boost::shared_ptr<Instance> second = currentSelection->back();
+		std::shared_ptr<Instance> first = currentSelection->front();
+		std::shared_ptr<Instance> second = currentSelection->back();
 
 		if (FUN_00617200(first.get(), second.get())) {
 			return true;
@@ -379,8 +376,8 @@ void JoinCommand::doIt(IDataState* dataState)
 	Selection* currentSelection = dataModel ? dataModel->create<Selection>() : NULL;
 
 	if (currentSelection->size() == 2) {
-		boost::shared_ptr<Instance> first = currentSelection->front();
-		boost::shared_ptr<Instance> second = currentSelection->back();
+		std::shared_ptr<Instance> first = currentSelection->front();
+		std::shared_ptr<Instance> second = currentSelection->back();
 		FUN_0061a840(first.get(), second.get());
 	}
 }
@@ -407,7 +404,7 @@ void ClearStarterpack::doIt(IDataState* dataState)
 	}
 }
 
-static void FUN_00598570(boost::shared_ptr<Instance> instance)
+static void FUN_00598570(std::shared_ptr<Instance> instance)
 {
 	if (PartInstance* part = dynamic_cast<PartInstance*>(instance.get())) {
 		Surfaces& surfaces = part->getSurfaces();
@@ -419,7 +416,7 @@ static void FUN_00598570(boost::shared_ptr<Instance> instance)
 	}
 
 	if (instance->getChildren()) {
-		std::for_each(instance->getChildren()->begin(), instance->getChildren()->end(), boost::bind(&FUN_00598570, _1));
+		std::for_each(instance->getChildren()->begin(), instance->getChildren()->end(), FUN_00598570);
 	}
 }
 
@@ -436,7 +433,7 @@ BoolPropertyVerb::BoolPropertyVerb(const std::string& name, DataModel* dataModel
 {
 }
 
-static bool FUN_00598ac0(const Name& propertyName, boost::shared_ptr<const Instance> instance)
+static bool FUN_00598ac0(const Name& propertyName, std::shared_ptr<const Instance> instance)
 {
 	Reflection::MemberDescriptorContainer<Reflection::PropertyDescriptor>::ConstIterator iter =
 		instance->findProperty(propertyName);
@@ -451,7 +448,7 @@ static bool FUN_00598ac0(const Name& propertyName, boost::shared_ptr<const Insta
 	return false;
 }
 
-void Unknown00597dd0::operator()(boost::shared_ptr<Instance> instance)
+void Unknown00597dd0::operator()(std::shared_ptr<Instance> instance)
 {
 	Reflection::MemberDescriptorContainer<Reflection::PropertyDescriptor>::Iterator iter =
 		instance->findProperty(m_unk0x00);
@@ -503,7 +500,7 @@ public:
 	{
 	}
 
-	void operator()(const boost::shared_ptr<Instance>& instance)
+	void operator()(const std::shared_ptr<Instance>& instance)
 	{
 		if (instance->numChildren() > 0) {
 			for (unsigned int i = 0; i < instance->numChildren(); i++) {
@@ -555,7 +552,9 @@ void ControllerCommand::setController(Controller::ControllerType controllerType)
 	Controller::ControllerType newType =
 		filteredSelection->FUN_00598690(Unknown00598770(controllerType)) ? controllerType : Controller::NO_CONTROLLER;
 
-	std::for_each(filteredSelection->begin(), filteredSelection->end(), boost::bind(&FUN_00596950, newType, _1));
+	std::for_each(filteredSelection->begin(), filteredSelection->end(), [newType](PVInstance* instance) {
+		FUN_00596950(newType, instance);
+	});
 }
 
 void AllCanSelectCommand::doIt(IDataState* dataState)
@@ -586,7 +585,7 @@ void UngroupSelectionVerb::doIt(IDataState* dataState)
 	FilteredSelection<ModelInstance>* filteredSelection =
 		dataModel ? dataModel->create<FilteredSelection<ModelInstance> >() : NULL;
 
-	std::vector<boost::shared_ptr<Instance> > models;
+	std::vector<std::shared_ptr<Instance> > models;
 	for (std::vector<ModelInstance*>::const_iterator iter = filteredSelection->begin();
 		 iter != filteredSelection->end();
 		 ++iter) {
@@ -810,9 +809,9 @@ void FixedCameraCommand::doIt(IDataState* dataState)
 
 bool BoolPropertyVerb::isChecked() const
 {
-	return std::find_if(
-			   selection->begin(), selection->end(), boost::bind(&FUN_00598ac0, boost::cref(propertyName), _1)
-		   ) != selection->end();
+	return std::find_if(selection->begin(), selection->end(), [this](const std::shared_ptr<Instance>& instance) {
+			   return FUN_00598ac0(propertyName, instance);
+		   }) != selection->end();
 }
 
 void BoolPropertyVerb::doIt(IDataState* dataState)
@@ -820,7 +819,7 @@ void BoolPropertyVerb::doIt(IDataState* dataState)
 	FUN_00596660(dataModel);
 
 	Unknown00597dd0 functor(propertyName, !isChecked());
-	std::for_each(selection->begin(), selection->end(), functor);
+	std::for_each(selection->begin(), selection->end(), std::move(functor));
 	dataState->pushState(propertyName.toString(), functor.m_unk0x08.release(), functor.m_unk0x0c.release());
 	dataState->setDirty(true);
 }
@@ -935,7 +934,7 @@ void WeldSelectionVerb::doIt(IDataState* dataState)
 {
 	FUN_00596660(dataModel);
 	Selection* currentSelection = dataModel ? dataModel->create<Selection>() : NULL;
-	std::for_each(selection->begin(), selection->end(), boost::bind(&FUN_00598570, _1));
+	std::for_each(selection->begin(), selection->end(), FUN_00598570);
 	(dataModel ? dataModel->create<Soundscape::SoundService>() : NULL)->playSound(PING_SOUND);
 	dataState->clearStack();
 	dataState->setDirty(true);
@@ -963,7 +962,7 @@ void SnapSelectionVerb::doIt(IDataState* dataState)
 {
 	FUN_00596660(dataModel);
 	Selection* currentSelection = dataModel ? dataModel->create<Selection>() : NULL;
-	std::for_each(selection->begin(), selection->end(), boost::bind(&FUN_00597890, _1));
+	std::for_each(selection->begin(), selection->end(), FUN_00597890);
 	(dataModel ? dataModel->create<Soundscape::SoundService>() : NULL)->playSound(PING_SOUND);
 	dataState->clearStack();
 	dataState->setDirty(true);
@@ -987,20 +986,24 @@ void DuplicateSelectionVerb::doIt(IDataState* dataState)
 	UndoState* undoState = new UndoState();
 	RedoState* redoState = new RedoState();
 
-	std::auto_ptr<XmlElement> root(SerializerV2::newRootElement());
+	std::unique_ptr<XmlElement> root(SerializerV2::newRootElement());
 	Selection* currentSelection = dataModel ? dataModel->create<Selection>() : NULL;
-	std::for_each(selection->begin(), selection->end(), boost::bind(&FUN_00597490, root.get(), _1));
+	std::for_each(
+		selection->begin(), selection->end(), [container = root.get()](const std::shared_ptr<Instance>& instance) {
+			FUN_00597490(container, instance);
+		}
+	);
 	SerializerV2::isolateHandles(root.get());
 
-	std::vector<boost::shared_ptr<Instance> > instances;
+	std::vector<std::shared_ptr<Instance> > instances;
 	workspace->insertItems(root.get(), instances, INSERT_TO_3D_VIEW, ALLOW_PROMPTS);
 
-	const std::vector<boost::shared_ptr<Instance> >& items = instances;
+	const std::vector<std::shared_ptr<Instance> >& items = instances;
 	selection->setSelection(items.begin(), items.end());
 
 	(dataModel ? dataModel->create<Soundscape::SoundService>() : NULL)->playSound(PING_SOUND);
 
-	for (std::vector<boost::shared_ptr<Instance> >::const_iterator iter = items.begin(); iter != items.end(); ++iter) {
+	for (std::vector<std::shared_ptr<Instance> >::const_iterator iter = items.begin(); iter != items.end(); ++iter) {
 		if (Instance* instance = iter->get()) {
 			undoState->addDelete(*instance);
 			redoState->addParentProperty(*instance);
@@ -1021,9 +1024,13 @@ void DeleteBase::doIt(IDataState* dataState)
 		UndoState* undoState = new UndoState();
 		RedoState* redoState = new RedoState();
 
-		std::for_each(selection->begin(), selection->end(), boost::bind(&FUN_00596fc0, undoState, redoState, _1));
+		std::for_each(
+			selection->begin(), selection->end(), [undoState, redoState](const std::shared_ptr<Instance>& instance) {
+				FUN_00596fc0(undoState, redoState, instance);
+			}
+		);
 
-		while (boost::shared_ptr<Instance> instance = selection->front()) {
+		while (std::shared_ptr<Instance> instance = selection->front()) {
 			instance->setParent(NULL);
 		}
 

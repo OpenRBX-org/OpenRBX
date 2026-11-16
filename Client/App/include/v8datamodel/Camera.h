@@ -53,7 +53,7 @@ private:
 	G3D::CoordinateFrame cameraFocus;
 	CameraType cameraType;
 	AnimationType animationType;
-	boost::shared_ptr<Instance> cameraSubject;
+	std::shared_ptr<Instance> cameraSubject;
 	bool cameraExternallyAdjusted;
 
 	ICameraOwner* getCameraOwner();

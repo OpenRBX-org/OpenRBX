@@ -384,7 +384,7 @@ void TextXmlWriterWithEmbeddedContent::serializeNode(const XmlElement* xmlNode, 
 			else if (embeddedContent.find(contentId) == embeddedContent.end()) {
 				embeddedContent.insert(contentId);
 
-				std::auto_ptr<std::istream> contentStream;
+				std::unique_ptr<std::istream> contentStream;
 
 				try {
 					contentStream = RBX::ContentProvider::singleton().getContent(contentId);
@@ -424,7 +424,7 @@ void TextXmlWriterWithEmbeddedContent::serializeNode(const XmlElement* xmlNode, 
 	}
 }
 
-std::auto_ptr<XmlElement> TextXmlParser::parse()
+std::unique_ptr<XmlElement> TextXmlParser::parse()
 {
 	if (buffer->sgetc() == EOF) {
 		throw std::runtime_error("TextXmlParser::parse empty file");
@@ -457,7 +457,7 @@ std::auto_ptr<XmlElement> TextXmlParser::parse()
 			elements.pop();
 
 			if (elements.empty()) {
-				return std::auto_ptr<XmlElement>(currentElement);
+				return std::unique_ptr<XmlElement>(currentElement);
 			}
 		}
 		else {

@@ -3,17 +3,18 @@
 
 #include "util/Name.h"
 
-#include <boost/noncopyable.hpp>
-#include <boost/thread/once.hpp>
-#include <boost/thread/recursive_mutex.hpp>
 #include <map>
+#include <mutex>
 #include <string>
 
 namespace RBX {
 
-class Guid : private boost::noncopyable
+class Guid
 {
 public:
+	Guid(const Guid&) = delete;
+	Guid& operator=(const Guid&) = delete;
+
 	struct Data
 	{
 		bool operator<(const Data& other) const;
@@ -51,7 +52,7 @@ class __declspec(novtable) GuidItem
 		typedef std::map<Guid::Data, T*> Map;
 
 		Map map;
-		boost::recursive_mutex mutex;
+		std::recursive_mutex mutex;
 	};
 
 	static StaticData* staticData;
@@ -60,8 +61,8 @@ class __declspec(novtable) GuidItem
 
 	static StaticData& getStaticData()
 	{
-		static boost::once_flag flag = BOOST_ONCE_INIT;
-		boost::call_once(&initStaticData, flag);
+		static std::once_flag flag;
+		std::call_once(flag, &initStaticData);
 		return *staticData;
 	}
 
@@ -91,7 +92,7 @@ public:
 		}
 
 		StaticData& s = getStaticData();
-		boost::recursive_mutex::scoped_lock lock(s.mutex);
+		std::lock_guard<std::recursive_mutex> lock(s.mutex);
 		typename StaticData::Map::const_iterator iter = s.map.find(data);
 
 		if (iter != s.map.end()) {
@@ -117,7 +118,7 @@ private:
 			Guid::Data data;
 			guid.extract(data);
 			StaticData& s = getStaticData();
-			boost::recursive_mutex::scoped_lock lock(s.mutex);
+			std::lock_guard<std::recursive_mutex> lock(s.mutex);
 			s.map.erase(data);
 		}
 		registeredGuid = false;
@@ -129,7 +130,7 @@ private:
 			Guid::Data data;
 			guid.extract(data);
 			StaticData& s = getStaticData();
-			boost::recursive_mutex::scoped_lock lock(s.mutex);
+			std::lock_guard<std::recursive_mutex> lock(s.mutex);
 			s.map[data] = const_cast<T*>(static_cast<const T*>(this));
 		}
 		registeredGuid = true;

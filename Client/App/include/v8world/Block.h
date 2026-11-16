@@ -51,7 +51,7 @@ public:
 
 	const Vector3* getFaceVertex(NormalId faceId, int vertexId) const;
 
-	int getClosestEdge(const Matrix3& rotation, NormalId normalID, Vector3& crossAxis);
+	int getClosestEdge(const Matrix3& rotation, NormalId normalID, const Vector3& crossAxis);
 
 	int faceVertexToEdge(NormalId faceId, int vertexId);
 	int faceVertexToClockwiseEdge(NormalId, int);

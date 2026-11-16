@@ -4,13 +4,12 @@
 #include "script/Script.h"
 #include "util/ContentProvider.h"
 #include "util/Events.h"
+#include "util/Utilities.h"
 #include "v8datamodel/DataModel.h"
 #include "v8tree/Service.h"
 
 #include <algorithm>
-#include <boost/iostreams/copy.hpp>
 #include <memory>
-#include <sstream>
 
 static HMODULE g_unk0x009544b0;
 
@@ -361,7 +360,7 @@ void CScriptEditor::FUN_00468db0()
 {
 	if (GetCtrl().GetModify() && !m_unk0x144) {
 		if (m_unk0x134) {
-			boost::recursive_mutex::scoped_lock lock(*m_unk0x128);
+			std::lock_guard<std::recursive_mutex> lock(*m_unk0x128);
 			int length = GetCtrl().GetTextLength();
 			CString text;
 			GetCtrl().GetText(length + 1, text.GetBuffer(length + 1));
@@ -389,19 +388,17 @@ void CScriptEditor::FUN_004696d0()
 
 		if (m_unk0x134) {
 			try {
-				boost::recursive_mutex::scoped_lock lock(*m_unk0x128);
+				std::lock_guard<std::recursive_mutex> lock(*m_unk0x128);
 				m_unk0x146 = m_unk0x134->getScriptId().isNull();
 
 				if (m_unk0x146) {
 					GetCtrl().SetText(m_unk0x134->getEmbeddedCode().c_str());
 				}
 				else {
-					std::auto_ptr<std::istream> stream(
+					std::unique_ptr<std::istream> stream(
 						RBX::ContentProvider::singleton().getContent(m_unk0x134->getScriptId())
 					);
-					std::ostringstream text;
-					boost::iostreams::copy(*stream, text, 0x1000);
-					GetCtrl().SetText(text.str().c_str());
+					GetCtrl().SetText(RBX::readStream(*stream).c_str());
 				}
 
 				GetCtrl().SetReadOnly(m_unk0x145 || !m_unk0x146);
@@ -449,10 +446,10 @@ void CScriptEditor::VTable0x08(const RBX::Instance* source, RBX::PropertyChanged
 	}
 }
 
-void CScriptEditor::FUN_00469b30(boost::shared_ptr<RBX::Script> script)
+void CScriptEditor::FUN_00469b30(std::shared_ptr<RBX::Script> script)
 {
 	if (m_unk0x134) {
-		boost::recursive_mutex::scoped_lock lock(*m_unk0x128);
+		std::lock_guard<std::recursive_mutex> lock(*m_unk0x128);
 		RBX::stopListening<RBX::Instance, RBX::AncestorChanged>(m_unk0x134, this);
 		RBX::stopListening<RBX::Instance, RBX::PropertyChanged>(m_unk0x134, this);
 		RBX::stopListening<RBX::RunService, RBX::RunState>(m_unk0x13c, this);
@@ -465,7 +462,7 @@ void CScriptEditor::FUN_00469b30(boost::shared_ptr<RBX::Script> script)
 		m_unk0x128 = RBX::DataModel::getMutex(script.get());
 		m_unk0x134 = script;
 
-		boost::recursive_mutex::scoped_lock lock(*m_unk0x128);
+		std::lock_guard<std::recursive_mutex> lock(*m_unk0x128);
 		m_unk0x13c = RBX::shared_from(RBX::ServiceProvider::find<RBX::RunService>(script.get()));
 		RBX::startListening<RBX::RunService, RBX::RunState>(m_unk0x13c, this);
 		RBX::startListening<RBX::Instance, RBX::PropertyChanged>(m_unk0x134, this);
@@ -480,7 +477,7 @@ void CScriptEditor::FUN_00469b30(boost::shared_ptr<RBX::Script> script)
 void CScriptEditor::onEvent(const RBX::Instance* source, RBX::AncestorChanged event)
 {
 	if (!event.newParent) {
-		FUN_00469b30(boost::shared_ptr<RBX::Script>());
+		FUN_00469b30(std::shared_ptr<RBX::Script>());
 		::PostMessage(m_unk0x130->m_hWnd, WM_CLOSE, 0, 0);
 	}
 }
@@ -494,7 +491,7 @@ void CScriptEditor::OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint)
 
 CScriptEditor::~CScriptEditor()
 {
-	FUN_00469b30(boost::shared_ptr<RBX::Script>());
+	FUN_00469b30(std::shared_ptr<RBX::Script>());
 }
 
 // clang-format off

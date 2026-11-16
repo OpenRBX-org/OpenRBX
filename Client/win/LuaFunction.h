@@ -8,7 +8,7 @@
 #include <G3D/format.h>
 #include <atlbase.h>
 #include <atlcom.h>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -76,7 +76,7 @@ public:
 	STDMETHOD(Call)(VARIANT arg1, VARIANT arg2, VARIANT arg3, VARIANT arg4, VARIANT* result);
 	STDMETHOD(CallEx)(SAFEARRAY* args, SAFEARRAY** result);
 
-	boost::shared_ptr<RBX::DataModel> m_unk0x0c;
+	std::shared_ptr<RBX::DataModel> m_unk0x0c;
 	RBX::Lua::FunctionRef m_unk0x14;
 };
 

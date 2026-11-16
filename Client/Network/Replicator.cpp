@@ -37,8 +37,6 @@
 #include <RakNetStatistics.h>
 #include <RakPeer.h>
 #include <algorithm>
-#include <boost/bind.hpp>
-#include <boost/noncopyable.hpp>
 #include <stdexcept>
 #include <stdio.h>
 
@@ -84,7 +82,7 @@ Reflection::SignalDesc<Replicator, void(std::string, bool)> Replicator::event_Di
 } // namespace Network
 } // namespace RBX
 
-static RBX::Reflection::BoundFuncDesc<RBX::Network::Replicator, boost::shared_ptr<RBX::Reflection::DescribedBase>(), 0>
+static RBX::Reflection::BoundFuncDesc<RBX::Network::Replicator, std::shared_ptr<RBX::Reflection::DescribedBase>(), 0>
 	func_SendMarker(
 		&RBX::Network::Replicator::sendMarker, "SendMarker", RBX::Reflection::FunctionDescriptor::NeedTrustedCaller
 	);
@@ -100,10 +98,9 @@ static RBX::Reflection::BoundFuncDesc<RBX::Network::Replicator, void(), 0> func_
 	RBX::Reflection::FunctionDescriptor::NeedTrustedCaller
 );
 
-static RBX::Reflection::BoundFuncDesc<RBX::Network::Replicator, boost::shared_ptr<RBX::Instance>(), 0>
-	prop_RemotePlayer(
-		&RBX::Network::Replicator::getPlayer, "GetPlayer", RBX::Reflection::FunctionDescriptor::NeedTrustedCaller
-	);
+static RBX::Reflection::BoundFuncDesc<RBX::Network::Replicator, std::shared_ptr<RBX::Instance>(), 0> prop_RemotePlayer(
+	&RBX::Network::Replicator::getPlayer, "GetPlayer", RBX::Reflection::FunctionDescriptor::NeedTrustedCaller
+);
 
 namespace RBX {
 namespace Network {
@@ -117,19 +114,19 @@ class Replicator::ReplicatorStatsItem : public Stats::Item
 	Item* ping;
 	Item* instanceSize;
 	Item* bps;
-	const boost::shared_ptr<Replicator> replicator;
+	const std::shared_ptr<Replicator> replicator;
 	const RakNetStatistics* statistics;
 
 public:
 	unsigned int instanceCount;
 	unsigned int instanceBits;
 
-	ReplicatorStatsItem(const boost::shared_ptr<Replicator>& replicator, const RakNetStatistics* statistics);
+	ReplicatorStatsItem(const std::shared_ptr<Replicator>& replicator, const RakNetStatistics* statistics);
 
 	virtual void update();
 };
 
-class __declspec(novtable) Replicator::Item : boost::noncopyable
+class __declspec(novtable) Replicator::Item
 {
 protected:
 	Replicator& replicator;
@@ -137,6 +134,9 @@ protected:
 	Item(Replicator& replicator) : replicator(replicator) {}
 
 public:
+	Item(const Item&) = delete;
+	Item& operator=(const Item&) = delete;
+
 	enum ItemType
 	{
 		ItemTypeEnd = 0,
@@ -155,19 +155,19 @@ public:
 
 class Replicator::NewInstanceItem : public Item
 {
-	const boost::shared_ptr<Instance> instance;
+	const std::shared_ptr<Instance> instance;
 
 public:
-	NewInstanceItem(Replicator& replicator, const boost::shared_ptr<Instance>& instance);
+	NewInstanceItem(Replicator& replicator, const std::shared_ptr<Instance>& instance);
 	virtual void write(RakNet::BitStream& bitStream);
 };
 
 class Replicator::DeleteInstanceItem : public Item
 {
-	boost::shared_ptr<const Instance> instance;
+	std::shared_ptr<const Instance> instance;
 
 public:
-	DeleteInstanceItem(Replicator& replicator, const boost::shared_ptr<const Instance>& instance);
+	DeleteInstanceItem(Replicator& replicator, const std::shared_ptr<const Instance>& instance);
 	virtual void write(RakNet::BitStream& bitStream);
 };
 
@@ -184,18 +184,18 @@ public:
 class Replicator::ChangePropertyItem : public Item
 {
 	const Reflection::PropertyDescriptor& desc;
-	const boost::shared_ptr<const Instance> instance;
+	const std::shared_ptr<const Instance> instance;
 
 public:
 	ChangePropertyItem(
 		Replicator& replicator,
-		const boost::shared_ptr<const Instance>& instance,
+		const std::shared_ptr<const Instance>& instance,
 		const Reflection::PropertyDescriptor& desc
 	);
 	virtual void write(RakNet::BitStream& bitStream);
 };
 
-class Replicator::ItemSender : boost::noncopyable
+class Replicator::ItemSender
 {
 	Replicator& replicator;
 	RakPeerInterface* peer;
@@ -213,6 +213,9 @@ class Replicator::ItemSender : boost::noncopyable
 	const int maxStreamSize;
 
 public:
+	ItemSender(const ItemSender&) = delete;
+	ItemSender& operator=(const ItemSender&) = delete;
+
 	bool sentItems;
 
 	ItemSender(Replicator& replicator, RakPeerInterface* peer);
@@ -279,7 +282,7 @@ bool Replicator::wantReplicate(const Instance* source) const
 	return dynamic_cast<const Camera*>(source) ? false : true;
 }
 
-class Replicator::JobSender : public boost::noncopyable
+class Replicator::JobSender
 {
 	const Assembly* firstA;
 	const Mechanism* firstM;
@@ -310,6 +313,9 @@ class Replicator::JobSender : public boost::noncopyable
 	}
 
 public:
+	JobSender(const JobSender&) = delete;
+	JobSender& operator=(const JobSender&) = delete;
+
 	bool sentPacket;
 
 	JobSender(Replicator& replicator, RakPeerInterface* peer)
@@ -482,9 +488,7 @@ void Replicator::skipValue(RakNet::BitStream& inBitStream, ValueType type)
 }
 
 inline Replicator::ChangePropertyItem::ChangePropertyItem(
-	Replicator& replicator,
-	const boost::shared_ptr<const Instance>& instance,
-	const Reflection::PropertyDescriptor& desc
+	Replicator& replicator, const std::shared_ptr<const Instance>& instance, const Reflection::PropertyDescriptor& desc
 )
 	: Item(replicator), desc(desc), instance(instance)
 {
@@ -509,6 +513,11 @@ void Peer::Update(RakPeerInterface* peer)
 Player* Replicator::findTargetPlayer()
 {
 	return players ? players->getLocalPlayer() : NULL;
+}
+
+std::shared_ptr<Instance> Replicator::getPlayer()
+{
+	return shared_from(findTargetPlayer());
 }
 
 Mechanism* Replicator::findTargetPlayerCharacterMechanism()
@@ -667,7 +676,7 @@ inline bool Replicator::JobSender::report(const Mechanism& m)
 	return numBytes < maxStreamSize;
 }
 
-inline Replicator::NewInstanceItem::NewInstanceItem(Replicator& replicator, const boost::shared_ptr<Instance>& instance)
+inline Replicator::NewInstanceItem::NewInstanceItem(Replicator& replicator, const std::shared_ptr<Instance>& instance)
 	: Item(replicator), instance(instance)
 {
 	replicator.pendingNewInstances.insert(instance.get());
@@ -699,7 +708,7 @@ void Peer::updateNetworkSimulator()
 }
 
 inline Replicator::DeleteInstanceItem::DeleteInstanceItem(
-	Replicator& replicator, const boost::shared_ptr<const Instance>& instance
+	Replicator& replicator, const std::shared_ptr<const Instance>& instance
 )
 	: Item(replicator), instance(instance)
 {
@@ -729,14 +738,14 @@ inline Replicator::ItemSender::ItemSender(Replicator& replicator, RakPeerInterfa
 {
 }
 
-bool Replicator::disconnectReplicationData(boost::shared_ptr<Instance> instance)
+bool Replicator::disconnectReplicationData(std::shared_ptr<Instance> instance)
 {
 	RepConts::iterator iter = replicationContainers.find(instance.get());
 	if (iter == replicationContainers.end()) {
 		return false;
 	}
 
-	instance->visitChildren(boost::bind(&Replicator::disconnectReplicationData, this, _1));
+	instance->visitChildren([this](const std::shared_ptr<Instance>& child) { disconnectReplicationData(child); });
 
 	closeReplicationItem(*iter);
 	replicationContainers.erase(iter);
@@ -744,7 +753,7 @@ bool Replicator::disconnectReplicationData(boost::shared_ptr<Instance> instance)
 	return true;
 }
 
-void Replicator::onChildAdded(boost::shared_ptr<Instance> child)
+void Replicator::onChildAdded(std::shared_ptr<Instance> child)
 {
 	Profiling::Mark mark(*profileReplication, false);
 	Profiling::Mark mark2(*profileDataListening, false);
@@ -756,9 +765,9 @@ void Replicator::onChildAdded(boost::shared_ptr<Instance> child)
 	if (replicationContainers.find(child.get()) == replicationContainers.end()) {
 		addReplicationData(child, true);
 
-		pendingItems.push_back(boost::shared_ptr<Item>(new NewInstanceItem(*this, child)));
+		pendingItems.push_back(std::shared_ptr<Item>(new NewInstanceItem(*this, child)));
 
-		child->visitChildren(boost::bind(&Replicator::onChildAdded, this, _1));
+		child->visitChildren([this](const std::shared_ptr<Instance>& grandchild) { onChildAdded(grandchild); });
 	}
 }
 
@@ -768,23 +777,21 @@ inline bool Replicator::removeFromPendingNewInstances(const Instance* instance)
 	return removed;
 }
 
-void Replicator::onParentChanged(boost::shared_ptr<Instance> instance)
+void Replicator::onParentChanged(std::shared_ptr<Instance> instance)
 {
 	if (replicationContainers.find(instance->getParent()) != replicationContainers.end()) {
-		pendingItems.push_back(boost::shared_ptr<Item>(new ChangePropertyItem(*this, instance, Instance::propParent)));
+		pendingItems.push_back(std::shared_ptr<Item>(new ChangePropertyItem(*this, instance, Instance::propParent)));
 	}
 	else {
 		disconnectReplicationData(instance);
 
 		if (!removeFromPendingNewInstances(instance.get())) {
-			pendingItems.push_back(boost::shared_ptr<Item>(new DeleteInstanceItem(*this, instance)));
+			pendingItems.push_back(std::shared_ptr<Item>(new DeleteInstanceItem(*this, instance)));
 		}
 	}
 }
 
-void Replicator::onPropertyChanged(
-	boost::shared_ptr<Instance> instance, const Reflection::PropertyDescriptor* descriptor
-)
+void Replicator::onPropertyChanged(std::shared_ptr<Instance> instance, const Reflection::PropertyDescriptor* descriptor)
 {
 	Profiling::Mark mark(*profileReplication, false);
 	Profiling::Mark mark2(*profileDataListening, false);
@@ -813,10 +820,10 @@ void Replicator::onPropertyChanged(
 	Player* player = findTargetPlayer();
 	ModelInstance* character = player ? player->getCharacter() : NULL;
 	if (character && instance->isDescendentOf(character)) {
-		pendingItems.push_front(boost::shared_ptr<Item>(new ChangePropertyItem(*this, instance, *descriptor)));
+		pendingItems.push_front(std::shared_ptr<Item>(new ChangePropertyItem(*this, instance, *descriptor)));
 	}
 	else {
-		pendingItems.push_back(boost::shared_ptr<Item>(new ChangePropertyItem(*this, instance, *descriptor)));
+		pendingItems.push_back(std::shared_ptr<Item>(new ChangePropertyItem(*this, instance, *descriptor)));
 	}
 }
 
@@ -830,7 +837,7 @@ bool Replicator::sendItems()
 	ItemSender sender(*this, peer);
 
 	while (pendingItems.size() > 0) {
-		boost::shared_ptr<Item> item = pendingItems.front();
+		std::shared_ptr<Item> item = pendingItems.front();
 		if (item) {
 			if (!sender.send(*item)) {
 				break;
@@ -908,7 +915,7 @@ void Replicator::readInstanceDelete(RakNet::BitStream& inBitstream)
 	Instance* instance;
 	Guid::Data id;
 	if (deserializeInstanceRef(inBitstream, instance, id)) {
-		boost::shared_ptr<Instance> hold = shared_from(instance);
+		std::shared_ptr<Instance> hold = shared_from(instance);
 
 		if (NetworkSettings::singleton().printInstances) {
 			StandardOut::singleton()->print(
@@ -992,14 +999,14 @@ PluginReceiveResult Replicator::OnReceive_ID_TIMESTAMP(Packet* packet)
 		return RR_CONTINUE_PROCESSING;
 	}
 
-	boost::shared_ptr<RunService> runService = shared_from(ServiceProvider::find<RunService>(this));
+	std::shared_ptr<RunService> runService = shared_from(ServiceProvider::find<RunService>(this));
 
 	Profiling::Mark mark(*profilePhysicsIn, false);
 	bool firstIteration = true;
 	bool inPhysics = false;
 
 	while (true) {
-		boost::shared_ptr<PartInstance> part;
+		std::shared_ptr<PartInstance> part;
 		Instance* instance;
 		Guid::Data id;
 		if (deserializeInstanceRef(inBitstream, instance, id)) {
@@ -1115,7 +1122,7 @@ void Peer::onServiceProvider(const ServiceProvider* oldProvider, const ServicePr
 {
 	Stats::StatsService* stats = oldProvider ? oldProvider->find<Stats::StatsService>() : NULL;
 	if (stats) {
-		boost::shared_ptr<Stats::Item> network =
+		std::shared_ptr<Stats::Item> network =
 			shared_from_polymorphic_downcast<Stats::Item>(stats->findFirstChildByName("Network"));
 		if (network) {
 			network->setParent(NULL);
@@ -1130,7 +1137,7 @@ void Peer::onServiceProvider(const ServiceProvider* oldProvider, const ServicePr
 
 	stats = newProvider ? newProvider->find<Stats::StatsService>() : NULL;
 	if (stats) {
-		boost::shared_ptr<Stats::Item> network = Creatable<Instance>::create<Stats::Item>();
+		std::shared_ptr<Stats::Item> network = Creatable<Instance>::create<Stats::Item>();
 		network->setName("Network");
 		network->setParent(stats);
 		network->createBoundChildItem(*profilePacketsThread);
@@ -1180,7 +1187,7 @@ void Replicator::Update(RakPeerInterface* peer)
 }
 
 Replicator::ReplicatorStatsItem::ReplicatorStatsItem(
-	const boost::shared_ptr<Replicator>& replicator, const RakNetStatistics* statistics
+	const std::shared_ptr<Replicator>& replicator, const RakNetStatistics* statistics
 )
 	: replicator(replicator), statistics(statistics), instanceCount(0), instanceBits(0)
 {
@@ -1229,7 +1236,7 @@ const Instance* Replicator::getDefault(const Name& className)
 
 	DefaultObjects::iterator iter = defaultObjects.find(&className);
 	if (iter == defaultObjects.end()) {
-		boost::shared_ptr<Instance> instance = Instance::create(className);
+		std::shared_ptr<Instance> instance = Instance::create(className);
 		if (!instance) {
 			StandardOut::singleton()->print(
 				MESSAGE_ERROR, "Replication: Can't create default object of type %s", className.c_str()
@@ -1250,7 +1257,7 @@ void Replicator::createStatsItems(Stats::StatsService* stats)
 	}
 
 	if (stats) {
-		boost::shared_ptr<Stats::Item> network =
+		std::shared_ptr<Stats::Item> network =
 			shared_from_polymorphic_downcast<Stats::Item>(stats->findFirstChildByName("Network"));
 		if (network) {
 			statsItem = Creatable<Instance>::create<ReplicatorStatsItem>(
@@ -1266,7 +1273,7 @@ SharedStringDictionary& Replicator::getSharedDictionary(const Reflection::Proper
 {
 	Strings::iterator iter = strings.find(&descriptor);
 	if (iter == strings.end()) {
-		boost::shared_ptr<SharedStringDictionary> result(new SharedStringDictionary());
+		std::shared_ptr<SharedStringDictionary> result(new SharedStringDictionary());
 		strings[&descriptor] = result;
 		return *result;
 	}
@@ -1414,7 +1421,7 @@ inline void Replicator::ChangePropertyItem::write(RakNet::BitStream& bitStream)
 	}
 }
 
-Replicator::ReplicationData& Replicator::addReplicationData(boost::shared_ptr<Instance> instance, bool listenToChanges)
+Replicator::ReplicationData& Replicator::addReplicationData(std::shared_ptr<Instance> instance, bool listenToChanges)
 {
 	std::pair<RepConts::iterator, bool> pair =
 		replicationContainers.insert(RepConts::value_type(instance.get(), ReplicationData()));
@@ -1423,11 +1430,16 @@ Replicator::ReplicationData& Replicator::addReplicationData(boost::shared_ptr<In
 		ReplicationData& data = pair.first->second;
 		data.instance = instance;
 		data.deleteOnDisconnect = false;
-		data.childAdded =
-			Instance::event_childAdded.connect(instance.get(), boost::bind(&Replicator::onChildAdded, this, _1), 0);
+		data.childAdded = Instance::event_childAdded.connect(
+			instance.get(), [this](const std::shared_ptr<Instance>& child) { onChildAdded(child); }, 0
+		);
 		if (listenToChanges) {
 			data.changed = Instance::event_propertyChanged.connect(
-				instance.get(), boost::bind(&Replicator::onPropertyChanged, this, instance, _1), 0
+				instance.get(),
+				[this, instance](const Reflection::PropertyDescriptor* descriptor) {
+					onPropertyChanged(instance, descriptor);
+				},
+				0
 			);
 		}
 		return data;
@@ -1439,7 +1451,11 @@ Replicator::ReplicationData& Replicator::addReplicationData(boost::shared_ptr<In
 		}
 		else if (!oldData.changed.connected()) {
 			oldData.changed = Instance::event_propertyChanged.connect(
-				instance.get(), boost::bind(&Replicator::onPropertyChanged, this, instance, _1), 0
+				instance.get(),
+				[this, instance](const Reflection::PropertyDescriptor* descriptor) {
+					onPropertyChanged(instance, descriptor);
+				},
+				0
 			);
 		}
 		return oldData;
@@ -1490,7 +1506,7 @@ void Replicator::readInstanceNew(RakNet::BitStream& inBitstream)
 		);
 	}
 
-	boost::shared_ptr<Instance> instance;
+	std::shared_ptr<Instance> instance;
 	Instance* i;
 	if (Instance::lookupByGuid(id, i)) {
 		instance = shared_from(i);
@@ -1530,7 +1546,11 @@ void Replicator::readInstanceNew(RakNet::BitStream& inBitstream)
 	}
 	else {
 		data.changed = Instance::event_propertyChanged.connect(
-			instance.get(), boost::bind(&Replicator::onPropertyChanged, this, instance, _1), 0
+			instance.get(),
+			[this, instance](const Reflection::PropertyDescriptor* descriptor) {
+				onPropertyChanged(instance, descriptor);
+			},
+			0
 		);
 
 		Reflection::Property property(Instance::propParent, instance.get());
@@ -1657,13 +1677,17 @@ void Replicator::addTopReplicationContainer(Instance* instance, bool replicatePr
 
 		addReplicationData(shared_from(instance), replicateProperties);
 
-		instance->visitChildren(boost::bind(&Replicator::onChildAdded, this, _1));
+		instance->visitChildren([this](const std::shared_ptr<Instance>& child) { onChildAdded(child); });
 	}
 }
 
 void Replicator::onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider)
 {
-	std::for_each(replicationContainers.begin(), replicationContainers.end(), boost::bind(&closeReplicationItem, _1));
+	std::for_each(
+		replicationContainers.begin(),
+		replicationContainers.end(),
+		[](const std::pair<const Instance* const, ReplicationData>& pair) { closeReplicationItem(pair); }
+	);
 	replicationContainers.clear();
 	pendingItems.clear();
 	topReplicationContainers.clear();
@@ -1764,7 +1788,7 @@ PluginReceiveResult Replicator::OnReceive(RakPeerInterface* peer, Packet* packet
 				long id;
 				inBitstream >> id;
 
-				pendingItems.push_back(boost::shared_ptr<Item>(new MarkerItem(*this, id)));
+				pendingItems.push_back(std::shared_ptr<Item>(new MarkerItem(*this, id)));
 			}
 				return RR_STOP_PROCESSING_AND_DEALLOCATE;
 
@@ -1836,9 +1860,9 @@ inline void Replicator::NewInstanceItem::write(RakNet::BitStream& bitStream)
 	}
 }
 
-boost::shared_ptr<Reflection::DescribedBase> Replicator::sendMarker()
+std::shared_ptr<Reflection::DescribedBase> Replicator::sendMarker()
 {
-	boost::shared_ptr<Marker> marker = Marker::newMarker();
+	std::shared_ptr<Marker> marker = Marker::newMarker();
 
 	RakNet::BitStream bitStream;
 	bitStream << (unsigned char) ID_REQUEST_MARKER;

@@ -6,8 +6,8 @@
 #include "reflection/signal.h"
 #include "v8tree/Instance.h"
 
-#include <boost/function.hpp>
-#include <boost/thread/recursive_mutex.hpp>
+#include <functional>
+#include <mutex>
 #include <string>
 
 class DHTMLWindow;
@@ -22,7 +22,7 @@ public:
 
 	virtual bool askAddChild(const RBX::Instance* instance) const;
 
-	boost::shared_ptr<RBX::Instance> FUN_0041cf60(int width, int height);
+	std::shared_ptr<RBX::Instance> FUN_0041cf60(int width, int height);
 };
 
 class DHTMLWindow : public RBX::DescribedNonCreatable<DHTMLWindow, RBX::Instance, sDHTMLWindow>
@@ -44,7 +44,7 @@ public:
 	void FUN_0041d110(RBX::Lua::FunctionRef function);
 	void FUN_0041d1f0(std::string url);
 	void FUN_0041d2d0(std::string html);
-	void FUN_0041d880(boost::shared_ptr<RBX::Instance> instance, std::string property, std::string name);
+	void FUN_0041d880(std::shared_ptr<RBX::Instance> instance, std::string property, std::string name);
 	void FUN_0041dc70();
 
 	static RBX::Reflection::SignalDesc<DHTMLWindow, void(std::string)> g_unk0x00953120;
@@ -56,9 +56,9 @@ private:
 	friend class CLuaHtmlView;
 	friend class DHTMLWindowService;
 
-	void FUN_004152c0(boost::function<void(CLuaHtmlView*)> function)
+	void FUN_004152c0(std::function<void(CLuaHtmlView*)> function)
 	{
-		boost::recursive_mutex::scoped_lock lock(m_unk0xf8);
+		std::lock_guard<std::recursive_mutex> lock(m_unk0xf8);
 		if (m_unk0x104) {
 			function(m_unk0x104);
 		}
@@ -71,7 +71,7 @@ private:
 		frame->ModifyStyleEx(WS_EX_CLIENTEDGE, WS_EX_TOOLWINDOW);
 		CLuaHtmlView* view = dynamic_cast<CLuaHtmlView*>(XTFuncCreateView(frame, RUNTIME_CLASS(CLuaHtmlView)));
 		{
-			boost::recursive_mutex::scoped_lock lock(m_unk0xf8);
+			std::lock_guard<std::recursive_mutex> lock(m_unk0xf8);
 			m_unk0x104 = view;
 		}
 		frame->InitialUpdateFrame(NULL, FALSE);
@@ -79,7 +79,7 @@ private:
 
 	void FUN_00415550()
 	{
-		boost::recursive_mutex::scoped_lock lock(m_unk0xf8);
+		std::lock_guard<std::recursive_mutex> lock(m_unk0xf8);
 		if (m_unk0x104) {
 			m_unk0x104->GetParentFrame()->CenterWindow(NULL);
 			m_unk0x104->GetParentFrame()->ShowWindow(SW_SHOW);
@@ -88,7 +88,7 @@ private:
 
 	void FUN_004155f0()
 	{
-		boost::recursive_mutex::scoped_lock lock(m_unk0xf8);
+		std::lock_guard<std::recursive_mutex> lock(m_unk0xf8);
 		if (m_unk0x104) {
 			m_unk0x104->FUN_0042d640();
 		}
@@ -96,7 +96,7 @@ private:
 
 	void FUN_00415670(int x, int y)
 	{
-		boost::recursive_mutex::scoped_lock lock(m_unk0xf8);
+		std::lock_guard<std::recursive_mutex> lock(m_unk0xf8);
 		if (m_unk0x104) {
 			m_unk0x104->GetParentFrame()->SetWindowPos(NULL, 0, 0, x, y, SWP_NOMOVE | SWP_NOZORDER);
 		}
@@ -104,7 +104,7 @@ private:
 
 	void FUN_00415710(RBX::Lua::FunctionRef function)
 	{
-		boost::recursive_mutex::scoped_lock lock(m_unk0xf8);
+		std::lock_guard<std::recursive_mutex> lock(m_unk0xf8);
 		if (m_unk0x104) {
 			m_unk0x104->m_unk0xf8->m_unk0x14 = function;
 		}
@@ -112,7 +112,7 @@ private:
 
 	void FUN_004157b0(std::string url)
 	{
-		boost::recursive_mutex::scoped_lock lock(m_unk0xf8);
+		std::lock_guard<std::recursive_mutex> lock(m_unk0xf8);
 		if (m_unk0x104) {
 			m_unk0x104->Navigate(url.c_str());
 		}
@@ -120,19 +120,17 @@ private:
 
 	void FUN_00415860(std::string html)
 	{
-		boost::recursive_mutex::scoped_lock lock(m_unk0xf8);
+		std::lock_guard<std::recursive_mutex> lock(m_unk0xf8);
 		if (m_unk0x104) {
 			m_unk0x104->FUN_0042e330(html.c_str());
 		}
 	}
 
 	void FUN_00415910(
-		boost::shared_ptr<RBX::Instance> instance,
-		const RBX::Reflection::PropertyDescriptor* descriptor,
-		std::string name
+		std::shared_ptr<RBX::Instance> instance, const RBX::Reflection::PropertyDescriptor* descriptor, std::string name
 	)
 	{
-		boost::recursive_mutex::scoped_lock lock(m_unk0xf8);
+		std::lock_guard<std::recursive_mutex> lock(m_unk0xf8);
 		if (m_unk0x104) {
 			m_unk0x104->FUN_00430c90(instance, descriptor, name.c_str());
 		}
@@ -140,13 +138,13 @@ private:
 
 	void FUN_00417550()
 	{
-		boost::recursive_mutex::scoped_lock lock(m_unk0xf8);
+		std::lock_guard<std::recursive_mutex> lock(m_unk0xf8);
 		if (m_unk0x104) {
 			m_unk0x104->FUN_0042f1b0(RBX::shared_from(this));
 		}
 	}
 
-	boost::recursive_mutex m_unk0xf8;
+	std::recursive_mutex m_unk0xf8;
 	CLuaHtmlView* m_unk0x104;
 };
 

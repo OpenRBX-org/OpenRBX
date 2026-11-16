@@ -11,8 +11,8 @@ class CSettingsExplorer : public CInstanceExplorer
 protected:
 	CSettingsExplorer() {}
 
-	virtual void onEvent(const RBX::Instance* source, RBX::DescendentAdded event);
-	virtual void onEvent(const RBX::Instance* source, RBX::DescendentRemoving event);
+	virtual void onEvent(const RBX::Instance* source, RBX::DescendentAdded event) noexcept;
+	virtual void onEvent(const RBX::Instance* source, RBX::DescendentRemoving event) noexcept;
 };
 
 class CSettingsDialog : public CDialog

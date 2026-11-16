@@ -9,8 +9,8 @@
 #include "v8datamodel/DebugSettings.h"
 
 #include <atlutil.h>
-#include <boost/scoped_ptr.hpp>
 #include <iphlpapi.h>
+#include <memory>
 
 STDMETHODIMP CApp::LaunchIDE()
 {
@@ -94,7 +94,7 @@ STDMETHODIMP CApp::get_ID(BSTR* pVal)
 
 	CComBSTR id;
 	if (bufferLength > 0) {
-		boost::scoped_ptr<RBX::MD5Hasher> hasher(RBX::MD5Hasher::create());
+		std::unique_ptr<RBX::MD5Hasher> hasher(RBX::MD5Hasher::create());
 		for (unsigned int i = 0; i < bufferLength / sizeof(IP_ADAPTER_INFO); i++) {
 			hasher->addData(adapterInfo[i].AdapterName);
 		}

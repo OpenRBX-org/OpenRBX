@@ -7,6 +7,7 @@
 #include "script/ScriptContext.h"
 #include "security/SecurityContext.h"
 #include "util/ContentProvider.h"
+#include "util/Utilities.h"
 #include "v8datamodel/Commands.h"
 #include "v8datamodel/Selection.h"
 #include "v8xml/SerializerV2.h"
@@ -14,17 +15,14 @@
 
 #include <G3D/format.h>
 #include <algorithm>
-#include <boost/bind.hpp>
-#include <boost/iostreams/copy.hpp>
 #include <fstream>
-#include <sstream>
 
 #define CHECK_HRESULT(expr)                                                                                            \
 	(void) ((expr) && (LogManager::ReportEvent(EVENTLOG_ERROR_TYPE, expr, __FILE__, __LINE__),                         \
 					   FUN_0046f230(expr, CLSID_Workspace),                                                            \
 					   1))
 
-boost::shared_ptr<RBX::DataModel> CWorkspace::FUN_0046edc0() const
+std::shared_ptr<RBX::DataModel> CWorkspace::FUN_0046edc0() const
 {
 	return m_unk0x24;
 }
@@ -60,9 +58,9 @@ CWorkspace::CWorkspace()
 {
 }
 
-std::auto_ptr<XmlElement> CWorkspace::FUN_0046f040()
+std::unique_ptr<XmlElement> CWorkspace::FUN_0046f040()
 {
-	std::auto_ptr<XmlElement> root(SerializerV2::newRootElement());
+	std::unique_ptr<XmlElement> root(SerializerV2::newRootElement());
 	RBX::DataModel::Lock lock(m_unk0x24);
 	FUN_0046edc0()->writeChildren(root.get());
 	return root;
@@ -105,7 +103,7 @@ HRESULT CWorkspace::DoExecScript(
 		arguments.FUN_00431c00(arg3);
 		arguments.FUN_00431c00(arg4);
 
-		std::auto_ptr<std::vector<RBX::Reflection::Value> > values =
+		std::unique_ptr<std::vector<RBX::Reflection::Value> > values =
 			FUN_0046edc0()->create<RBX::ScriptContext>()->executeInNewThread(
 				RBX::Security::TrustedCOM, script, NULL, arguments
 			);
@@ -128,19 +126,19 @@ STDMETHODIMP CWorkspace::ExecUrlScript(
 {
 	try {
 		AFX_MANAGE_STATE(AfxGetAppModuleState());
-		std::ostringstream stream;
+		std::string script;
 
 		try {
 			CString text(url);
-			std::auto_ptr<std::istream> content = RBX::ContentProvider::singleton().getContent(RBX::ContentId(text));
-			boost::iostreams::copy(*content, stream, 0x1000);
+			std::unique_ptr<std::istream> content = RBX::ContentProvider::singleton().getContent(RBX::ContentId(text));
+			script = RBX::readStream(*content);
 		}
 		catch (std::exception& e) {
 			std::string message = G3D::format("Failed to get URL, %s", e.what());
 			return LogManager::ReportCOMError(CLSID_Workspace, message.c_str(), S_OK);
 		}
 
-		return DoExecScript(stream.str().c_str(), arg1, arg2, arg3, arg4, result);
+		return DoExecScript(script.c_str(), arg1, arg2, arg3, arg4, result);
 	}
 	catch (CException* e) {
 		char message[255];
@@ -180,12 +178,16 @@ void CWorkspace::FinalRelease()
 	FUN_0046f420();
 }
 
-std::auto_ptr<XmlElement> CWorkspace::FUN_0046ffa0()
+std::unique_ptr<XmlElement> CWorkspace::FUN_0046ffa0()
 {
-	std::auto_ptr<XmlElement> root(SerializerV2::newRootElement());
+	std::unique_ptr<XmlElement> root(SerializerV2::newRootElement());
 	RBX::DataModel::Lock lock(m_unk0x24);
 	RBX::Selection* selection = RBX::ServiceProvider::create<RBX::Selection>(FUN_0046edf0());
-	std::for_each(selection->begin(), selection->end(), boost::bind(&RBX::FUN_00597490, root.get(), _1));
+	std::for_each(
+		selection->begin(), selection->end(), [container = root.get()](const std::shared_ptr<RBX::Instance>& instance) {
+			RBX::FUN_00597490(container, instance);
+		}
+	);
 	return root;
 }
 
@@ -218,29 +220,27 @@ void CWorkspace::FUN_004702b0(RBX::ContentId contentId, bool p_unk0x20)
 	RBX::Instance* parent = p_unk0x20 && selection->size() == 1 ? selection->front().get() : FUN_0046edf0();
 	RBX::InsertMode insertMode = p_unk0x20 ? RBX::INSERT_TO_TREE : RBX::INSERT_TO_3D_VIEW;
 	RBX::PromptMode promptMode = p_unk0x20 ? RBX::SUPPRESS_PROMPTS : RBX::ALLOW_PROMPTS;
-	std::vector<boost::shared_ptr<RBX::Instance> > instances;
+	std::vector<std::shared_ptr<RBX::Instance> > instances;
 
 	try {
 		{
-			std::auto_ptr<std::istream> stream = RBX::ContentProvider::singleton().getContent(contentId);
+			std::unique_ptr<std::istream> stream = RBX::ContentProvider::singleton().getContent(contentId);
 			TextXmlParser machine(stream->rdbuf());
-			std::auto_ptr<XmlElement> root = machine.parse();
+			std::unique_ptr<XmlElement> root = machine.parse();
 			SerializerV2().loadInstances(root.get(), instances);
 		}
 
 		FUN_0046edf0()->insertInstances(instances, parent, insertMode, promptMode);
 
 		if (m_unk0x2c->getRunState() == RBX::RS_NORMAL) {
-			const std::vector<boost::shared_ptr<RBX::Instance> >& items = instances;
+			const std::vector<std::shared_ptr<RBX::Instance> >& items = instances;
 			selection->setSelection(items.begin(), items.end());
 		}
 	}
 	catch (...) {
-		std::for_each(
-			instances.begin(),
-			instances.end(),
-			boost::bind(&RBX::Instance::setParent, _1, static_cast<RBX::Instance*>(NULL))
-		);
+		std::for_each(instances.begin(), instances.end(), [](const std::shared_ptr<RBX::Instance>& instance) {
+			instance->setParent(NULL);
+		});
 		throw;
 	}
 }

@@ -10,8 +10,6 @@
 
 #include <G3D/GImage.h>
 #include <algorithm>
-#include <boost/bind.hpp>
-#include <boost/ref.hpp>
 #include <cstdio>
 #include <fstream>
 #include <string>
@@ -202,9 +200,9 @@ int CPropGrid::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	return 0;
 }
 
-static boost::recursive_mutex& FUN_0043c580()
+static std::recursive_mutex& FUN_0043c580()
 {
-	static boost::recursive_mutex mutex;
+	static std::recursive_mutex mutex;
 	return mutex;
 }
 
@@ -284,24 +282,26 @@ CXTPPropertyGridItem* CPropGrid::FUN_0043cba0(const RBX::Name& category)
 
 void CPropGrid::FUN_0043db00(const RBX::Reflection::ClassDescriptor* classDescriptor)
 {
-	boost::recursive_mutex::scoped_lock lock(FUN_0043c580());
+	std::lock_guard<std::recursive_mutex> lock(FUN_0043c580());
 	std::for_each(
 		classDescriptor->derivedClasses_begin(),
 		classDescriptor->derivedClasses_end(),
-		boost::bind(&CPropGrid::FUN_0043db00, this, _1)
+		[this](const RBX::Reflection::ClassDescriptor* derivedClass) { FUN_0043db00(derivedClass); }
 	);
 	std::for_each(
 		classDescriptor
 			->RBX::Reflection::MemberDescriptorContainer<RBX::Reflection::PropertyDescriptor>::descriptors_begin(),
 		classDescriptor
 			->RBX::Reflection::MemberDescriptorContainer<RBX::Reflection::PropertyDescriptor>::descriptors_end(),
-		boost::bind(&CPropGrid::FUN_00442e20, this, classDescriptor, _1)
+		[this, classDescriptor](const RBX::Reflection::PropertyDescriptor* descriptor) {
+			FUN_00442e20(classDescriptor, descriptor);
+		}
 	);
 }
 
 void CPropGrid::onEvent(const RBX::Instance* source, RBX::PropertyChanged event)
 {
-	boost::recursive_mutex::scoped_lock lock(m_unk0x188);
+	std::lock_guard<std::recursive_mutex> lock(m_unk0x188);
 	if (!m_unk0x1c1) {
 		std::map<const RBX::Reflection::PropertyDescriptor*, Item*>::const_iterator iter =
 			m_unk0x1a8.find(&event.getDescriptor());
@@ -309,7 +309,7 @@ void CPropGrid::onEvent(const RBX::Instance* source, RBX::PropertyChanged event)
 			m_unk0x1c4.insert(iter->second);
 		}
 
-		boost::recursive_mutex::scoped_lock lock(m_unk0x188);
+		std::lock_guard<std::recursive_mutex> lock(m_unk0x188);
 		if (!m_unk0x1c0) {
 			if (m_hWnd) {
 				::PostMessage(m_hWnd, WM_USER + 101, 0, 0);
@@ -325,7 +325,7 @@ void CPropGrid::Item::FUN_0043e120(const RBX::Reflection::ClassDescriptor* class
 	std::for_each(
 		classDescriptor->derivedClasses_begin(),
 		classDescriptor->derivedClasses_end(),
-		boost::bind(&Item::FUN_0043e120, this, _1)
+		[this](const RBX::Reflection::ClassDescriptor* derivedClass) { FUN_0043e120(derivedClass); }
 	);
 }
 
@@ -333,7 +333,7 @@ void CPropGrid::Unk0x1d0::FUN_0043e170(RBX::Instance* instance)
 {
 	iterator iter = find(&instance->getDescriptor());
 	if (iter != end()) {
-		std::vector<boost::shared_ptr<RBX::Instance> >::iterator found =
+		std::vector<std::shared_ptr<RBX::Instance> >::iterator found =
 			std::find(iter->second.begin(), iter->second.end(), shared_from(instance));
 		if (found != iter->second.end()) {
 			iter->second.erase(found);
@@ -360,7 +360,7 @@ void CPropGrid::FUN_0043e6b0(T* item)
 	m_unk0x198.push_back(item);
 }
 
-void CPropGrid::FUN_0043e7f0(boost::shared_ptr<RBX::Instance> instance)
+void CPropGrid::FUN_0043e7f0(std::shared_ptr<RBX::Instance> instance)
 {
 	RBX::stopListening<RBX::Instance, RBX::PropertyChanged>(instance, this);
 	m_unk0x1d0.FUN_0043e170(instance.get());
@@ -378,7 +378,7 @@ LRESULT CPropGrid::FUN_0043e8a0(WPARAM wParam, LPARAM lParam)
 	std::vector<Item*> items;
 	std::set<Item*> dirty;
 	{
-		boost::recursive_mutex::scoped_lock lock(m_unk0x188);
+		std::lock_guard<std::recursive_mutex> lock(m_unk0x188);
 		if (m_unk0x1c1) {
 			items = m_unk0x198;
 			m_unk0x1c1 = false;
@@ -392,8 +392,8 @@ LRESULT CPropGrid::FUN_0043e8a0(WPARAM wParam, LPARAM lParam)
 
 	{
 		RBX::DataModel::Lock lock(m_unk0x194);
-		std::for_each(items.begin(), items.end(), boost::bind(&Item::VTable0x00, _1, boost::cref(m_unk0x1d0)));
-		std::for_each(dirty.begin(), dirty.end(), boost::bind(&Item::VTable0x00, _1, boost::cref(m_unk0x1d0)));
+		std::for_each(items.begin(), items.end(), [this](Item* item) { item->VTable0x00(m_unk0x1d0); });
+		std::for_each(dirty.begin(), dirty.end(), [this](Item* item) { item->VTable0x00(m_unk0x1d0); });
 	}
 
 	for (int i = 0; i < GetCategories()->GetCount(); i++) {
@@ -420,23 +420,23 @@ CPropGrid::Item::Item(const RBX::Reflection::PropertyDescriptor& descriptor, CPr
 
 template <class T, class Base, class Descriptor>
 void XItem<T, Base, Descriptor>::VTable0x00(
-	const std::map<const RBX::Reflection::ClassDescriptor*, std::vector<boost::shared_ptr<RBX::Instance> > >& instances
+	const std::map<const RBX::Reflection::ClassDescriptor*, std::vector<std::shared_ptr<RBX::Instance> > >& instances
 )
 {
 	T first;
 	bool hasValue = false;
-	std::map<const RBX::Reflection::ClassDescriptor*, std::vector<boost::shared_ptr<RBX::Instance> > >::const_iterator
+	std::map<const RBX::Reflection::ClassDescriptor*, std::vector<std::shared_ptr<RBX::Instance> > >::const_iterator
 		objectsEnd = instances.end();
 	for (std::vector<const RBX::Reflection::ClassDescriptor*>::const_iterator iter = m_unk0x04.begin(),
 																			  end = m_unk0x04.end();
 		 iter != end;
 		 ++iter) {
 		const RBX::Reflection::ClassDescriptor* descriptor = *iter;
-		std::map<const RBX::Reflection::ClassDescriptor*, std::vector<boost::shared_ptr<RBX::Instance> > >::
-			const_iterator found = instances.find(descriptor);
+		std::map<const RBX::Reflection::ClassDescriptor*, std::vector<std::shared_ptr<RBX::Instance> > >::const_iterator
+			found = instances.find(descriptor);
 		if (found != objectsEnd) {
-			for (std::vector<boost::shared_ptr<RBX::Instance> >::const_iterator instance = found->second.begin(),
-																				instancesEnd = found->second.end();
+			for (std::vector<std::shared_ptr<RBX::Instance> >::const_iterator instance = found->second.begin(),
+																			  instancesEnd = found->second.end();
 				 instance != instancesEnd;
 				 ++instance) {
 				if (!hasValue) {
@@ -482,21 +482,21 @@ template <class T, class Base, class Descriptor>
 void XItem<T, Base, Descriptor>::FUN_00443670(const T& value)
 {
 	try {
-		std::auto_ptr<RBX::XmlState> undoState(new RBX::UndoState());
-		std::auto_ptr<RBX::XmlState> redoState(new RBX::RedoState());
+		std::unique_ptr<RBX::XmlState> undoState(new RBX::UndoState());
+		std::unique_ptr<RBX::XmlState> redoState(new RBX::RedoState());
 
-		std::map<const RBX::Reflection::ClassDescriptor*, std::vector<boost::shared_ptr<RBX::Instance> > >::iterator
+		std::map<const RBX::Reflection::ClassDescriptor*, std::vector<std::shared_ptr<RBX::Instance> > >::iterator
 			objectsEnd = m_unk0x14->m_unk0x1d0.end();
 		std::vector<const RBX::Reflection::ClassDescriptor*>::const_iterator end = m_unk0x04.end();
 		for (std::vector<const RBX::Reflection::ClassDescriptor*>::const_iterator iter = m_unk0x04.begin(); iter != end;
 			 ++iter) {
 			const RBX::Reflection::ClassDescriptor* descriptor = *iter;
 			CPropGrid::Unk0x1d0& objects = m_unk0x14->m_unk0x1d0;
-			std::map<const RBX::Reflection::ClassDescriptor*, std::vector<boost::shared_ptr<RBX::Instance> > >::iterator
+			std::map<const RBX::Reflection::ClassDescriptor*, std::vector<std::shared_ptr<RBX::Instance> > >::iterator
 				found = objects.find(descriptor);
 			if (found != objectsEnd) {
-				for (std::vector<boost::shared_ptr<RBX::Instance> >::iterator instance = found->second.begin(),
-																			  instancesEnd = found->second.end();
+				for (std::vector<std::shared_ptr<RBX::Instance> >::iterator instance = found->second.begin(),
+																			instancesEnd = found->second.end();
 					 instance != instancesEnd;
 					 ++instance) {
 					undoState->addProperty(RBX::Reflection::Property(*m_unk0x124, instance->get()));
@@ -602,7 +602,7 @@ BOOL Vector3Item::OnAfterEdit(CString& strValue)
 }
 
 void Vector3Item::VTable0x00(
-	const std::map<const RBX::Reflection::ClassDescriptor*, std::vector<boost::shared_ptr<RBX::Instance> > >& instances
+	const std::map<const RBX::Reflection::ClassDescriptor*, std::vector<std::shared_ptr<RBX::Instance> > >& instances
 )
 {
 	XItem<G3D::Vector3, CXTPPropertyGridItem, RBX::Reflection::TypedPropertyDescriptor<G3D::Vector3> >::VTable0x00(
@@ -683,23 +683,23 @@ RefItem::RefItem(const RBX::Reflection::RefPropertyDescriptor& descriptor, CProp
 }
 
 void RefItem::VTable0x00(
-	const std::map<const RBX::Reflection::ClassDescriptor*, std::vector<boost::shared_ptr<RBX::Instance> > >& instances
+	const std::map<const RBX::Reflection::ClassDescriptor*, std::vector<std::shared_ptr<RBX::Instance> > >& instances
 )
 {
 	RBX::Instance* first;
 	bool hasValue = false;
-	std::map<const RBX::Reflection::ClassDescriptor*, std::vector<boost::shared_ptr<RBX::Instance> > >::const_iterator
+	std::map<const RBX::Reflection::ClassDescriptor*, std::vector<std::shared_ptr<RBX::Instance> > >::const_iterator
 		objectsEnd = instances.end();
 	for (std::vector<const RBX::Reflection::ClassDescriptor*>::const_iterator iter = m_unk0x04.begin(),
 																			  end = m_unk0x04.end();
 		 iter != end;
 		 ++iter) {
 		const RBX::Reflection::ClassDescriptor* descriptor = *iter;
-		std::map<const RBX::Reflection::ClassDescriptor*, std::vector<boost::shared_ptr<RBX::Instance> > >::
-			const_iterator found = instances.find(descriptor);
+		std::map<const RBX::Reflection::ClassDescriptor*, std::vector<std::shared_ptr<RBX::Instance> > >::const_iterator
+			found = instances.find(descriptor);
 		if (found != objectsEnd) {
-			for (std::vector<boost::shared_ptr<RBX::Instance> >::const_iterator instance = found->second.begin(),
-																				instancesEnd = found->second.end();
+			for (std::vector<std::shared_ptr<RBX::Instance> >::const_iterator instance = found->second.begin(),
+																			  instancesEnd = found->second.end();
 				 instance != instancesEnd;
 				 ++instance) {
 				if (!hasValue) {
@@ -735,7 +735,7 @@ void ScriptItem::OnValueChanged(CString strValue)
 }
 
 void ScriptItem::VTable0x00(
-	const std::map<const RBX::Reflection::ClassDescriptor*, std::vector<boost::shared_ptr<RBX::Instance> > >& instances
+	const std::map<const RBX::Reflection::ClassDescriptor*, std::vector<std::shared_ptr<RBX::Instance> > >& instances
 )
 {
 	for (std::vector<const RBX::Reflection::ClassDescriptor*>::const_iterator iter = m_unk0x04.begin(),
@@ -743,8 +743,8 @@ void ScriptItem::VTable0x00(
 		 iter != end;
 		 ++iter) {
 		const RBX::Reflection::ClassDescriptor* descriptor = *iter;
-		std::map<const RBX::Reflection::ClassDescriptor*, std::vector<boost::shared_ptr<RBX::Instance> > >::
-			const_iterator found = instances.find(descriptor);
+		std::map<const RBX::Reflection::ClassDescriptor*, std::vector<std::shared_ptr<RBX::Instance> > >::const_iterator
+			found = instances.find(descriptor);
 		if (found != instances.end() && found->second.size() != 0) {
 			SetHidden(FALSE);
 			return;
@@ -755,7 +755,7 @@ void ScriptItem::VTable0x00(
 
 void ScriptItem::OnInplaceButtonDown(CXTPPropertyGridInplaceButton* pButton)
 {
-	std::map<const RBX::Reflection::ClassDescriptor*, std::vector<boost::shared_ptr<RBX::Instance> > >::iterator
+	std::map<const RBX::Reflection::ClassDescriptor*, std::vector<std::shared_ptr<RBX::Instance> > >::iterator
 		objectsEnd = m_unk0x14->m_unk0x1d0.end();
 	for (std::vector<const RBX::Reflection::ClassDescriptor*>::const_iterator iter = m_unk0x04.begin(),
 																			  end = m_unk0x04.end();
@@ -763,11 +763,11 @@ void ScriptItem::OnInplaceButtonDown(CXTPPropertyGridInplaceButton* pButton)
 		 ++iter) {
 		const RBX::Reflection::ClassDescriptor* descriptor = *iter;
 		CPropGrid::Unk0x1d0& objects = m_unk0x14->m_unk0x1d0;
-		std::map<const RBX::Reflection::ClassDescriptor*, std::vector<boost::shared_ptr<RBX::Instance> > >::iterator
+		std::map<const RBX::Reflection::ClassDescriptor*, std::vector<std::shared_ptr<RBX::Instance> > >::iterator
 			found = objects.find(descriptor);
 		if (found != objectsEnd) {
-			for (std::vector<boost::shared_ptr<RBX::Instance> >::iterator instance = found->second.begin(),
-																		  instancesEnd = found->second.end();
+			for (std::vector<std::shared_ptr<RBX::Instance> >::iterator instance = found->second.begin(),
+																		instancesEnd = found->second.end();
 				 instance != instancesEnd;
 				 ++instance) {
 				if (RBX::Script* script = dynamic_cast<RBX::Script*>(instance->get())) {
@@ -891,7 +891,7 @@ void CPropGrid::Unk0x1d0::FUN_004452d0(RBX::Instance* instance)
 	(*this)[&instance->getDescriptor()].push_back(shared_from(instance));
 }
 
-void CPropGrid::FUN_00445380(boost::shared_ptr<RBX::Instance> instance)
+void CPropGrid::FUN_00445380(std::shared_ptr<RBX::Instance> instance)
 {
 	m_unk0x1d0.FUN_004452d0(instance.get());
 	RBX::startListening<RBX::Instance, RBX::PropertyChanged>(instance, this);
@@ -906,11 +906,11 @@ void CSelectionPropGrid::onEvent(const RBX::Selection* source, RBX::SelectionCha
 		FUN_0043e7f0(event.removedItem);
 	}
 
-	boost::recursive_mutex::scoped_lock lock(m_unk0x188);
+	std::lock_guard<std::recursive_mutex> lock(m_unk0x188);
 	m_unk0x1c1 = true;
 	m_unk0x1c4.clear();
 
-	boost::recursive_mutex::scoped_lock lock2(m_unk0x188);
+	std::lock_guard<std::recursive_mutex> lock2(m_unk0x188);
 	if (!m_unk0x1c0) {
 		if (m_hWnd) {
 			::PostMessage(m_hWnd, WM_USER + 101, 0, 0);
@@ -921,11 +921,13 @@ void CSelectionPropGrid::onEvent(const RBX::Selection* source, RBX::SelectionCha
 
 void CSelectionPropGrid::FUN_00445580(RBX::Selection* selection)
 {
-	boost::recursive_mutex::scoped_lock lock(m_unk0x188);
+	std::lock_guard<std::recursive_mutex> lock(m_unk0x188);
 
 	if (m_unk0x1e0) {
 		RBX::stopListening<RBX::Selection, RBX::SelectionChanged>(m_unk0x1e0, this);
-		std::for_each(m_unk0x1e0->begin(), m_unk0x1e0->end(), boost::bind(&CSelectionPropGrid::FUN_0043e7f0, this, _1));
+		std::for_each(m_unk0x1e0->begin(), m_unk0x1e0->end(), [this](const std::shared_ptr<RBX::Instance>& instance) {
+			FUN_0043e7f0(instance);
+		});
 	}
 
 	m_unk0x1c4.clear();
@@ -933,13 +935,15 @@ void CSelectionPropGrid::FUN_00445580(RBX::Selection* selection)
 	m_unk0x1e0 = shared_from(selection);
 
 	if (m_unk0x1e0) {
-		std::for_each(m_unk0x1e0->begin(), m_unk0x1e0->end(), boost::bind(&CSelectionPropGrid::FUN_00445380, this, _1));
+		std::for_each(m_unk0x1e0->begin(), m_unk0x1e0->end(), [this](const std::shared_ptr<RBX::Instance>& instance) {
+			FUN_00445380(instance);
+		});
 		RBX::startListening<RBX::Selection, RBX::SelectionChanged>(m_unk0x1e0, this);
 	}
 
 	m_unk0x1c1 = true;
 
-	boost::recursive_mutex::scoped_lock lock2(m_unk0x188);
+	std::lock_guard<std::recursive_mutex> lock2(m_unk0x188);
 	if (!m_unk0x1c0) {
 		if (m_hWnd) {
 			::PostMessage(m_hWnd, WM_USER + 101, 0, 0);
@@ -949,7 +953,7 @@ void CSelectionPropGrid::FUN_00445580(RBX::Selection* selection)
 }
 
 void CDataModelPropGrid::VTable0x00(
-	boost::shared_ptr<RBX::DataModel> newDataModel, boost::shared_ptr<RBX::DataModel> oldDataModel
+	std::shared_ptr<RBX::DataModel> newDataModel, std::shared_ptr<RBX::DataModel> oldDataModel
 )
 {
 	if (m_unk0x194) {

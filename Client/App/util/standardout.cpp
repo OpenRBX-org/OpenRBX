@@ -33,7 +33,7 @@ void StandardOut::print(MessageType type, const char* format, ...)
 	}
 
 	if (hasListeners()) {
-		boost::mutex::scoped_lock lock(sync);
+		std::lock_guard<std::recursive_mutex> lock(sync);
 
 		if (hasListeners()) {
 			raise(StandardOutMessage(type, message.c_str()));
@@ -41,14 +41,21 @@ void StandardOut::print(MessageType type, const char* format, ...)
 	}
 }
 
-boost::shared_ptr<StandardOut> StandardOut::singleton()
+void reportOnEventException(const std::exception& error)
 {
-	static boost::shared_ptr<StandardOut> standardOut(new StandardOut());
+	std::string what(error.what());
+
+	StandardOut::singleton()->print(MESSAGE_WARNING, "Exception caught in onEvent. %s", what.c_str());
+}
+
+std::shared_ptr<StandardOut> StandardOut::singleton()
+{
+	static std::shared_ptr<StandardOut> standardOut(new StandardOut());
 
 	return standardOut;
 }
 
-void StandardOut::print_exception(const boost::function0<void>& f, MessageType type, bool rethrow)
+void StandardOut::print_exception(const std::function<void()>& f, MessageType type, bool rethrow)
 {
 	try {
 		f();

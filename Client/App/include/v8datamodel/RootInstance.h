@@ -10,8 +10,6 @@
 
 #include <G3D/Rect2D.h>
 #include <G3D/Vector3.h>
-#include <boost/shared_ptr.hpp>
-#include <boost/weak_ptr.hpp>
 #include <memory>
 #include <vector>
 
@@ -44,37 +42,36 @@ private:
 		MOVE_NO_DROP = 1,
 	};
 
-	void moveSafe(std::vector<boost::weak_ptr<PartInstance> >& partArray, G3D::Vector3 move, MoveType moveType);
+	void moveSafe(std::vector<std::weak_ptr<PartInstance> >& partArray, G3D::Vector3 move, MoveType moveType);
 	void moveSafe(MegaDragger& megaDragger, G3D::Vector3 move, MoveType moveType);
-	void moveToCharacterInsertPoint(std::vector<boost::weak_ptr<PartInstance> >& partArray);
-	void moveToIdeInsertPoint(std::vector<boost::weak_ptr<PartInstance> >& partArray);
+	void moveToCharacterInsertPoint(std::vector<std::weak_ptr<PartInstance> >& partArray);
+	void moveToIdeInsertPoint(std::vector<std::weak_ptr<PartInstance> >& partArray);
 	void insertRaw(
-		const std::vector<boost::shared_ptr<Instance> >& instances,
+		const std::vector<std::shared_ptr<Instance> >& instances,
 		Instance* requestedParent,
-		std::vector<boost::weak_ptr<PartInstance> >& partArray
+		std::vector<std::weak_ptr<PartInstance> >& partArray
 	);
-	void insertToTree(const std::vector<boost::shared_ptr<Instance> >& instances, Instance* requestedParent);
+	void insertToTree(const std::vector<std::shared_ptr<Instance> >& instances, Instance* requestedParent);
 	void insertCharacterView(
-		const std::vector<boost::shared_ptr<Instance> >& instances,
-		std::vector<boost::weak_ptr<PartInstance> >& partArray
+		const std::vector<std::shared_ptr<Instance> >& instances, std::vector<std::weak_ptr<PartInstance> >& partArray
 	);
 	void insertIdeView(
-		const std::vector<boost::shared_ptr<Instance> >& instances,
-		std::vector<boost::weak_ptr<PartInstance> >& partArray,
+		const std::vector<std::shared_ptr<Instance> >& instances,
+		std::vector<std::weak_ptr<PartInstance> >& partArray,
 		PromptMode promptMode
 	);
-	void insert3dView(const std::vector<boost::shared_ptr<Instance> >& instances, PromptMode promptMode);
+	void insert3dView(const std::vector<std::shared_ptr<Instance> >& instances, PromptMode promptMode);
 	void insertHopperBin(HopperBin* h);
 	void insertSpawnLocation(SpawnLocation* s);
 
 protected:
 	virtual void onDescendentAdded(Instance* instance);
-	virtual void onDescendentRemoving(const boost::shared_ptr<Instance>& instance);
+	virtual void onDescendentRemoving(const std::shared_ptr<Instance>& instance);
 	virtual void onLastChildRemoved() {}
 	virtual void onChildControllerChanged() { ControllersUsed.setDirty(); }
 
 	G3D::Rect2D viewPort;
-	std::auto_ptr<World> world;
+	std::unique_ptr<World> world;
 
 	RootInstance();
 
@@ -82,7 +79,7 @@ protected:
 
 public:
 	void insertInstances(
-		const std::vector<boost::shared_ptr<Instance> >& instances,
+		const std::vector<std::shared_ptr<Instance> >& instances,
 		Instance* requestedParent,
 		InsertMode insertMode,
 		PromptMode promptMode

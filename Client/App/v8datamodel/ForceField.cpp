@@ -5,8 +5,6 @@
 #include "v8datamodel/PartInstance.h"
 #include "v8datamodel/Workspace.h"
 
-#include <boost/bind.hpp>
-
 namespace RBX {
 
 char sForceField[] = "ForceField";
@@ -16,7 +14,7 @@ bool ForceField::askSetParent(const Instance* instance) const
 	return dynamic_cast<const Workspace*>(instance) == NULL;
 }
 
-void renderForceField(boost::shared_ptr<Instance> descendent, Adorn* adorn, int cycle)
+void renderForceField(std::shared_ptr<Instance> descendent, Adorn* adorn, int cycle)
 {
 	if (PartInstance* part = dynamic_cast<PartInstance*>(descendent.get())) {
 		int value = cycle < 15 ? cycle : 30 - cycle;
@@ -61,7 +59,9 @@ void ForceField::render3dAdorn(Adorn* adorn)
 		cycle = (cycle + 1) % 30;
 	}
 
-	getParent()->visitDescendents(boost::bind(&renderForceField, _1, adorn, cycle));
+	getParent()->visitDescendents([adorn, cycle = cycle](const std::shared_ptr<Instance>& descendent) {
+		renderForceField(descendent, adorn, cycle);
+	});
 }
 
 ForceField::ForceField() : cycle(0)

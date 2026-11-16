@@ -7,9 +7,8 @@
 #include "v8tree/Service.h"
 #include "v8tree/Verb.h"
 
-#include <boost/scoped_ptr.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/thread/recursive_mutex.hpp>
+#include <memory>
+#include <mutex>
 #include <string>
 #include <vector>
 
@@ -41,12 +40,12 @@ class DataModel : public DescribedNonCreatable<DataModel, ServiceProvider, sData
 	void processEvent(const UIEvent&);
 
 private:
-	boost::shared_ptr<LocalBackpack> localBackpack;
-	boost::shared_ptr<Workspace> workspace;
-	boost::shared_ptr<RunService> runService;
-	boost::shared_ptr<StarterPackService> starterPackService;
-	boost::shared_ptr<GuiRoot> guiRoot;
-	boost::shared_ptr<GuiRoot> guiHooks;
+	std::shared_ptr<LocalBackpack> localBackpack;
+	std::shared_ptr<Workspace> workspace;
+	std::shared_ptr<RunService> runService;
+	std::shared_ptr<StarterPackService> starterPackService;
+	std::shared_ptr<GuiRoot> guiRoot;
+	std::shared_ptr<GuiRoot> guiHooks;
 	GuiTarget* guiTarget;
 	bool forceArrowCursor;
 	std::string uiMessage;
@@ -54,7 +53,7 @@ private:
 	IMetric* tempMetric;
 	bool dirty;
 	bool isInitialized;
-	boost::shared_ptr<boost::recursive_mutex> mutex;
+	std::shared_ptr<std::recursive_mutex> mutex;
 
 	void initializeContents();
 
@@ -62,23 +61,21 @@ public:
 	class Lock
 	{
 	public:
-		Lock(const DataModel* dataModel) : lock(NULL) { doLock(dataModel); }
+		Lock(const DataModel* dataModel) { doLock(dataModel); }
 
-		Lock(boost::shared_ptr<const DataModel> dataModel) : lock(NULL) { doLock(dataModel.get()); }
-
-		~Lock();
+		Lock(std::shared_ptr<const DataModel> dataModel) { doLock(dataModel.get()); }
 
 	private:
 		void doLock(const DataModel* dataModel);
 
-		boost::shared_ptr<boost::recursive_mutex> mutex;
-		boost::recursive_mutex::scoped_lock* lock;
+		std::shared_ptr<std::recursive_mutex> mutex;
+		std::unique_lock<std::recursive_mutex> lock;
 	};
 
-	boost::scoped_ptr<TimeState> timeState;
+	std::unique_ptr<TimeState> timeState;
 
-	static boost::shared_ptr<DataModel> createDataModel();
-	static void closeDataModel(boost::shared_ptr<DataModel> dataModel, bool joinRunThread);
+	static std::shared_ptr<DataModel> createDataModel();
+	static void closeDataModel(std::shared_ptr<DataModel> dataModel, bool joinRunThread);
 
 	DataModel();
 	virtual ~DataModel();
@@ -88,7 +85,7 @@ public:
 	std::string httpGet(std::string url, bool synchronous);
 	std::string httpPost(std::string url, std::string data, bool synchronous);
 	void close();
-	boost::shared_ptr<const std::vector<boost::shared_ptr<Instance> > > get(ContentId contentId);
+	std::shared_ptr<const std::vector<std::shared_ptr<Instance> > > get(ContentId contentId);
 	void raiseClose();
 	int numChatOptions();
 	void buildGui(Adorn*);
@@ -96,17 +93,17 @@ public:
 	GuiRoot* getGuiRoot() const { return guiRoot.get(); }
 	GuiRoot* getGuiHooks() const { return guiHooks.get(); }
 	void clearContents();
-	boost::shared_ptr<boost::recursive_mutex> getMutex() const { return mutex; }
+	std::shared_ptr<std::recursive_mutex> getMutex() const { return mutex; }
 
-	static boost::shared_ptr<boost::recursive_mutex> getMutex(Instance* instance)
+	static std::shared_ptr<std::recursive_mutex> getMutex(Instance* instance)
 	{
 		if (!instance) {
-			return boost::shared_ptr<boost::recursive_mutex>();
+			return std::shared_ptr<std::recursive_mutex>();
 		}
 
 		DataModel* dataModel = dynamic_cast<DataModel*>(instance->getRootAncestor());
 		if (!dataModel) {
-			return boost::shared_ptr<boost::recursive_mutex>();
+			return std::shared_ptr<std::recursive_mutex>();
 		}
 
 		return dataModel->getMutex();
@@ -148,7 +145,7 @@ protected:
 		setDirty(true);
 	}
 
-	virtual void onDescendentRemoving(const boost::shared_ptr<Instance>& instance)
+	virtual void onDescendentRemoving(const std::shared_ptr<Instance>& instance)
 	{
 		ServiceProvider::onDescendentRemoving(instance);
 		setDirty(true);

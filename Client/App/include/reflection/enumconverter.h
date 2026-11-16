@@ -4,9 +4,8 @@
 #include "reflection/type.h"
 
 #include <algorithm>
-#include <boost/bind.hpp>
-#include <boost/checked_delete.hpp>
 #include <map>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -36,7 +35,9 @@ public:
 
 	bool isValue(int intValue) const
 	{
-		return std::find_if(allItems.begin(), allItems.end(), boost::bind(&equalValue, _1, intValue)) != allItems.end();
+		return std::find_if(allItems.begin(), allItems.end(), [intValue](const Item* item) {
+				   return equalValue(item, intValue);
+			   }) != allItems.end();
 	}
 
 protected:
@@ -217,7 +218,7 @@ unsigned int EnumDesc<T>::convertToIndex(T value) const
 template <class T>
 EnumDesc<T>::~EnumDesc()
 {
-	std::for_each(allItems.begin(), allItems.end(), boost::checked_deleter<const Item>());
+	std::for_each(allItems.begin(), allItems.end(), std::default_delete<const Item>());
 }
 
 } // namespace Reflection

@@ -1,7 +1,7 @@
 #ifndef V8DATAMODEL_SAFECHAT_H
 #define V8DATAMODEL_SAFECHAT_H
 
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -31,7 +31,7 @@ public:
 	std::string getMessage(std::vector<std::string> path);
 
 private:
-	boost::scoped_ptr<ChatOption> chatRoot;
+	std::unique_ptr<ChatOption> chatRoot;
 
 	void loadChatTree();
 	void saveChatTree();

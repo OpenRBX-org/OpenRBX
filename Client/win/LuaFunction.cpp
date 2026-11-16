@@ -13,7 +13,7 @@ STDMETHODIMP CLuaFunction::CallEx(SAFEARRAY* args, SAFEARRAY** result)
 {
 	AFX_MANAGE_STATE(AfxGetAppModuleState());
 
-	std::auto_ptr<std::vector<RBX::Reflection::Value> > results;
+	std::unique_ptr<std::vector<RBX::Reflection::Value> > results;
 	if (result != NULL) {
 		*result = FUN_00413500(*results);
 	}
@@ -32,7 +32,7 @@ STDMETHODIMP CLuaFunction::Call(VARIANT arg1, VARIANT arg2, VARIANT arg3, VARIAN
 		arguments.FUN_00431c00(arg3);
 		arguments.FUN_00431c00(arg4);
 
-		std::auto_ptr<std::vector<RBX::Reflection::Value> > results;
+		std::unique_ptr<std::vector<RBX::Reflection::Value> > results;
 		{
 			RBX::DataModel::Lock lock(m_unk0x0c);
 			results = (m_unk0x0c ? m_unk0x0c->create<RBX::ScriptContext>() : NULL)->call(m_unk0x14, arguments);

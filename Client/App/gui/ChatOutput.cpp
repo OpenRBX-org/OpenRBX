@@ -4,6 +4,7 @@
 #include "network/Players.h"
 #include "util/Color.h"
 #include "util/Hash.h"
+#include "util/Utilities.h"
 #include "v8datamodel/GameSettings.h"
 #include "v8datamodel/SafeChat.h"
 #include "v8datamodel/Team.h"
@@ -11,8 +12,6 @@
 #include "v8tree/Service.h"
 
 #include <algorithm>
-#include <boost/algorithm/string.hpp>
-#include <boost/tokenizer.hpp>
 #include <vector>
 
 namespace RBX {
@@ -131,19 +130,13 @@ ChatLine::ChatLine(Network::Player* p_unk0x04, const std::string& p_unk0x08, flo
 
 bool ChatOutput::ParseCommand(Network::ChatMessage p_unk0x04)
 {
-	std::vector<std::string> tokens;
-	boost::char_separator<char> sep(" -_/,");
-	boost::tokenizer<boost::char_separator<char> > tok(p_unk0x04.message, sep);
-
-	for (boost::tokenizer<boost::char_separator<char> >::iterator it = tok.begin(); it != tok.end(); ++it) {
-		tokens.push_back(*it);
-	}
+	std::vector<std::string> tokens = tokenize(p_unk0x04.message, " -_/,");
 
 	if (tokens.size() == 0) {
 		return false;
 	}
 
-	boost::to_lower(tokens[0]);
+	toLower(tokens[0]);
 
 	if (tokens[0] == "sc") {
 		std::string message = SafeChat::singleton().getMessage(tokens);

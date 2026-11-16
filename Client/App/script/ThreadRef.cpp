@@ -9,10 +9,10 @@
 namespace RBX {
 namespace Lua {
 
-boost::shared_ptr<boost::mutex> ThreadRef::syncSingleton(new boost::mutex());
+std::shared_ptr<std::recursive_mutex> ThreadRef::syncSingleton(new std::recursive_mutex());
 
 template <>
-const char* Bridge<boost::shared_ptr<ThreadRef::Node>, 1>::className = "shared_ptr<ThreadRef::Node>";
+const char* Bridge<std::shared_ptr<ThreadRef::Node>, 1>::className = "shared_ptr<ThreadRef::Node>";
 
 void ThreadRef::addRef()
 {
@@ -73,16 +73,16 @@ void ThreadRef::removeFromNode()
 }
 
 template <>
-void Bridge<boost::shared_ptr<ThreadRef::Node>, 1>::on_newindex(
-	boost::shared_ptr<ThreadRef::Node>& value, const char* name, lua_State* L
+void Bridge<std::shared_ptr<ThreadRef::Node>, 1>::on_newindex(
+	std::shared_ptr<ThreadRef::Node>& value, const char* name, lua_State* L
 )
 {
 	throw std::runtime_error(G3D::format("%s cannot be assigned to", name));
 }
 
 template <>
-int Bridge<boost::shared_ptr<ThreadRef::Node>, 1>::on_index(
-	const boost::shared_ptr<ThreadRef::Node>& value, const char* name, lua_State* L
+int Bridge<std::shared_ptr<ThreadRef::Node>, 1>::on_index(
+	const std::shared_ptr<ThreadRef::Node>& value, const char* name, lua_State* L
 )
 {
 	throw std::runtime_error(G3D::format("%s is not a valid member", name));
@@ -104,12 +104,12 @@ void FunctionRef::removeRef()
 	ThreadRef::removeRef();
 }
 
-boost::shared_ptr<ThreadRef::Node> ThreadRef::Node::get(lua_State* thread)
+std::shared_ptr<ThreadRef::Node> ThreadRef::Node::get(lua_State* thread)
 {
 	lua_pushlightuserdata(thread, (void*) 0x4e);
 	lua_gettable(thread, LUA_GLOBALSINDEX);
 
-	boost::shared_ptr<Node>& node = Bridge<boost::shared_ptr<Node>, 1>::getObject(thread, lua_gettop(thread));
+	std::shared_ptr<Node>& node = Bridge<std::shared_ptr<Node>, 1>::getObject(thread, lua_gettop(thread));
 
 	lua_settop(thread, -2);
 
@@ -134,7 +134,7 @@ namespace Lua {
 
 ThreadRef::ThreadRef(lua_State* L) : sync(syncSingleton), node(NULL), previous(NULL), next(NULL), L(L), threadId(0)
 {
-	boost::mutex::scoped_lock lock(*sync);
+	std::lock_guard<std::recursive_mutex> lock(*sync);
 
 	node = Node::get(L).get();
 
@@ -145,7 +145,7 @@ ThreadRef::ThreadRef(lua_State* L) : sync(syncSingleton), node(NULL), previous(N
 
 ThreadRef::ThreadRef(const ThreadRef& other) : sync(syncSingleton), node(other.node), L(other.L)
 {
-	boost::mutex::scoped_lock lock(*sync);
+	std::lock_guard<std::recursive_mutex> lock(*sync);
 
 	addRef();
 
@@ -154,7 +154,7 @@ ThreadRef::ThreadRef(const ThreadRef& other) : sync(syncSingleton), node(other.n
 
 void ThreadRef::reset()
 {
-	boost::mutex::scoped_lock lock(*sync);
+	std::lock_guard<std::recursive_mutex> lock(*sync);
 
 	removeFromNode();
 
@@ -164,7 +164,7 @@ void ThreadRef::reset()
 ThreadRef& ThreadRef::operator=(const ThreadRef& other)
 {
 	if (L != other.L) {
-		boost::mutex::scoped_lock lock(*sync);
+		std::lock_guard<std::recursive_mutex> lock(*sync);
 
 		removeRef();
 
@@ -174,7 +174,7 @@ ThreadRef& ThreadRef::operator=(const ThreadRef& other)
 	}
 
 	if (node != other.node) {
-		boost::mutex::scoped_lock lock(*sync);
+		std::lock_guard<std::recursive_mutex> lock(*sync);
 
 		removeFromNode();
 
@@ -188,7 +188,7 @@ ThreadRef& ThreadRef::operator=(const ThreadRef& other)
 
 void ThreadRef::Node::eraseAllRefs()
 {
-	boost::mutex::scoped_lock lock(*sync);
+	std::lock_guard<std::recursive_mutex> lock(*sync);
 
 	ThreadRef* ref = first;
 
@@ -275,7 +275,7 @@ Lua::FunctionRef& Value::convert<Lua::FunctionRef>()
 		_type = &Type::singleton<Lua::FunctionRef>();
 	}
 
-	if (Lua::FunctionRef* function = boost::any_cast<Lua::FunctionRef>(&value)) {
+	if (Lua::FunctionRef* function = std::any_cast<Lua::FunctionRef>(&value)) {
 		return *function;
 	}
 
@@ -286,15 +286,15 @@ Lua::FunctionRef& Value::convert<Lua::FunctionRef>()
 
 namespace Lua {
 
-boost::shared_ptr<ThreadRef::Node> ThreadRef::Node::create(lua_State* thread)
+std::shared_ptr<ThreadRef::Node> ThreadRef::Node::create(lua_State* thread)
 {
 	lua_pushlightuserdata(thread, (void*) 0x4e);
 
-	boost::shared_ptr<Node>& node = Bridge<boost::shared_ptr<Node>, 1>::pushNewObject(thread);
+	std::shared_ptr<Node>& node = Bridge<std::shared_ptr<Node>, 1>::pushNewObject(thread);
 
 	lua_settable(thread, LUA_GLOBALSINDEX);
 
-	node = boost::shared_ptr<Node>(new Node());
+	node = std::shared_ptr<Node>(new Node());
 
 	return node;
 }

@@ -9,7 +9,7 @@ bool InstanceHandle::empty() const
 	return target.get() == 0;
 }
 
-void InstanceHandle::linkTo(boost::shared_ptr<Instance> target)
+void InstanceHandle::linkTo(std::shared_ptr<Instance> target)
 {
 	this->target = target;
 }

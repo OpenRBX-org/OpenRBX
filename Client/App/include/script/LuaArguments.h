@@ -175,14 +175,14 @@ public:
 			return 1;
 		}
 
-		if (value.isType<boost::shared_ptr<Instance> >()) {
-			SharedPtrBridge<Reflection::DescribedBase>::push(L, value.cast<const boost::shared_ptr<Instance>&>());
+		if (value.isType<std::shared_ptr<Instance> >()) {
+			SharedPtrBridge<Reflection::DescribedBase>::push(L, value.cast<const std::shared_ptr<Instance>&>());
 			return 1;
 		}
 
-		if (value.isType<boost::shared_ptr<Reflection::DescribedBase> >()) {
+		if (value.isType<std::shared_ptr<Reflection::DescribedBase> >()) {
 			SharedPtrBridge<Reflection::DescribedBase>::push(
-				L, value.cast<const boost::shared_ptr<Reflection::DescribedBase>&>()
+				L, value.cast<const std::shared_ptr<Reflection::DescribedBase>&>()
 			);
 			return 1;
 		}
@@ -192,9 +192,9 @@ public:
 			return pushTable(values.begin(), values.end(), L);
 		}
 
-		if (value.isType<boost::shared_ptr<const std::vector<boost::shared_ptr<Instance> > > >()) {
-			boost::shared_ptr<const std::vector<boost::shared_ptr<Instance> > > instances =
-				value.cast<boost::shared_ptr<const std::vector<boost::shared_ptr<Instance> > > >();
+		if (value.isType<std::shared_ptr<const std::vector<std::shared_ptr<Instance> > > >()) {
+			std::shared_ptr<const std::vector<std::shared_ptr<Instance> > > instances =
+				value.cast<std::shared_ptr<const std::vector<std::shared_ptr<Instance> > > >();
 			if (instances) {
 				return pushTable(instances->begin(), instances->end(), L);
 			}

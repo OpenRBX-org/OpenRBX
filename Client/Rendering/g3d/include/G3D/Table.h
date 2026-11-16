@@ -89,6 +89,26 @@ inline unsigned int hashCode(const std::string& a) {
 }
 
 namespace G3D {
+class AABox;
+class NetAddress;
+class Sphere;
+class TextureFormat;
+class Triangle;
+class VARArea;
+class Vector3;
+class Vector4;
+}
+
+inline unsigned int hashCode(const G3D::AABox& b);
+inline unsigned int hashCode(const G3D::NetAddress& a);
+inline unsigned int hashCode(const G3D::Sphere& sphere);
+inline unsigned int hashCode(const G3D::TextureFormat* f);
+inline unsigned int hashCode(const G3D::Triangle& t);
+inline unsigned int hashCode(const G3D::VARArea* v);
+unsigned int hashCode(const G3D::Vector3& v);
+unsigned int hashCode(const G3D::Vector4& v);
+
+namespace G3D {
 
 
 /**
@@ -471,7 +491,8 @@ public:
      key into a table is O(1), but may cause a potentially slow rehashing.
      */
     void set(const Key& key, const Value& value) {
-        unsigned int code = ::hashCode(key);
+        using ::hashCode;
+        unsigned int code = hashCode(key);
         unsigned int b = code % numBuckets;
         
         // Go to the bucket
@@ -524,7 +545,8 @@ public:
     */
    void remove(const Key& key) {
       
-      unsigned int code = ::hashCode(key);
+      using ::hashCode;
+      unsigned int code = hashCode(key);
       unsigned int b = code % numBuckets;
 
       // Go to the bucket
@@ -564,7 +586,8 @@ public:
     */
    Value& get(const Key& key) const {
 
-       unsigned int code = ::hashCode(key);
+       using ::hashCode;
+       unsigned int code = hashCode(key);
       unsigned int b = code % numBuckets;
 
       Node* node = bucket[b];
@@ -587,7 +610,8 @@ public:
     If the key is not present, returns false.
     */
    bool get(const Key& key, Value& val) const {
-	  unsigned int code = ::hashCode(key);
+	  using ::hashCode;
+	  unsigned int code = hashCode(key);
       unsigned int b = code % numBuckets;
 
       Node* node = bucket[b];
@@ -609,7 +633,8 @@ public:
     Returns true if key is in the table.
     */
    bool containsKey(const Key& key) const {
-       unsigned int code = ::hashCode(key);
+       using ::hashCode;
+       unsigned int code = hashCode(key);
        unsigned int b = code % numBuckets;
 
        Node* node = bucket[b];

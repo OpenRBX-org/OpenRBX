@@ -3,12 +3,12 @@
 
 #include "util/IRenderable.h"
 #include "util/NormalId.h"
+#include "util/Signals.h"
 #include "v8datamodel/JointInstance.h"
 #include "v8tree/Instance.h"
 #include "v8world/MotorJoint.h"
 
-#include <boost/shared_ptr.hpp>
-#include <boost/signals/connection.hpp>
+#include <memory>
 
 namespace RBX {
 
@@ -97,8 +97,8 @@ private:
 	MotorJoint* motorJoint() { return static_cast<MotorJoint*>(joint); }
 	const MotorJoint* motorJoint() const { return static_cast<const MotorJoint*>(joint); }
 
-	boost::shared_ptr<Hole> hole;
-	boost::signals::scoped_connection holeAncestorChanged;
+	std::shared_ptr<Hole> hole;
+	Signals::ScopedConnection holeAncestorChanged;
 
 	void onEvent_HoleAncestorChanged();
 	void setPart(int i, Feature* feature);

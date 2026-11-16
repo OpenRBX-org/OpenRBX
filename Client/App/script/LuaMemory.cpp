@@ -3,9 +3,69 @@
 #define NOMINMAX
 
 #include <algorithm>
-#include <boost/pool/singleton_pool.hpp>
+#include <mutex>
+#include <new>
 #include <stdlib.h>
 #include <string.h>
+
+template <size_t chunkSize>
+class ChunkPool
+{
+public:
+	static void* malloc()
+	{
+		ChunkPool& pool = instance();
+		std::lock_guard<std::mutex> lock(pool.mutex);
+
+		if (pool.freeList == NULL && !pool.grow()) {
+			return NULL;
+		}
+
+		void* chunk = pool.freeList;
+		pool.freeList = *static_cast<void**>(chunk);
+		return chunk;
+	}
+
+	static void free(void* chunk)
+	{
+		ChunkPool& pool = instance();
+		std::lock_guard<std::mutex> lock(pool.mutex);
+
+		*static_cast<void**>(chunk) = pool.freeList;
+		pool.freeList = chunk;
+	}
+
+private:
+	static_assert(chunkSize % sizeof(void*) == 0, "chunks must hold and align a free-list pointer");
+
+	std::mutex mutex;
+	void* freeList = NULL;
+	size_t nextSize = 32;
+
+	static ChunkPool& instance()
+	{
+		static ChunkPool* pool = new ChunkPool();
+		return *pool;
+	}
+
+	bool grow()
+	{
+		char* block = new (std::nothrow) char[nextSize * chunkSize];
+
+		if (block == NULL) {
+			return false;
+		}
+
+		for (size_t i = nextSize; i-- > 0;) {
+			void* chunk = block + i * chunkSize;
+			*static_cast<void**>(chunk) = freeList;
+			freeList = chunk;
+		}
+
+		nextSize <<= 1;
+		return true;
+	}
+};
 
 LuaAllocator::LuaAllocator() : heapSize(0), heapCount(0), maxHeapSize(0), maxHeapCount(0)
 {
@@ -46,16 +106,16 @@ void* bucketRealloc(void* ptr, size_t osize, size_t nsize)
 			result = malloc(nsize);
 			memcpy(result, ptr, osize);
 			if (osize > smallSize) {
-				boost::singleton_pool<LuaAllocator, largeSize>::free(ptr);
+				ChunkPool<largeSize>::free(ptr);
 			}
 			else {
-				boost::singleton_pool<LuaAllocator, smallSize>::free(ptr);
+				ChunkPool<smallSize>::free(ptr);
 			}
 		}
 	}
 	else if (nsize > smallSize) {
 		if (osize > largeSize) {
-			result = boost::singleton_pool<LuaAllocator, largeSize>::malloc();
+			result = ChunkPool<largeSize>::malloc();
 			memcpy(result, ptr, nsize);
 			free(ptr);
 		}
@@ -63,29 +123,29 @@ void* bucketRealloc(void* ptr, size_t osize, size_t nsize)
 			result = ptr;
 		}
 		else {
-			result = boost::singleton_pool<LuaAllocator, largeSize>::malloc();
+			result = ChunkPool<largeSize>::malloc();
 			if (osize > 0) {
 				memcpy(result, ptr, osize);
-				boost::singleton_pool<LuaAllocator, smallSize>::free(ptr);
+				ChunkPool<smallSize>::free(ptr);
 			}
 		}
 	}
 	else if (nsize > 0) {
 		if (osize > largeSize) {
-			result = boost::singleton_pool<LuaAllocator, smallSize>::malloc();
+			result = ChunkPool<smallSize>::malloc();
 			memcpy(result, ptr, nsize);
 			free(ptr);
 		}
 		else if (osize > smallSize) {
-			result = boost::singleton_pool<LuaAllocator, smallSize>::malloc();
+			result = ChunkPool<smallSize>::malloc();
 			memcpy(result, ptr, nsize);
-			boost::singleton_pool<LuaAllocator, largeSize>::free(ptr);
+			ChunkPool<largeSize>::free(ptr);
 		}
 		else if (osize > 0) {
 			result = ptr;
 		}
 		else {
-			result = boost::singleton_pool<LuaAllocator, smallSize>::malloc();
+			result = ChunkPool<smallSize>::malloc();
 		}
 	}
 	else {
@@ -93,10 +153,10 @@ void* bucketRealloc(void* ptr, size_t osize, size_t nsize)
 			free(ptr);
 		}
 		else if (osize > smallSize) {
-			boost::singleton_pool<LuaAllocator, largeSize>::free(ptr);
+			ChunkPool<largeSize>::free(ptr);
 		}
 		else if (osize > 0) {
-			boost::singleton_pool<LuaAllocator, smallSize>::free(ptr);
+			ChunkPool<smallSize>::free(ptr);
 		}
 		result = NULL;
 	}

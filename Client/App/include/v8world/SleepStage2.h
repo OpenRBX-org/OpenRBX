@@ -8,7 +8,7 @@
 #include "v8world/IWorldStage.h"
 
 #include <G3D/Array.h>
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 #include <set>
 #include <vector>
 
@@ -121,9 +121,9 @@ private:
 	AssemblySet sleepingDeeply;
 
 public:
-	boost::scoped_ptr<Profiling::CodeProfiler> profilingCollision;
-	boost::scoped_ptr<Profiling::CodeProfiler> profilingWake;
-	boost::scoped_ptr<Profiling::CodeProfiler> profilingSleep;
+	std::unique_ptr<Profiling::CodeProfiler> profilingCollision;
+	std::unique_ptr<Profiling::CodeProfiler> profilingWake;
+	std::unique_ptr<Profiling::CodeProfiler> profilingSleep;
 };
 
 } // namespace RBX

@@ -18,25 +18,25 @@ namespace RBX {
 namespace Reflection {
 
 template <>
-const Type& Type::singleton<boost::shared_ptr<DescribedBase> >()
+const Type& Type::singleton<std::shared_ptr<DescribedBase> >()
 {
-	static Type type("Object", typeid(boost::shared_ptr<DescribedBase>));
+	static Type type("Object", typeid(std::shared_ptr<DescribedBase>));
 
 	return type;
 }
 
 template <>
-const Type& Type::singleton<boost::shared_ptr<Instance> >()
+const Type& Type::singleton<std::shared_ptr<Instance> >()
 {
-	static Type type("Instance", typeid(boost::shared_ptr<Instance>));
+	static Type type("Instance", typeid(std::shared_ptr<Instance>));
 
 	return type;
 }
 
 template <>
-const Type& Type::singleton<boost::shared_ptr<const std::vector<boost::shared_ptr<Instance> > > >()
+const Type& Type::singleton<std::shared_ptr<const std::vector<std::shared_ptr<Instance> > > >()
 {
-	static Type type("Objects", typeid(boost::shared_ptr<const std::vector<boost::shared_ptr<Instance> > >));
+	static Type type("Objects", typeid(std::shared_ptr<const std::vector<std::shared_ptr<Instance> > >));
 
 	return type;
 }
@@ -122,11 +122,11 @@ const Type& Type::singleton<std::vector<Value> >()
 }
 
 template <>
-boost::shared_ptr<const std::vector<boost::shared_ptr<Instance> > >& Value::convert<
-	boost::shared_ptr<const std::vector<boost::shared_ptr<Instance> > > >()
+std::shared_ptr<const std::vector<std::shared_ptr<Instance> > >& Value::convert<
+	std::shared_ptr<const std::vector<std::shared_ptr<Instance> > > >()
 {
-	if (boost::shared_ptr<const std::vector<boost::shared_ptr<Instance> > >* objects =
-			boost::any_cast<boost::shared_ptr<const std::vector<boost::shared_ptr<Instance> > > >(&value)) {
+	if (std::shared_ptr<const std::vector<std::shared_ptr<Instance> > >* objects =
+			std::any_cast<std::shared_ptr<const std::vector<std::shared_ptr<Instance> > > >(&value)) {
 		return *objects;
 	}
 
@@ -136,7 +136,7 @@ boost::shared_ptr<const std::vector<boost::shared_ptr<Instance> > >& Value::conv
 template <>
 std::vector<Value>& Value::convert<std::vector<Value> >()
 {
-	if (std::vector<Value>* values = boost::any_cast<std::vector<Value> >(&value)) {
+	if (std::vector<Value>* values = std::any_cast<std::vector<Value> >(&value)) {
 		return *values;
 	}
 
@@ -474,17 +474,17 @@ template <>
 int& Value::convert<int>()
 {
 	if (isType<float>()) {
-		value = G3D::iRound(boost::any_cast<float>(value));
+		value = G3D::iRound(std::any_cast<float>(value));
 		_type = &Type::singleton<int>();
 	}
 
 	if (isType<double>()) {
-		value = G3D::iRound(boost::any_cast<double>(value));
+		value = G3D::iRound(std::any_cast<double>(value));
 		_type = &Type::singleton<int>();
 	}
 
 	if (isType<bool>()) {
-		value = boost::any_cast<bool>(value) ? 1 : 0;
+		value = std::any_cast<bool>(value) ? 1 : 0;
 		_type = &Type::singleton<int>();
 	}
 
@@ -495,17 +495,17 @@ template <>
 bool& Value::convert<bool>()
 {
 	if (isType<int>()) {
-		value = boost::any_cast<int>(value) != 0;
+		value = std::any_cast<int>(value) != 0;
 		_type = &Type::singleton<bool>();
 	}
 
 	if (isType<float>()) {
-		value = boost::any_cast<float>(value) != 0.0f;
+		value = std::any_cast<float>(value) != 0.0f;
 		_type = &Type::singleton<bool>();
 	}
 
 	if (isType<double>()) {
-		value = boost::any_cast<double>(value) != 0.0;
+		value = std::any_cast<double>(value) != 0.0;
 		_type = &Type::singleton<bool>();
 	}
 
@@ -516,17 +516,17 @@ template <>
 float& Value::convert<float>()
 {
 	if (isType<int>()) {
-		value = (float) boost::any_cast<int>(value);
+		value = (float) std::any_cast<int>(value);
 		_type = &Type::singleton<float>();
 	}
 
 	if (isType<double>()) {
-		value = (float) boost::any_cast<double>(value);
+		value = (float) std::any_cast<double>(value);
 		_type = &Type::singleton<float>();
 	}
 
 	if (isType<bool>()) {
-		value = (float) (boost::any_cast<bool>(value) ? 1 : 0);
+		value = (float) (std::any_cast<bool>(value) ? 1 : 0);
 		_type = &Type::singleton<float>();
 	}
 
@@ -537,17 +537,17 @@ template <>
 double& Value::convert<double>()
 {
 	if (isType<int>()) {
-		value = (double) boost::any_cast<int>(value);
+		value = (double) std::any_cast<int>(value);
 		_type = &Type::singleton<double>();
 	}
 
 	if (isType<bool>()) {
-		value = (double) (boost::any_cast<bool>(value) ? 1 : 0);
+		value = (double) (std::any_cast<bool>(value) ? 1 : 0);
 		_type = &Type::singleton<double>();
 	}
 
 	if (isType<float>()) {
-		value = (double) boost::any_cast<float>(value);
+		value = (double) std::any_cast<float>(value);
 		_type = &Type::singleton<double>();
 	}
 
@@ -564,7 +564,7 @@ template <>
 ContentId& Value::convert<ContentId>()
 {
 	if (isType<std::string>()) {
-		value = ContentId(boost::any_cast<std::string>(value));
+		value = ContentId(std::any_cast<std::string>(value));
 		_type = &Type::singleton<ContentId>();
 	}
 
@@ -575,31 +575,31 @@ template <>
 std::string& Value::convert<std::string>()
 {
 	if (isType<bool>()) {
-		value = StringConverter<bool>::convertToString(boost::any_cast<bool>(value));
+		value = StringConverter<bool>::convertToString(std::any_cast<bool>(value));
 		_type = &Type::singleton<bool>();
 	}
 
 	if (isType<int>()) {
-		value = StringConverter<int>::convertToString(boost::any_cast<int>(value));
+		value = StringConverter<int>::convertToString(std::any_cast<int>(value));
 		_type = &Type::singleton<int>();
 	}
 
 	if (isType<float>()) {
-		value = StringConverter<float>::convertToString(boost::any_cast<float>(value));
+		value = StringConverter<float>::convertToString(std::any_cast<float>(value));
 		_type = &Type::singleton<float>();
 	}
 
 	if (isType<double>()) {
-		value = StringConverter<double>::convertToString(boost::any_cast<double>(value));
+		value = StringConverter<double>::convertToString(std::any_cast<double>(value));
 		_type = &Type::singleton<double>();
 	}
 
 	if (isType<G3D::Vector3>()) {
-		value = StringConverter<G3D::Vector3>::convertToString(boost::any_cast<G3D::Vector3>(value));
+		value = StringConverter<G3D::Vector3>::convertToString(std::any_cast<G3D::Vector3>(value));
 		_type = &Type::singleton<G3D::Vector3>();
 	}
 
-	if (std::string* s = boost::any_cast<std::string>(&value)) {
+	if (std::string* s = std::any_cast<std::string>(&value)) {
 		return *s;
 	}
 
@@ -731,15 +731,15 @@ std::string TypedPropertyDescriptor<ContentId>::getStringValue(const DescribedBa
 }
 
 template <>
-boost::shared_ptr<Instance>& Value::convert<boost::shared_ptr<Instance> >()
+std::shared_ptr<Instance>& Value::convert<std::shared_ptr<Instance> >()
 {
 	if (isType<void>()) {
-		value = boost::shared_ptr<Instance>();
-		_type = &Type::singleton<boost::shared_ptr<Instance> >();
+		value = std::shared_ptr<Instance>();
+		_type = &Type::singleton<std::shared_ptr<Instance> >();
 	}
 
-	if (isType<boost::shared_ptr<DescribedBase> >()) {
-		boost::shared_ptr<DescribedBase>* described = boost::any_cast<boost::shared_ptr<DescribedBase> >(&value);
+	if (isType<std::shared_ptr<DescribedBase> >()) {
+		std::shared_ptr<DescribedBase>* described = std::any_cast<std::shared_ptr<DescribedBase> >(&value);
 		if (described) {
 			Instance* instance = dynamic_cast<Instance*>(described->get());
 			if (instance == NULL) {
@@ -749,13 +749,13 @@ boost::shared_ptr<Instance>& Value::convert<boost::shared_ptr<Instance> >()
 			value = shared_from(instance);
 		}
 		else {
-			value = boost::shared_ptr<Instance>();
+			value = std::shared_ptr<Instance>();
 		}
 
-		_type = &Type::singleton<boost::shared_ptr<Instance> >();
+		_type = &Type::singleton<std::shared_ptr<Instance> >();
 	}
 
-	if (boost::shared_ptr<Instance>* instance = boost::any_cast<boost::shared_ptr<Instance> >(&value)) {
+	if (std::shared_ptr<Instance>* instance = std::any_cast<std::shared_ptr<Instance> >(&value)) {
 		return *instance;
 	}
 

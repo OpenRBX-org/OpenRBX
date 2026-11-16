@@ -4,7 +4,7 @@
 #include "util/Name.h"
 #include "v8datamodel/ScriptMouseCommand.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace RBX {
 
@@ -15,7 +15,7 @@ extern char sToolMouseCommand[];
 class ToolMouseCommand : public Named<ScriptMouseCommand, sToolMouseCommand>
 {
 private:
-	boost::shared_ptr<Tool> tool;
+	std::shared_ptr<Tool> tool;
 
 	void updateTargetPoint(const UIEvent& uiEvent);
 

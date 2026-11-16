@@ -8,7 +8,7 @@
 
 #include <G3D/Rect2D.h>
 #include <atlsync.h>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #define DIRECTINPUT_VERSION 0x0800
 #include <dinput.h>
@@ -40,7 +40,7 @@ private:
 	CComPtr<IDirectInput8> m_unk0x188;
 	CComPtr<IDirectInputDevice8> m_unk0x18c;
 	CComPtr<IDirectInputDevice8> m_unk0x190;
-	boost::shared_ptr<RBX::DataModel> m_unk0x194;
+	std::shared_ptr<RBX::DataModel> m_unk0x194;
 
 	bool FUN_0046b7f0(const G3D::Vector2& position);
 	bool FUN_0046b880();

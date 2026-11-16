@@ -13,7 +13,7 @@ namespace RBX {
 
 const char sGlobalSettings[] = "GlobalSettings";
 
-boost::recursive_mutex GlobalSettings::mutex;
+std::recursive_mutex GlobalSettings::mutex;
 
 static std::string FUN_00581c60()
 {
@@ -42,9 +42,9 @@ void GlobalSettings::loadState()
 	try {
 		std::ifstream stream(fileName.c_str(), std::ios_base::in | std::ios_base::binary);
 		TextXmlParser parser(stream.rdbuf());
-		std::auto_ptr<XmlElement> root(parser.parse());
+		std::unique_ptr<XmlElement> root(parser.parse());
 
-		boost::recursive_mutex::scoped_lock lock(mutex);
+		std::lock_guard<std::recursive_mutex> lock(mutex);
 		MergeBinder binder;
 		readChildren(root.get(), binder);
 		binder.resolveRefs();
@@ -62,7 +62,7 @@ void GlobalSettings::saveState()
 		return;
 	}
 
-	std::auto_ptr<XmlElement> root(SerializerV2::newRootElement());
+	std::unique_ptr<XmlElement> root(SerializerV2::newRootElement());
 	writeChildren(root.get());
 
 	std::ofstream stream(fileName.c_str(), std::ios_base::out | std::ios_base::binary);
@@ -75,11 +75,11 @@ GlobalSettings::GlobalSettings()
 	setName("Global Settings");
 }
 
-boost::shared_ptr<GlobalSettings> GlobalSettings::singleton()
+std::shared_ptr<GlobalSettings> GlobalSettings::singleton()
 {
-	boost::recursive_mutex::scoped_lock lock(mutex);
+	std::lock_guard<std::recursive_mutex> lock(mutex);
 
-	static boost::shared_ptr<GlobalSettings> sing = Creatable<Instance>::create<GlobalSettings>();
+	static std::shared_ptr<GlobalSettings> sing = Creatable<Instance>::create<GlobalSettings>();
 
 	return sing;
 }

@@ -8,9 +8,9 @@
 #include "v8datamodel/Selection.h"
 #include "v8tree/Instance.h"
 
-#include <boost/shared_ptr.hpp>
-#include <boost/thread/recursive_mutex.hpp>
 #include <map>
+#include <memory>
+#include <mutex>
 #include <set>
 #include <vector>
 
@@ -28,7 +28,7 @@ public:
 		Item(const RBX::Reflection::PropertyDescriptor& descriptor, CPropGrid* grid);
 
 		virtual void VTable0x00(
-			const std::map<const RBX::Reflection::ClassDescriptor*, std::vector<boost::shared_ptr<RBX::Instance> > >&
+			const std::map<const RBX::Reflection::ClassDescriptor*, std::vector<std::shared_ptr<RBX::Instance> > >&
 				instances
 		) = 0;
 
@@ -40,7 +40,7 @@ public:
 	};
 
 	class Unk0x1d0
-		: public std::map<const RBX::Reflection::ClassDescriptor*, std::vector<boost::shared_ptr<RBX::Instance> > >
+		: public std::map<const RBX::Reflection::ClassDescriptor*, std::vector<std::shared_ptr<RBX::Instance> > >
 	{
 	public:
 		void FUN_0043e170(RBX::Instance* instance);
@@ -56,8 +56,8 @@ protected:
 	virtual void onEvent(const RBX::Instance* source, RBX::PropertyChanged event);
 
 	void FUN_0043db00(const RBX::Reflection::ClassDescriptor* classDescriptor);
-	void FUN_0043e7f0(boost::shared_ptr<RBX::Instance> instance);
-	void FUN_00445380(boost::shared_ptr<RBX::Instance> instance);
+	void FUN_0043e7f0(std::shared_ptr<RBX::Instance> instance);
+	void FUN_00445380(std::shared_ptr<RBX::Instance> instance);
 
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg LRESULT FUN_0043e8a0(WPARAM wParam, LPARAM lParam);
@@ -76,7 +76,7 @@ private:
 	void FUN_0043e6b0(T* item);
 
 protected:
-	boost::recursive_mutex m_unk0x188;
+	std::recursive_mutex m_unk0x188;
 	RBX::DataModel* m_unk0x194;
 	std::vector<Item*> m_unk0x198;
 	std::map<const RBX::Reflection::PropertyDescriptor*, Item*> m_unk0x1a8;
@@ -116,7 +116,7 @@ public:
 	}
 
 	virtual void VTable0x00(
-		const std::map<const RBX::Reflection::ClassDescriptor*, std::vector<boost::shared_ptr<RBX::Instance> > >&
+		const std::map<const RBX::Reflection::ClassDescriptor*, std::vector<std::shared_ptr<RBX::Instance> > >&
 			instances
 	);
 
@@ -212,7 +212,7 @@ public:
 
 	virtual BOOL OnAfterEdit(CString& strValue);
 	virtual void VTable0x00(
-		const std::map<const RBX::Reflection::ClassDescriptor*, std::vector<boost::shared_ptr<RBX::Instance> > >&
+		const std::map<const RBX::Reflection::ClassDescriptor*, std::vector<std::shared_ptr<RBX::Instance> > >&
 			instances
 	);
 
@@ -230,7 +230,7 @@ public:
 
 	virtual void OnValueChanged(CString strValue);
 	virtual void VTable0x00(
-		const std::map<const RBX::Reflection::ClassDescriptor*, std::vector<boost::shared_ptr<RBX::Instance> > >&
+		const std::map<const RBX::Reflection::ClassDescriptor*, std::vector<std::shared_ptr<RBX::Instance> > >&
 			instances
 	);
 
@@ -245,7 +245,7 @@ public:
 
 	virtual void OnValueChanged(CString strValue);
 	virtual void VTable0x00(
-		const std::map<const RBX::Reflection::ClassDescriptor*, std::vector<boost::shared_ptr<RBX::Instance> > >&
+		const std::map<const RBX::Reflection::ClassDescriptor*, std::vector<std::shared_ptr<RBX::Instance> > >&
 			instances
 	);
 
@@ -322,7 +322,7 @@ protected:
 	virtual void onEvent(const RBX::Selection* source, RBX::SelectionChanged event);
 
 private:
-	boost::shared_ptr<RBX::Selection> m_unk0x1e0;
+	std::shared_ptr<RBX::Selection> m_unk0x1e0;
 };
 
 class CDataModelPropGrid : public CSelectionPropGrid, public ActiveDocView
@@ -333,9 +333,7 @@ public:
 	CDataModelPropGrid() {}
 
 protected:
-	virtual void VTable0x00(
-		boost::shared_ptr<RBX::DataModel> newDataModel, boost::shared_ptr<RBX::DataModel> oldDataModel
-	);
+	virtual void VTable0x00(std::shared_ptr<RBX::DataModel> newDataModel, std::shared_ptr<RBX::DataModel> oldDataModel);
 };
 
 #endif // PROPGRID_H

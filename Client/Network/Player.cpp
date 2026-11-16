@@ -5,6 +5,7 @@
 #include "reflection/property.h"
 #include "security/SecurityContext.h"
 #include "util/ContentProvider.h"
+#include "util/Utilities.h"
 #include "v8datamodel/Accoutrement.h"
 #include "v8datamodel/Backpack.h"
 #include "v8datamodel/Camera.h"
@@ -19,8 +20,6 @@
 
 #include <G3D/System.h>
 #include <algorithm>
-#include <boost/algorithm/string.hpp>
-#include <boost/bind.hpp>
 #include <stdexcept>
 
 namespace RBX {
@@ -61,7 +60,7 @@ Reflection::BoundProp<bool, 1> Player::prop_SuperSafeChat(
 	"SuperSafeChat", "Data", &Player::superSafeChat, Reflection::PropertyDescriptor::STREAMING
 );
 
-Reflection::SignalDesc<Player, void(std::string, boost::shared_ptr<Instance>)> Player::event_Chatted(
+Reflection::SignalDesc<Player, void(std::string, std::shared_ptr<Instance>)> Player::event_Chatted(
 	"Chatted", "message", "recipient"
 );
 
@@ -87,12 +86,12 @@ static void setAppearanceParentNull(Instance* instance)
 	}
 }
 
-static void addChild(const boost::shared_ptr<ModelInstance>& parent, const boost::shared_ptr<Instance>& child)
+static void addChild(const std::shared_ptr<ModelInstance>& parent, const std::shared_ptr<Instance>& child)
 {
 	child->setParent(parent.get());
 }
 
-static void setAppearanceParent(boost::shared_ptr<Instance> parent, boost::shared_ptr<Instance> instance)
+static void setAppearanceParent(std::shared_ptr<Instance> parent, std::shared_ptr<Instance> instance)
 {
 	if (dynamic_cast<CharacterAppearance*>(instance.get())) {
 		instance->setParent(parent.get());
@@ -172,13 +171,13 @@ void Player::rebuildBackpack()
 		oldBackpack->setParent(NULL);
 	}
 
-	boost::shared_ptr<Instance> backpack = Creatable<Instance>::create<Backpack>();
+	std::shared_ptr<Instance> backpack = Creatable<Instance>::create<Backpack>();
 	backpack->setParent(this);
 
 	if (StarterPackService* starterPack = ServiceProvider::find<StarterPackService>(this)) {
 		for (unsigned int i = 0; i < starterPack->numChildren(); ++i) {
 			Instance* child = starterPack->getChild(i);
-			boost::shared_ptr<Instance> copy = child->clone();
+			std::shared_ptr<Instance> copy = child->clone();
 			copy->setParent(backpack.get());
 		}
 	}
@@ -245,7 +244,7 @@ void Player::doPeriodicIdleCheck()
 	TimerService* timer = ServiceProvider::create<TimerService>(this);
 
 	if (timer) {
-		timer->delay(boost::bind(&Player::doPeriodicIdleCheck, shared_from(this)), 30.0);
+		timer->delay([self = shared_from(this)] { self->doPeriodicIdleCheck(); }, 30.0);
 	}
 }
 
@@ -304,11 +303,10 @@ void Player::loadCharacterAppearance()
 	removeCharacterAppearance();
 
 	if (character && !characterAppearance.empty()) {
-		std::vector<boost::shared_ptr<Instance> > characterApperance;
+		std::vector<std::shared_ptr<Instance> > characterApperance;
 
 		{
-			std::vector<std::string> strings;
-			boost::algorithm::split(strings, characterAppearance, boost::algorithm::is_any_of(";"));
+			std::vector<std::string> strings = split(characterAppearance, ";");
 
 			for (unsigned int i = 0; i < strings.size(); ++i) {
 				ContentProvider::singleton().load(ContentId(strings[i]), characterApperance);
@@ -316,7 +314,11 @@ void Player::loadCharacterAppearance()
 		}
 
 		std::for_each(
-			characterApperance.begin(), characterApperance.end(), boost::bind(&setAppearanceParent, character, _1)
+			characterApperance.begin(),
+			characterApperance.end(),
+			[character = character](const std::shared_ptr<Instance>& instance) {
+				setAppearanceParent(character, instance);
+			}
 		);
 
 		Workspace* workspace = ServiceProvider::find<Workspace>(this);
@@ -338,14 +340,14 @@ void Player::loadCharacter()
 		throw std::runtime_error("LoadCharacter can only be called by the backend server");
 	}
 
-	std::vector<boost::shared_ptr<Instance> > instances;
+	std::vector<std::shared_ptr<Instance> > instances;
 	ContentProvider::singleton().load(ContentId::fromAssets("fonts\\character.rbxm"), instances);
 
 	if (instances.size() != 1) {
 		throw std::runtime_error("character.rbxm should contain a Character model");
 	}
 
-	boost::shared_ptr<ModelInstance> model = boost::shared_dynamic_cast<ModelInstance>(instances.front());
+	std::shared_ptr<ModelInstance> model = std::dynamic_pointer_cast<ModelInstance>(instances.front());
 	if (!model) {
 		throw std::runtime_error("character.rbxm should contain a Character model");
 	}
@@ -356,21 +358,27 @@ void Player::loadCharacter()
 	}
 
 	{
-		std::vector<boost::shared_ptr<Instance> > extraSound;
+		std::vector<std::shared_ptr<Instance> > extraSound;
 		ContentProvider::singleton().load(ContentId::fromAssets("fonts\\humanoidSound.rbxm"), extraSound);
-		std::for_each(extraSound.begin(), extraSound.end(), boost::bind(&addChild, model, _1));
+		std::for_each(extraSound.begin(), extraSound.end(), [model](const std::shared_ptr<Instance>& child) {
+			addChild(model, child);
+		});
 	}
 
 	{
-		std::vector<boost::shared_ptr<Instance> > extraHealth;
+		std::vector<std::shared_ptr<Instance> > extraHealth;
 		ContentProvider::singleton().load(ContentId::fromAssets("fonts\\humanoidHealth.rbxm"), extraHealth);
-		std::for_each(extraHealth.begin(), extraHealth.end(), boost::bind(&addChild, model, _1));
+		std::for_each(extraHealth.begin(), extraHealth.end(), [model](const std::shared_ptr<Instance>& child) {
+			addChild(model, child);
+		});
 	}
 
 	{
-		std::vector<boost::shared_ptr<Instance> > extraAnimate;
+		std::vector<std::shared_ptr<Instance> > extraAnimate;
 		ContentProvider::singleton().load(ContentId::fromAssets("fonts\\humanoidAnimate.rbxm"), extraAnimate);
-		std::for_each(extraAnimate.begin(), extraAnimate.end(), boost::bind(&addChild, model, _1));
+		std::for_each(extraAnimate.begin(), extraAnimate.end(), [model](const std::shared_ptr<Instance>& child) {
+			addChild(model, child);
+		});
 	}
 
 	model->setName(getName());

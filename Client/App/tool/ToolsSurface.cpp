@@ -155,7 +155,7 @@ MouseCommand* SurfaceTool::onMouseDown(const UIEvent& uiEvent)
 		VTable0x40(surface);
 		ServiceProvider::create<Soundscape::SoundService>(workspace)->playSound(PING_SOUND);
 
-		std::auto_ptr<RedoState> redoState(new RedoState());
+		std::unique_ptr<RedoState> redoState(new RedoState());
 		redoState->addAllProperties(*part);
 		workspace->getDataState().pushState(m_unk0x30, undoState.release(), redoState.release());
 		workspace->getDataState().setDirty(true);
@@ -267,10 +267,10 @@ static Instance* FUN_0063a090(Instance* instance)
 		return part;
 	}
 
-	boost::shared_ptr<const std::vector<boost::shared_ptr<Instance> > > children = instance->getChildren().read();
+	std::shared_ptr<const std::vector<std::shared_ptr<Instance> > > children = instance->getChildren().read();
 	if (children) {
-		std::vector<boost::shared_ptr<Instance> >::const_iterator end = children->end();
-		for (std::vector<boost::shared_ptr<Instance> >::const_iterator iter = children->begin(); iter != end; ++iter) {
+		std::vector<std::shared_ptr<Instance> >::const_iterator end = children->end();
+		for (std::vector<std::shared_ptr<Instance> >::const_iterator iter = children->begin(); iter != end; ++iter) {
 			if (FUN_0063a090(iter->get())) {
 				return iter->get();
 			}
@@ -289,7 +289,7 @@ void ModelTool::onMouseHover(const UIEvent& uiEvent)
 
 void AnchorTool::onMouseHover(const UIEvent& uiEvent)
 {
-	boost::shared_ptr<Instance> oldInstance = m_unk0x20;
+	std::shared_ptr<Instance> oldInstance = m_unk0x20;
 	ModelTool::onMouseHover(uiEvent);
 	if (oldInstance != m_unk0x20) {
 		bool anchored;
@@ -383,18 +383,18 @@ ShootTool::ShootTool(Workspace* workspace, bool p_unk0x28, int p_unk0x2c)
 {
 }
 
-boost::shared_ptr<PartInstance> SlingshotTool::VTable0x40()
+std::shared_ptr<PartInstance> SlingshotTool::VTable0x40()
 {
-	std::vector<boost::shared_ptr<Instance> > instances;
+	std::vector<std::shared_ptr<Instance> > instances;
 	ContentProvider::singleton().load(ContentId::fromAssets("Fonts\\SlingshotPellet.rbxm"), instances);
-	return boost::shared_polymorphic_downcast<PartInstance>(instances.front());
+	return std::static_pointer_cast<PartInstance>(instances.front());
 }
 
-boost::shared_ptr<PartInstance> RocketTool::VTable0x40()
+std::shared_ptr<PartInstance> RocketTool::VTable0x40()
 {
-	std::vector<boost::shared_ptr<Instance> > instances;
+	std::vector<std::shared_ptr<Instance> > instances;
 	ContentProvider::singleton().load(ContentId::fromAssets("Fonts\\Rocket.rbxm"), instances);
-	return boost::shared_polymorphic_downcast<PartInstance>(instances.front());
+	return std::static_pointer_cast<PartInstance>(instances.front());
 }
 
 void ShootTool::FUN_0063ab10(const UIEvent& uiEvent)
@@ -406,8 +406,7 @@ void ShootTool::FUN_0063ab10(const UIEvent& uiEvent)
 			m_unk0x20 = VTable0x40();
 		}
 
-		boost::shared_ptr<PartInstance> projectile =
-			boost::shared_polymorphic_downcast<PartInstance>(m_unk0x20->clone());
+		std::shared_ptr<PartInstance> projectile = std::static_pointer_cast<PartInstance>(m_unk0x20->clone());
 		projectile->setParent(workspace);
 		projectile->getPrimitive()->setPV(VTable0x44(uiEvent, head->getCoordinateFrame()));
 		ServiceProvider::create<Soundscape::SoundService>(workspace)->playSound(VTable0x48());
@@ -437,7 +436,7 @@ const std::string ResizeTool::getCursorName() const
 
 void ResizeTool::VTable0x40(XmlState* state)
 {
-	boost::shared_ptr<PVInstance> locked = m_unk0x24.lock();
+	std::shared_ptr<PVInstance> locked = m_unk0x24.lock();
 	if (PartInstance* part = dynamic_cast<PartInstance*>(locked.get())) {
 		part->writeResizeData(state);
 	}
@@ -448,7 +447,7 @@ MouseCommand* ResizeTool::onMouseUp(const UIEvent& uiEvent)
 	if (captured()) {
 		releaseCapture();
 		if (!m_unk0x24.expired()) {
-			std::auto_ptr<RedoState> redoState(new RedoState());
+			std::unique_ptr<RedoState> redoState(new RedoState());
 			VTable0x40(redoState.get());
 			XmlState* undo = undoState.release();
 			XmlState* redo = redoState.release();
@@ -497,7 +496,7 @@ void ResizeTool::onMouseMove(const UIEvent& uiEvent)
 void ResizeTool::FUN_0063b240(const UIEvent& uiEvent)
 {
 	ServiceClient<Selection> selection(workspace);
-	std::vector<boost::shared_ptr<Instance> >::const_iterator it;
+	std::vector<std::shared_ptr<Instance> >::const_iterator it;
 	for (it = selection->begin(); it != selection->end(); ++it) {
 		if (PartInstance* part = dynamic_cast<PartInstance*>(it->get())) {
 			G3D::Ray ray = getUnitMouseRay(uiEvent);
@@ -513,7 +512,7 @@ void ResizeTool::FUN_0063b240(const UIEvent& uiEvent)
 void ResizeTool::render3dAdorn(Adorn* adorn)
 {
 	ServiceClient<Selection> selection(workspace);
-	std::vector<boost::shared_ptr<Instance> >::const_iterator it;
+	std::vector<std::shared_ptr<Instance> >::const_iterator it;
 	for (it = selection->begin(); it != selection->end(); ++it) {
 		if (PartInstance* part = dynamic_cast<PartInstance*>(it->get())) {
 			DrawAdorn::handles3d(
@@ -530,7 +529,7 @@ void ResizeTool::render3dAdorn(Adorn* adorn)
 void ResizeTool::render2d(Adorn* adorn)
 {
 	ServiceClient<Selection> selection(workspace);
-	std::vector<boost::shared_ptr<Instance> >::const_iterator it;
+	std::vector<std::shared_ptr<Instance> >::const_iterator it;
 	for (it = selection->begin(); it != selection->end(); ++it) {
 		if (PartInstance* part = dynamic_cast<PartInstance*>(it->get())) {
 			DrawAdorn::handles2d(
@@ -588,7 +587,7 @@ void HammerTool::onMouseIdle(const UIEvent& uiEvent)
 MouseCommand* HammerTool::onMouseDown(const UIEvent& uiEvent)
 {
 	if (part) {
-		boost::shared_ptr<Explosion> explosion = Creatable<Instance>::create<Explosion>();
+		std::shared_ptr<Explosion> explosion = Creatable<Instance>::create<Explosion>();
 		Explosion::propPosition.setValue(explosion.get(), part->getCoordinateFrame().translation);
 		Explosion::propBlastPressure.setValue(explosion.get(), 0.0f);
 		explosion->setParent(workspace);
@@ -617,7 +616,7 @@ MouseCommand* LaserTool::onMouseDown(const UIEvent& uiEvent)
 		G3D::Vector3 hitWorld;
 		PartInstance* part = getPart(uiEvent, NULL, hitWorld);
 		if (part) {
-			boost::shared_ptr<Explosion> explosion = Creatable<Instance>::create<Explosion>();
+			std::shared_ptr<Explosion> explosion = Creatable<Instance>::create<Explosion>();
 			Explosion::propPosition.setValue(explosion.get(), hitWorld);
 			Explosion::propBlastPressure.setValue(explosion.get(), 0.0f);
 			explosion->setParent(workspace);
@@ -681,8 +680,8 @@ MouseCommand* CloneTool::onMouseDown(const UIEvent& uiEvent)
 {
 	if (part) {
 		const G3D::CoordinateFrame& cframe = part->getCoordinateFrame();
-		boost::shared_ptr<PartInstance> clone = boost::shared_polymorphic_downcast<PartInstance>(part->clone());
-		std::vector<boost::shared_ptr<Instance> > instances;
+		std::shared_ptr<PartInstance> clone = std::static_pointer_cast<PartInstance>(part->clone());
+		std::vector<std::shared_ptr<Instance> > instances;
 		instances.push_back(clone);
 		workspace->insertInstances(instances, workspace, INSERT_TO_TREE, SUPPRESS_PROMPTS);
 		ServiceProvider::create<Soundscape::SoundService>(workspace)->playSound(PING_SOUND);
@@ -788,9 +787,9 @@ bool AxisMoveTool::FUN_0063cc60(Extents& extents)
 {
 	ServiceClient<Selection> selection(workspace);
 	std::vector<Primitive*> primitives;
-	std::for_each(
-		selection->begin(), selection->end(), boost::bind(&DragUtilities::getPrimitives2, _1, boost::ref(primitives))
-	);
+	std::for_each(selection->begin(), selection->end(), [&primitives](const std::shared_ptr<Instance>& instance) {
+		DragUtilities::getPrimitives2(instance, primitives);
+	});
 	if (primitives.size() != 0) {
 		extents = Dragger::computeExtents(primitives);
 		return true;

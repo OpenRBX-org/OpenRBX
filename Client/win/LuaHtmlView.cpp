@@ -10,11 +10,9 @@
 
 #include <G3D/format.h>
 #include <algorithm>
-#include <boost/bind.hpp>
-#include <boost/function.hpp>
-#include <boost/ref.hpp>
 #include <dispex.h>
 #include <exception>
+#include <functional>
 #include <mshtmdid.h>
 #include <mshtmhst.h>
 #include <mshtml.h>
@@ -25,7 +23,7 @@
 class EventHandler : public IDispatch
 {
 public:
-	EventHandler(boost::function<bool()> handler);
+	EventHandler(std::function<bool()> handler);
 
 	STDMETHOD(QueryInterface)(REFIID riid, void** ppvObject);
 	virtual ULONG STDMETHODCALLTYPE AddRef();
@@ -47,7 +45,7 @@ public:
 private:
 	friend class CLuaHtmlView::Binder;
 
-	boost::function<bool()> m_unk0x08;
+	std::function<bool()> m_unk0x08;
 	ULONG m_unk0x28;
 };
 
@@ -152,7 +150,7 @@ bool FUN_0042dd20(IUnknown* p_unk0x04, IUnknown* p_unk0x08)
 	return false;
 }
 
-EventHandler::EventHandler(boost::function<bool()> handler) : m_unk0x08(handler), m_unk0x28(0)
+EventHandler::EventHandler(std::function<bool()> handler) : m_unk0x08(handler), m_unk0x28(0)
 {
 }
 
@@ -250,8 +248,8 @@ void CLuaHtmlView::Binder::FUN_0042ebf0()
 	m_unk0x18 = false;
 
 	std::string value;
-	std::list<boost::shared_ptr<PropBinding> >::const_iterator iter = m_unk0x0c.begin();
-	std::list<boost::shared_ptr<PropBinding> >::const_iterator end = m_unk0x0c.end();
+	std::list<std::shared_ptr<PropBinding> >::const_iterator iter = m_unk0x0c.begin();
+	std::list<std::shared_ptr<PropBinding> >::const_iterator end = m_unk0x0c.end();
 	if (iter != end) {
 		value = (*iter)->FUN_0042d810();
 		++iter;
@@ -287,7 +285,7 @@ HRESULT FUN_0042ef30(CComObjectNoLock<CLuaFunction>** p_unk0x04, void* p_unk0x08
 	return result;
 }
 
-void CLuaHtmlView::FUN_0042f1b0(boost::shared_ptr<DHTMLWindow> window)
+void CLuaHtmlView::FUN_0042f1b0(std::shared_ptr<DHTMLWindow> window)
 {
 	m_unk0x104 = window;
 	m_unk0xfc = RBX::shared_from_dynamic_cast<RBX::DataModel, RBX::Instance>(window->getRootAncestor());
@@ -321,7 +319,9 @@ bool CLuaHtmlView::Binder::FUN_0042f6e0()
 	m_unk0x20->get_value(&value);
 
 	std::string text = (LPCTSTR) CString(value);
-	std::for_each(m_unk0x0c.begin(), m_unk0x0c.end(), boost::bind(&PropBinding::FUN_0042d7d0, _1, boost::cref(text)));
+	std::for_each(m_unk0x0c.begin(), m_unk0x0c.end(), [&text](const std::shared_ptr<PropBinding>& binding) {
+		binding->FUN_0042d7d0(text);
+	});
 	return true;
 }
 
@@ -332,7 +332,7 @@ bool FUN_005df250()
 
 CLuaHtmlView::Binder::Binder(IHTMLInputElement* element) : m_unk0x18(false), m_unk0x20(element)
 {
-	m_unk0x1c = new EventHandler(boost::bind(&Binder::FUN_0042f6e0, this));
+	m_unk0x1c = new EventHandler([this] { return FUN_0042f6e0(); });
 
 	CComQIPtr<IHTMLElement2> element2(element);
 	VARIANT_BOOL result;
@@ -356,7 +356,7 @@ CLuaHtmlView::Binder::~Binder()
 void CLuaHtmlView::Binder::FUN_00430750()
 {
 	if (!m_unk0x18) {
-		g_unk0x00952f1c->FUN_00418fd0(boost::bind(&Binder::FUN_0042ebf0, shared_from_this()));
+		g_unk0x00952f1c->FUN_00418fd0([self = shared_from_this()] { self->FUN_0042ebf0(); });
 		m_unk0x18 = true;
 	}
 }
@@ -373,25 +373,29 @@ void FUN_00430940(
 }
 
 CLuaHtmlView::Binder::PropBinding::PropBinding(
-	boost::shared_ptr<RBX::Instance> instance, const RBX::Reflection::PropertyDescriptor* descriptor, Binder* binder
+	std::shared_ptr<RBX::Instance> instance, const RBX::Reflection::PropertyDescriptor* descriptor, Binder* binder
 )
 	: m_unk0x00(instance), m_unk0x08(descriptor)
 {
 	m_unk0x0c = RBX::Instance::event_propertyChanged.connect(
-		instance.get(), boost::bind(&FUN_00430940, descriptor, _1, binder), 10
+		instance.get(),
+		[descriptor, binder](const RBX::Reflection::PropertyDescriptor* changed) {
+			FUN_00430940(descriptor, changed, binder);
+		},
+		10
 	);
 }
 
 void CLuaHtmlView::Binder::FUN_00430b30(
-	boost::shared_ptr<RBX::Instance> instance, const RBX::Reflection::PropertyDescriptor* descriptor
+	std::shared_ptr<RBX::Instance> instance, const RBX::Reflection::PropertyDescriptor* descriptor
 )
 {
-	m_unk0x0c.push_back(boost::shared_ptr<PropBinding>(new PropBinding(instance, descriptor, this)));
+	m_unk0x0c.push_back(std::shared_ptr<PropBinding>(new PropBinding(instance, descriptor, this)));
 	FUN_0042ebf0();
 }
 
 void CLuaHtmlView::FUN_00430c90(
-	boost::shared_ptr<RBX::Instance> instance, const RBX::Reflection::PropertyDescriptor* descriptor, LPCTSTR name
+	std::shared_ptr<RBX::Instance> instance, const RBX::Reflection::PropertyDescriptor* descriptor, LPCTSTR name
 )
 {
 	CComQIPtr<IHTMLDocument2> document = GetHtmlDocument();
@@ -414,8 +418,8 @@ void CLuaHtmlView::FUN_00430c90(
 	}
 
 	Binder* binder = NULL;
-	std::list<boost::shared_ptr<Binder> >::iterator iter = m_unk0x10c.begin();
-	std::list<boost::shared_ptr<Binder> >::iterator end = m_unk0x10c.end();
+	std::list<std::shared_ptr<Binder> >::iterator iter = m_unk0x10c.begin();
+	std::list<std::shared_ptr<Binder> >::iterator end = m_unk0x10c.end();
 	while (iter != end) {
 		if (FUN_0042dd20((*iter)->m_unk0x20.p, input.p)) {
 			binder = (*iter).get();
@@ -427,7 +431,7 @@ void CLuaHtmlView::FUN_00430c90(
 	if (binder == NULL) {
 		RBX::DataModel::Lock lock(m_unk0xfc);
 		binder = new Binder(input);
-		m_unk0x10c.push_back(boost::shared_ptr<Binder>(binder));
+		m_unk0x10c.push_back(std::shared_ptr<Binder>(binder));
 	}
 
 	binder->FUN_00430b30(instance, descriptor);

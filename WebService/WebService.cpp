@@ -5,6 +5,7 @@
 
 #include "util/Name.h"
 #include "util/Sound.h"
+#include "util/Utilities.h"
 
 namespace RBX {
 class DataModel;
@@ -32,12 +33,9 @@ class DataModel;
 #include <atlcom.h>
 #include <atlisapi.h>
 #include <atlsoap.h>
-#include <boost/scoped_ptr.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/thread/mutex.hpp>
-#include <boost/thread/once.hpp>
-#include <boost/tokenizer.hpp>
 #include <map>
+#include <memory>
+#include <mutex>
 #include <queue>
 #include <shlobj.h>
 #include <sstream>
@@ -47,39 +45,39 @@ class DataModel;
 
 template const RBX::Name& RBX::Name::doDeclare<RBX::sWorkspace>();
 
-boost::once_flag flagInitRoblox = BOOST_ONCE_INIT;
+std::once_flag flagInitRoblox;
 static bool initRobloxFailed;
 static std::string dotVersion;
 
 extern "C" BOOL WINAPI TerminateExtension(DWORD flags);
 
-static boost::scoped_ptr<MainLogManager> mainLogManager;
+static std::unique_ptr<MainLogManager> mainLogManager;
 
 class StandardOutLog : public RBX::Listener<RBX::StandardOut, RBX::StandardOutMessage>
 {
 private:
-	boost::shared_ptr<RBX::StandardOut> standardOut;
+	std::shared_ptr<RBX::StandardOut> standardOut;
 
 public:
-	boost::mutex messagesMutex;
+	std::mutex messagesMutex;
 	std::queue<RBX::StandardOutMessage> messages;
 
 	StandardOutLog() : standardOut(RBX::StandardOut::singleton())
 	{
-		boost::mutex::scoped_lock lock(RBX::StandardOut::singleton()->sync);
+		std::lock_guard<std::recursive_mutex> lock(RBX::StandardOut::singleton()->sync);
 		RBX::startListening(standardOut, this);
 	}
 
 	virtual ~StandardOutLog()
 	{
-		boost::mutex::scoped_lock lock(RBX::StandardOut::singleton()->sync);
+		std::lock_guard<std::recursive_mutex> lock(RBX::StandardOut::singleton()->sync);
 		RBX::stopListening(standardOut, this);
 	}
 
 protected:
 	virtual void onEvent(const RBX::StandardOut* source, RBX::StandardOutMessage event)
 	{
-		boost::mutex::scoped_lock lock(messagesMutex);
+		std::lock_guard<std::mutex> lock(messagesMutex);
 
 		messages.push(event);
 
@@ -89,7 +87,7 @@ protected:
 	}
 };
 
-static boost::scoped_ptr<StandardOutLog> standardOutLog;
+static std::unique_ptr<StandardOutLog> standardOutLog;
 
 static void initRoblox()
 {
@@ -137,14 +135,12 @@ static void initRoblox()
 
 		RBX::Network::API::init(v.c_str());
 
-		boost::tokenizer<boost::char_separator<char> > tokens(v, boost::char_separator<char>(" ,."));
-		for (boost::tokenizer<boost::char_separator<char> >::iterator tok_iter = tokens.begin();
-			 tok_iter != tokens.end();
-			 ++tok_iter) {
-			if (tok_iter != tokens.begin()) {
+		const std::vector<std::string> tokens = RBX::tokenize(v, " ,.");
+		for (std::vector<std::string>::const_iterator token = tokens.begin(); token != tokens.end(); ++token) {
+			if (token != tokens.begin()) {
 				dotVersion += ".";
 			}
-			dotVersion += *tok_iter;
+			dotVersion += *token;
 		}
 
 		static ErrorUploader errorUploader;
@@ -231,21 +227,21 @@ BOOL WINAPI DllMain(DLLMAIN_HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserv
 namespace Roblox {
 
 CWebService::Jobs CWebService::jobs;
-boost::mutex CWebService::sync;
+std::recursive_mutex CWebService::sync;
 
 } // namespace Roblox
 
 class CRbxIsapiExtension : public ATL::CIsapiExtension<>
 {
 private:
-	const char* GetExtensionDesc() { return "ROBLOX Web Service"; }
+	const char* GetExtensionDesc() noexcept { return "ROBLOX Web Service"; }
 };
 
 CRbxIsapiExtension theExtension;
 
 extern "C" DWORD WINAPI HttpExtensionProc(EXTENSION_CONTROL_BLOCK* lpECB)
 {
-	boost::call_once(initRoblox, flagInitRoblox);
+	std::call_once(flagInitRoblox, initRoblox);
 
 	if (initRobloxFailed) {
 		return HSE_STATUS_ERROR;
@@ -280,7 +276,7 @@ HRESULT CWebService::ReportException(const std::exception& e)
 
 HRESULT __stdcall CWebService::GetAllJobs(Strings* result)
 {
-	boost::mutex::scoped_lock lock(sync);
+	std::lock_guard<std::recursive_mutex> lock(sync);
 
 	result->count = jobs.size();
 	result->items = allocate(result->items, result->count);
@@ -301,7 +297,7 @@ HRESULT __stdcall CWebService::GetAllJobs(Strings* result)
 HRESULT __stdcall CWebService::TouchJob(wchar_t* jobID, double timeout)
 {
 	try {
-		boost::mutex::scoped_lock lock(sync);
+		std::lock_guard<std::recursive_mutex> lock(sync);
 		touch(getJob(jobID)->second, timeout);
 	}
 	catch (std::exception& e) {
@@ -315,9 +311,9 @@ HRESULT __stdcall CWebService::OpenJob(wchar_t* jobID, ScriptExecution script, d
 {
 	try {
 		std::string id(ATL::CStringA(jobID).GetString());
-		boost::shared_ptr<RBX::DataModel> dataModel = RBX::DataModel::createDataModel();
+		std::shared_ptr<RBX::DataModel> dataModel = RBX::DataModel::createDataModel();
 		{
-			boost::mutex::scoped_lock lock(sync);
+			std::lock_guard<std::recursive_mutex> lock(sync);
 			Job job;
 			job.dataModel = dataModel;
 			touch(job, timeout);
@@ -335,9 +331,9 @@ HRESULT __stdcall CWebService::OpenJob(wchar_t* jobID, ScriptExecution script, d
 HRESULT __stdcall CWebService::CloseJob(wchar_t* jobID)
 {
 	try {
-		boost::shared_ptr<RBX::DataModel> dataModel;
+		std::shared_ptr<RBX::DataModel> dataModel;
 		{
-			boost::mutex::scoped_lock lock(sync);
+			std::lock_guard<std::recursive_mutex> lock(sync);
 			Jobs::iterator iter = jobs.find(ATL::CStringA(jobID).GetString());
 			if (iter != jobs.end()) {
 				dataModel = iter->second.dataModel;
@@ -362,9 +358,9 @@ HRESULT __stdcall CWebService::CloseTimedoutJobs(int* result)
 	*result = 0;
 
 	try {
-		std::vector<boost::shared_ptr<RBX::DataModel> > dataModels;
+		std::vector<std::shared_ptr<RBX::DataModel> > dataModels;
 		{
-			boost::mutex::scoped_lock lock(sync);
+			std::lock_guard<std::recursive_mutex> lock(sync);
 
 			std::map<std::string, Job> keep;
 			Jobs::iterator end = jobs.end();
@@ -380,8 +376,8 @@ HRESULT __stdcall CWebService::CloseTimedoutJobs(int* result)
 			jobs = keep;
 		}
 
-		std::vector<boost::shared_ptr<RBX::DataModel> >::iterator iter = dataModels.begin();
-		std::vector<boost::shared_ptr<RBX::DataModel> >::iterator end = dataModels.end();
+		std::vector<std::shared_ptr<RBX::DataModel> >::iterator iter = dataModels.begin();
+		std::vector<std::shared_ptr<RBX::DataModel> >::iterator end = dataModels.end();
 		while (iter != end) {
 			RBX::DataModel::closeDataModel(*iter, true);
 			(*result)++;
@@ -400,10 +396,10 @@ HRESULT __stdcall CWebService::CloseOrphanedJobs(Strings activeJobs, int* result
 	*result = 0;
 
 	try {
-		std::vector<boost::shared_ptr<RBX::DataModel> > dataModels;
+		std::vector<std::shared_ptr<RBX::DataModel> > dataModels;
 		{
 			std::map<std::string, Job> keep;
-			boost::mutex::scoped_lock lock(sync);
+			std::lock_guard<std::recursive_mutex> lock(sync);
 			Jobs::iterator end = jobs.end();
 			for (Jobs::iterator iter = jobs.begin(); iter != end; ++iter) {
 				bool found = false;
@@ -422,8 +418,8 @@ HRESULT __stdcall CWebService::CloseOrphanedJobs(Strings activeJobs, int* result
 			jobs = keep;
 		}
 
-		std::vector<boost::shared_ptr<RBX::DataModel> >::iterator iter = dataModels.begin();
-		std::vector<boost::shared_ptr<RBX::DataModel> >::iterator end = dataModels.end();
+		std::vector<std::shared_ptr<RBX::DataModel> >::iterator iter = dataModels.begin();
+		std::vector<std::shared_ptr<RBX::DataModel> >::iterator end = dataModels.end();
 		while (iter != end) {
 			RBX::DataModel::closeDataModel(*iter, true);
 			(*result)++;
@@ -440,7 +436,7 @@ HRESULT __stdcall CWebService::CloseOrphanedJobs(Strings activeJobs, int* result
 HRESULT __stdcall CWebService::CloseAllJobs()
 {
 	try {
-		boost::mutex::scoped_lock lock(sync);
+		std::lock_guard<std::recursive_mutex> lock(sync);
 
 		Jobs::iterator end = jobs.end();
 		for (Jobs::iterator iter = jobs.begin(); iter != end; ++iter) {
@@ -460,7 +456,7 @@ HRESULT __stdcall CWebService::CloseAllJobs()
 HRESULT __stdcall CWebService::GetTimeout(wchar_t* jobID, double* timeout)
 {
 	try {
-		boost::mutex::scoped_lock lock(sync);
+		std::lock_guard<std::recursive_mutex> lock(sync);
 		*timeout = secondsToTimeout(getJob(jobID)->second);
 	}
 	catch (std::exception& e) {
@@ -653,20 +649,20 @@ HRESULT __stdcall CWebService::Execute(wchar_t* jobID, ScriptExecution script, L
 		std::string code;
 		code = ATL::CStringA(script.script);
 		if (RBX::ContentProvider::isHttpUrl(code)) {
-			std::auto_ptr<std::istream> stream = RBX::ContentProvider::singleton().getContent(RBX::ContentId(code));
+			std::unique_ptr<std::istream> stream = RBX::ContentProvider::singleton().getContent(RBX::ContentId(code));
 			std::stringstream out;
 			out << stream->rdbuf();
 			code = out.str();
 		}
 
-		boost::shared_ptr<RBX::DataModel> dataModel;
+		std::shared_ptr<RBX::DataModel> dataModel;
 		{
-			boost::mutex::scoped_lock lock(sync);
+			std::lock_guard<std::recursive_mutex> lock(sync);
 			Jobs::iterator iter = getJob(jobID);
 			dataModel = iter->second.dataModel;
 		}
 
-		std::auto_ptr<std::vector<RBX::Reflection::Value> > tuple;
+		std::unique_ptr<std::vector<RBX::Reflection::Value> > tuple;
 		{
 			std::vector<RBX::Reflection::Value> args(script.arguments.count);
 			for (int i = 0; i < script.arguments.count; ++i) {
@@ -720,7 +716,7 @@ HRESULT __stdcall CWebService::GetStatus(Status* result)
 		return hr;
 	}
 
-	boost::mutex::scoped_lock lock(sync);
+	std::lock_guard<std::recursive_mutex> lock(sync);
 	result->environmentCount = jobs.size();
 
 	return S_OK;
@@ -741,7 +737,7 @@ HRESULT __stdcall CWebService::Update(wchar_t* url)
 HRESULT __stdcall CWebService::GetStandardOutMessages(int maxCount, StandardOutMessages* result)
 {
 	try {
-		boost::mutex::scoped_lock lock(standardOutLog->messagesMutex);
+		std::lock_guard<std::mutex> lock(standardOutLog->messagesMutex);
 
 		while (standardOutLog->messages.size() > maxCount) {
 			standardOutLog->messages.pop();

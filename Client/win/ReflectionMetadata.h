@@ -129,7 +129,7 @@ public:
 
 	void FUN_00447e50(std::string fileName);
 
-	static boost::shared_ptr<Reflection> FUN_004480c0();
+	static std::shared_ptr<Reflection> FUN_004480c0();
 
 protected:
 	virtual bool askAddChild(const Instance* instance) const;

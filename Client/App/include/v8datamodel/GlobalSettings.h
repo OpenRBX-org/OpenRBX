@@ -4,8 +4,8 @@
 #include "v8tree/Instance.h"
 #include "v8tree/Service.h"
 
-#include <boost/shared_ptr.hpp>
-#include <boost/thread/recursive_mutex.hpp>
+#include <memory>
+#include <mutex>
 
 namespace RBX {
 
@@ -16,9 +16,9 @@ class GlobalSettings : public DescribedNonCreatable<GlobalSettings, ServiceProvi
 public:
 	GlobalSettings();
 
-	static boost::recursive_mutex mutex;
+	static std::recursive_mutex mutex;
 
-	static boost::shared_ptr<GlobalSettings> singleton();
+	static std::shared_ptr<GlobalSettings> singleton();
 	void loadState();
 	void saveState();
 	void eraseSettingsStore();
@@ -39,7 +39,7 @@ private:
 protected:
 	GlobalSettingsItem()
 	{
-		setName(sName);
+		this->setName(sName);
 		sing = this;
 	}
 
@@ -48,9 +48,9 @@ protected:
 public:
 	static T& singleton()
 	{
-		boost::recursive_mutex::scoped_lock lock(GlobalSettings::mutex);
+		std::lock_guard<std::recursive_mutex> lock(GlobalSettings::mutex);
 		if (sing == NULL) {
-			boost::shared_ptr<T> s = Creatable<Instance>::create<T>();
+			std::shared_ptr<T> s = Creatable<Instance>::create<T>();
 			s->setParent(GlobalSettings::singleton().get());
 		}
 		return static_cast<T&>(*sing);

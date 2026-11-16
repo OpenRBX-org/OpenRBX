@@ -15,6 +15,7 @@
 #include "util/RunStateOwner.h"
 #include "util/Sound.h"
 #include "util/StandardOut.h"
+#include "util/Utilities.h"
 #include "v8datamodel/Selection.h"
 #include "v8datamodel/TimeState.h"
 #include "v8datamodel/Visit.h"
@@ -22,7 +23,6 @@
 #include "v8xml/SerializerV2.h"
 #include "v8xml/XmlSerializer.h"
 
-#include <boost/iostreams/copy.hpp>
 #include <shlobj.h>
 #include <shlwapi.h>
 #include <sstream>
@@ -245,7 +245,7 @@ void CRobloxDoc::FUN_00455900()
 
 void CRobloxDoc::FUN_00455a30(CCmdUI* pCmdUI)
 {
-	boost::shared_ptr<RBX::DataModel> dataModel = m_unk0x78->FUN_0046edc0();
+	std::shared_ptr<RBX::DataModel> dataModel = m_unk0x78->FUN_0046edc0();
 	std::string name;
 	{
 		RBX::DataModel::Lock lock(dataModel);
@@ -265,7 +265,7 @@ void CRobloxDoc::FUN_00455bb0()
 
 void CRobloxDoc::FUN_00455ce0(CCmdUI* pCmdUI)
 {
-	boost::shared_ptr<RBX::DataModel> dataModel = m_unk0x78->FUN_0046edc0();
+	std::shared_ptr<RBX::DataModel> dataModel = m_unk0x78->FUN_0046edc0();
 	std::string name;
 	{
 		RBX::DataModel::Lock lock(dataModel);
@@ -366,7 +366,7 @@ void CRobloxDoc::FUN_00456d30()
 
 	m_unk0x78->AddRef();
 
-	boost::shared_ptr<RBX::DataModel> dataModel = m_unk0x78->FUN_0046edc0();
+	std::shared_ptr<RBX::DataModel> dataModel = m_unk0x78->FUN_0046edc0();
 	RBX::DataModel::Lock lock(dataModel);
 
 	dataModel->setName((LPCTSTR) GetTitle());
@@ -451,7 +451,7 @@ BOOL CRobloxDoc::OnOpenDocument(LPCTSTR lpszPathName)
 	SetModifiedFlag(TRUE);
 
 	try {
-		std::auto_ptr<std::istream> stream =
+		std::unique_ptr<std::istream> stream =
 			RBX::ContentProvider::singleton().getContent(RBX::ContentId::fromFile(lpszPathName));
 		m_unk0x78->FUN_0046ef00(*stream);
 
@@ -521,10 +521,9 @@ void CRobloxDoc::FUN_004588a0(NMHDR* pNMHDR, LRESULT* pResult)
 
 		try {
 			if (RBX::ContentProvider::isHttpUrl(text)) {
-				std::auto_ptr<std::istream> stream = RBX::ContentProvider::singleton().getContent(RBX::ContentId(text));
-				std::ostringstream script;
-				boost::iostreams::copy(*stream, script, 0x1000);
-				text = script.str();
+				std::unique_ptr<std::istream> stream =
+					RBX::ContentProvider::singleton().getContent(RBX::ContentId(text));
+				text = RBX::readStream(*stream);
 			}
 
 			RBX::DataModel::Lock lock(FUN_00403290());

@@ -3,9 +3,8 @@
 
 #include "util/Name.h"
 
-#include <boost/enable_shared_from_this.hpp>
-#include <boost/shared_ptr.hpp>
 #include <map>
+#include <memory>
 #include <stdlib.h>
 
 namespace RBX {
@@ -19,21 +18,21 @@ public:
 };
 
 template <class T>
-boost::shared_ptr<T> shared_from(T* r)
+std::shared_ptr<T> shared_from(T* r)
 {
-	return r != NULL ? boost::shared_static_cast<T>(r->shared_from_this()) : boost::shared_ptr<T>();
+	return r != NULL ? std::static_pointer_cast<T>(r->shared_from_this()) : std::shared_ptr<T>();
 }
 
 template <class T, class Base>
-boost::shared_ptr<T> shared_from_dynamic_cast(boost::enable_shared_from_this<Base>* r)
+std::shared_ptr<T> shared_from_dynamic_cast(std::enable_shared_from_this<Base>* r)
 {
-	return r != NULL ? boost::shared_dynamic_cast<T>(r->shared_from_this()) : boost::shared_ptr<T>();
+	return r != NULL ? std::dynamic_pointer_cast<T>(r->shared_from_this()) : std::shared_ptr<T>();
 }
 
 template <class T, class Base>
-boost::shared_ptr<T> shared_from_polymorphic_downcast(boost::enable_shared_from_this<Base>* r)
+std::shared_ptr<T> shared_from_polymorphic_downcast(std::enable_shared_from_this<Base>* r)
 {
-	return r != NULL ? boost::shared_polymorphic_downcast<T>(r->shared_from_this()) : boost::shared_ptr<T>();
+	return r != NULL ? std::static_pointer_cast<T>(r->shared_from_this()) : std::shared_ptr<T>();
 }
 
 template <class T>
@@ -51,45 +50,45 @@ public:
 	};
 
 	template <class U>
-	static boost::shared_ptr<U> create()
+	static std::shared_ptr<U> create()
 	{
-		return boost::shared_ptr<U>(new U(), Deleter());
+		return std::shared_ptr<U>(new U(), Deleter());
 	}
 
 	template <class U, class A>
-	static boost::shared_ptr<U> create(A p1)
+	static std::shared_ptr<U> create(A p1)
 	{
-		return boost::shared_ptr<U>(new U(p1), Deleter());
+		return std::shared_ptr<U>(new U(p1), Deleter());
 	}
 
 	template <class U, class A, class B>
-	static boost::shared_ptr<U> create(A p1, B p2)
+	static std::shared_ptr<U> create(A p1, B p2)
 	{
-		return boost::shared_ptr<U>(new U(p1, p2), Deleter());
+		return std::shared_ptr<U>(new U(p1, p2), Deleter());
 	}
 
 	template <class U, class A, class B, class C>
-	static boost::shared_ptr<U> create(A p1, B p2, C p3)
+	static std::shared_ptr<U> create(A p1, B p2, C p3)
 	{
-		return boost::shared_ptr<U>(new U(p1, p2, p3), Deleter());
+		return std::shared_ptr<U>(new U(p1, p2, p3), Deleter());
 	}
 
 	template <class U, class A, class B, class C, class D>
-	static boost::shared_ptr<U> create(A p1, B p2, C p3, D p4)
+	static std::shared_ptr<U> create(A p1, B p2, C p3, D p4)
 	{
-		return boost::shared_ptr<U>(new U(p1, p2, p3, p4), Deleter());
+		return std::shared_ptr<U>(new U(p1, p2, p3, p4), Deleter());
 	}
 
 	template <class U, class A, class B, class C, class D, class E>
-	static boost::shared_ptr<U> create(A p1, B p2, C p3, D p4, E p5)
+	static std::shared_ptr<U> create(A p1, B p2, C p3, D p4, E p5)
 	{
-		return boost::shared_ptr<U>(new U(p1, p2, p3, p4, p5), Deleter());
+		return std::shared_ptr<U>(new U(p1, p2, p3, p4, p5), Deleter());
 	}
 
 	template <class U, class A, class B, class C, class D, class E, class F>
-	static boost::shared_ptr<U> create(A p1, B p2, C p3, D p4, E p5, F p6)
+	static std::shared_ptr<U> create(A p1, B p2, C p3, D p4, E p5, F p6)
 	{
-		return boost::shared_ptr<U>(new U(p1, p2, p3, p4, p5, p6), Deleter());
+		return std::shared_ptr<U>(new U(p1, p2, p3, p4, p5, p6), Deleter());
 	}
 
 protected:
@@ -104,7 +103,7 @@ protected:
 class __declspec(novtable) ICreator
 {
 public:
-	virtual boost::shared_ptr<Object> create() const = 0;
+	virtual std::shared_ptr<Object> create() const = 0;
 };
 
 template <class T>
@@ -122,14 +121,14 @@ protected:
 public:
 	virtual const Name& getClassName() const = 0;
 
-	static boost::shared_ptr<T> create(const Name& name)
+	static std::shared_ptr<T> create(const Name& name)
 	{
 		std::map<const Name*, const ICreator*>::iterator iter = getCreators().find(&name);
 		if (iter == getCreators().end()) {
-			return boost::shared_ptr<T>();
+			return std::shared_ptr<T>();
 		}
 
-		return boost::shared_dynamic_cast<T>(iter->second->create());
+		return std::dynamic_pointer_cast<T>(iter->second->create());
 	}
 };
 
@@ -140,7 +139,7 @@ public:
 	class Creator : public ICreator
 	{
 	public:
-		virtual boost::shared_ptr<Object> create() const { return Creatable<Instance>::create<T>(); }
+		virtual std::shared_ptr<Object> create() const { return Creatable<Instance>::create<T>(); }
 
 		const Name& getClassName() const { return Name::declare<sName>(); }
 

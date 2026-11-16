@@ -6,9 +6,9 @@
 #include "v8tree/Instance.h"
 #include "v8tree/Service.h"
 
-#include <boost/function.hpp>
-#include <boost/shared_ptr.hpp>
+#include <functional>
 #include <list>
+#include <memory>
 
 namespace RBX {
 
@@ -18,13 +18,13 @@ class TimerService : public DescribedCreatable<TimerService, Instance, sTimerSer
 					 public Listener<RunService, Heartbeat>
 {
 private:
-	boost::shared_ptr<RunService> runService;
+	std::shared_ptr<RunService> runService;
 
 	class Item
 	{
 	public:
 		double time;
-		boost::function0<void> func;
+		std::function<void()> func;
 	};
 
 	std::list<Item> items;
@@ -32,7 +32,7 @@ private:
 public:
 	TimerService();
 
-	void delay(boost::function0<void> func, double seconds);
+	void delay(std::function<void()> func, double seconds);
 
 protected:
 	virtual void onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider);

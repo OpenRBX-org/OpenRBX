@@ -29,9 +29,14 @@ public:
 	typedef typename T::Member MemberType;
 
 	class ConstIterator
-		: public std::iterator<std::forward_iterator_tag, ConstMemberType, void, ConstMemberType, ConstMemberType&>
 	{
 	public:
+		typedef std::forward_iterator_tag iterator_category;
+		typedef ConstMemberType value_type;
+		typedef void difference_type;
+		typedef ConstMemberType pointer;
+		typedef ConstMemberType& reference;
+
 		ConstIterator(const typename Collection::const_iterator& iter, const DescribedBase* instance)
 			: instance(instance), iter(iter)
 		{
@@ -63,9 +68,15 @@ public:
 		typename Collection::const_iterator iter;
 	};
 
-	class Iterator : public std::iterator<std::forward_iterator_tag, MemberType, void, MemberType, MemberType&>
+	class Iterator
 	{
 	public:
+		typedef std::forward_iterator_tag iterator_category;
+		typedef MemberType value_type;
+		typedef void difference_type;
+		typedef MemberType pointer;
+		typedef MemberType& reference;
+
 		Iterator(const typename Collection::const_iterator& iter, DescribedBase* instance)
 			: instance(instance), iter(iter)
 		{
@@ -158,7 +169,7 @@ typename MemberDescriptorContainer<T>::Collection::const_iterator MemberDescript
 template <class T>
 void MemberDescriptorContainer<T>::declare(T* descriptor)
 {
-	boost::recursive_mutex::scoped_lock lock(sync());
+	std::lock_guard<std::recursive_mutex> lock(sync());
 
 	typename Collection::iterator where = std::lower_bound(descriptors.begin(), descriptors.end(), descriptor, compare);
 	if (where == descriptors.end() || *where != descriptor) {
@@ -187,7 +198,7 @@ template <class T>
 MemberDescriptorContainer<T>::MemberDescriptorContainer(MemberDescriptorContainer* base) : base(base)
 {
 	if (base != NULL) {
-		boost::recursive_mutex::scoped_lock lock(sync());
+		std::lock_guard<std::recursive_mutex> lock(sync());
 
 		mergeMembers(base);
 

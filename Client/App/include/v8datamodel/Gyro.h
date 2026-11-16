@@ -185,7 +185,7 @@ private:
 	void onGoalChanged(const Reflection::PropertyDescriptor&) { firedEvent = false; }
 
 	bool active;
-	boost::shared_ptr<PartInstance> target;
+	std::shared_ptr<PartInstance> target;
 	G3D::Vector3 targetOffset;
 	float targetRadius;
 	bool firedEvent;

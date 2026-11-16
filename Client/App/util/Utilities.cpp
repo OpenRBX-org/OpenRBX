@@ -7,12 +7,116 @@
 #include <G3D/CoordinateFrame.h>
 #include <G3D/Vector2int16.h>
 #include <G3D/Vector3.h>
-#include <boost/lexical_cast.hpp>
 #include <cstdio>
 #include <limits>
+#include <locale>
+#include <sstream>
+#include <stdexcept>
 #include <stdlib.h>
 
 namespace RBX {
+
+void toLower(std::string& text)
+{
+	if (!text.empty()) {
+		std::use_facet<std::ctype<char> >(std::locale()).tolower(&text[0], &text[0] + text.size());
+	}
+}
+
+void trim(std::string& text)
+{
+	const std::ctype<char>& ctype = std::use_facet<std::ctype<char> >(std::locale());
+
+	std::string::size_type end = text.size();
+	while (end > 0 && ctype.is(std::ctype_base::space, text[end - 1])) {
+		--end;
+	}
+
+	std::string::size_type begin = 0;
+	while (begin < end && ctype.is(std::ctype_base::space, text[begin])) {
+		++begin;
+	}
+
+	text.erase(end);
+	text.erase(0, begin);
+}
+
+std::vector<std::string> split(const std::string& text, const char* delimiters)
+{
+	std::vector<std::string> result;
+	std::string::size_type begin = 0;
+
+	while (true) {
+		const std::string::size_type end = text.find_first_of(delimiters, begin);
+
+		if (end == std::string::npos) {
+			result.push_back(text.substr(begin));
+			return result;
+		}
+
+		result.push_back(text.substr(begin, end - begin));
+		begin = end + 1;
+	}
+}
+
+std::vector<std::string> tokenize(const std::string& text, const char* delimiters)
+{
+	std::vector<std::string> result;
+	std::string::size_type begin = text.find_first_not_of(delimiters);
+
+	while (begin != std::string::npos) {
+		const std::string::size_type end = text.find_first_of(delimiters, begin);
+
+		result.push_back(text.substr(begin, end == std::string::npos ? std::string::npos : end - begin));
+		begin = text.find_first_not_of(delimiters, end);
+	}
+
+	return result;
+}
+
+template <class T>
+static bool parseValue(const std::string& text, T& value)
+{
+	std::istringstream stream(text);
+	stream.unsetf(std::ios::skipws);
+
+	T result;
+
+	if (!(stream >> result) || stream.get() != std::char_traits<char>::eof()) {
+		return false;
+	}
+
+	value = result;
+	return true;
+}
+
+template <class T>
+T lexicalCast(const std::string& text)
+{
+	T value;
+
+	if (!parseValue(text, value)) {
+		throw std::runtime_error("bad lexical cast: source type value could not be interpreted as target");
+	}
+
+	return value;
+}
+
+template int lexicalCast<int>(const std::string& text);
+template unsigned short lexicalCast<unsigned short>(const std::string& text);
+template long long lexicalCast<long long>(const std::string& text);
+
+std::string readStream(std::istream& stream)
+{
+	std::string result;
+	char buffer[4096];
+
+	for (std::streamsize amount; (amount = stream.rdbuf()->sgetn(buffer, sizeof(buffer))) > 0;) {
+		result.append(buffer, static_cast<std::string::size_type>(amount));
+	}
+
+	return result;
+}
 
 template <>
 std::string StringConverter<bool>::convertToString(const bool& value)
@@ -103,14 +207,7 @@ bool StringConverter<int>::convertToValue(const std::string& text, int& value)
 		return false;
 	}
 
-	try {
-		value = boost::lexical_cast<int>(text);
-	}
-	catch (boost::bad_lexical_cast&) {
-		return false;
-	}
-
-	return true;
+	return parseValue(text, value);
 }
 
 template <>
@@ -120,14 +217,7 @@ bool StringConverter<unsigned int>::convertToValue(const std::string& text, unsi
 		return false;
 	}
 
-	try {
-		value = boost::lexical_cast<unsigned int>(text);
-	}
-	catch (boost::bad_lexical_cast&) {
-		return false;
-	}
-
-	return true;
+	return parseValue(text, value);
 }
 
 template <>
@@ -147,12 +237,7 @@ bool StringConverter<double>::convertToValue(const std::string& text, double& va
 		value = std::numeric_limits<double>::quiet_NaN();
 	}
 	else {
-		try {
-			value = boost::lexical_cast<double>(text);
-		}
-		catch (boost::bad_lexical_cast&) {
-			return false;
-		}
+		return parseValue(text, value);
 	}
 
 	return true;
@@ -175,12 +260,7 @@ bool StringConverter<float>::convertToValue(const std::string& text, float& valu
 		value = std::numeric_limits<float>::quiet_NaN();
 	}
 	else {
-		try {
-			value = boost::lexical_cast<float>(text);
-		}
-		catch (boost::bad_lexical_cast&) {
-			return false;
-		}
+		return parseValue(text, value);
 	}
 
 	return true;

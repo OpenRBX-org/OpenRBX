@@ -57,11 +57,11 @@ void ArrowPanel::init(
 	SDLKey rightKey
 )
 {
-	boost::shared_ptr<TopMenuBar> leftPanel = Creatable<Instance>::create<TopMenuBar>("LeftPanel", Layout::VERTICAL);
+	std::shared_ptr<TopMenuBar> leftPanel = Creatable<Instance>::create<TopMenuBar>("LeftPanel", Layout::VERTICAL);
 	leftPanel->addGuiItem(Creatable<Instance>::create<ImageWidget>(adorn, image));
 	leftPanel->addGuiItem(Creatable<Instance>::create<ArrowButton>(adorn, left, leftKey, controller, dataModel));
 
-	boost::shared_ptr<TopMenuBar> forwardBackPanel =
+	std::shared_ptr<TopMenuBar> forwardBackPanel =
 		Creatable<Instance>::create<TopMenuBar>("ForwardBackPanel", Layout::VERTICAL);
 	forwardBackPanel->addGuiItem(
 		Creatable<Instance>::create<ArrowButton>(adorn, forward, forwardKey, controller, dataModel)
@@ -70,7 +70,7 @@ void ArrowPanel::init(
 		Creatable<Instance>::create<ArrowButton>(adorn, backward, backwardKey, controller, dataModel)
 	);
 
-	boost::shared_ptr<TopMenuBar> rightPanel = Creatable<Instance>::create<TopMenuBar>(right, Layout::VERTICAL);
+	std::shared_ptr<TopMenuBar> rightPanel = Creatable<Instance>::create<TopMenuBar>(right, Layout::VERTICAL);
 	rightPanel->addGuiItem(Creatable<Instance>::create<MenuSpacer>(32.0f, 32.0f));
 	rightPanel->addGuiItem(Creatable<Instance>::create<ArrowButton>(adorn, right, rightKey, controller, dataModel));
 

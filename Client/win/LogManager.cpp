@@ -11,12 +11,9 @@
 #include <atlbase.h>
 #include <atlcom.h>
 #include <atltime.h>
-#include <boost/thread/once.hpp>
-#include <boost/thread/tss.hpp>
 #include <direct.h>
 #include <list>
-
-static boost::thread_specific_ptr<ThreadLogManager>* ts;
+#include <memory>
 
 bool LogManager::logsEnabled = true;
 
@@ -400,27 +397,13 @@ HRESULT LogManager::ReportExceptionAsCOMError(const GUID& guid, const std::excep
 	return ReportCOMError(guid, e.what(), S_OK);
 }
 
-namespace log_detail {
-
-boost::once_flag once_init = BOOST_ONCE_INIT;
-
-void init()
-{
-	static boost::thread_specific_ptr<ThreadLogManager> value;
-
-	::ts = &value;
-}
-
-} // namespace log_detail
-
 ThreadLogManager* ThreadLogManager::getCurrent()
 {
-	boost::call_once(&log_detail::init, log_detail::once_init);
-	ThreadLogManager* logManager = ts->get();
-	if (logManager == NULL) {
-		logManager = new ThreadLogManager();
-		ts->reset(logManager);
+	static thread_local std::unique_ptr<ThreadLogManager> current;
+
+	if (!current) {
+		current.reset(new ThreadLogManager());
 	}
 
-	return logManager;
+	return current.get();
 }

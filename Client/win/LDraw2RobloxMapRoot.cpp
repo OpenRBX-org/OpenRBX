@@ -142,7 +142,7 @@ LDraw2RobloxMapRoot::LDraw2RobloxMapRoot(std::string p_unk0x04) : m_unk0x04(p_un
 {
 	std::ifstream stream(m_unk0x04.c_str());
 	TextXmlParser parser(stream.rdbuf());
-	std::auto_ptr<XmlElement> root = parser.parse();
+	std::unique_ptr<XmlElement> root = parser.parse();
 
 	const XmlElement* element = root->findFirstChildByTag(g_unk0x0095531c);
 	if (element) {

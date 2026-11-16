@@ -106,7 +106,7 @@ public:
 
 	void merge(const XmlElement* root, RBX::DataModel* dataModel);
 
-	void loadInstances(XmlElement* root, std::vector<boost::shared_ptr<RBX::Instance> >& instances);
+	void loadInstances(XmlElement* root, std::vector<std::shared_ptr<RBX::Instance> >& instances);
 
 	static void load(XmlElement* root, RBX::DataModel* dataModel);
 	void load(std::istream& stream, RBX::DataModel* dataModel);

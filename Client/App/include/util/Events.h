@@ -2,11 +2,12 @@
 #define UTIL_EVENTS_H
 
 #include <algorithm>
+#include <exception>
 #include <vector>
 
 namespace RBX {
 
-class StandardOut;
+void reportOnEventException(const std::exception& error);
 
 template <class Source, class Event>
 class Notifier;
@@ -123,9 +124,7 @@ void Notifier<Source, Event>::raise(Event event, Listener<Source, Event>* listen
 		listener->onEvent(static_cast<const Source*>(this), event);
 	}
 	catch (std::exception& error) {
-		std::string what(error.what());
-
-		StandardOut::singleton()->print(MESSAGE_WARNING, "Exception caught in onEvent. %s", what.c_str());
+		reportOnEventException(error);
 	}
 }
 

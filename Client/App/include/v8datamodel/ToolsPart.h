@@ -6,7 +6,7 @@
 #include "v8datamodel/BrickColor.h"
 #include "v8datamodel/MouseCommand.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <string>
 
 namespace RBX {
@@ -21,7 +21,7 @@ extern char sModelSetPrimaryPartTool[];
 class PartTool : public MouseCommand
 {
 private:
-	boost::shared_ptr<PartInstance> partInstance;
+	std::shared_ptr<PartInstance> partInstance;
 
 protected:
 	virtual void render3dAdorn(Adorn* adorn);

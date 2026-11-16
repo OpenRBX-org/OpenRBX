@@ -8,9 +8,7 @@
 #include "v8xml/Serializer.h"
 #include "v8xml/XmlElement.h"
 
-#include <boost/cast.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/type_traits/function_traits.hpp>
+#include <memory>
 
 namespace RBX {
 namespace Reflection {
@@ -38,7 +36,7 @@ public:
 template <class Class, class T>
 class EnumPropDescriptor : public EnumPropertyDescriptor
 {
-	std::auto_ptr<typename TypedPropertyDescriptor<T>::GetSet> getset;
+	std::unique_ptr<typename TypedPropertyDescriptor<T>::GetSet> getset;
 
 public:
 	template <class GetFunc, class SetFunc>
@@ -196,7 +194,7 @@ public:
 
 	virtual void setRefValue(DescribedBase* instance, DescribedBase* value) const
 	{
-		T* t = value != NULL ? boost::polymorphic_cast<T*>(value) : NULL;
+		T* t = value != NULL ? polymorphicCast<T*>(value) : NULL;
 
 		setValue(instance, t);
 	}
@@ -213,13 +211,13 @@ public:
 
 	virtual void assignIDREF(DescribedBase* propertyOwner, const InstanceHandle& handle) const
 	{
-		boost::shared_ptr<Instance> t = handle.getTarget();
+		std::shared_ptr<Instance> t = handle.getTarget();
 
 		setValue(propertyOwner, static_cast<T*>(t.get()));
 	}
 
 private:
-	std::auto_ptr<typename TypedPropertyDescriptor<T*>::GetSet> getset;
+	std::unique_ptr<typename TypedPropertyDescriptor<T*>::GetSet> getset;
 };
 
 template <class Class>
@@ -236,7 +234,7 @@ template <class Class, class Signature>
 class BoundFuncDesc<Class, Signature, 0> : public FuncDesc<Class>
 {
 public:
-	typedef typename boost::function_traits<Signature>::result_type result_type;
+	typedef ResultType<Signature> result_type;
 	typedef result_type (Class::*Function)();
 
 private:
@@ -265,7 +263,7 @@ public:
 
 	virtual void execute(DescribedBase* instance, typename FunctionDescriptor::Arguments& arguments) const
 	{
-		call<result_type>(boost::polymorphic_cast<Class*>(instance), arguments.returnValue);
+		call<result_type>(polymorphicCast<Class*>(instance), arguments.returnValue);
 	}
 };
 
@@ -273,8 +271,8 @@ template <class Class, class Signature>
 class BoundFuncDesc<Class, Signature, 1> : public FuncDesc<Class>
 {
 public:
-	typedef typename boost::function_traits<Signature>::result_type result_type;
-	typedef typename boost::function_traits<Signature>::arg1_type Arg1;
+	typedef ResultType<Signature> result_type;
+	typedef ArgumentType<Signature, 0> Arg1;
 	typedef result_type (Class::*Function)(Arg1);
 
 private:
@@ -324,7 +322,7 @@ public:
 	{
 		Value arg1(default1);
 		arguments.get(1, arg1);
-		call<result_type>(boost::polymorphic_cast<Class*>(instance), arguments.returnValue, arg1);
+		call<result_type>(polymorphicCast<Class*>(instance), arguments.returnValue, arg1);
 	}
 };
 
@@ -332,9 +330,9 @@ template <class Class, class Signature>
 class BoundFuncDesc<Class, Signature, 2> : public FuncDesc<Class>
 {
 public:
-	typedef typename boost::function_traits<Signature>::result_type result_type;
-	typedef typename boost::function_traits<Signature>::arg1_type Arg1;
-	typedef typename boost::function_traits<Signature>::arg2_type Arg2;
+	typedef ResultType<Signature> result_type;
+	typedef ArgumentType<Signature, 0> Arg1;
+	typedef ArgumentType<Signature, 1> Arg2;
 	typedef result_type (Class::*Function)(Arg1, Arg2);
 
 private:
@@ -407,7 +405,7 @@ public:
 		arguments.get(1, arg1);
 		Value arg2(default2);
 		arguments.get(2, arg2);
-		call<result_type>(boost::polymorphic_cast<Class*>(instance), arguments.returnValue, arg1, arg2);
+		call<result_type>(polymorphicCast<Class*>(instance), arguments.returnValue, arg1, arg2);
 	}
 };
 
@@ -415,10 +413,10 @@ template <class Class, class Signature>
 class BoundFuncDesc<Class, Signature, 3> : public FuncDesc<Class>
 {
 public:
-	typedef typename boost::function_traits<Signature>::result_type result_type;
-	typedef typename boost::function_traits<Signature>::arg1_type Arg1;
-	typedef typename boost::function_traits<Signature>::arg2_type Arg2;
-	typedef typename boost::function_traits<Signature>::arg3_type Arg3;
+	typedef ResultType<Signature> result_type;
+	typedef ArgumentType<Signature, 0> Arg1;
+	typedef ArgumentType<Signature, 1> Arg2;
+	typedef ArgumentType<Signature, 2> Arg3;
 	typedef result_type (Class::*Function)(Arg1, Arg2, Arg3);
 
 private:
@@ -483,7 +481,7 @@ public:
 		arguments.get(2, arg2);
 		Value arg3(default3);
 		arguments.get(3, arg3);
-		call<result_type>(boost::polymorphic_cast<Class*>(instance), arguments.returnValue, arg1, arg2, arg3);
+		call<result_type>(polymorphicCast<Class*>(instance), arguments.returnValue, arg1, arg2, arg3);
 	}
 };
 
@@ -491,11 +489,11 @@ template <class Class, class Signature>
 class BoundFuncDesc<Class, Signature, 4> : public FuncDesc<Class>
 {
 public:
-	typedef typename boost::function_traits<Signature>::result_type result_type;
-	typedef typename boost::function_traits<Signature>::arg1_type Arg1;
-	typedef typename boost::function_traits<Signature>::arg2_type Arg2;
-	typedef typename boost::function_traits<Signature>::arg3_type Arg3;
-	typedef typename boost::function_traits<Signature>::arg4_type Arg4;
+	typedef ResultType<Signature> result_type;
+	typedef ArgumentType<Signature, 0> Arg1;
+	typedef ArgumentType<Signature, 1> Arg2;
+	typedef ArgumentType<Signature, 2> Arg3;
+	typedef ArgumentType<Signature, 3> Arg4;
 	typedef result_type (Class::*Function)(Arg1, Arg2, Arg3, Arg4);
 
 private:
@@ -620,7 +618,7 @@ public:
 		arguments.get(3, arg3);
 		Value arg4(default4);
 		arguments.get(4, arg4);
-		call<result_type>(boost::polymorphic_cast<Class*>(instance), arguments.returnValue, arg1, arg2, arg3, arg4);
+		call<result_type>(polymorphicCast<Class*>(instance), arguments.returnValue, arg1, arg2, arg3, arg4);
 	}
 };
 

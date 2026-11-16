@@ -111,7 +111,7 @@ namespace Stats {
 
 Item* Item::createChildItem(const char* name)
 {
-	boost::shared_ptr<Item> item = Creatable<Instance>::create<Item>();
+	std::shared_ptr<Item> item = Creatable<Instance>::create<Item>();
 	item->setName(name);
 	item->setParent(this);
 	return item.get();
@@ -119,7 +119,7 @@ Item* Item::createChildItem(const char* name)
 
 Item* Item::createBoundChildItem(const Profiling::Profiler& p)
 {
-	boost::shared_ptr<Item> item = Creatable<Instance>::create<ProfilingItem>(&p);
+	std::shared_ptr<Item> item = Creatable<Instance>::create<ProfilingItem>(&p);
 	item->setName(p.name.c_str());
 	item->setParent(this);
 	return item.get();
@@ -127,7 +127,7 @@ Item* Item::createBoundChildItem(const Profiling::Profiler& p)
 
 Item* Item::createBoundMemChildItem(const char* name, const unsigned int& v)
 {
-	boost::shared_ptr<Item> item = Creatable<Instance>::create<TypedMemItem>(&v);
+	std::shared_ptr<Item> item = Creatable<Instance>::create<TypedMemItem>(&v);
 	item->setName(name);
 	item->setParent(this);
 	return item.get();

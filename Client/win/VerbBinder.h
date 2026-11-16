@@ -4,8 +4,8 @@
 #include "v8datamodel/DataModel.h"
 #include "v8tree/Verb.h"
 
-#include <boost/shared_ptr.hpp>
 #include <map>
+#include <memory>
 
 template <class T, class Base>
 class VerbBinder : public Base
@@ -16,7 +16,7 @@ public:
 		if (nCode == CN_COMMAND || nCode == CN_UPDATE_COMMAND_UI) {
 			typename std::map<UINT, const RBX::Name*>::iterator it = m_unk0x58.find(nID);
 			if (it != m_unk0x58.end() && it->second) {
-				boost::shared_ptr<RBX::DataModel> dataModel = static_cast<T*>(this)->FUN_00403290();
+				std::shared_ptr<RBX::DataModel> dataModel = static_cast<T*>(this)->FUN_00403290();
 				RBX::DataModel::Lock lock(dataModel);
 				const RBX::Name* name = it->second;
 				RBX::VerbContainer* container = static_cast<T*>(this)->FUN_004558a0();

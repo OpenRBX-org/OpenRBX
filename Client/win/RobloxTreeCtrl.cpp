@@ -10,14 +10,13 @@
 #include "v8datamodel/Workspace.h"
 
 #include <algorithm>
-#include <boost/bind.hpp>
 #include <iterator>
 #include <vector>
 
 class RootNode : public CRobloxTreeCtrlNode
 {
 public:
-	RootNode(const boost::shared_ptr<RBX::Instance>& instance, CRobloxTreeCtrl* tree);
+	RootNode(const std::shared_ptr<RBX::Instance>& instance, CRobloxTreeCtrl* tree);
 
 	virtual void VTable0x08();
 	virtual void VTable0x14(NMTVDISPINFO* dispInfo);
@@ -230,7 +229,7 @@ void CRobloxTreeCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 
 int FUN_004230c0(RBX::Instance* instance)
 {
-	boost::shared_ptr<RBX::Reflection::Metadata::Reflection> reflection =
+	std::shared_ptr<RBX::Reflection::Metadata::Reflection> reflection =
 		RBX::Reflection::Metadata::Reflection::FUN_004480c0();
 	RBX::Reflection::Metadata::Class* metadata = reflection->FUN_00446220(&instance->getDescriptor(), true);
 	return metadata ? metadata->FUN_00422100() : 0;
@@ -239,7 +238,7 @@ int FUN_004230c0(RBX::Instance* instance)
 void CSelectionTreeCtrl::FUN_00423170(TVITEM* item, bool select)
 {
 	if (item->hItem && item->lParam) {
-		boost::shared_ptr<RBX::Instance> instance = reinterpret_cast<CRobloxTreeCtrlNode*>(item->lParam)->m_unk0x0c;
+		std::shared_ptr<RBX::Instance> instance = reinterpret_cast<CRobloxTreeCtrlNode*>(item->lParam)->m_unk0x0c;
 		if (instance) {
 			RBX::DataModel::Lock lock(VTable0x14c());
 			RBX::Selection* selection = VTable0x148();
@@ -351,7 +350,7 @@ void CSelectionTreeCtrl::SelectAllIgnore(BOOL bSelect, HTREEITEM hIgnore)
 {
 	if (!bSelect) {
 		CRobloxTreeCtrlNode* node = reinterpret_cast<CRobloxTreeCtrlNode*>(GetItemData(hIgnore));
-		boost::shared_ptr<RBX::Instance> instance;
+		std::shared_ptr<RBX::Instance> instance;
 		if (node) {
 			instance = node->m_unk0x0c;
 		}
@@ -385,7 +384,7 @@ void CRobloxTreeCtrl::OnLButtonDblClk(UINT nFlags, CPoint point)
 	if (item && (nFlags & TVHT_ONITEM)) {
 		CRobloxTreeCtrlNode* node = reinterpret_cast<CRobloxTreeCtrlNode*>(GetItemData(item));
 		if (node) {
-			boost::shared_ptr<RBX::Script> script = boost::shared_dynamic_cast<RBX::Script>(node->m_unk0x0c);
+			std::shared_ptr<RBX::Script> script = std::dynamic_pointer_cast<RBX::Script>(node->m_unk0x0c);
 			if (script) {
 				RBX::DataModel::Lock lock(VTable0x14c());
 				static_cast<CRobloxApp*>(AfxGetApp())->FUN_0044ef90(script);
@@ -399,7 +398,7 @@ HTREEITEM CSelectionTreeCtrl::FUN_00423cc0(HTREEITEM item)
 	if (item) {
 		CRobloxTreeCtrlNode* node = reinterpret_cast<CRobloxTreeCtrlNode*>(GetItemData(item));
 		if (node) {
-			boost::shared_ptr<RBX::Instance> instance = node->m_unk0x0c;
+			std::shared_ptr<RBX::Instance> instance = node->m_unk0x0c;
 			if (instance && instance->FUN_00422f10(VTable0x148()->begin(), VTable0x148()->end())) {
 				return item;
 			}
@@ -433,10 +432,10 @@ void CSelectionTreeCtrl::OnMouseMove(UINT nFlags, CPoint point)
 	CXTTreeCtrl::OnMouseMove(nFlags, point);
 }
 
-void CRobloxTreeCtrlNode::FUN_004248f0(const boost::shared_ptr<RBX::Instance>& instance)
+void CRobloxTreeCtrlNode::FUN_004248f0(const std::shared_ptr<RBX::Instance>& instance)
 {
 	{
-		boost::recursive_mutex::scoped_lock lock(m_unk0x30->m_unk0xb0);
+		std::lock_guard<std::recursive_mutex> lock(m_unk0x30->m_unk0xb0);
 		m_unk0x38.insert(instance);
 	}
 	m_unk0x30->VTable0x154(this);
@@ -444,7 +443,7 @@ void CRobloxTreeCtrlNode::FUN_004248f0(const boost::shared_ptr<RBX::Instance>& i
 
 void CSelectionTreeCtrl::VTable0x150(RBX::Instance* instance)
 {
-	boost::recursive_mutex::scoped_lock lock(m_unk0xb0);
+	std::lock_guard<std::recursive_mutex> lock(m_unk0xb0);
 
 	std::map<RBX::Instance*, CRobloxTreeCtrlNode*>::iterator it = m_unk0x98.find(instance);
 	if (it != m_unk0x98.end()) {
@@ -454,13 +453,13 @@ void CSelectionTreeCtrl::VTable0x150(RBX::Instance* instance)
 
 void CSelectionTreeCtrl::VTable0x154(CRobloxTreeCtrlNode* node)
 {
-	boost::recursive_mutex::scoped_lock lock(m_unk0xb0);
+	std::lock_guard<std::recursive_mutex> lock(m_unk0xb0);
 	m_unk0xdc.insert(node);
 }
 
 void CSelectionTreeCtrl::VTable0x158(CRobloxTreeCtrlNode* node)
 {
-	boost::recursive_mutex::scoped_lock lock(m_unk0xb0);
+	std::lock_guard<std::recursive_mutex> lock(m_unk0xb0);
 	m_unk0xdc.erase(node);
 }
 
@@ -471,7 +470,7 @@ CRobloxTreeCtrl::CRobloxTreeCtrl() : m_unk0x94(NULL), m_unk0xa4(false)
 CRobloxTreeCtrlNode::~CRobloxTreeCtrlNode()
 {
 	{
-		boost::recursive_mutex::scoped_lock lock(m_unk0x30->m_unk0xb0);
+		std::lock_guard<std::recursive_mutex> lock(m_unk0x30->m_unk0xb0);
 
 		if (m_unk0x34) {
 			m_unk0x34->m_unk0x14.erase(m_unk0x0c.get());
@@ -503,7 +502,7 @@ void CRobloxTreeCtrlNode::VTable0x10(UINT p_unk0x04)
 
 int FUN_00425240(const RBX::Reflection::ClassDescriptor* descriptor)
 {
-	boost::shared_ptr<RBX::Reflection::Metadata::Reflection> reflection =
+	std::shared_ptr<RBX::Reflection::Metadata::Reflection> reflection =
 		RBX::Reflection::Metadata::Reflection::FUN_004480c0();
 	RBX::Reflection::Metadata::Class* metadata = reflection->FUN_00446220(descriptor, true);
 	return metadata ? metadata->FUN_004251c0() : 0;
@@ -559,14 +558,14 @@ void CRobloxTreeCtrlNode::onEvent(const RBX::Instance* source, RBX::PropertyChan
 bool CRobloxTreeCtrlNode::FUN_004255f0()
 {
 	RBX::DataModel::Lock lock(m_unk0x30->VTable0x14c());
-	boost::shared_ptr<const std::vector<boost::shared_ptr<RBX::Instance> > > children = m_unk0x0c->getChildren().read();
+	std::shared_ptr<const std::vector<std::shared_ptr<RBX::Instance> > > children = m_unk0x0c->getChildren().read();
 	if (!children) {
 		return false;
 	}
 
-	std::vector<boost::shared_ptr<RBX::Instance> >::const_iterator end = children->end();
-	for (std::vector<boost::shared_ptr<RBX::Instance> >::const_iterator it = children->begin(); it != end; ++it) {
-		boost::shared_ptr<RBX::Reflection::Metadata::Reflection> reflection =
+	std::vector<std::shared_ptr<RBX::Instance> >::const_iterator end = children->end();
+	for (std::vector<std::shared_ptr<RBX::Instance> >::const_iterator it = children->begin(); it != end; ++it) {
+		std::shared_ptr<RBX::Reflection::Metadata::Reflection> reflection =
 			RBX::Reflection::Metadata::Reflection::FUN_004480c0();
 		RBX::Reflection::Metadata::Class* metadata = reflection->FUN_00446220(&(*it)->getDescriptor(), true);
 		if (metadata && metadata->FUN_00422100() >= 0) {
@@ -613,7 +612,7 @@ void CRobloxTreeCtrlNode::VTable0x08()
 void CRobloxTreeCtrlNode::onEvent(const RBX::Instance* source, RBX::ChildAdded event)
 {
 	if (m_unk0x2c_bit1) {
-		boost::recursive_mutex::scoped_lock lock(m_unk0x30->m_unk0xb0);
+		std::lock_guard<std::recursive_mutex> lock(m_unk0x30->m_unk0xb0);
 		m_unk0x38.insert(event.child);
 	}
 
@@ -625,7 +624,7 @@ void CRobloxTreeCtrlNode::FUN_00425c40()
 	std::vector<CRobloxTreeCtrlNode*> nodes;
 
 	{
-		boost::recursive_mutex::scoped_lock lock(m_unk0x30->m_unk0xb0);
+		std::lock_guard<std::recursive_mutex> lock(m_unk0x30->m_unk0xb0);
 		std::copy(m_unk0x20.begin(), m_unk0x20.end(), std::back_inserter(nodes));
 		m_unk0x20.clear();
 	}
@@ -638,7 +637,7 @@ void CRobloxTreeCtrlNode::FUN_00425c40()
 void CRobloxTreeCtrlNode::onEvent(const RBX::Instance* source, RBX::ChildRemoved event)
 {
 	{
-		boost::recursive_mutex::scoped_lock lock(m_unk0x30->m_unk0xb0);
+		std::lock_guard<std::recursive_mutex> lock(m_unk0x30->m_unk0xb0);
 		m_unk0x30->m_unk0x98.erase(event.child.get());
 
 		std::map<RBX::Instance*, CRobloxTreeCtrlNode*>::iterator it = m_unk0x14.find(event.child.get());
@@ -656,7 +655,7 @@ void CSelectionTreeCtrl::onEvent(const RBX::Selection* source, RBX::SelectionCha
 {
 	if (!m_unk0xce) {
 		if (event.addedItem) {
-			boost::recursive_mutex::scoped_lock lock(m_unk0xb0);
+			std::lock_guard<std::recursive_mutex> lock(m_unk0xb0);
 			std::map<RBX::Instance*, CRobloxTreeCtrlNode*>::iterator it = m_unk0x98.find(event.addedItem.get());
 			if (it != m_unk0x98.end()) {
 				VTable0x154(it->second);
@@ -667,7 +666,7 @@ void CSelectionTreeCtrl::onEvent(const RBX::Selection* source, RBX::SelectionCha
 		}
 
 		if (event.removedItem) {
-			boost::recursive_mutex::scoped_lock lock(m_unk0xb0);
+			std::lock_guard<std::recursive_mutex> lock(m_unk0xb0);
 			m_unk0xd0.erase(event.removedItem);
 			std::map<RBX::Instance*, CRobloxTreeCtrlNode*>::iterator it = m_unk0x98.find(event.removedItem.get());
 			if (it != m_unk0x98.end()) {
@@ -682,19 +681,19 @@ CSelectionTreeCtrl::CSelectionTreeCtrl() : m_unk0xcc(false), m_unk0xcd(false), m
 	m_unk0xc4.LoadMenu(103);
 }
 
-boost::shared_ptr<RBX::DataModel> CSelectionTreeCtrl::VTable0x14c() const
+std::shared_ptr<RBX::DataModel> CSelectionTreeCtrl::VTable0x14c() const
 {
 	return m_unk0xe8;
 }
 
 CRobloxTreeCtrlNode::CRobloxTreeCtrlNode(
-	CRobloxTreeCtrlNode* parent, boost::shared_ptr<RBX::Instance> instance, CRobloxTreeCtrl* tree
+	CRobloxTreeCtrlNode* parent, std::shared_ptr<RBX::Instance> instance, CRobloxTreeCtrl* tree
 )
 	: m_unk0x0c(instance), m_unk0x2c_bit0(false), m_unk0x2c_bit1(false), m_unk0x2d(false), m_unk0x30(tree),
 	  m_unk0x34(parent), m_unk0x44(NULL), m_unk0x48(FUN_004230c0(instance.get())), m_unk0x4c(&instance->getDescriptor())
 {
 	{
-		boost::recursive_mutex::scoped_lock lock(tree->m_unk0xb0);
+		std::lock_guard<std::recursive_mutex> lock(tree->m_unk0xb0);
 		tree->m_unk0x98[instance.get()] = this;
 
 		if (parent) {
@@ -716,9 +715,9 @@ void CRobloxTreeCtrlNode::VTable0x0c()
 	m_unk0x0c->RBX::Notifier<RBX::Instance, RBX::ChildRemoved>::addListener(this);
 }
 
-CRobloxTreeCtrlNode* CRobloxTreeCtrlNode::FUN_004267a0(const boost::shared_ptr<RBX::Instance>& instance)
+CRobloxTreeCtrlNode* CRobloxTreeCtrlNode::FUN_004267a0(const std::shared_ptr<RBX::Instance>& instance)
 {
-	boost::shared_ptr<RBX::Reflection::Metadata::Reflection> reflection =
+	std::shared_ptr<RBX::Reflection::Metadata::Reflection> reflection =
 		RBX::Reflection::Metadata::Reflection::FUN_004480c0();
 	RBX::Reflection::Metadata::Class* metadata = reflection->FUN_00446220(&instance->getDescriptor(), true);
 	if (!metadata || metadata->FUN_00422100() < 0) {
@@ -726,7 +725,7 @@ CRobloxTreeCtrlNode* CRobloxTreeCtrlNode::FUN_004267a0(const boost::shared_ptr<R
 	}
 
 	{
-		boost::recursive_mutex::scoped_lock lock(m_unk0x30->m_unk0xb0);
+		std::lock_guard<std::recursive_mutex> lock(m_unk0x30->m_unk0xb0);
 		std::map<RBX::Instance*, CRobloxTreeCtrlNode*>::iterator it = m_unk0x14.find(instance.get());
 		if (it != m_unk0x14.end()) {
 			return it->second;
@@ -740,7 +739,7 @@ CRobloxTreeCtrlNode* CRobloxTreeCtrlNode::FUN_004267a0(const boost::shared_ptr<R
 
 void CRobloxTreeCtrlNode::FUN_00426960()
 {
-	std::vector<boost::shared_ptr<RBX::Instance> > children;
+	std::vector<std::shared_ptr<RBX::Instance> > children;
 
 	{
 		RBX::DataModel::Lock lock(m_unk0x30->VTable0x14c());
@@ -749,16 +748,18 @@ void CRobloxTreeCtrlNode::FUN_00426960()
 		}
 	}
 
-	std::for_each(children.begin(), children.end(), boost::bind(&CRobloxTreeCtrlNode::FUN_004248f0, this, _1));
+	std::for_each(children.begin(), children.end(), [this](const std::shared_ptr<RBX::Instance>& instance) {
+		FUN_004248f0(instance);
+	});
 }
 
 void CRobloxTreeCtrlNode::FUN_00426b00()
 {
 	for (int i = 0; i < 10; i++) {
-		boost::shared_ptr<RBX::Instance> instance;
+		std::shared_ptr<RBX::Instance> instance;
 		{
-			boost::recursive_mutex::scoped_lock lock(m_unk0x30->m_unk0xb0);
-			std::set<boost::shared_ptr<RBX::Instance> >::iterator it = m_unk0x38.begin();
+			std::lock_guard<std::recursive_mutex> lock(m_unk0x30->m_unk0xb0);
+			auto it = m_unk0x38.begin();
 			if (it == m_unk0x38.end()) {
 				return;
 			}
@@ -769,7 +770,7 @@ void CRobloxTreeCtrlNode::FUN_00426b00()
 	}
 }
 
-RootNode::RootNode(const boost::shared_ptr<RBX::Instance>& instance, CRobloxTreeCtrl* tree)
+RootNode::RootNode(const std::shared_ptr<RBX::Instance>& instance, CRobloxTreeCtrl* tree)
 	: CRobloxTreeCtrlNode(NULL, instance, tree)
 {
 	m_unk0x2c_bit1 = true;
@@ -792,14 +793,14 @@ void CSelectionTreeCtrl::VTable0x15c()
 	}
 }
 
-CRobloxTreeCtrlNode* CRobloxTreeCtrl::FUN_00426e00(const boost::shared_ptr<RBX::Instance>& instance)
+CRobloxTreeCtrlNode* CRobloxTreeCtrl::FUN_00426e00(const std::shared_ptr<RBX::Instance>& instance)
 {
 	if (!instance) {
 		return NULL;
 	}
 
 	{
-		boost::recursive_mutex::scoped_lock lock(m_unk0xb0);
+		std::lock_guard<std::recursive_mutex> lock(m_unk0xb0);
 		std::map<RBX::Instance*, CRobloxTreeCtrlNode*>::iterator it = m_unk0x98.find(instance.get());
 		if (it != m_unk0x98.end()) {
 			return it->second;
@@ -816,10 +817,10 @@ CRobloxTreeCtrlNode* CRobloxTreeCtrl::FUN_00426e00(const boost::shared_ptr<RBX::
 void CSelectionTreeCtrl::FUN_00426f50()
 {
 	for (int i = 0; i < 10; i++) {
-		boost::shared_ptr<RBX::Instance> instance;
+		std::shared_ptr<RBX::Instance> instance;
 		{
-			boost::recursive_mutex::scoped_lock lock(m_unk0xb0);
-			std::set<boost::shared_ptr<RBX::Instance> >::iterator it = m_unk0xd0.begin();
+			std::lock_guard<std::recursive_mutex> lock(m_unk0xb0);
+			auto it = m_unk0xd0.begin();
 			if (it == m_unk0xd0.end()) {
 				return;
 			}
@@ -834,7 +835,7 @@ void CSelectionTreeCtrl::OnTimer(UINT_PTR nIDEvent)
 {
 	CRobloxTreeCtrlNode* node = NULL;
 	{
-		boost::recursive_mutex::scoped_lock lock(m_unk0xb0);
+		std::lock_guard<std::recursive_mutex> lock(m_unk0xb0);
 		if (m_unk0xdc.size() > 0) {
 			node = *m_unk0xdc.begin();
 		}
@@ -850,7 +851,7 @@ void CSelectionTreeCtrl::OnTimer(UINT_PTR nIDEvent)
 		}
 		node->FUN_00426b00();
 
-		boost::recursive_mutex::scoped_lock lock(m_unk0xb0);
+		std::lock_guard<std::recursive_mutex> lock(m_unk0xb0);
 		if (node->m_unk0x38.empty()) {
 			VTable0x158(node);
 		}
@@ -865,7 +866,7 @@ RBX::Selection* CSelectionTreeCtrl::VTable0x148()
 	return m_unk0xe8 ? m_unk0xe8->create<RBX::Selection>() : NULL;
 }
 
-void CSelectionTreeCtrl::FUN_004285a0(boost::shared_ptr<RBX::DataModel> dataModel)
+void CSelectionTreeCtrl::FUN_004285a0(std::shared_ptr<RBX::DataModel> dataModel)
 {
 	if (m_unk0xe8) {
 		RBX::DataModel::Lock lock(m_unk0xe8);
@@ -893,7 +894,7 @@ void CRobloxTreeCtrl::FUN_00428720(NMHDR* pNMHDR, LRESULT* pResult)
 	*pResult = 0;
 }
 
-static void FUN_00428770(RBX::Instance* parent, boost::shared_ptr<RBX::Instance> child)
+static void FUN_00428770(RBX::Instance* parent, std::shared_ptr<RBX::Instance> child)
 {
 	if (child->getParent() == parent) {
 		return;
@@ -903,7 +904,7 @@ static void FUN_00428770(RBX::Instance* parent, boost::shared_ptr<RBX::Instance>
 	if (workspace) {
 		bool descendent = child->isDescendentOf(workspace);
 		if (!descendent) {
-			std::vector<boost::shared_ptr<RBX::Instance> > instances;
+			std::vector<std::shared_ptr<RBX::Instance> > instances;
 			instances.push_back(child);
 			workspace->insertInstances(instances, workspace, RBX::INSERT_TO_TREE, RBX::SUPPRESS_PROMPTS);
 		}
@@ -914,11 +915,11 @@ static void FUN_00428770(RBX::Instance* parent, boost::shared_ptr<RBX::Instance>
 
 CSelectionTreeCtrl::~CSelectionTreeCtrl()
 {
-	FUN_004285a0(boost::shared_ptr<RBX::DataModel>());
+	FUN_004285a0(std::shared_ptr<RBX::DataModel>());
 }
 
 void CSelectionTreeCtrl::VTable0x00(
-	boost::shared_ptr<RBX::DataModel> newDataModel, boost::shared_ptr<RBX::DataModel> oldDataModel
+	std::shared_ptr<RBX::DataModel> newDataModel, std::shared_ptr<RBX::DataModel> oldDataModel
 )
 {
 	FUN_004285a0(newDataModel);
@@ -950,11 +951,15 @@ void CSelectionTreeCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 		if (target) {
 			CRobloxTreeCtrlNode* node = reinterpret_cast<CRobloxTreeCtrlNode*>(GetItemData(target));
 			if (node) {
-				boost::shared_ptr<RBX::Instance> instance = node->m_unk0x0c;
+				std::shared_ptr<RBX::Instance> instance = node->m_unk0x0c;
 				RBX::DataModel::Lock lock(m_unk0xe8);
 				if (instance) {
 					std::for_each(
-						VTable0x148()->begin(), VTable0x148()->end(), boost::bind(&FUN_00428770, instance.get(), _1)
+						VTable0x148()->begin(),
+						VTable0x148()->end(),
+						[parent = instance.get()](const std::shared_ptr<RBX::Instance>& child) {
+							FUN_00428770(parent, child);
+						}
 					);
 				}
 				m_unk0xe8->clearStack();

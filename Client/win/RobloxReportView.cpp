@@ -7,7 +7,7 @@
 #include "v8datamodel/Stats.h"
 #include "v8tree/Service.h"
 
-#include <boost/pointer_cast.hpp>
+#include <memory>
 
 IMPLEMENT_DYNCREATE(CRobloxReportDocView, CRobloxReportView)
 IMPLEMENT_DYNAMIC(CRobloxReportView, CXTPReportView)
@@ -70,7 +70,7 @@ void CRobloxReportDocView::OnActivateView(BOOL bActivate, CView* pActivateView, 
 }
 
 CRobloxReportView::CStatsItemRecord::CNameItem::CNameItem(
-	RBX::Stats::Item* item, boost::shared_ptr<RBX::DataModel> dataModel
+	RBX::Stats::Item* item, std::shared_ptr<RBX::DataModel> dataModel
 )
 	: MutexRef(dataModel), m_unk0x84(item)
 {
@@ -83,7 +83,7 @@ CString CRobloxReportView::CStatsItemRecord::CNameItem::GetCaption(CXTPReportCol
 }
 
 CRobloxReportView::CStatsItemRecord::CValueItem::CValueItem(
-	RBX::Stats::Item* item, boost::shared_ptr<RBX::DataModel> dataModel
+	RBX::Stats::Item* item, std::shared_ptr<RBX::DataModel> dataModel
 )
 	: MutexRef(dataModel), m_unk0x84(item)
 {
@@ -113,7 +113,7 @@ CRobloxReportView::CRobloxReportView() : m_unk0x3a4(0)
 }
 
 CRobloxReportView::CStatsItemRecord::CStatsItemRecord(
-	boost::shared_ptr<RBX::Stats::Item> item, boost::shared_ptr<RBX::DataModel> dataModel
+	std::shared_ptr<RBX::Stats::Item> item, std::shared_ptr<RBX::DataModel> dataModel
 )
 	: MutexRef(dataModel), m_unk0x98(item)
 {
@@ -145,7 +145,7 @@ CRobloxReportView::CStatsItemRecord::~CStatsItemRecord()
 
 void CRobloxReportView::CStatsItemRecord::VTable0x08(const RBX::Instance* source, RBX::ChildAdded event)
 {
-	boost::shared_ptr<RBX::Stats::Item> item = boost::shared_polymorphic_downcast<RBX::Stats::Item>(event.child);
+	std::shared_ptr<RBX::Stats::Item> item = std::static_pointer_cast<RBX::Stats::Item>(event.child);
 	GetChilds()->Add(new CStatsItemRecord(item, m_unk0x00));
 }
 
@@ -153,12 +153,12 @@ void CRobloxReportView::VTable0x08(const RBX::Instance* source, RBX::ChildAdded 
 {
 	CXTPReportControl& report = GetReportCtrl();
 	CStatsItemRecord* record =
-		new CStatsItemRecord(boost::shared_polymorphic_downcast<RBX::Stats::Item>(event.child), m_unk0x3a8);
+		new CStatsItemRecord(std::static_pointer_cast<RBX::Stats::Item>(event.child), m_unk0x3a8);
 	record->SetExpanded(TRUE);
 	report.AddRecord(record);
 }
 
-void CRobloxReportView::FUN_0045cc90(boost::shared_ptr<RBX::DataModel> dataModel)
+void CRobloxReportView::FUN_0045cc90(std::shared_ptr<RBX::DataModel> dataModel)
 {
 	if (dataModel == m_unk0x3a8) {
 		return;
@@ -202,7 +202,7 @@ void CRobloxReportView::OnInitialUpdate()
 		FUN_0045cc90(static_cast<CRobloxDoc*>(GetDocument())->FUN_00403290());
 	}
 	else {
-		FUN_0045cc90(boost::shared_ptr<RBX::DataModel>());
+		FUN_0045cc90(std::shared_ptr<RBX::DataModel>());
 	}
 }
 
@@ -213,7 +213,7 @@ void CRobloxReportPaneView::OnInitialUpdate()
 }
 
 void CRobloxReportPaneView::VTable0x00(
-	boost::shared_ptr<RBX::DataModel> newDataModel, boost::shared_ptr<RBX::DataModel> oldDataModel
+	std::shared_ptr<RBX::DataModel> newDataModel, std::shared_ptr<RBX::DataModel> oldDataModel
 )
 {
 	FUN_0045cc90(newDataModel);
@@ -221,7 +221,7 @@ void CRobloxReportPaneView::VTable0x00(
 
 CRobloxReportView::~CRobloxReportView()
 {
-	FUN_0045cc90(boost::shared_ptr<RBX::DataModel>());
+	FUN_0045cc90(std::shared_ptr<RBX::DataModel>());
 }
 
 CRobloxReportPaneView::CRobloxReportPaneView()

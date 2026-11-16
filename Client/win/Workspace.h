@@ -12,7 +12,6 @@
 #include <atlbase.h>
 #include <atlcom.h>
 #include <atlctl.h>
-#include <boost/shared_ptr.hpp>
 #include <iosfwd>
 #include <memory>
 
@@ -54,7 +53,7 @@ public:
 
 	HRESULT FinalConstruct();
 
-	boost::shared_ptr<RBX::DataModel> FUN_0046edc0() const;
+	std::shared_ptr<RBX::DataModel> FUN_0046edc0() const;
 
 	RBX::Workspace* FUN_0046edf0() const;
 
@@ -68,14 +67,14 @@ protected:
 private:
 	friend class CRobloxDoc;
 
-	std::auto_ptr<XmlElement> FUN_0046f040();
+	std::unique_ptr<XmlElement> FUN_0046f040();
 	void FUN_0046f420();
-	std::auto_ptr<XmlElement> FUN_0046ffa0();
+	std::unique_ptr<XmlElement> FUN_0046ffa0();
 	HRESULT FUN_004700b0(const XmlElement* root, std::ostream* stream);
 	HRESULT DoExecScript(LPCSTR script, VARIANT arg1, VARIANT arg2, VARIANT arg3, VARIANT arg4, SAFEARRAY** result);
 
-	boost::shared_ptr<RBX::DataModel> m_unk0x24;
-	boost::shared_ptr<RBX::RunService> m_unk0x2c;
+	std::shared_ptr<RBX::DataModel> m_unk0x24;
+	std::shared_ptr<RBX::RunService> m_unk0x2c;
 };
 
 #endif // WORKSPACE_H

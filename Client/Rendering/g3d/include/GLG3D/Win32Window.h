@@ -83,7 +83,7 @@ private:
     /** Called from all constructors */
 	void init(HWND hwnd, bool creatingShareWindow = false);
 
-	static std::auto_ptr<Win32Window>	_shareWindow;	
+	static std::unique_ptr<Win32Window>	_shareWindow;	
 
 	/** OpenGL technically does not allow sharing of resources between
 	  multiple windows (although this tends to work most of the time

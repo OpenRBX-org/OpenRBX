@@ -113,7 +113,7 @@ MegaDragger::MegaDragger(
 }
 
 MegaDragger::MegaDragger(
-	PartInstance* mousePartPtr, const std::vector<boost::weak_ptr<PartInstance> >& partArray, RootInstance* rootInstance
+	PartInstance* mousePartPtr, const std::vector<std::weak_ptr<PartInstance> >& partArray, RootInstance* rootInstance
 )
 	: mousePart(shared_from(mousePartPtr)), dragParts(partArray), joined(true), rootInstance(rootInstance),
 	  contactManager(&rootInstance->getWorld()->getContactManager())

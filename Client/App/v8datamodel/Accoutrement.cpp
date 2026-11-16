@@ -9,8 +9,6 @@
 #include "v8datamodel/Workspace.h"
 #include "v8xml/XmlElement.h"
 
-#include <boost/bind.hpp>
-
 namespace RBX {
 
 const char sHat[] = "Hat";
@@ -203,14 +201,14 @@ void Accoutrement::rebuildBackendState()
 	setDesiredState(desiredState, ServiceProvider::findServiceProvider(this));
 }
 
-void Accoutrement::onEvent_AddedBackend(boost::shared_ptr<Instance> child)
+void Accoutrement::onEvent_AddedBackend(std::shared_ptr<Instance> child)
 {
 	if (child.get() != this) {
 		rebuildBackendState();
 	}
 }
 
-void Accoutrement::onEvent_RemovedBackend(boost::shared_ptr<Instance> child)
+void Accoutrement::onEvent_RemovedBackend(std::shared_ptr<Instance> child)
 {
 	if (child.get() != this) {
 		if (child.get() == weld.get()) {
@@ -242,7 +240,7 @@ void Accoutrement::dropAllOthers(ModelInstance* model, Accoutrement* accoutremen
 	}
 }
 
-void Accoutrement::onEvent_HandleTouched(boost::shared_ptr<Instance> other)
+void Accoutrement::onEvent_HandleTouched(std::shared_ptr<Instance> other)
 {
 	if (backendAccoutrementState == IN_WORKSPACE) {
 		Instance* character = other->getParent();
@@ -264,7 +262,7 @@ void Accoutrement::upTo_Equipped()
 {
 	handleTouched.disconnect();
 
-	std::vector<boost::weak_ptr<PartInstance> > parts;
+	std::vector<std::weak_ptr<PartInstance> > parts;
 	PartInstance::findParts(this, parts);
 	DragUtilities::unJoinFromOutsiders(parts);
 
@@ -278,7 +276,9 @@ void Accoutrement::connectTouchEvent()
 {
 	if (const PartInstance* handle = getHandleConst()) {
 		handleTouched = PartInstance::event_Touched.connect(
-			const_cast<PartInstance*>(handle), boost::bind(&Accoutrement::onEvent_HandleTouched, this, _1), 10
+			const_cast<PartInstance*>(handle),
+			[this](const std::shared_ptr<Instance>& other) { onEvent_HandleTouched(other); },
+			10
 		);
 	}
 	else {
@@ -288,10 +288,11 @@ void Accoutrement::connectTouchEvent()
 
 void Accoutrement::upTo_InCharacter()
 {
-	characterChildAdded =
-		Instance::event_childAdded.connect(getParent(), boost::bind(&Accoutrement::onEvent_AddedBackend, this, _1), 10);
+	characterChildAdded = Instance::event_childAdded.connect(
+		getParent(), [this](const std::shared_ptr<Instance>& instance) { onEvent_AddedBackend(instance); }, 10
+	);
 	characterChildRemoved = Instance::event_childRemoved.connect(
-		getParent(), boost::bind(&Accoutrement::onEvent_RemovedBackend, this, _1), 10
+		getParent(), [this](const std::shared_ptr<Instance>& instance) { onEvent_RemovedBackend(instance); }, 10
 	);
 }
 

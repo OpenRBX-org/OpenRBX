@@ -1,7 +1,6 @@
 #ifndef UTIL_PROFILING_H
 #define UTIL_PROFILING_H
 
-#include <boost/noncopyable.hpp>
 #include <cstddef>
 #include <string>
 #include <windows.h>
@@ -37,9 +36,12 @@ public:
 	int frames;
 };
 
-class Profiler : public boost::noncopyable
+class Profiler
 {
 public:
+	Profiler(const Profiler&) = delete;
+	Profiler& operator=(const Profiler&) = delete;
+
 	Profiler(const char* name);
 
 	Bucket getData(double seconds) const;

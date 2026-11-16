@@ -11,9 +11,8 @@
 #include <G3D/Color3.h>
 #include <G3D/CoordinateFrame.h>
 #include <G3D/Vector3.h>
-#include <boost/noncopyable.hpp>
-#include <boost/shared_ptr.hpp>
 #include <map>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -128,9 +127,12 @@ public:
 	}
 };
 
-class SharedStringDictionary : public StringSender, public StringReceiver, private boost::noncopyable
+class SharedStringDictionary : public StringSender, public StringReceiver
 {
 public:
+	SharedStringDictionary() = default;
+	SharedStringDictionary(const SharedStringDictionary&) = delete;
+	SharedStringDictionary& operator=(const SharedStringDictionary&) = delete;
 };
 
 class IdSerializer : public Instance
@@ -141,7 +143,7 @@ protected:
 	struct WaitItem
 	{
 		const Reflection::RefPropertyDescriptor* desc;
-		boost::shared_ptr<Instance> instance;
+		std::shared_ptr<Instance> instance;
 	};
 
 	typedef std::map<Guid::Data, std::vector<WaitItem> > WaitItemMap;

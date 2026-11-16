@@ -6,7 +6,6 @@
 #include "v8world/Assembly2.h"
 
 #include <G3D/System.h>
-#include <boost/bind.hpp>
 
 namespace RBX {
 
@@ -67,7 +66,7 @@ void Seat::seatCharacter(Humanoid* h)
 	weld->setParent(this);
 }
 
-void Seat::onEvent_seatTouched(boost::shared_ptr<Instance> other)
+void Seat::onEvent_seatTouched(std::shared_ptr<Instance> other)
 {
 	if (charSeated() || G3D::System::getLocalTime() - sleepTime < 3.0) {
 		return;
@@ -82,7 +81,7 @@ void Seat::onEvent_seatTouched(boost::shared_ptr<Instance> other)
 			humanoid->setSit(true);
 			seatCharacter(humanoid);
 			humanoidJumped =
-				Humanoid::event_Jumping.connect(humanoid, boost::bind(&Seat::onEvent_humanoidJumped, this, _1), 10);
+				Humanoid::event_Jumping.connect(humanoid, [this](bool active) { onEvent_humanoidJumped(active); }, 10);
 		}
 	}
 }
@@ -92,7 +91,9 @@ void Seat::onServiceProvider(const ServiceProvider* oldProvider, const ServicePr
 	Instance::onServiceProvider(oldProvider, newProvider);
 
 	if (oldProvider == NULL) {
-		seatTouched = PartInstance::event_Touched.connect(this, boost::bind(&Seat::onEvent_seatTouched, this, _1), 10);
+		seatTouched = PartInstance::event_Touched.connect(
+			this, [this](const std::shared_ptr<Instance>& other) { onEvent_seatTouched(other); }, 10
+		);
 	}
 
 	if (newProvider == NULL) {

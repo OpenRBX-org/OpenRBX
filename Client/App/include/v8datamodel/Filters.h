@@ -3,7 +3,7 @@
 
 #include "util/HitTestFilter.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace RBX {
 
@@ -22,8 +22,8 @@ public:
 class PartByLocalCharacter : public HitTestFilter
 {
 protected:
-	boost::shared_ptr<ModelInstance> character;
-	boost::shared_ptr<PartInstance> head;
+	std::shared_ptr<ModelInstance> character;
+	std::shared_ptr<PartInstance> head;
 
 public:
 	PartByLocalCharacter(Instance* root);
@@ -42,7 +42,7 @@ public:
 class IgnoreDescendantsOf : public HitTestFilter
 {
 protected:
-	boost::shared_ptr<Instance> inst;
+	std::shared_ptr<Instance> inst;
 
 public:
 	IgnoreDescendantsOf(Instance* i);

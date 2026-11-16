@@ -2,20 +2,19 @@
 
 #include "util/ContentProvider.h"
 #include "util/Name.h"
+#include "util/Utilities.h"
 #include "v8xml/XmlElement.h"
 #include "v8xml/XmlSerializer.h"
 
 #include <algorithm>
-#include <boost/algorithm/string.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/thread/once.hpp>
 #include <fstream>
+#include <mutex>
 
 static const RBX::Name& utterance = RBX::Name::declare("utterance", -1);
 
-static boost::scoped_ptr<RBX::SafeChat> sing;
+static std::unique_ptr<RBX::SafeChat> sing;
 
-static boost::once_flag once_SafeChat_singleton = BOOST_ONCE_INIT;
+static std::once_flag once_SafeChat_singleton;
 
 namespace RBX {
 
@@ -50,7 +49,7 @@ void SafeChat::loadChildren(ChatOption* parent, XmlElement* element)
 		 child = element->findNextChildWithSameTag(child)) {
 		std::string text;
 		child->getValue(text);
-		boost::algorithm::trim(text);
+		trim(text);
 
 		ChatOption* option = new ChatOption(text);
 		parent->children.push_back(option);
@@ -63,7 +62,7 @@ std::string SafeChat::getMessage(std::vector<std::string> path)
 	ChatOption* option = chatRoot.get();
 
 	for (unsigned int i = 1; i < path.size(); i++) {
-		int index = boost::lexical_cast<int>(path[i]);
+		int index = lexicalCast<int>(path[i]);
 
 		if (index >= option->children.size()) {
 			return "";
@@ -80,7 +79,7 @@ void SafeChat::loadChatTree()
 	std::string fileName = FUN_00660930();
 	std::ifstream stream(fileName.c_str(), std::ios_base::in | std::ios_base::binary);
 	TextXmlParser parser(stream.rdbuf());
-	std::auto_ptr<XmlElement> root = parser.parse();
+	std::unique_ptr<XmlElement> root = parser.parse();
 
 	chatRoot.reset(new ChatOption());
 	chatRoot->text = "ROOT";
@@ -99,7 +98,7 @@ static void SafeChat_singleton()
 
 SafeChat& SafeChat::singleton()
 {
-	boost::call_once(SafeChat_singleton, once_SafeChat_singleton);
+	std::call_once(once_SafeChat_singleton, SafeChat_singleton);
 	return *sing;
 }
 

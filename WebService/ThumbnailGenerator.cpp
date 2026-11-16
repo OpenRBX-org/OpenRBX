@@ -22,40 +22,14 @@
 #include <GL/osmesa.h>
 #include <GLG3D/GWindow.h>
 #include <GLG3D/RenderDevice.h>
-#include <boost/thread/mutex.hpp>
-#include <boost/thread/once.hpp>
-#include <boost/thread/thread.hpp>
-#include <boost/thread/xtime.hpp>
 #include <memory>
+#include <mutex>
 #include <sstream>
 #include <stdexcept>
 
 const char sThumbnailGenerator[] = "ThumbnailGenerator";
 
-template <class T>
-class StaticMutex
-{
-	static boost::once_flag initFlag;
-	static boost::mutex* m;
-
-	static void init()
-	{
-		static boost::mutex _m;
-		m = &_m;
-	}
-
-public:
-	static boost::mutex& get()
-	{
-		boost::call_once(init, initFlag);
-		return *m;
-	}
-};
-
-template <class T>
-boost::once_flag StaticMutex<T>::initFlag = BOOST_ONCE_INIT;
-template <class T>
-boost::mutex* StaticMutex<T>::m;
+static std::mutex osContextMutex;
 
 static RBX::Reflection::BoundFuncDesc<ThumbnailGenerator, std::string(std::string, int, int, bool), 4> clickFunction(
 	&ThumbnailGenerator::click,
@@ -203,9 +177,7 @@ public:
 static void waitForContent()
 {
 	while (!RBX::ContentProvider::singleton().isRequestQueueEmpty()) {
-		boost::xtime xt;
-		boost::xtime_get(&xt, boost::TIME_UTC_);
-		boost::thread::sleep(xt);
+		Sleep(0);
 	}
 }
 
@@ -230,7 +202,7 @@ std::string ThumbnailGenerator::clickTexture(std::string textureId, std::string 
 
 		OSContext context(cx, cy, true);
 
-		boost::mutex::scoped_lock lock(StaticMutex<OSContext>::get());
+		std::lock_guard<std::mutex> lock(osContextMutex);
 
 		context.makeCurrent();
 
@@ -345,7 +317,7 @@ void ThumbnailGenerator::doClick(std::string fileType, int cx, int cy, bool hide
 
 	OSContext context(cx, cy, alphaChannel);
 
-	boost::mutex::scoped_lock lock(StaticMutex<OSContext>::get());
+	std::lock_guard<std::mutex> lock(osContextMutex);
 
 	context.makeCurrent();
 
@@ -355,7 +327,7 @@ void ThumbnailGenerator::doClick(std::string fileType, int cx, int cy, bool hide
 	G3D::RenderDevice renderDevice;
 	renderDevice.init(&context);
 
-	std::auto_ptr<RBX::ViewBase> rbxView(
+	std::unique_ptr<RBX::ViewBase> rbxView(
 		new RBX::View::View(RBX::shared_from(static_cast<RBX::DataModel*>(getParent())))
 	);
 
@@ -440,13 +412,13 @@ template const RBX::FactoryProduct<RBX::LocalScript, RBX::Script, RBX::sLocalScr
 
 template RBX::Lighting* RBX::ServiceProvider::find<RBX::Lighting>() const;
 
-template boost::shared_ptr<RBX::Instance>::~shared_ptr();
-template boost::shared_ptr<RBX::ModelInstance>::~shared_ptr();
-template boost::shared_ptr<RBX::Selection>::~shared_ptr();
-template boost::shared_ptr<RBX::RunService>::~shared_ptr();
-template boost::shared_ptr<RBX::Script>::~shared_ptr();
-template boost::shared_ptr<RBX::ScriptContext>::~shared_ptr();
-template boost::shared_ptr<RBX::Lighting>::~shared_ptr();
+template std::shared_ptr<RBX::Instance>::~shared_ptr();
+template std::shared_ptr<RBX::ModelInstance>::~shared_ptr();
+template std::shared_ptr<RBX::Selection>::~shared_ptr();
+template std::shared_ptr<RBX::RunService>::~shared_ptr();
+template std::shared_ptr<RBX::Script>::~shared_ptr();
+template std::shared_ptr<RBX::ScriptContext>::~shared_ptr();
+template std::shared_ptr<RBX::Lighting>::~shared_ptr();
 
 template G3D::ReferenceCountedPointer<G3D::Texture>::~ReferenceCountedPointer();
 template G3D::ReferenceCountedPointer<RBX::TextureProxyBase>::~ReferenceCountedPointer();

@@ -11,7 +11,7 @@
 namespace RBX {
 namespace LDraw2Lua {
 
-static std::auto_ptr<LDraw2RobloxMapRoot> g_unk0x0095535c;
+static std::unique_ptr<LDraw2RobloxMapRoot> g_unk0x0095535c;
 
 LDrawParser::~LDrawParser()
 {

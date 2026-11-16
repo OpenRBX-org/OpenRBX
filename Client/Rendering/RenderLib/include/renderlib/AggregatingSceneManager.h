@@ -6,7 +6,6 @@
 #include "renderlib/RenderScene.h"
 
 #include <G3D/ReferenceCount.h>
-#include <boost/noncopyable.hpp>
 #include <map>
 #include <set>
 #include <vector>
@@ -33,9 +32,13 @@ public:
 		bool operator<(const BucketKey& that) const;
 	};
 
-	class Bucket : public G3D::ReferenceCountedObject, public boost::noncopyable
+	class Bucket : public G3D::ReferenceCountedObject
 	{
 	public:
+		Bucket() = default;
+		Bucket(const Bucket&) = delete;
+		Bucket& operator=(const Bucket&) = delete;
+
 		bool dequeueSleepingChunk(const G3D::ReferenceCountedPointer<Chunk>& chunk);
 		void addToQueue(const G3D::ReferenceCountedPointer<Chunk>& chunk);
 		void clear() { queue.clear(); }

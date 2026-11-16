@@ -2,14 +2,12 @@
 #define LUAHTMLVIEW_H
 
 #include "SecureHtmlView.h"
+#include "util/Signals.h"
 
 #include <atlbase.h>
 #include <atlcom.h>
-#include <boost/enable_shared_from_this.hpp>
-#include <boost/noncopyable.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/signals/connection.hpp>
 #include <list>
+#include <memory>
 #include <mshtml.h>
 #include <string>
 
@@ -31,14 +29,17 @@ class CLuaHtmlView : public CSecureHtmlView
 	DECLARE_DYNCREATE(CLuaHtmlView)
 
 public:
-	class Binder : public boost::enable_shared_from_this<Binder>, public boost::noncopyable
+	class Binder : public std::enable_shared_from_this<Binder>
 	{
 	public:
+		Binder(const Binder&) = delete;
+		Binder& operator=(const Binder&) = delete;
+
 		class PropBinding
 		{
 		public:
 			PropBinding(
-				boost::shared_ptr<RBX::Instance> instance,
+				std::shared_ptr<RBX::Instance> instance,
 				const RBX::Reflection::PropertyDescriptor* descriptor,
 				Binder* binder
 			);
@@ -47,9 +48,9 @@ public:
 			std::string FUN_0042d810();
 
 		private:
-			boost::shared_ptr<RBX::Instance> m_unk0x00;
+			std::shared_ptr<RBX::Instance> m_unk0x00;
 			const RBX::Reflection::PropertyDescriptor* m_unk0x08;
-			boost::signals::scoped_connection m_unk0x0c;
+			RBX::Signals::ScopedConnection m_unk0x0c;
 		};
 
 		Binder(IHTMLInputElement* element);
@@ -59,13 +60,13 @@ public:
 		bool FUN_0042f6e0();
 		void FUN_00430750();
 		void FUN_00430b30(
-			boost::shared_ptr<RBX::Instance> instance, const RBX::Reflection::PropertyDescriptor* descriptor
+			std::shared_ptr<RBX::Instance> instance, const RBX::Reflection::PropertyDescriptor* descriptor
 		);
 
 	private:
 		friend class CLuaHtmlView;
 
-		std::list<boost::shared_ptr<PropBinding> > m_unk0x0c;
+		std::list<std::shared_ptr<PropBinding> > m_unk0x0c;
 		bool m_unk0x18;
 		CComPtr<EventHandler> m_unk0x1c;
 		CComPtr<IHTMLInputElement> m_unk0x20;
@@ -85,10 +86,10 @@ public:
 
 	void FUN_0042d640();
 	void FUN_0042e330(LPCTSTR html);
-	void FUN_0042f1b0(boost::shared_ptr<DHTMLWindow> window);
+	void FUN_0042f1b0(std::shared_ptr<DHTMLWindow> window);
 	void FUN_0042f370();
 	void FUN_00430c90(
-		boost::shared_ptr<RBX::Instance> instance, const RBX::Reflection::PropertyDescriptor* descriptor, LPCTSTR name
+		std::shared_ptr<RBX::Instance> instance, const RBX::Reflection::PropertyDescriptor* descriptor, LPCTSTR name
 	);
 
 protected:
@@ -103,9 +104,9 @@ private:
 
 	CComPtr<IDispatch> m_unk0xf4;
 	CComObjectNoLock<CLuaFunction>* m_unk0xf8;
-	boost::shared_ptr<RBX::DataModel> m_unk0xfc;
-	boost::shared_ptr<DHTMLWindow> m_unk0x104;
-	std::list<boost::shared_ptr<Binder> > m_unk0x10c;
+	std::shared_ptr<RBX::DataModel> m_unk0xfc;
+	std::shared_ptr<DHTMLWindow> m_unk0x104;
+	std::list<std::shared_ptr<Binder> > m_unk0x10c;
 };
 
 #endif // LUAHTMLVIEW_H

@@ -10,7 +10,7 @@
 #include "v8tree/Instance.h"
 
 #include <G3D/format.h>
-#include <boost/any.hpp>
+#include <any>
 #include <lua.h>
 #include <stdexcept>
 #include <string.h>
@@ -23,7 +23,7 @@ class WaitScriptSlot : public RBX::Script::Slot
 public:
 	WaitScriptSlot(lua_State* L);
 
-	void operator()(const std::vector<boost::any>& arguments);
+	void operator()(const std::vector<std::any>& arguments);
 
 private:
 	RBX::Lua::ThreadRef waitThread;
@@ -34,7 +34,7 @@ class FunctionScriptSlot : public RBX::Script::Slot
 public:
 	FunctionScriptSlot(lua_State* L, int index);
 
-	void operator()(const std::vector<boost::any>& arguments);
+	void operator()(const std::vector<std::any>& arguments);
 
 private:
 	RBX::ScriptContext& context;
@@ -47,26 +47,24 @@ namespace RBX {
 namespace Lua {
 
 template <>
-const char* Bridge<boost::signals::connection, 1>::className = "RBXScriptConnection";
+const char* Bridge<Signals::Connection, 1>::className = "RBXScriptConnection";
 
 template <>
-const char* Bridge<boost::shared_ptr<RBX::Reflection::SignalInstance>, 0>::className = "RBXScriptSignal";
+const char* Bridge<std::shared_ptr<RBX::Reflection::SignalInstance>, 0>::className = "RBXScriptSignal";
 
-template boost::signals::connection* Bridge<boost::signals::connection, 1>::pushNewObject<boost::signals::connection>(
-	lua_State* L, boost::signals::connection value
+template Signals::Connection* Bridge<Signals::Connection, 1>::pushNewObject<Signals::Connection>(
+	lua_State* L, Signals::Connection value
 );
 
 template <>
-void Bridge<boost::signals::connection, 1>::on_newindex(
-	boost::signals::connection& value, const char* name, lua_State* L
-)
+void Bridge<Signals::Connection, 1>::on_newindex(Signals::Connection& value, const char* name, lua_State* L)
 {
 	throw std::runtime_error(G3D::format("%s cannot be assigned to", name));
 }
 
 template <>
-void Bridge<boost::shared_ptr<RBX::Reflection::SignalInstance>, 0>::on_newindex(
-	boost::shared_ptr<RBX::Reflection::SignalInstance>& value, const char* name, lua_State* L
+void Bridge<std::shared_ptr<RBX::Reflection::SignalInstance>, 0>::on_newindex(
+	std::shared_ptr<RBX::Reflection::SignalInstance>& value, const char* name, lua_State* L
 )
 {
 	if (value.get() == NULL) {
@@ -83,9 +81,7 @@ int SignalConnectionBridge::disconnect(lua_State* L)
 }
 
 template <>
-int Bridge<boost::signals::connection, 1>::on_index(
-	const boost::signals::connection& value, const char* name, lua_State* L
-)
+int Bridge<Signals::Connection, 1>::on_index(const Signals::Connection& value, const char* name, lua_State* L)
 {
 	if (strcmp(name, "disconnect") == 0) {
 		lua_pushcclosure(L, SignalConnectionBridge::disconnect, 0);
@@ -103,43 +99,41 @@ int Bridge<boost::signals::connection, 1>::on_index(
 } // namespace Lua
 } // namespace RBX
 
-static unsigned int pushArgs(lua_State* L, const std::vector<boost::any>& arguments)
+static unsigned int pushArgs(lua_State* L, const std::vector<std::any>& arguments)
 {
-	for (std::vector<boost::any>::const_iterator iter = arguments.begin(), end = arguments.end(); iter != end; ++iter) {
+	for (std::vector<std::any>::const_iterator iter = arguments.begin(), end = arguments.end(); iter != end; ++iter) {
 		const std::type_info& type = iter->type();
 
 		if (type == typeid(std::string)) {
-			lua_pushstring(L, boost::any_cast<std::string>(*iter).c_str());
+			lua_pushstring(L, std::any_cast<std::string>(*iter).c_str());
 		}
 		else if (type == typeid(int)) {
-			lua_pushinteger(L, boost::any_cast<int>(*iter));
+			lua_pushinteger(L, std::any_cast<int>(*iter));
 		}
 		else if (type == typeid(unsigned int)) {
-			lua_pushinteger(L, boost::any_cast<unsigned int>(*iter));
+			lua_pushinteger(L, std::any_cast<unsigned int>(*iter));
 		}
 		else if (type == typeid(float)) {
-			lua_pushnumber(L, boost::any_cast<float>(*iter));
+			lua_pushnumber(L, std::any_cast<float>(*iter));
 		}
 		else if (type == typeid(double)) {
-			lua_pushnumber(L, boost::any_cast<double>(*iter));
+			lua_pushnumber(L, std::any_cast<double>(*iter));
 		}
 		else if (type == typeid(bool)) {
-			lua_pushboolean(L, boost::any_cast<bool>(*iter));
+			lua_pushboolean(L, std::any_cast<bool>(*iter));
 		}
-		else if (type == typeid(boost::shared_ptr<RBX::Instance>)) {
+		else if (type == typeid(std::shared_ptr<RBX::Instance>)) {
 			RBX::Lua::SharedPtrBridge<RBX::Reflection::DescribedBase>::push(
-				L, boost::any_cast<boost::shared_ptr<RBX::Instance> >(*iter)
+				L, std::any_cast<std::shared_ptr<RBX::Instance> >(*iter)
 			);
 		}
 		else if (type == typeid(const RBX::Reflection::PropertyDescriptor*)) {
-			lua_pushstring(L, boost::any_cast<const RBX::Reflection::PropertyDescriptor*>(*iter)->name.name.c_str());
+			lua_pushstring(L, std::any_cast<const RBX::Reflection::PropertyDescriptor*>(*iter)->name.name.c_str());
 		}
 		else if (type == typeid(const char*)) {
-			lua_pushstring(L, boost::any_cast<const char*>(*iter));
+			lua_pushstring(L, std::any_cast<const char*>(*iter));
 		}
 		else {
-			type.name();
-
 			lua_pushnil(L);
 		}
 	}
@@ -147,7 +141,7 @@ static unsigned int pushArgs(lua_State* L, const std::vector<boost::any>& argume
 	return arguments.size();
 }
 
-void WaitScriptSlot::operator()(const std::vector<boost::any>& arguments)
+void WaitScriptSlot::operator()(const std::vector<std::any>& arguments)
 {
 	cnction->disconnect();
 
@@ -162,7 +156,7 @@ void WaitScriptSlot::operator()(const std::vector<boost::any>& arguments)
 	}
 }
 
-void FunctionScriptSlot::operator()(const std::vector<boost::any>& arguments)
+void FunctionScriptSlot::operator()(const std::vector<std::any>& arguments)
 {
 	bool reentrant = executionDepth > 0;
 	RBX::ScopedAssign<int> assign(executionDepth, executionDepth + 1);
@@ -248,11 +242,11 @@ namespace Lua {
 int SignalBridge::wait(lua_State* L)
 {
 	{
-		boost::shared_ptr<RBX::Reflection::SignalInstance> si = getObject(L, 1);
+		std::shared_ptr<RBX::Reflection::SignalInstance> si = getObject(L, 1);
 
 		WaitScriptSlot slot(L);
 
-		*slot.cnction = si->connectGeneric(slot, boost::signals::at_front);
+		*slot.cnction = si->connectGeneric(slot, Signals::at_front);
 
 		RobloxExtraSpace::get(L)->yieldCaptured = true;
 	}
@@ -262,11 +256,11 @@ int SignalBridge::wait(lua_State* L)
 
 int SignalBridge::connect(lua_State* L)
 {
-	boost::shared_ptr<RBX::Reflection::SignalInstance> si = getObject(L, 1);
+	std::shared_ptr<RBX::Reflection::SignalInstance> si = getObject(L, 1);
 
 	FunctionScriptSlot slot(L, 2);
 
-	*slot.cnction = si->connectGeneric(slot, boost::signals::at_front);
+	*slot.cnction = si->connectGeneric(slot, Signals::at_front);
 
 	SignalConnectionBridge::pushNewObject(L, *slot.cnction);
 
@@ -274,8 +268,8 @@ int SignalBridge::connect(lua_State* L)
 }
 
 template <>
-int Bridge<boost::shared_ptr<RBX::Reflection::SignalInstance>, 0>::on_index(
-	const boost::shared_ptr<RBX::Reflection::SignalInstance>& value, const char* name, lua_State* L
+int Bridge<std::shared_ptr<RBX::Reflection::SignalInstance>, 0>::on_index(
+	const std::shared_ptr<RBX::Reflection::SignalInstance>& value, const char* name, lua_State* L
 )
 {
 	if (value.get() == NULL) {

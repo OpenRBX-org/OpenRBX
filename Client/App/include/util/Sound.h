@@ -10,9 +10,8 @@
 #include "v8tree/Instance.h"
 #include "v8tree/Service.h"
 
-#include <boost/noncopyable.hpp>
-#include <boost/shared_ptr.hpp>
 #include <map>
+#include <memory>
 #include <string>
 
 extern char sStockSound[];
@@ -45,9 +44,12 @@ public:
 	SoundId(const ContentId& id) : ContentId(id) {}
 };
 
-class Sound : private boost::noncopyable
+class Sound
 {
 public:
+	Sound(const Sound&) = delete;
+	Sound& operator=(const Sound&) = delete;
+
 	Sound(FMOD::System* system, SoundId id, bool is3D);
 	~Sound();
 
@@ -100,7 +102,7 @@ class SoundService : public DescribedCreatable<SoundService, Instance, sSoundSer
 					 public Listener<RunService, Heartbeat>
 {
 private:
-	typedef std::map<SoundType, boost::shared_ptr<SoundChannel> > StockSounds;
+	typedef std::map<SoundType, std::shared_ptr<SoundChannel> > StockSounds;
 
 	FMOD::System* system;
 	unsigned int fmod_version;
@@ -109,11 +111,11 @@ private:
 	float distancefactor;
 	float rolloffscale;
 
-	boost::shared_ptr<Instance> statsItem;
+	std::shared_ptr<Instance> statsItem;
 	ReverbType ambientReverb;
 	double nextGarbageCollectTime;
 
-	typedef std::map<SoundId, boost::shared_ptr<Sound> > LoadedSounds;
+	typedef std::map<SoundId, std::shared_ptr<Sound> > LoadedSounds;
 
 	LoadedSounds loadedSounds;
 	LoadedSounds loaded3DSounds;
@@ -123,7 +125,7 @@ private:
 public:
 	static bool soundDisabled;
 
-	boost::shared_ptr<Sound> loadSound(SoundId id, bool is3D);
+	std::shared_ptr<Sound> loadSound(SoundId id, bool is3D);
 
 	bool enabled() const { return system != NULL; }
 
@@ -222,7 +224,7 @@ public:
 	void onChannelEnd();
 
 private:
-	boost::shared_ptr<Sound> sound;
+	std::shared_ptr<Sound> sound;
 	FMOD::Channel* fmod_channel;
 	SoundId soundId;
 	float volume;

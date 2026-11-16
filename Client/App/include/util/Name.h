@@ -1,19 +1,20 @@
 #ifndef UTIL_NAME_H
 #define UTIL_NAME_H
 
-#include <boost/noncopyable.hpp>
-#include <boost/thread/mutex.hpp>
-#include <boost/thread/once.hpp>
 #include <map>
+#include <mutex>
 #include <string>
 
 namespace RBX {
 
-class Name : public boost::noncopyable
+class Name
 {
-	static boost::mutex& mutex();
+	static std::recursive_mutex& mutex();
 
 public:
+	Name(const Name&) = delete;
+	Name& operator=(const Name&) = delete;
+
 	static const Name& declare(const char* name, int dictionaryIndex);
 	static const Name& lookup(const std::string& name);
 	static const Name& lookup(const char* name);
@@ -27,15 +28,14 @@ private:
 	static std::map<int, Name*>& dictionary();
 
 	Name(const char* name, int dictionaryIndex);
-	Name& operator=(const Name& other);
 
 public:
 	template <const char* name>
 	static const Name& declare()
 	{
-		static boost::once_flag flag = BOOST_ONCE_INIT;
+		static std::once_flag flag;
 
-		boost::call_once(&callDoDeclare<name>, flag);
+		std::call_once(flag, &callDoDeclare<name>);
 
 		return doDeclare<name>();
 	}

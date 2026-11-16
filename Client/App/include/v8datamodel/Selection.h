@@ -9,9 +9,8 @@
 #include "v8world/Controller.h"
 
 #include <algorithm>
-#include <boost/bind.hpp>
-#include <boost/shared_ptr.hpp>
 #include <iterator>
+#include <memory>
 #include <vector>
 
 namespace RBX {
@@ -19,13 +18,13 @@ namespace RBX {
 class SelectionChanged
 {
 public:
-	const boost::shared_ptr<Instance> addedItem;
-	const boost::shared_ptr<Instance> removedItem;
+	const std::shared_ptr<Instance> addedItem;
+	const std::shared_ptr<Instance> removedItem;
 
 private:
 	friend class Selection;
 
-	SelectionChanged(boost::shared_ptr<Instance> addedItem, boost::shared_ptr<Instance> removedItem)
+	SelectionChanged(std::shared_ptr<Instance> addedItem, std::shared_ptr<Instance> removedItem)
 		: addedItem(addedItem), removedItem(removedItem)
 	{
 	}
@@ -51,10 +50,7 @@ public:
 
 	unsigned int size() const { return selection->size(); }
 
-	boost::shared_ptr<Instance> front() const
-	{
-		return size() > 0 ? selection->front() : boost::shared_ptr<Instance>();
-	}
+	std::shared_ptr<Instance> front() const { return size() > 0 ? selection->front() : std::shared_ptr<Instance>(); }
 
 	template <class _InIt>
 	void setSelection(_InIt _First, _InIt _Last)
@@ -65,24 +61,24 @@ public:
 		}
 	}
 
-	std::vector<boost::shared_ptr<Instance> >::const_iterator begin() const { return selection->begin(); }
+	std::vector<std::shared_ptr<Instance> >::const_iterator begin() const { return selection->begin(); }
 
-	std::vector<boost::shared_ptr<Instance> >::const_iterator end() const { return selection->end(); }
+	std::vector<std::shared_ptr<Instance> >::const_iterator end() const { return selection->end(); }
 
-	boost::shared_ptr<Instance> back() const { return size() > 0 ? selection->back() : boost::shared_ptr<Instance>(); }
+	std::shared_ptr<Instance> back() const { return size() > 0 ? selection->back() : std::shared_ptr<Instance>(); }
 
-	const CopyOnWrite<std::vector<boost::shared_ptr<Instance> > >& getSelection() const;
+	const CopyOnWrite<std::vector<std::shared_ptr<Instance> > >& getSelection() const;
 
 	void clearSelection();
 
-	boost::shared_ptr<const std::vector<boost::shared_ptr<Instance> > > getSelection2() { return selection.read(); }
-	void setSelection(boost::shared_ptr<const std::vector<boost::shared_ptr<Instance> > > selection)
+	std::shared_ptr<const std::vector<std::shared_ptr<Instance> > > getSelection2() { return selection.read(); }
+	void setSelection(std::shared_ptr<const std::vector<std::shared_ptr<Instance> > > selection)
 	{
 		setSelection(selection->begin(), selection->end());
 	}
 	void setSelection(Instance* instance);
 
-	void addToSelection(const boost::shared_ptr<Instance>& instance) { addToSelection(instance.get()); }
+	void addToSelection(const std::shared_ptr<Instance>& instance) { addToSelection(instance.get()); }
 	void addToSelection(Instance* instance);
 	void toggleSelection(Instance* instance);
 	void removeFromSelection(const Instance* instance);
@@ -92,8 +88,15 @@ public:
 		return std::find(selection->begin(), selection->end(), shared_from(instance)) != selection->end();
 	}
 
-	class AddIterator : public std::iterator<std::output_iterator_tag, void, void, void, void>
+	class AddIterator
 	{
+	public:
+		typedef std::output_iterator_tag iterator_category;
+		typedef void value_type;
+		typedef void difference_type;
+		typedef void pointer;
+		typedef void reference;
+
 	private:
 		Selection* selection;
 
@@ -112,8 +115,15 @@ public:
 		}
 	};
 
-	class RemoveIterator : public std::iterator<std::output_iterator_tag, void, void, void, void>
+	class RemoveIterator
 	{
+	public:
+		typedef std::output_iterator_tag iterator_category;
+		typedef void value_type;
+		typedef void difference_type;
+		typedef void pointer;
+		typedef void reference;
+
 	private:
 		Selection* selection;
 
@@ -132,8 +142,15 @@ public:
 		}
 	};
 
-	class ToggleIterator : public std::iterator<std::output_iterator_tag, void, void, void, void>
+	class ToggleIterator
 	{
+	public:
+		typedef std::output_iterator_tag iterator_category;
+		typedef void value_type;
+		typedef void difference_type;
+		typedef void pointer;
+		typedef void reference;
+
 	private:
 		Selection* selection;
 
@@ -158,10 +175,10 @@ public:
 	void removeFilteredSelection(ISelectionBase* fs);
 
 private:
-	void raiseAdded(boost::shared_ptr<Instance> instance);
-	void raiseRemoved(boost::shared_ptr<Instance> source);
+	void raiseAdded(std::shared_ptr<Instance> instance);
+	void raiseRemoved(std::shared_ptr<Instance> source);
 
-	CopyOnWrite<std::vector<boost::shared_ptr<Instance> > > selection;
+	CopyOnWrite<std::vector<std::shared_ptr<Instance> > > selection;
 	std::vector<ISelectionBase*> filteredSelections;
 };
 
@@ -211,7 +228,7 @@ protected:
 			rootSelection = shared_from(ServiceProvider::create<Selection>(event.newParent));
 
 			if (rootSelection) {
-				for (std::vector<boost::shared_ptr<Instance> >::const_iterator iter = rootSelection->begin();
+				for (std::vector<std::shared_ptr<Instance> >::const_iterator iter = rootSelection->begin();
 					 iter != rootSelection->end();
 					 ++iter) {
 					if (T* c = dynamic_cast<T*>(iter->get())) {
@@ -240,7 +257,7 @@ protected:
 	}
 
 private:
-	boost::shared_ptr<Selection> rootSelection;
+	std::shared_ptr<Selection> rootSelection;
 	std::vector<T*> filteredSelection;
 };
 

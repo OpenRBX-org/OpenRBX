@@ -12,8 +12,7 @@
 #include "v8tree/Service.h"
 #include "v8tree/Verb.h"
 
-#include <boost/scoped_ptr.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 class CRobloxView;
 
@@ -114,7 +113,7 @@ public:
 	virtual void OnBeginPrinting(CDC* pDC, CPrintInfo* pInfo);
 	virtual void OnEndPrinting(CDC* pDC, CPrintInfo* pInfo);
 
-	boost::shared_ptr<RBX::DataModel> FUN_00403290() const;
+	std::shared_ptr<RBX::DataModel> FUN_00403290() const;
 	void FUN_0045e900();
 	CRobloxView* FUN_004558a0() { return this; }
 
@@ -127,15 +126,15 @@ private:
 	friend class InsertModelFromRobloxVerb;
 
 	CRobloxWnd m_unk0x88;
-	boost::shared_ptr<RBX::DataModel> m_unk0x140;
+	std::shared_ptr<RBX::DataModel> m_unk0x140;
 	CMenu m_unk0x148;
 	CMultiPlayerPane m_unk0x150;
 	CWebToolbox* m_unk0x1a8;
-	boost::scoped_ptr<RBX::Verb> m_unk0x1ac;
-	boost::scoped_ptr<RBX::Verb> m_unk0x1b0;
-	boost::scoped_ptr<RBX::Verb> m_unk0x1b4;
-	boost::scoped_ptr<RBX::Verb> m_unk0x1b8;
-	boost::scoped_ptr<RBX::Verb> m_unk0x1bc;
+	std::unique_ptr<RBX::Verb> m_unk0x1ac;
+	std::unique_ptr<RBX::Verb> m_unk0x1b0;
+	std::unique_ptr<RBX::Verb> m_unk0x1b4;
+	std::unique_ptr<RBX::Verb> m_unk0x1b8;
+	std::unique_ptr<RBX::Verb> m_unk0x1bc;
 };
 
 #endif // ROBLOXVIEW_H

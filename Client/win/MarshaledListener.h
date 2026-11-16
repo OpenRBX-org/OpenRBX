@@ -5,7 +5,7 @@
 #include "util/Events.h"
 #include "util/object.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <vector>
 
 namespace RBX {
@@ -45,7 +45,7 @@ public:
 
 		void FUN_0045b7d0(const Source* source) { m_unk0x04 = shared_from(source); }
 
-		boost::shared_ptr<const Source> m_unk0x04;
+		std::shared_ptr<const Source> m_unk0x04;
 		MarshaledListener* m_unk0x0c;
 		Event m_unk0x10;
 	};

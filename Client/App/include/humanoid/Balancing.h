@@ -5,7 +5,7 @@
 #include "util/HitTestFilter.h"
 
 #include <G3D/Vector3.h>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace RBX {
 
@@ -32,7 +32,7 @@ protected:
 
 	G3D::Vector3 getYAxis() const;
 
-	boost::shared_ptr<PartInstance> floorPart;
+	std::shared_ptr<PartInstance> floorPart;
 	G3D::Vector3 floorTouchInWorld;
 
 public:

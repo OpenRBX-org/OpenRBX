@@ -11,15 +11,13 @@
 #include "util/object.h"
 #include "v8xml/XmlElement.h"
 
-#include <boost/enable_shared_from_this.hpp>
-#include <boost/noncopyable.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <string>
 #include <vector>
 
 namespace RBX {
 
-using boost::shared_ptr;
+using std::shared_ptr;
 
 class IReferenceBinder;
 class Instance;
@@ -28,7 +26,7 @@ class ServiceProvider;
 
 struct ChildAdded
 {
-	const boost::shared_ptr<Instance> child;
+	const std::shared_ptr<Instance> child;
 
 	ChildAdded(Instance* child);
 	ChildAdded(const ChildAdded& other);
@@ -39,7 +37,7 @@ private:
 
 struct ChildRemoved
 {
-	const boost::shared_ptr<Instance> child;
+	const std::shared_ptr<Instance> child;
 
 	ChildRemoved(Instance* child);
 	ChildRemoved(const ChildRemoved& other);
@@ -50,8 +48,8 @@ private:
 
 struct DescendentAdded
 {
-	const boost::shared_ptr<Instance> instance;
-	const boost::shared_ptr<Instance> parent;
+	const std::shared_ptr<Instance> instance;
+	const std::shared_ptr<Instance> parent;
 
 private:
 	friend class Instance;
@@ -64,10 +62,10 @@ private:
 
 struct DescendentRemoving
 {
-	const boost::shared_ptr<Instance> instance;
-	const boost::shared_ptr<Instance> parent;
+	const std::shared_ptr<Instance> instance;
+	const std::shared_ptr<Instance> parent;
 
-	DescendentRemoving(const boost::shared_ptr<Instance>& instance, const boost::shared_ptr<Instance>& parent)
+	DescendentRemoving(const std::shared_ptr<Instance>& instance, const std::shared_ptr<Instance>& parent)
 		: instance(instance), parent(parent)
 	{
 	}
@@ -104,7 +102,7 @@ private:
 
 extern const char sInstance[];
 
-class Instance : public boost::enable_shared_from_this<Instance>,
+class Instance : public std::enable_shared_from_this<Instance>,
 				 public GuidItem<Instance>,
 				 public AbstractFactoryProduct<Instance>,
 				 public Reflection::Described<Instance, sInstance, Reflection::DescribedBase>,
@@ -114,8 +112,7 @@ class Instance : public boost::enable_shared_from_this<Instance>,
 				 public Notifier<Instance, DescendentAdded>,
 				 public Notifier<Instance, DescendentRemoving>,
 				 public Notifier<Instance, AncestorChanged>,
-				 public Notifier<Instance, PropertyChanged>,
-				 public boost::noncopyable
+				 public Notifier<Instance, PropertyChanged>
 {
 protected:
 	Instance();
@@ -124,6 +121,9 @@ protected:
 	virtual ~Instance();
 
 public:
+	Instance(const Instance&) = delete;
+	Instance& operator=(const Instance&) = delete;
+
 	virtual void setName(const std::string& value);
 
 protected:
@@ -174,7 +174,7 @@ public:
 
 	void setParent(Instance* newParent);
 
-	void setParent2(boost::shared_ptr<Instance> instance) { setParent(instance.get()); }
+	void setParent2(std::shared_ptr<Instance> instance) { setParent(instance.get()); }
 	void promoteChildren();
 
 	Instance* getRootAncestor() { return parent != NULL ? parent->getRootAncestor() : this; }
@@ -193,11 +193,11 @@ public:
 
 	Instance* findFirstChildByName(const std::string& findName) const;
 	Instance* findFirstChildByNameRecursive(const std::string& findName) const;
-	boost::shared_ptr<Instance> findFirstChildByName2(std::string findName, bool recursive);
+	std::shared_ptr<Instance> findFirstChildByName2(std::string findName, bool recursive);
 
-	boost::shared_ptr<Instance> clone();
+	std::shared_ptr<Instance> clone();
 	static XmlElement* toNewXmlRoot(Instance* instance);
-	static boost::shared_ptr<Instance> fromXmlRoot(XmlElement* root);
+	static std::shared_ptr<Instance> fromXmlRoot(XmlElement* root);
 	void remove();
 
 	template <class T>
@@ -209,13 +209,13 @@ public:
 
 	const CopyOnWrite<std::vector<shared_ptr<Instance> > >& getChildren() const { return children; }
 
-	boost::shared_ptr<const std::vector<shared_ptr<Instance> > > getChildren2() { return children.read(); }
+	std::shared_ptr<const std::vector<shared_ptr<Instance> > > getChildren2() { return children.read(); }
 
 	template <class Func>
 	void for_eachChild(Func func) const
 	{
 		if (children) {
-			boost::shared_ptr<const std::vector<shared_ptr<Instance> > > c = children.read();
+			std::shared_ptr<const std::vector<shared_ptr<Instance> > > c = children.read();
 			std::vector<shared_ptr<Instance> >::const_iterator end = c->end();
 			for (std::vector<shared_ptr<Instance> >::const_iterator iter = c->begin(); iter != end; ++iter) {
 				func(iter->get());
@@ -227,7 +227,7 @@ public:
 	void visitDescendents(Func func) const
 	{
 		if (children) {
-			boost::shared_ptr<const std::vector<shared_ptr<Instance> > > c = children.read();
+			std::shared_ptr<const std::vector<shared_ptr<Instance> > > c = children.read();
 			std::vector<shared_ptr<Instance> >::const_iterator end = c->end();
 			for (std::vector<shared_ptr<Instance> >::const_iterator iter = c->begin(); iter != end; ++iter) {
 				func(*iter);
@@ -240,7 +240,7 @@ public:
 	void visitChildren(Func func) const
 	{
 		if (children) {
-			boost::shared_ptr<const std::vector<shared_ptr<Instance> > > c = children.read();
+			std::shared_ptr<const std::vector<shared_ptr<Instance> > > c = children.read();
 			std::vector<shared_ptr<Instance> >::const_iterator end = c->end();
 			for (std::vector<shared_ptr<Instance> >::const_iterator iter = c->begin(); iter != end; ++iter) {
 				func(*iter);
@@ -295,7 +295,7 @@ public:
 
 	bool contains(const Instance* instance) const;
 
-	bool canAddChild(const boost::shared_ptr<Instance>& instance) const;
+	bool canAddChild(const std::shared_ptr<Instance>& instance) const;
 
 	bool canAddChild(const Instance* instance) const
 	{
@@ -345,9 +345,9 @@ public:
 		return isAncestorOf(descendent);
 	}
 
-	bool isAncestorOf2(boost::shared_ptr<Instance> descendent) { return isAncestorOf(descendent.get()); }
+	bool isAncestorOf2(std::shared_ptr<Instance> descendent) { return isAncestorOf(descendent.get()); }
 
-	bool isDescendentOf2(boost::shared_ptr<Instance> ancestor) { return isDescendentOf(ancestor.get()); }
+	bool isDescendentOf2(std::shared_ptr<Instance> ancestor) { return isDescendentOf(ancestor.get()); }
 
 	bool isDescendentOf(const Instance* ancestor) const
 	{
@@ -377,7 +377,7 @@ private:
 
 	Association<Instance> assoc;
 	Instance* parent;
-	CopyOnWrite<std::vector<boost::shared_ptr<Instance> > > children;
+	CopyOnWrite<std::vector<std::shared_ptr<Instance> > > children;
 	std::string name;
 	bool archivable;
 };

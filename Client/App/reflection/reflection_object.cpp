@@ -26,7 +26,7 @@ ClassDescriptor::ClassDescriptor(ClassDescriptor& base, const char* name)
 	  MemberDescriptorContainer<SignalDescriptor>(&base), MemberDescriptorContainer<FunctionDescriptor>(&base),
 	  base(&base)
 {
-	boost::recursive_mutex::scoped_lock lock(sync());
+	std::lock_guard<std::recursive_mutex> lock(sync());
 
 	base.derivedClasses.push_back(this);
 }

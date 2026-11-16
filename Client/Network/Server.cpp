@@ -31,7 +31,7 @@ static Reflection::BoundFuncDesc<Server, int(), 0> f_GetClientCount(
 	&Server::getClientCount, "GetClientCount", Reflection::FunctionDescriptor::NeedTrustedCaller
 );
 
-Reflection::SignalDesc<Server, void(std::string, boost::shared_ptr<Instance>)> Server::event_IncommingConnection(
+Reflection::SignalDesc<Server, void(std::string, std::shared_ptr<Instance>)> Server::event_IncommingConnection(
 	"IncommingConnection", "peer", "replicator"
 );
 
@@ -40,7 +40,7 @@ void Server::ClientProxy::onSentMarker(long id)
 	sendPhysicsEnabled = true;
 }
 
-static bool isReplicator(boost::shared_ptr<Instance> instance)
+static bool isReplicator(std::shared_ptr<Instance> instance)
 {
 	return dynamic_cast<Replicator*>(instance.get()) != NULL;
 }
@@ -212,8 +212,7 @@ PluginReceiveResult Server::OnReceive(RakPeerInterface* peer, Packet* packet)
 		try {
 			StandardOut::singleton()->print(MESSAGE_INFO, "New connection from %s\n", packet->systemAddress.ToString());
 
-			boost::shared_ptr<ClientProxy> proxy =
-				Creatable<Instance>::create<ClientProxy>(packet->systemAddress, this);
+			std::shared_ptr<ClientProxy> proxy = Creatable<Instance>::create<ClientProxy>(packet->systemAddress, this);
 			proxy->setParent(this);
 			proxy->sendTop();
 

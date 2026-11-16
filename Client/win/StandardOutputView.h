@@ -4,8 +4,8 @@
 #include "OutputView.h"
 #include "util/StandardOut.h"
 
-#include <boost/thread/mutex.hpp>
 #include <deque>
+#include <mutex>
 
 class CStandardOutputView : public COutputView, public RBX::Listener<RBX::StandardOut, RBX::StandardOutMessage>
 {
@@ -26,7 +26,7 @@ protected:
 
 private:
 	std::deque<RBX::StandardOutMessage> m_unk0x114;
-	boost::mutex m_unk0x128;
+	std::mutex m_unk0x128;
 };
 
 #endif // STANDARDOUTPUTVIEW_H

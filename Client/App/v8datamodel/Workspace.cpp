@@ -31,8 +31,6 @@
 #include "v8xml/XmlElement.h"
 #include "v8xml/XmlSerializer.h"
 
-#include <boost/bind.hpp>
-
 namespace RBX {
 
 char sWorkspace[] = "Workspace";
@@ -41,20 +39,18 @@ bool Workspace::showWorldCoord;
 bool Workspace::showHashGrid;
 
 static Reflection::
-	BoundFuncDesc<Workspace, boost::shared_ptr<const std::vector<boost::shared_ptr<Instance> > >(ContentId), 1>
+	BoundFuncDesc<Workspace, std::shared_ptr<const std::vector<std::shared_ptr<Instance> > >(ContentId), 1>
 		workspace_insertContent(
 			&Workspace::insertContent, "InsertContent", "url", Reflection::FunctionDescriptor::NeedTrustedCaller
 		);
-static Reflection::
-	BoundFuncDesc<Workspace, void(boost::shared_ptr<const std::vector<boost::shared_ptr<Instance> > >), 1>
-		workspace_makeJoints(
-			&Workspace::makeJoints, "MakeJoints", "objects", Reflection::FunctionDescriptor::NeedTrustedCaller
-		);
-static Reflection::
-	BoundFuncDesc<Workspace, void(boost::shared_ptr<const std::vector<boost::shared_ptr<Instance> > >), 1>
-		workspace_breakJoints(
-			&Workspace::breakJoints, "BreakJoints", "objects", Reflection::FunctionDescriptor::NeedTrustedCaller
-		);
+static Reflection::BoundFuncDesc<Workspace, void(std::shared_ptr<const std::vector<std::shared_ptr<Instance> > >), 1>
+	workspace_makeJoints(
+		&Workspace::makeJoints, "MakeJoints", "objects", Reflection::FunctionDescriptor::NeedTrustedCaller
+	);
+static Reflection::BoundFuncDesc<Workspace, void(std::shared_ptr<const std::vector<std::shared_ptr<Instance> > >), 1>
+	workspace_breakJoints(
+		&Workspace::breakJoints, "BreakJoints", "objects", Reflection::FunctionDescriptor::NeedTrustedCaller
+	);
 static Reflection::BoundFuncDesc<Workspace, void(bool), 1> workspace_SetThrottleEnabled(
 	&Workspace::setThrottleEnabled,
 	"SetPhysicsThrottleEnabled",
@@ -126,7 +122,7 @@ World* Workspace::getMyWorldFast(const Instance* context)
 }
 
 void Workspace::insertItems(
-	XmlElement* root, std::vector<boost::shared_ptr<Instance> >& items, InsertMode insertMode, PromptMode promptMode
+	XmlElement* root, std::vector<std::shared_ptr<Instance> >& items, InsertMode insertMode, PromptMode promptMode
 )
 {
 	SerializerV2().loadInstances(root, items);
@@ -148,7 +144,7 @@ void Workspace::render2d(Adorn* adorn)
 	render2dItems(adorn);
 }
 
-static void DrawAdorn(boost::shared_ptr<Instance> wsi, Adorn* adorn, SelectState selectState, Workspace* workspace)
+static void DrawAdorn(std::shared_ptr<Instance> wsi, Adorn* adorn, SelectState selectState, Workspace* workspace)
 {
 	if (IRenderable* renderable = dynamic_cast<IRenderable*>(wsi.get())) {
 		if (workspace->contains(wsi.get())) {
@@ -222,7 +218,7 @@ static void wrapper(Instance* instance)
 Camera* Workspace::getCamera() const
 {
 	if (!currentCamera || !currentCamera->isDescendentOf(this)) {
-		boost::shared_ptr<Camera> newCam = Creatable<Instance>::create<Camera>();
+		std::shared_ptr<Camera> newCam = Creatable<Instance>::create<Camera>();
 		Workspace* workspace = const_cast<Workspace*>(this);
 		newCam->setParent(workspace);
 		const_cast<Workspace*>(this)->currentCamera = newCam;
@@ -237,7 +233,7 @@ void Workspace::onChildChanged(Instance* instance, const PropertyChanged& event)
 	raiseDrawChanged();
 }
 
-void Workspace::onDescendentRemoving(const boost::shared_ptr<Instance>& instance)
+void Workspace::onDescendentRemoving(const std::shared_ptr<Instance>& instance)
 {
 	if (IRenderable* renderable = dynamic_cast<IRenderable*>(instance.get())) {
 		onRemoving(renderable);
@@ -268,28 +264,28 @@ void Workspace::onDescendentAdded(Instance* instance)
 }
 
 template <int i>
-static void wrapper2(boost::shared_ptr<Instance> instance)
+static void wrapper2(std::shared_ptr<Instance> instance)
 {
 	wrapper<i>(instance.get());
 }
 
-void Workspace::makeJoints(boost::shared_ptr<const std::vector<boost::shared_ptr<Instance> > > instances)
+void Workspace::makeJoints(std::shared_ptr<const std::vector<std::shared_ptr<Instance> > > instances)
 {
 	std::for_each(instances->begin(), instances->end(), wrapper2<1>);
 }
 
-void Workspace::breakJoints(boost::shared_ptr<const std::vector<boost::shared_ptr<Instance> > > instances)
+void Workspace::breakJoints(std::shared_ptr<const std::vector<std::shared_ptr<Instance> > > instances)
 {
 	std::for_each(instances->begin(), instances->end(), wrapper2<0>);
 }
 
-void clearEmptiedModels(boost::shared_ptr<Instance> test, Instance* workspace)
+void clearEmptiedModels(std::shared_ptr<Instance> test, Instance* workspace)
 {
 	if (test.get() != workspace) {
 		if (ModelInstance* model = dynamic_cast<ModelInstance*>(test.get())) {
 			if (!Humanoid::modelIsCharacter(model)) {
 				if (!model->findFirstChildOfType<PartInstance>() && !model->findFirstChildOfType<ModelInstance>()) {
-					boost::shared_ptr<Instance> oldParent = shared_from(model->getParent());
+					std::shared_ptr<Instance> oldParent = shared_from(model->getParent());
 					model->setParent(NULL);
 					clearEmptiedModels(oldParent, workspace);
 				}
@@ -298,7 +294,7 @@ void clearEmptiedModels(boost::shared_ptr<Instance> test, Instance* workspace)
 
 		if (Flag* flag = dynamic_cast<Flag*>(test.get())) {
 			if (!flag->findFirstChildOfType<PartInstance>()) {
-				boost::shared_ptr<Instance> oldParent = shared_from(flag->getParent());
+				std::shared_ptr<Instance> oldParent = shared_from(flag->getParent());
 				flag->setParent(NULL);
 				clearEmptiedModels(oldParent, workspace);
 			}
@@ -306,11 +302,11 @@ void clearEmptiedModels(boost::shared_ptr<Instance> test, Instance* workspace)
 	}
 }
 
-void Workspace::handleFallenParts(const G3D::Array<boost::shared_ptr<PartInstance> >& fallenParts)
+void Workspace::handleFallenParts(const G3D::Array<std::shared_ptr<PartInstance> >& fallenParts)
 {
 	for (int i = 0; i < fallenParts.size(); ++i) {
-		boost::shared_ptr<PartInstance> part = fallenParts[i];
-		boost::shared_ptr<Instance> oldParent = shared_from(part->getParent());
+		std::shared_ptr<PartInstance> part = fallenParts[i];
+		std::shared_ptr<Instance> oldParent = shared_from(part->getParent());
 		part->setParent(NULL);
 		clearEmptiedModels(oldParent, this);
 	}
@@ -430,10 +426,10 @@ float Workspace::step(float timeInterval)
 {
 	timeInterval = world->step(timeInterval);
 
-	G3D::Array<boost::shared_ptr<PartInstance> > touchParts;
-	G3D::Array<boost::shared_ptr<PartInstance> > touchOtherParts;
+	G3D::Array<std::shared_ptr<PartInstance> > touchParts;
+	G3D::Array<std::shared_ptr<PartInstance> > touchOtherParts;
 	G3D::Array<Primitive*> fallen;
-	G3D::Array<boost::shared_ptr<PartInstance> > fallenParts;
+	G3D::Array<std::shared_ptr<PartInstance> > fallenParts;
 
 	PartInstance::primitivesToParts(world->getTouch(), touchParts);
 	PartInstance::primitivesToParts(world->getTouchOther(), touchOtherParts);
@@ -545,13 +541,13 @@ void Workspace::setImageServerView(const G3D::Rect2D& viewPortRect)
 }
 
 void Workspace::insertContent(
-	ContentId contentId, std::vector<boost::shared_ptr<Instance> >& items, InsertMode insertMode, PromptMode promptMode
+	ContentId contentId, std::vector<std::shared_ptr<Instance> >& items, InsertMode insertMode, PromptMode promptMode
 )
 {
-	std::auto_ptr<std::istream> stream = ContentProvider::singleton().getContent(contentId);
+	std::unique_ptr<std::istream> stream = ContentProvider::singleton().getContent(contentId);
 
 	TextXmlParser machine(stream->rdbuf());
-	std::auto_ptr<XmlElement> root = machine.parse();
+	std::unique_ptr<XmlElement> root = machine.parse();
 
 	SerializerV2().loadInstances(root.get(), items);
 	if (items.size() > 0) {
@@ -559,7 +555,7 @@ void Workspace::insertContent(
 	}
 }
 
-static void append(const boost::shared_ptr<Instance>& item, std::vector<boost::shared_ptr<Instance> >* values)
+static void append(const std::shared_ptr<Instance>& item, std::vector<std::shared_ptr<Instance> >* values)
 {
 	values->push_back(item);
 }
@@ -570,7 +566,7 @@ void Workspace::start()
 	getCamera()->alwaysMode();
 
 	if (scriptContext) {
-		std::vector<boost::shared_ptr<Script> > startScripts;
+		std::vector<std::shared_ptr<Script> > startScripts;
 
 		std::set<Script*>::const_iterator iter = pendingScripts.begin();
 		std::set<Script*>::const_iterator end = pendingScripts.end();
@@ -584,7 +580,9 @@ void Workspace::start()
 		std::for_each(
 			startScripts.begin(),
 			startScripts.end(),
-			boost::bind(&ScriptContext::addScript, scriptContext, boost::bind(&boost::shared_ptr<Script>::get, _1))
+			[scriptContext = scriptContext](const std::shared_ptr<Script>& script) {
+				scriptContext->addScript(script.get());
+			}
 		);
 	}
 }
@@ -597,16 +595,16 @@ void Workspace::setCursor(Adorn* adorn)
 	}
 }
 
-boost::shared_ptr<const std::vector<boost::shared_ptr<Instance> > > Workspace::insertContent(ContentId contentId)
+std::shared_ptr<const std::vector<std::shared_ptr<Instance> > > Workspace::insertContent(ContentId contentId)
 {
-	std::vector<boost::shared_ptr<Instance> > items;
+	std::vector<std::shared_ptr<Instance> > items;
 	insertContent(contentId, items, INSERT_TO_TREE, SUPPRESS_PROMPTS);
 
-	boost::shared_ptr<std::vector<boost::shared_ptr<Instance> > > values(
-		new std::vector<boost::shared_ptr<Instance> >()
-	);
+	std::shared_ptr<std::vector<std::shared_ptr<Instance> > > values(new std::vector<std::shared_ptr<Instance> >());
 
-	std::for_each(items.begin(), items.end(), boost::bind(&append, _1, values.get()));
+	std::for_each(items.begin(), items.end(), [&values](const std::shared_ptr<Instance>& item) {
+		append(item, values.get());
+	});
 	return values;
 }
 
@@ -628,7 +626,9 @@ void Workspace::render3dAdorn(Adorn* adorn)
 
 	ServiceClient<Selection> sel(this);
 	if (sel) {
-		std::for_each(sel->begin(), sel->end(), boost::bind(&DrawAdorn, _1, adorn, SELECT_NORMAL, this));
+		std::for_each(sel->begin(), sel->end(), [this, adorn](const std::shared_ptr<Instance>& wsi) {
+			DrawAdorn(wsi, adorn, SELECT_NORMAL, this);
+		});
 	}
 
 	render3dAdornItems(adorn);
@@ -685,7 +685,7 @@ WorkspaceStatsItem::WorkspaceStatsItem(const Workspace* workspace, const World* 
 {
 	setName("Workspace");
 
-	createChildItem<double>("FPS", boost::bind(&getFPS, workspace));
+	createChildItem<double>("FPS", [workspace] { return getFPS(workspace); });
 	createBoundChildItem(*workspace->profileRun);
 
 	Stats::Item* pWorkspaceStep = createBoundChildItem(*workspace->profileWorkspaceStep);
@@ -700,29 +700,29 @@ WorkspaceStatsItem::WorkspaceStatsItem(const Workspace* workspace, const World* 
 	pWorkspaceStep->createBoundChildItem(*workspace->profileRunServiceHeartbeat);
 
 	Stats::Item* worldItem = createChildItem("World");
-	worldItem->createChildItem<int>("Primitives", boost::bind(&World::getNumPrimitives, world));
-	worldItem->createChildItem<int>("Joints", boost::bind(&World::getNumJoints, world));
-	worldItem->createChildItem<int>("Contacts", boost::bind(&World::getNumContacts, world));
+	worldItem->createChildItem<int>("Primitives", [world] { return world->getNumPrimitives(); });
+	worldItem->createChildItem<int>("Joints", [world] { return world->getNumJoints(); });
+	worldItem->createChildItem<int>("Contacts", [world] { return world->getNumContacts(); });
 
 	Stats::Item* contacts = createChildItem("Contacts");
-	contacts->createChildItem<int>(
-		"CtctStageCtcts", boost::bind(&World::getMetric, world, IWorldStage::NUM_CONTACTSTAGE_CONTACTS)
-	);
-	contacts->createChildItem<int>(
-		"SteppingCtcts", boost::bind(&World::getMetric, world, IWorldStage::NUM_STEPPING_CONTACTS)
-	);
-	contacts->createChildItem<int>(
-		"TouchingCtcts", boost::bind(&World::getMetric, world, IWorldStage::NUM_TOUCHING_CONTACTS)
-	);
-	contacts->createChildItem<int>("MaxTreeDepth", boost::bind(&World::getMetric, world, IWorldStage::MAX_TREE_DEPTH));
-	contacts->createChildItem<int>("# link(p)", boost::bind(&World::getNumLinkCalls, world));
-	contacts->createChildItem<int>("Hash Nodes Out", boost::bind(&World::getNumHashNodes, world));
-	contacts->createChildItem<int>("Max Bucket Size", boost::bind(&World::getMaxBucketSize, world));
+	contacts->createChildItem<int>("CtctStageCtcts", [world] {
+		return world->getMetric(IWorldStage::NUM_CONTACTSTAGE_CONTACTS);
+	});
+	contacts->createChildItem<int>("SteppingCtcts", [world] {
+		return world->getMetric(IWorldStage::NUM_STEPPING_CONTACTS);
+	});
+	contacts->createChildItem<int>("TouchingCtcts", [world] {
+		return world->getMetric(IWorldStage::NUM_TOUCHING_CONTACTS);
+	});
+	contacts->createChildItem<int>("MaxTreeDepth", [world] { return world->getMetric(IWorldStage::MAX_TREE_DEPTH); });
+	contacts->createChildItem<int>("# link(p)", [world] { return world->getNumLinkCalls(); });
+	contacts->createChildItem<int>("Hash Nodes Out", [world] { return world->getNumHashNodes(); });
+	contacts->createChildItem<int>("Max Bucket Size", [world] { return world->getMaxBucketSize(); });
 
 	Stats::Item* kernel = createChildItem("Kernel");
-	kernel->createChildItem<int>("Bodies", boost::bind(&World::getNumBodies, world));
-	kernel->createChildItem<int>("Constraints", boost::bind(&World::getNumConstraints, world));
-	kernel->createChildItem<int>("Points", boost::bind(&World::getNumPoints, world));
+	kernel->createChildItem<int>("Bodies", [world] { return world->getNumBodies(); });
+	kernel->createChildItem<int>("Constraints", [world] { return world->getNumConstraints(); });
+	kernel->createChildItem<int>("Points", [world] { return world->getNumPoints(); });
 }
 
 void Workspace::onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider)

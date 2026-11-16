@@ -72,10 +72,6 @@ void PartDragTool::onMouseMove(const UIEvent& uiEvent)
 		}
 	}
 
-	if (dragging && megaDragger->mousePartAlive()) {
-		megaDragger->getMousePart().lock().get();
-	}
-
 	onMouseIdle(uiEvent);
 }
 

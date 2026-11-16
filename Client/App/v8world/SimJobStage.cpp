@@ -23,7 +23,9 @@ SimJobStage::SimJobStage(IStage* upstream, World* world) : IWorldStage(upstream,
 
 void SimJobStage::notifyMovingPrimitives()
 {
-	std::for_each(mechanisms.begin(), mechanisms.end(), std::mem_fun(&Mechanism::notifyMovingPrimitives));
+	std::for_each(mechanisms.begin(), mechanisms.end(), [](Mechanism* mechanism) {
+		mechanism->notifyMovingPrimitives();
+	});
 }
 
 void SimJobStage::destroyMechanism(Mechanism* m)

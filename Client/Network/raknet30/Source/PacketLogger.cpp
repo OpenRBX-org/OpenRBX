@@ -188,7 +188,7 @@ void PacketLogger::SetPrintAcks(bool print)
 {
 	printAcks=print;
 }
-char* PacketLogger::BaseIDTOString(unsigned char Id)
+const char* PacketLogger::BaseIDTOString(unsigned char Id)
 {
 	if (Id >= ID_USER_PACKET_ENUM)
         return 0;
@@ -273,22 +273,22 @@ char* PacketLogger::BaseIDTOString(unsigned char Id)
 
 	};
 
-	return (char*)IDTable[Id];
+	return IDTable[Id];
 }
 #ifdef _MSC_VER
 #pragma warning( disable : 4100 ) // warning C4100: <variable name> : unreferenced formal parameter
 #endif
-char* PacketLogger::UserIDTOString(unsigned char Id)
+const char* PacketLogger::UserIDTOString(unsigned char Id)
 {
 	// Users should override this
 	return "Unknown";
 }
-char* PacketLogger::IDTOString(unsigned char Id)
+const char* PacketLogger::IDTOString(unsigned char Id)
 {
-	char *out;
+	const char *out;
 	out=BaseIDTOString(Id);
 	if (out)
-		return (char*)out;
+		return out;
 	return UserIDTOString(Id);
 }
 void PacketLogger::SetPrefix(const char *_prefix)

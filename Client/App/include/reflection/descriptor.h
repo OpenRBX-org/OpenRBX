@@ -3,22 +3,24 @@
 
 #include "util/Name.h"
 
-#include <boost/noncopyable.hpp>
-#include <boost/thread/recursive_mutex.hpp>
+#include <mutex>
 
 namespace RBX {
 namespace Reflection {
 
-static boost::recursive_mutex& sync()
+static std::recursive_mutex& sync()
 {
-	static boost::recursive_mutex s;
+	static std::recursive_mutex s;
 
 	return s;
 }
 
-class Descriptor : public boost::noncopyable
+class Descriptor
 {
 public:
+	Descriptor(const Descriptor&) = delete;
+	Descriptor& operator=(const Descriptor&) = delete;
+
 	virtual ~Descriptor() {}
 
 	const Name& name;

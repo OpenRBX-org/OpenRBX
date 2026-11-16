@@ -3,6 +3,7 @@
 #include "util/FileSystem.h"
 #include "util/Http.h"
 #include "util/StandardOut.h"
+#include "util/Utilities.h"
 #include "v8xml/SerializerV2.h"
 #include "v8xml/XmlElement.h"
 #include "v8xml/XmlSerializer.h"
@@ -11,8 +12,7 @@
 #include <algorithm>
 #include <atlpath.h>
 #include <atlstr.h>
-#include <boost/bind.hpp>
-#include <boost/iostreams/copy.hpp>
+#include <chrono>
 #include <fstream>
 #include <istream>
 #include <shlobj.h>
@@ -153,7 +153,7 @@ MD5Hasher* MD5Hasher::create()
 
 bool ContentProvider::isRequestQueueEmpty()
 {
-	boost::mutex::scoped_lock lock(requestSync);
+	std::lock_guard<std::recursive_mutex> lock(requestSync);
 	return requestQueue.empty();
 }
 
@@ -188,13 +188,19 @@ const char* MD5HasherImpl::c_str()
 }
 
 ContentProvider::FailedUrl::FailedUrl(const char* url)
-	: url(url), expiration(boost::posix_time::second_clock::local_time() + boost::posix_time::minutes(5))
+	: url(url),
+	  expiration(std::chrono::floor<std::chrono::seconds>(std::chrono::steady_clock::now()) + std::chrono::minutes(5))
 {
+}
+
+bool ContentProvider::FailedUrl::expired() const
+{
+	return std::chrono::floor<std::chrono::seconds>(std::chrono::steady_clock::now()) >= expiration;
 }
 
 bool ContentProvider::isUrlBad(const char* url)
 {
-	boost::mutex::scoped_lock lock(requestSync);
+	std::lock_guard<std::recursive_mutex> lock(requestSync);
 	std::list<FailedUrl>::iterator end = failedUrls.end();
 	for (std::list<FailedUrl>::iterator iter = failedUrls.begin(); iter != end; ++iter) {
 		if (iter->expired()) {
@@ -244,7 +250,7 @@ ContentId ContentProvider::registerContent(std::istream& content, const Name& mi
 {
 	ContentId id;
 	{
-		boost::scoped_ptr<MD5Hasher> hasher(MD5Hasher::create());
+		std::unique_ptr<MD5Hasher> hasher(MD5Hasher::create());
 		hasher->addData(content);
 		id = ContentId(hasher->toString(), mimeType);
 	}
@@ -283,7 +289,7 @@ bool ContentProvider::registerFile(CachedContent* item)
 {
 	CachedContent temp;
 	{
-		boost::mutex::scoped_lock lock(contentCacheMutex);
+		std::lock_guard<std::mutex> lock(contentCacheMutex);
 		temp = *item;
 	}
 
@@ -297,7 +303,7 @@ bool ContentProvider::registerFile(CachedContent* item)
 
 		temp.filename.reset(new std::string(filename));
 
-		boost::mutex::scoped_lock lock(contentCacheMutex);
+		std::lock_guard<std::mutex> lock(contentCacheMutex);
 		*item = temp;
 	}
 
@@ -306,7 +312,7 @@ bool ContentProvider::registerFile(CachedContent* item)
 
 void ContentProvider::clearContentCache()
 {
-	boost::mutex::scoped_lock lock(contentCacheMutex);
+	std::lock_guard<std::mutex> lock(contentCacheMutex);
 	contentCache.clear();
 }
 
@@ -351,7 +357,7 @@ worker_thread::work_result ContentProvider::processRequests()
 {
 	ContentId id;
 	{
-		boost::mutex::scoped_lock lock(requestSync);
+		std::lock_guard<std::recursive_mutex> lock(requestSync);
 		if (requestQueue.empty()) {
 			return worker_thread::done;
 		}
@@ -359,17 +365,17 @@ worker_thread::work_result ContentProvider::processRequests()
 	}
 
 	try {
-		boost::shared_ptr<std::string> response(new std::string());
+		std::shared_ptr<std::string> response(new std::string());
 		try {
 			Http(id.toString()).get(*response);
 		}
 		catch (...) {
-			boost::mutex::scoped_lock lock(requestSync);
+			std::lock_guard<std::recursive_mutex> lock(requestSync);
 			failedUrls.push_front(id.c_str());
 			throw;
 		}
 
-		boost::mutex::scoped_lock lock(contentCacheMutex);
+		std::lock_guard<std::mutex> lock(contentCacheMutex);
 		contentCache[id].data = response;
 	}
 	catch (std::exception& e) {
@@ -377,7 +383,7 @@ worker_thread::work_result ContentProvider::processRequests()
 	}
 
 	{
-		boost::mutex::scoped_lock lock(requestSync);
+		std::lock_guard<std::recursive_mutex> lock(requestSync);
 		requestQueue.pop_front();
 	}
 
@@ -391,7 +397,7 @@ ContentProvider::CachedContent* ContentProvider::loadContent(ContentId id, HttpR
 	}
 
 	{
-		boost::mutex::scoped_lock lock(contentCacheMutex);
+		std::lock_guard<std::mutex> lock(contentCacheMutex);
 		ContentCache::iterator iter = contentCache.find(id);
 		if (iter != contentCache.end()) {
 			return &iter->second;
@@ -399,33 +405,33 @@ ContentProvider::CachedContent* ContentProvider::loadContent(ContentId id, HttpR
 	}
 
 	if (id.isFile()) {
-		boost::shared_ptr<const std::string> filename(new std::string(findFile(id)));
+		std::shared_ptr<const std::string> filename(new std::string(findFile(id)));
 		if (filename->empty()) {
 			return NULL;
 		}
 
-		boost::mutex::scoped_lock lock(contentCacheMutex);
+		std::lock_guard<std::mutex> lock(contentCacheMutex);
 		CachedContent& content = contentCache[id];
 		content.filename = filename;
 		return &content;
 	}
 
 	if (id.isAsset()) {
-		boost::shared_ptr<const std::string> filename(new std::string(findAsset(id)));
+		std::shared_ptr<const std::string> filename(new std::string(findAsset(id)));
 		if (filename->empty()) {
 			return NULL;
 		}
 
-		boost::mutex::scoped_lock lock(contentCacheMutex);
+		std::lock_guard<std::mutex> lock(contentCacheMutex);
 		CachedContent& content = contentCache[id];
 		content.filename = filename;
 		return &content;
 	}
 
 	{
-		boost::shared_ptr<const std::string> filename(new std::string(findHashFile(id)));
+		std::shared_ptr<const std::string> filename(new std::string(findHashFile(id)));
 		if (!filename->empty()) {
-			boost::mutex::scoped_lock lock(contentCacheMutex);
+			std::lock_guard<std::mutex> lock(contentCacheMutex);
 			CachedContent& content = contentCache[id];
 			content.filename = filename;
 			return &content;
@@ -435,7 +441,7 @@ ContentProvider::CachedContent* ContentProvider::loadContent(ContentId id, HttpR
 	if (id.isHttp()) {
 		switch (httpRequestType) {
 		case AsyncHttpRequest: {
-			boost::mutex::scoped_lock lock(requestSync);
+			std::lock_guard<std::recursive_mutex> lock(requestSync);
 			if (!isUrlBad(id.c_str())) {
 				if (std::find(requestQueue.begin(), requestQueue.end(), id) == requestQueue.end()) {
 					requestQueue.push_back(id);
@@ -445,17 +451,17 @@ ContentProvider::CachedContent* ContentProvider::loadContent(ContentId id, HttpR
 		} break;
 
 		case SyncHttpRequest: {
-			boost::shared_ptr<std::string> response(new std::string());
+			std::shared_ptr<std::string> response(new std::string());
 			try {
 				Http(id.toString()).get(*response);
 			}
 			catch (...) {
-				boost::mutex::scoped_lock lock(requestSync);
+				std::lock_guard<std::recursive_mutex> lock(requestSync);
 				failedUrls.push_front(id.c_str());
 				throw;
 			}
 
-			boost::mutex::scoped_lock lock(contentCacheMutex);
+			std::lock_guard<std::mutex> lock(contentCacheMutex);
 			CachedContent& content = contentCache[id];
 			content.data = response;
 			return &content;
@@ -476,7 +482,7 @@ std::string ContentProvider::getFile(ContentId ticket)
 	return *content->filename;
 }
 
-std::auto_ptr<std::istream> ContentProvider::getContent(ContentId ticket)
+std::unique_ptr<std::istream> ContentProvider::getContent(ContentId ticket)
 {
 	CachedContent* content = loadContent(ticket, SyncHttpRequest);
 	if (!content) {
@@ -484,11 +490,11 @@ std::auto_ptr<std::istream> ContentProvider::getContent(ContentId ticket)
 	}
 
 	if (content->data) {
-		return std::auto_ptr<std::istream>(new std::istringstream(*content->data));
+		return std::unique_ptr<std::istream>(new std::istringstream(*content->data));
 	}
 	else {
 		std::istream* stream = new std::ifstream(content->filename->c_str(), std::ios_base::in | std::ios_base::binary);
-		return std::auto_ptr<std::istream>(stream);
+		return std::unique_ptr<std::istream>(stream);
 	}
 }
 
@@ -522,20 +528,18 @@ bool ContentProvider::requestContentFile(ContentId id, std::string& filename)
 	return true;
 }
 
-boost::shared_ptr<const std::string> ContentProvider::requestContentString(ContentId id)
+std::shared_ptr<const std::string> ContentProvider::requestContentString(ContentId id)
 {
 	CachedContent* content = loadContent(id, AsyncHttpRequest);
 	if (!content) {
-		return boost::shared_ptr<const std::string>();
+		return std::shared_ptr<const std::string>();
 	}
 
-	boost::mutex::scoped_lock lock(contentCacheMutex);
+	std::lock_guard<std::mutex> lock(contentCacheMutex);
 	if (!content->data) {
 		std::ifstream stream(content->filename->c_str(), std::ios_base::in | std::ios_base::binary);
 
-		std::ostringstream data;
-		boost::iostreams::copy(stream, data);
-		content->data.reset(new std::string(data.str()));
+		content->data.reset(new std::string(readStream(stream)));
 	}
 	return content->data;
 }
@@ -565,12 +569,12 @@ ContentId ContentProvider::readContent(const char* id, std::istream& stream, uns
 	return result;
 }
 
-void ContentProvider::load(ContentId id, std::vector<boost::shared_ptr<Instance> >& instances)
+void ContentProvider::load(ContentId id, std::vector<std::shared_ptr<Instance> >& instances)
 {
-	boost::scoped_ptr<std::istream> stream(getContent(id));
+	std::unique_ptr<std::istream> stream(getContent(id));
 
 	TextXmlParser machine(stream->rdbuf());
-	boost::scoped_ptr<XmlElement> root(machine.parse());
+	std::unique_ptr<XmlElement> root(machine.parse());
 
 	SerializerV2().loadInstances(root.get(), instances);
 }
@@ -585,7 +589,7 @@ ContentProvider::ContentProvider()
 		StandardOut::singleton()->print(MESSAGE_WARNING, "Failed to get asset folder");
 	}
 
-	requestProcessor.reset(new worker_thread(boost::bind(&ContentProvider::processRequests, this), "rbx_content"));
+	requestProcessor.reset(new worker_thread([this] { return processRequests(); }, "rbx_content"));
 }
 
 } // namespace RBX

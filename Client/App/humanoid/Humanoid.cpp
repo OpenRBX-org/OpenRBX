@@ -24,8 +24,6 @@
 #include "v8world/World.h"
 
 #include <algorithm>
-#include <boost/bind.hpp>
-#include <boost/ref.hpp>
 #include <stdexcept>
 #include <vector>
 
@@ -89,7 +87,7 @@ static BoundFuncDesc<Humanoid, void(float), 1> func_TakeDamage(
 	&Humanoid::takeDamage, "TakeDamage", "amount", FunctionDescriptor::AnyCaller
 );
 
-static BoundFuncDesc<Humanoid, void(G3D::Vector3, boost::shared_ptr<Instance>), 2> func_MoveTo(
+static BoundFuncDesc<Humanoid, void(G3D::Vector3, std::shared_ptr<Instance>), 2> func_MoveTo(
 	&Humanoid::moveTo2, "MoveTo", "location", "part", FunctionDescriptor::AnyCaller
 );
 
@@ -243,15 +241,15 @@ Humanoid* Humanoid::getLocalHumanoidFromContext(const Instance* context)
 	return modelIsCharacter(Network::Players::findLocalCharacter(context));
 }
 
-boost::shared_ptr<AutoJoint> newJoint(bool animated)
+std::shared_ptr<AutoJoint> newJoint(bool animated)
 {
 	if (animated) {
-		boost::shared_ptr<Motor> m = Creatable<Instance>::create<Motor>();
+		std::shared_ptr<Motor> m = Creatable<Instance>::create<Motor>();
 		m->setMaxVelocity(0.1f);
 		return m;
 	}
 
-	boost::shared_ptr<Snap> s = Creatable<Instance>::create<Snap>();
+	std::shared_ptr<Snap> s = Creatable<Instance>::create<Snap>();
 	return s;
 }
 
@@ -404,11 +402,11 @@ void Humanoid::buildJoints()
 			rightLeg->getPrimitive()->getBody()->setCanThrottle(false);
 			leftLeg->getPrimitive()->getBody()->setCanThrottle(false);
 
-			boost::shared_ptr<AutoJoint> rightShoulder = newJoint(true);
-			boost::shared_ptr<AutoJoint> leftShoulder = newJoint(true);
-			boost::shared_ptr<AutoJoint> rightHip = newJoint(true);
-			boost::shared_ptr<AutoJoint> leftHip = newJoint(true);
-			boost::shared_ptr<AutoJoint> neck = newJoint(false);
+			std::shared_ptr<AutoJoint> rightShoulder = newJoint(true);
+			std::shared_ptr<AutoJoint> leftShoulder = newJoint(true);
+			std::shared_ptr<AutoJoint> rightHip = newJoint(true);
+			std::shared_ptr<AutoJoint> leftHip = newJoint(true);
+			std::shared_ptr<AutoJoint> neck = newJoint(false);
 
 			rightShoulder->setName("Right Shoulder");
 			leftShoulder->setName("Left Shoulder");
@@ -517,7 +515,7 @@ G3D::Vector3 Humanoid::updateWalkDirection()
 }
 
 static void collectAllDescendantCharacterPrims(
-	boost::shared_ptr<Instance> descendent, std::vector<Primitive*>& primitives
+	std::shared_ptr<Instance> descendent, std::vector<Primitive*>& primitives
 )
 {
 	PartInstance* part = dynamic_cast<PartInstance*>(descendent.get());
@@ -530,7 +528,9 @@ void Humanoid::tellCameraNear(float distance)
 {
 	std::vector<Primitive*> primitives;
 	if (ModelInstance* character = getCharacterFromHumanoid(this)) {
-		character->visitDescendents(boost::bind(&collectAllDescendantCharacterPrims, _1, boost::ref(primitives)));
+		character->visitDescendents([&primitives](const std::shared_ptr<Instance>& descendent) {
+			collectAllDescendantCharacterPrims(descendent, primitives);
+		});
 	}
 
 	float alphaModifier = 1.0f;
@@ -670,11 +670,11 @@ void Humanoid::render2d(Adorn* adorn)
 void Humanoid::getIgnorePrims(std::vector<const Primitive*>& ignore)
 {
 	if (ModelInstance* character = getCharacterFromHumanoid(this)) {
-		character->visitDescendents(
-			boost::bind(
-				&collectAllDescendantCharacterPrims, _1, boost::ref(reinterpret_cast<std::vector<Primitive*>&>(ignore))
-			)
-		);
+		std::vector<Primitive*>& primitives = reinterpret_cast<std::vector<Primitive*>&>(ignore);
+
+		character->visitDescendents([&primitives](const std::shared_ptr<Instance>& descendent) {
+			collectAllDescendantCharacterPrims(descendent, primitives);
+		});
 	}
 
 	ServiceClient<FilteredSelection<PartInstance> > pvSelection(this);
@@ -896,7 +896,7 @@ void Humanoid::cameraSetWalkOrientation(float rad, bool noAdjust)
 	}
 }
 
-void Humanoid::moveTo2(G3D::Vector3 worldPosition, boost::shared_ptr<Instance> part)
+void Humanoid::moveTo2(G3D::Vector3 worldPosition, std::shared_ptr<Instance> part)
 {
 	PartInstance* p = dynamic_cast<PartInstance*>(part.get());
 	if (!p) {

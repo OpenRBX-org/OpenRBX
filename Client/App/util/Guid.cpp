@@ -5,7 +5,7 @@
 #define NOMINMAX
 
 #include <algorithm>
-#include <boost/thread/once.hpp>
+#include <mutex>
 #include <objbase.h>
 #include <stdio.h>
 #include <windows.h>
@@ -136,9 +136,9 @@ static void initLocalScope()
 
 const Name& Guid::getLocalScope()
 {
-	static boost::once_flag flag = BOOST_ONCE_INIT;
+	static std::once_flag flag;
 
-	boost::call_once(initLocalScope, flag);
+	std::call_once(flag, initLocalScope);
 
 	return *localScope;
 }

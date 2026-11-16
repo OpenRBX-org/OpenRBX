@@ -14,8 +14,8 @@
 #include "v8tree/Service.h"
 
 #include <algorithm>
-#include <boost/lexical_cast.hpp>
 #include <map>
+#include <string>
 
 namespace RBX {
 
@@ -62,7 +62,7 @@ ScoreHud::BoardType ScoreHud::DetermineBoardType()
 
 	if (players != NULL) {
 		{
-			boost::shared_ptr<const std::vector<boost::shared_ptr<Instance> > > list = players->getPlayers();
+			std::shared_ptr<const std::vector<std::shared_ptr<Instance> > > list = players->getPlayers();
 
 			for (unsigned int i = 0; list->size() > i; ++i) {
 				Network::Player* player = static_cast<Network::Player*>((list->begin() + i)->get());
@@ -137,8 +137,8 @@ void LeaderboardData::CompileData()
 {
 	Network::Players* players = ServiceProvider::find<Network::Players>(context);
 	Teams* teams = ServiceProvider::create<Teams>(context);
-	boost::shared_ptr<const std::vector<boost::shared_ptr<Instance> > > teamList = teams->getTeams();
-	boost::shared_ptr<const std::vector<boost::shared_ptr<Instance> > > playerList = players->getPlayers();
+	std::shared_ptr<const std::vector<std::shared_ptr<Instance> > > teamList = teams->getTeams();
+	std::shared_ptr<const std::vector<std::shared_ptr<Instance> > > playerList = players->getPlayers();
 
 	for (unsigned int i = 0; playerList->size() > i; ++i) {
 		Network::Player* player = static_cast<Network::Player*>((playerList->begin() + i)->get());
@@ -183,7 +183,7 @@ void ScoreHud::BuildBoardData(BoardData& boardData)
 		return;
 	}
 
-	boost::shared_ptr<const std::vector<boost::shared_ptr<Instance> > > list = players->getPlayers();
+	std::shared_ptr<const std::vector<std::shared_ptr<Instance> > > list = players->getPlayers();
 
 	for (unsigned int i = 0; i < list->size(); ++i) {
 		Network::Player* player = static_cast<Network::Player*>((list->begin() + i)->get());
@@ -201,8 +201,7 @@ void ScoreHud::BuildBoardData(BoardData& boardData)
 
 			for (unsigned int j = 0; j < leaderstats->numChildren(); ++j) {
 				Value<int, sIntValue>* stat = dynamic_cast<Value<int, sIntValue>*>(leaderstats->getChild(j));
-				boardData.data[i][j + 1] =
-					boost::lexical_cast<std::string>(Value<int, sIntValue>::desc_Value.getValue(stat));
+				boardData.data[i][j + 1] = std::to_string(Value<int, sIntValue>::desc_Value.getValue(stat));
 			}
 		}
 		else {
@@ -369,9 +368,7 @@ void ScoreHud::renderTeamDeathmatchLeaderboard(Adorn* adorn, BoardType boardType
 				float half = rowWidth * 0.5f;
 				position.x =
 					(float) (i - 1) * (half / (float) leaderboardData.statNamesList.size()) + half + position.x;
-				label = boost::lexical_cast<std::string>(
-					leaderboardData.teamTotals[team][leaderboardData.statNamesList[i - 1]]
-				);
+				label = std::to_string(leaderboardData.teamTotals[team][leaderboardData.statNamesList[i - 1]]);
 			}
 
 			adorn->drawFont2D(
@@ -407,10 +404,8 @@ void ScoreHud::renderTeamDeathmatchLeaderboard(Adorn* adorn, BoardType boardType
 					float half = rowWidth * 0.5f;
 					position.x =
 						(float) (i - 1) * (half / (float) leaderboardData.statNamesList.size()) + half + position.x;
-					label = boost::lexical_cast<std::string>(
-						leaderboardData
-							.statMap[leaderboardData.playersByTeamList[team][p]][leaderboardData.statNamesList[i - 1]]
-					);
+					label = std::to_string(leaderboardData.statMap[leaderboardData.playersByTeamList[team][p]]
+																  [leaderboardData.statNamesList[i - 1]]);
 				}
 
 				adorn->drawFont2D(

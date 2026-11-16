@@ -36,7 +36,7 @@ private:
 
 protected:
 	Workspace* workspace;
-	std::auto_ptr<XmlState> undoState;
+	std::unique_ptr<XmlState> undoState;
 
 public:
 	G3D::Ray getUnitMouseRay(const UIEvent& uiEvent) const;

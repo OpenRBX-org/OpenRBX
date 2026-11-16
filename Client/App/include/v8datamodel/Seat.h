@@ -1,11 +1,11 @@
 #ifndef V8DATAMODEL_SEAT_H
 #define V8DATAMODEL_SEAT_H
 
+#include "util/Signals.h"
 #include "v8datamodel/PartInstance.h"
 #include "v8tree/Instance.h"
 
-#include <boost/shared_ptr.hpp>
-#include <boost/signals/connection.hpp>
+#include <memory>
 
 namespace RBX {
 
@@ -16,15 +16,15 @@ extern char sSeat[];
 class Seat : public DescribedCreatable<Seat, PartInstance, sSeat>
 {
 private:
-	boost::signals::scoped_connection seatTouched;
-	boost::signals::scoped_connection humanoidJumped;
+	Signals::ScopedConnection seatTouched;
+	Signals::ScopedConnection humanoidJumped;
 
-	void onEvent_seatTouched(boost::shared_ptr<Instance> other);
+	void onEvent_seatTouched(std::shared_ptr<Instance> other);
 	void onEvent_humanoidJumped(bool active);
 	void seatCharacter(Humanoid* h);
 	void unseatCharacter();
 
-	boost::shared_ptr<Weld> weld;
+	std::shared_ptr<Weld> weld;
 
 	bool charSeated();
 

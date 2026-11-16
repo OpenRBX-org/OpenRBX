@@ -2,12 +2,11 @@
 #define UTIL_INDEXARRAY_H
 
 #include <G3D/Array.h>
-#include <boost/noncopyable.hpp>
 
 namespace RBX {
 
 template <class T, int& (T::*getIndex)()>
-class IndexArray : public boost::noncopyable
+class IndexArray
 {
 private:
 	G3D::Array<T*> array;
@@ -15,6 +14,10 @@ private:
 	int& indexOf(T* element) const { return (element->*getIndex)(); }
 
 public:
+	IndexArray() = default;
+	IndexArray(const IndexArray&) = delete;
+	IndexArray& operator=(const IndexArray&) = delete;
+
 	void fastAppend(T* element)
 	{
 		indexOf(element) = array.size();

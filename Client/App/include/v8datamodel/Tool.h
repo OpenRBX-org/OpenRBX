@@ -5,12 +5,12 @@
 #include "util/ILocation.h"
 #include "util/IRenderable.h"
 #include "util/ISelectable3d.h"
+#include "util/Signals.h"
 #include "v8datamodel/Hopper.h"
 #include "v8datamodel/IEquipable.h"
 #include "v8tree/Instance.h"
 
-#include <boost/shared_ptr.hpp>
-#include <boost/signals/connection.hpp>
+#include <memory>
 
 class XmlElement;
 
@@ -54,18 +54,18 @@ private:
 	CoordinateFrame grip;
 	bool enabled;
 	ToolMouseCommand* toolMouseCommand;
-	boost::signals::scoped_connection handleTouched;
-	boost::signals::scoped_connection characterChildAdded;
-	boost::signals::scoped_connection characterChildRemoved;
-	boost::signals::scoped_connection torsoChildAdded;
-	boost::signals::scoped_connection torsoChildRemoved;
+	Signals::ScopedConnection handleTouched;
+	Signals::ScopedConnection characterChildAdded;
+	Signals::ScopedConnection characterChildRemoved;
+	Signals::ScopedConnection torsoChildAdded;
+	Signals::ScopedConnection torsoChildRemoved;
 
-	void onEvent_AddedBackend(boost::shared_ptr<Instance> instance);
-	void onEvent_RemovedBackend(boost::shared_ptr<Instance> instance);
-	void onEvent_HandleTouched(boost::shared_ptr<Instance> other);
+	void onEvent_AddedBackend(std::shared_ptr<Instance> instance);
+	void onEvent_RemovedBackend(std::shared_ptr<Instance> instance);
+	void onEvent_HandleTouched(std::shared_ptr<Instance> other);
 	static void moveAllToolsToBackpack(Network::Player* player);
 	static ToolState characterCanPickUpTool(Instance* character);
-	boost::shared_ptr<Mouse> getMouse();
+	std::shared_ptr<Mouse> getMouse();
 	ToolState computeDesiredState(Instance* testParent);
 	ToolState computeDesiredState();
 	void setDesiredState(ToolState desiredState, const ServiceProvider* serviceProvider);

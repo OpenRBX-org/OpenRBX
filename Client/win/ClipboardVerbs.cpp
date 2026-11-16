@@ -5,7 +5,6 @@
 #include "v8xml/SerializerV2.h"
 #include "v8xml/XmlSerializer.h"
 
-#include <boost/bind.hpp>
 #include <sstream>
 
 template <class T>
@@ -61,11 +60,11 @@ void PasteVerb::doIt(RBX::IDataState* dataState)
 
 	HANDLE handle = GetClipboardData(clipboardFormat());
 	const char* text = static_cast<const char*>(GlobalLock(handle));
-	std::vector<boost::shared_ptr<RBX::Instance> > instances;
+	std::vector<std::shared_ptr<RBX::Instance> > instances;
 	{
 		std::istringstream stream(text);
 		TextXmlParser machine(stream.rdbuf());
-		std::auto_ptr<XmlElement> root(machine.parse());
+		std::unique_ptr<XmlElement> root(machine.parse());
 
 		RBX::Selection* selection = createService<RBX::Selection>(m_unk0x0c);
 		RBX::Instance* parent =
@@ -75,7 +74,7 @@ void PasteVerb::doIt(RBX::IDataState* dataState)
 		serializer.loadInstances(root.get(), instances);
 		m_unk0x0c->getWorkspace()->insertInstances(instances, parent, insertMode, RBX::SUPPRESS_PROMPTS);
 
-		const std::vector<boost::shared_ptr<RBX::Instance> >& items = instances;
+		const std::vector<std::shared_ptr<RBX::Instance> >& items = instances;
 		selection->setSelection(items.begin(), items.end());
 	}
 
@@ -84,7 +83,7 @@ void PasteVerb::doIt(RBX::IDataState* dataState)
 
 	RBX::XmlState* undoState = new RBX::UndoState();
 	RBX::XmlState* redoState = new RBX::RedoState();
-	for (std::vector<boost::shared_ptr<RBX::Instance> >::iterator iter = instances.begin(); iter != instances.end();
+	for (std::vector<std::shared_ptr<RBX::Instance> >::iterator iter = instances.begin(); iter != instances.end();
 		 ++iter) {
 		undoState->addDelete(*iter->get());
 		redoState->addParentProperty(*iter->get());
@@ -98,7 +97,9 @@ void CopyVerb::doIt(RBX::IDataState* dataState)
 {
 	XmlElement* root = SerializerV2::newRootElement();
 	RBX::Selection* selection = createService<RBX::Selection>(dataModel);
-	std::for_each(selection->begin(), selection->end(), boost::bind(&RBX::FUN_00597490, root, _1));
+	std::for_each(selection->begin(), selection->end(), [root](const std::shared_ptr<RBX::Instance>& instance) {
+		RBX::FUN_00597490(root, instance);
+	});
 
 	std::ostringstream stream;
 	TextXmlWriter writer(stream);

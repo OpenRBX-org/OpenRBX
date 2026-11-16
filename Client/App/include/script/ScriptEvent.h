@@ -4,7 +4,7 @@
 #include "script/ThreadRef.h"
 #include "util/RunStateOwner.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <vector>
 
 struct lua_State;
@@ -22,7 +22,7 @@ public:
 	{
 		WaitingThread(lua_State* L, double requestedDelay);
 
-		boost::shared_ptr<ThreadRef> thread;
+		std::shared_ptr<ThreadRef> thread;
 		double requestedDelay;
 		double elapsedTime;
 	};

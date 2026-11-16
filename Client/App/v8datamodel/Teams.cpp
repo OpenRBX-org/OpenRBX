@@ -17,7 +17,7 @@ static Reflection::BoundFuncDesc<Teams, void(), 0> teams_rebalanceTeamsFunction(
 	&Teams::rebalanceTeams, "RebalanceTeams", Reflection::FunctionDescriptor::AnyCaller
 );
 
-static Reflection::BoundFuncDesc<Teams, boost::shared_ptr<const std::vector<boost::shared_ptr<Instance> > >(), 0>
+static Reflection::BoundFuncDesc<Teams, std::shared_ptr<const std::vector<std::shared_ptr<Instance> > >(), 0>
 	func_teams(&Teams::getTeams, "GetTeams", Reflection::FunctionDescriptor::AnyCaller);
 
 Teams::~Teams()
@@ -46,7 +46,7 @@ Team* Teams::getTeamFromPlayer(Network::Player* p)
 	return getTeamFromTeamColor(p->getTeamColor());
 }
 
-boost::shared_ptr<const std::vector<boost::shared_ptr<Instance> > > Teams::getTeams()
+std::shared_ptr<const std::vector<std::shared_ptr<Instance> > > Teams::getTeams()
 {
 	return teams.read();
 }
@@ -134,7 +134,7 @@ void Teams::assignNewPlayerToTeam(Network::Player* p)
 void Teams::onChildAdded(Instance* child)
 {
 	if (dynamic_cast<Team*>(child)) {
-		boost::shared_ptr<std::vector<boost::shared_ptr<Instance> > >& t = teams.write();
+		std::shared_ptr<std::vector<std::shared_ptr<Instance> > >& t = teams.write();
 		t->push_back(shared_from(child));
 	}
 }
@@ -142,12 +142,12 @@ void Teams::onChildAdded(Instance* child)
 void Teams::onChildRemoving(Instance* child)
 {
 	if (dynamic_cast<Team*>(child)) {
-		boost::shared_ptr<std::vector<boost::shared_ptr<Instance> > >& t = teams.write();
+		std::shared_ptr<std::vector<std::shared_ptr<Instance> > >& t = teams.write();
 		t->erase(std::find(t->begin(), t->end(), shared_from(child)));
 	}
 }
 
-Teams::Teams() : teams(std::vector<boost::shared_ptr<Instance> >())
+Teams::Teams() : teams(std::vector<std::shared_ptr<Instance> >())
 {
 	setName(sTeams);
 }

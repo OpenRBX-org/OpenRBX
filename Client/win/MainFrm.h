@@ -5,7 +5,7 @@
 #include "util/Events.h"
 #include "v8datamodel/BrickColor.h"
 
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 
 class CDataModelPropGrid;
 class CSelectionCaption;
@@ -138,9 +138,9 @@ private:
 	CXTWindowPos m_unk0xf4;
 	CXTPDockingPaneManager m_unk0x120;
 	CXTPTabClientWnd m_unk0x26c;
-	boost::scoped_ptr<CXTSplitterWnd> m_unk0x390;
-	boost::scoped_ptr<CDataModelPropGrid> m_unk0x394;
-	boost::scoped_ptr<CSelectionCaption> m_unk0x398;
+	std::unique_ptr<CXTSplitterWnd> m_unk0x390;
+	std::unique_ptr<CDataModelPropGrid> m_unk0x394;
+	std::unique_ptr<CSelectionCaption> m_unk0x398;
 	CXTThemeManager m_unk0x39c;
 	CXTPStatusBar m_unk0x3c8;
 };

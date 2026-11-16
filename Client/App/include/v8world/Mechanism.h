@@ -1,7 +1,6 @@
 #ifndef V8WORLD_MECHANISM_H
 #define V8WORLD_MECHANISM_H
 
-#include <boost/noncopyable.hpp>
 #include <cstddef>
 #include <list>
 #include <set>
@@ -34,9 +33,13 @@ private:
 	Mechanism* mechanism;
 };
 
-class Mechanism : public boost::noncopyable
+class Mechanism
 {
 public:
+	Mechanism() = default;
+	Mechanism(const Mechanism&) = delete;
+	Mechanism& operator=(const Mechanism&) = delete;
+
 	typedef std::set<Assembly*> AssemblySet;
 
 	static Mechanism* getMechanismFromPrimitive(const Primitive* primitive);

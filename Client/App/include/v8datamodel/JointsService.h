@@ -8,7 +8,7 @@
 #include "v8tree/Service.h"
 #include "v8world/World.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace RBX {
 
@@ -20,7 +20,7 @@ class JointsService : public NonFactoryProduct<Instance, static_cast<const char*
 {
 private:
 	virtual void onDescendentAdded(Instance* instance);
-	virtual void onDescendentRemoving(const boost::shared_ptr<Instance>& instance);
+	virtual void onDescendentRemoving(const std::shared_ptr<Instance>& instance);
 
 	virtual bool askAddChild(const Instance* instance) const
 	{

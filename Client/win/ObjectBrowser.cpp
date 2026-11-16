@@ -10,8 +10,7 @@
 #include "reflection/signal.h"
 
 #include <atlenc.h>
-#include <boost/bind.hpp>
-#include <boost/thread/recursive_mutex.hpp>
+#include <mutex>
 
 inline const RBX::Reflection::SignatureDescriptor& RBX::Reflection::FunctionDescriptor::getSignature() const
 {
@@ -130,9 +129,9 @@ BOOL CObjectBrowser::PreCreateWindow(CREATESTRUCT& cs)
 	return CView::PreCreateWindow(cs) != FALSE;
 }
 
-static boost::recursive_mutex& FUN_00437ab0()
+static std::recursive_mutex& FUN_00437ab0()
 {
-	static boost::recursive_mutex g_unk0x0095395c;
+	static std::recursive_mutex g_unk0x0095395c;
 
 	return g_unk0x0095395c;
 }
@@ -432,7 +431,7 @@ void CClassTreeView::FUN_00439690(const RBX::Reflection::ClassDescriptor* descri
 	std::for_each(
 		descriptor->derivedClasses_begin(),
 		descriptor->derivedClasses_end(),
-		boost::bind(&CClassTreeView::FUN_00439690, this, _1)
+		[this](const RBX::Reflection::ClassDescriptor* derivedClass) { FUN_00439690(derivedClass); }
 	);
 }
 
@@ -441,8 +440,10 @@ void CMemberTreeView::FUN_004397f0(const RBX::Reflection::EnumDescriptor* descri
 	GetTreeCtrl().DeleteAllItems();
 	m_unk0xac = descriptor;
 
-	boost::recursive_mutex::scoped_lock lock(FUN_00437ab0());
-	std::for_each(descriptor->begin(), descriptor->end(), boost::bind(&CMemberTreeView::FUN_004380e0, this, _1));
+	std::lock_guard<std::recursive_mutex> lock(FUN_00437ab0());
+	std::for_each(descriptor->begin(), descriptor->end(), [this](const RBX::Reflection::EnumDescriptor::Item* item) {
+		FUN_004380e0(item);
+	});
 
 	TVSORTCB sort;
 	sort.hParent = TVI_ROOT;
@@ -490,7 +491,9 @@ void CMemberTreeView::FUN_00439a70(const RBX::Reflection::FunctionDescriptor* de
 			std::for_each(
 				descriptor->getSignature().arguments.begin(),
 				descriptor->getSignature().arguments.end(),
-				boost::bind(FUN_00439910, &count, &text, _1)
+				[&count, &text](const RBX::Reflection::SignatureDescriptor::Item& argument) {
+					FUN_00439910(&count, &text, argument);
+				}
 			);
 			text += ")";
 
@@ -525,7 +528,9 @@ void CDeclarationView::FUN_00439c30(const RBX::Reflection::Descriptor* descripto
 		std::for_each(
 			function->getSignature().arguments.begin(),
 			function->getSignature().arguments.end(),
-			boost::bind(FUN_00439990, &count, &declaration, _1)
+			[&count, &declaration](const RBX::Reflection::SignatureDescriptor::Item& argument) {
+				FUN_00439990(&count, &declaration, argument);
+			}
 		);
 		declaration += ")";
 
@@ -555,7 +560,9 @@ void CDeclarationView::FUN_00439c30(const RBX::Reflection::Descriptor* descripto
 				std::for_each(
 					signal->getSignature().arguments.begin(),
 					signal->getSignature().arguments.end(),
-					boost::bind(FUN_00439990, &count, &declaration, _1)
+					[&count, &declaration](const RBX::Reflection::SignatureDescriptor::Item& argument) {
+						FUN_00439990(&count, &declaration, argument);
+					}
 				);
 				declaration += ")";
 
@@ -592,23 +599,23 @@ void CMemberTreeView::FUN_0043a060(const RBX::Reflection::ClassDescriptor* descr
 	GetTreeCtrl().DeleteAllItems();
 	m_unk0xac = descriptor;
 
-	boost::recursive_mutex::scoped_lock lock(FUN_00437ab0());
+	std::lock_guard<std::recursive_mutex> lock(FUN_00437ab0());
 	std::for_each(
 		descriptor
 			->RBX::Reflection::MemberDescriptorContainer<RBX::Reflection::PropertyDescriptor>::descriptors_begin(),
 		descriptor->RBX::Reflection::MemberDescriptorContainer<RBX::Reflection::PropertyDescriptor>::descriptors_end(),
-		boost::bind(&CMemberTreeView::FUN_00438300, this, _1)
+		[this](const RBX::Reflection::PropertyDescriptor* property) { FUN_00438300(property); }
 	);
 	std::for_each(
 		descriptor
 			->RBX::Reflection::MemberDescriptorContainer<RBX::Reflection::FunctionDescriptor>::descriptors_begin(),
 		descriptor->RBX::Reflection::MemberDescriptorContainer<RBX::Reflection::FunctionDescriptor>::descriptors_end(),
-		boost::bind(&CMemberTreeView::FUN_00439a70, this, _1)
+		[this](const RBX::Reflection::FunctionDescriptor* function) { FUN_00439a70(function); }
 	);
 	std::for_each(
 		descriptor->RBX::Reflection::MemberDescriptorContainer<RBX::Reflection::SignalDescriptor>::descriptors_begin(),
 		descriptor->RBX::Reflection::MemberDescriptorContainer<RBX::Reflection::SignalDescriptor>::descriptors_end(),
-		boost::bind(&CMemberTreeView::FUN_00438420, this, _1)
+		[this](const RBX::Reflection::SignalDescriptor* signal) { FUN_00438420(signal); }
 	);
 
 	TVSORTCB sort;
@@ -659,12 +666,12 @@ void CClassTreeView::OnInitialUpdate()
 {
 	CXTTreeView::OnInitialUpdate();
 
-	boost::recursive_mutex::scoped_lock lock(FUN_00437ab0());
+	std::lock_guard<std::recursive_mutex> lock(FUN_00437ab0());
 	FUN_00439690(&RBX::Reflection::ClassDescriptor::rootDescriptor());
 	std::for_each(
 		RBX::Reflection::EnumDescriptor::enumsBegin(),
 		RBX::Reflection::EnumDescriptor::enumsEnd(),
-		boost::bind(&CClassTreeView::FUN_00437f90, this, _1)
+		[this](const RBX::Reflection::EnumDescriptor* descriptor) { FUN_00437f90(descriptor); }
 	);
 
 	TVSORTCB sort;
@@ -708,13 +715,13 @@ void COutputView::OnDocumentComplete(LPCTSTR lpszURL)
 
 CStandardOutputView::~CStandardOutputView()
 {
-	boost::mutex::scoped_lock lock(RBX::StandardOut::singleton()->sync);
+	std::lock_guard<std::recursive_mutex> lock(RBX::StandardOut::singleton()->sync);
 	RBX::stopListening<RBX::StandardOut, RBX::StandardOutMessage>(RBX::StandardOut::singleton(), this);
 }
 
 void CStandardOutputView::onEvent(const RBX::StandardOut* source, RBX::StandardOutMessage message)
 {
-	boost::mutex::scoped_lock lock(m_unk0x128);
+	std::lock_guard<std::mutex> lock(m_unk0x128);
 	if (m_unk0x114.empty()) {
 		PostMessage(WM_USER + 101, 0, 0);
 	}
@@ -787,7 +794,7 @@ void COutputView::FUN_0043b490(RBX::MessageType type, const char* text, __time64
 CStandardOutputView::CStandardOutputView()
 {
 	m_unk0xf0 = true;
-	boost::mutex::scoped_lock lock(RBX::StandardOut::singleton()->sync);
+	std::lock_guard<std::recursive_mutex> lock(RBX::StandardOut::singleton()->sync);
 	RBX::startListening<RBX::StandardOut, RBX::StandardOutMessage>(RBX::StandardOut::singleton(), this);
 }
 
@@ -798,7 +805,7 @@ LRESULT CStandardOutputView::FUN_0043b8a0(WPARAM wParam, LPARAM lParam)
 		RBX::MessageType type;
 		__int64 time;
 		{
-			boost::mutex::scoped_lock lock(m_unk0x128);
+			std::lock_guard<std::mutex> lock(m_unk0x128);
 			if (m_unk0x114.empty()) {
 				break;
 			}

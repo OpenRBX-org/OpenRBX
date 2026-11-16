@@ -134,7 +134,7 @@ Balancing::Balancing(Humanoid* humanoid, const float kP, const float kD)
 Humanoid::State* Balancing::onStep(const float stepDt, Controller& controller)
 {
 	if (humanoid->getTorsoBody() != NULL) {
-		floorPart = shared_from(findFloor(floorPart));
+		floorPart = shared_from(findFloor(floorPart != NULL));
 
 		return this;
 	}

@@ -1,7 +1,7 @@
 #ifndef RBXVIEWBASE_VIEWBASE_H
 #define RBXVIEWBASE_VIEWBASE_H
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 class RenderStats;
 
@@ -32,7 +32,7 @@ public:
 	virtual RenderStats& getRenderStats() = 0;
 
 private:
-	virtual void onWorkspaceDescendentAdded(boost::shared_ptr<Instance>) = 0;
+	virtual void onWorkspaceDescendentAdded(std::shared_ptr<Instance>) = 0;
 	virtual void updateLighting() = 0;
 	virtual void invalidateLighting(bool) = 0;
 };

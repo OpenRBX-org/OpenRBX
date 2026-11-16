@@ -10,7 +10,6 @@
 #include "v8world/Primitive.h"
 #include "v8world/RigidJoint.h"
 
-#include <boost/bind.hpp>
 #include <stdlib.h>
 #include <vector>
 
@@ -24,9 +23,7 @@ static Reflection::PropDescriptor<FlagStand, BrickColor> prop_Color(
 	"TeamColor", "Data", &FlagStand::getTeamColor, &FlagStand::setTeamColor
 );
 
-static Reflection::SignalDesc<FlagStand, void(boost::shared_ptr<Instance>)> event_FlagCaptured(
-	"FlagCaptured", "Player"
-);
+static Reflection::SignalDesc<FlagStand, void(std::shared_ptr<Instance>)> event_FlagCaptured("FlagCaptured", "Player");
 
 BrickColor FlagStand::getTeamColor() const
 {
@@ -130,7 +127,7 @@ void FlagStand::setTeamColor(BrickColor color)
 	raisePropertyChanged(PartInstance::prop_Color);
 }
 
-void FlagStand::onEvent_standTouched(boost::shared_ptr<Instance> other)
+void FlagStand::onEvent_standTouched(std::shared_ptr<Instance> other)
 {
 	Instance* character = other->getParent();
 	if (!Humanoid::modelIsCharacter(character)) {
@@ -169,8 +166,9 @@ void FlagStand::onServiceProvider(const ServiceProvider* oldProvider, const Serv
 		FlagStandService* flagStandService = newProvider ? newProvider->create<FlagStandService>() : NULL;
 		flagStandService->RegisterFlagStand(this);
 
-		standTouched =
-			PartInstance::event_Touched.connect(this, boost::bind(&FlagStand::onEvent_standTouched, this, _1), 10);
+		standTouched = PartInstance::event_Touched.connect(
+			this, [this](const std::shared_ptr<Instance>& other) { onEvent_standTouched(other); }, 10
+		);
 	}
 
 	if (newProvider == NULL) {

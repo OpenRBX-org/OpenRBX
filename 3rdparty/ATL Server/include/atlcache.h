@@ -1252,6 +1252,7 @@ protected:
 	CComPtr<IDllCache> m_spDllCache;
 	typedef CMemoryCacheBase<CMemoryCache<DataType, StatClass, FlushClass, keyType, KeyTrait, SyncClass, CullClass>, DataType, CCacheDataEx, 
 		keyType, KeyTrait, FlushClass, CullClass, SyncClass, StatClass> baseClass;
+	typedef typename baseClass::NodeType NodeType;
 public:
 	virtual ~CMemoryCache()
 	{
@@ -2299,6 +2300,7 @@ protected:
 	typedef CMemoryCacheBase<CStencilCache<MonitorClass, StatClass, SyncClass, FlushClass, CullClass>, void *, CCacheDataEx, 
 		CFixedStringKey,  CStringElementTraitsI<CFixedStringKey >, 
 		FlushClass, CullClass, SyncClass, StatClass> cacheBase;
+	typedef typename cacheBase::NodeType NodeType;
 	unsigned __int64 m_dwdwStencilLifespan;
 
 	MonitorClass m_Monitor;
@@ -2631,6 +2633,7 @@ class CFileCache:
 	typedef CMemoryCacheBase<CFileCache<MonitorClass, StatClass, FileCachePeer, FlushClass, SyncClass, CullClass>, LPSTR, CCacheDataPeer<FileCachePeer>, 
 			CFixedStringKey,  CStringElementTraits<CFixedStringKey >, 
 			FlushClass, CullClass, SyncClass, StatClass> cacheBase;
+	typedef typename cacheBase::NodeType NodeType;
 
 	MonitorClass m_Monitor;
 

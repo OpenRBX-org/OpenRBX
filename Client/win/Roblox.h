@@ -6,8 +6,7 @@
 
 #include <G3D/Color3uint8.h>
 #include <afxdhtml.h>
-#include <boost/scoped_ptr.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -54,7 +53,7 @@ public:
 	BOOL FUN_0044e180(std::string script);
 	void FUN_0044e250();
 	BOOL FUN_0044ea70(std::string script);
-	void FUN_0044ef90(boost::shared_ptr<RBX::Script> script);
+	void FUN_0044ef90(std::shared_ptr<RBX::Script> script);
 	CDocument* FUN_0044fbc0();
 	void FUN_004509e0();
 	BOOL FUN_00451550(std::vector<std::string>::iterator begin, std::vector<std::string>::iterator end);
@@ -75,7 +74,7 @@ public:
 private:
 	MainLogManager m_unk0xa4;
 	std::string m_unk0xf0;
-	boost::scoped_ptr<ErrorUploader> m_unk0x10c;
+	std::unique_ptr<ErrorUploader> m_unk0x10c;
 };
 
 extern CRobloxApp theApp;

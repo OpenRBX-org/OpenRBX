@@ -7,7 +7,7 @@
 
 #include <RakNetTypes.h>
 #include <algorithm>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <string>
 
 namespace RBX {
@@ -24,13 +24,13 @@ extern char sServer[];
 class Server : public DescribedCreatable<Server, Peer, sServer>, public Service
 {
 	int outgoingPort;
-	boost::shared_ptr<Players> players;
+	std::shared_ptr<Players> players;
 
 	static int lastId;
 
 	class ClientProxy : public Replicator
 	{
-		boost::shared_ptr<Player> remotePlayer;
+		std::shared_ptr<Player> remotePlayer;
 		Server* server;
 
 	public:
@@ -60,7 +60,7 @@ public:
 	Server();
 	virtual ~Server();
 
-	static Reflection::SignalDesc<Server, void(std::string, boost::shared_ptr<Instance>)> event_IncommingConnection;
+	static Reflection::SignalDesc<Server, void(std::string, std::shared_ptr<Instance>)> event_IncommingConnection;
 
 	static bool serverIsPresent(const Instance* context, bool testInDatamodel);
 

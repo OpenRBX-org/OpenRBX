@@ -27,7 +27,7 @@ void CSelectionCaption::FUN_0046a290()
 		std::string name;
 		if (m_unk0x1b8) {
 			RBX::DataModel::Lock lock(m_unk0x1b0);
-			std::vector<boost::shared_ptr<RBX::Instance> >::const_iterator it = m_unk0x1b8->begin();
+			std::vector<std::shared_ptr<RBX::Instance> >::const_iterator it = m_unk0x1b8->begin();
 			if (it != m_unk0x1b8->end()) {
 				name = (*it)->getName();
 				const RBX::Name* className = &(*it)->getClassName();
@@ -92,7 +92,7 @@ CSelectionCaption::CSelectionCaption()
 }
 
 void CSelectionCaption::VTable0x00(
-	boost::shared_ptr<RBX::DataModel> newDataModel, boost::shared_ptr<RBX::DataModel> oldDataModel
+	std::shared_ptr<RBX::DataModel> newDataModel, std::shared_ptr<RBX::DataModel> oldDataModel
 )
 {
 	{

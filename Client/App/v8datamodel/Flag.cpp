@@ -9,8 +9,6 @@
 #include "v8datamodel/PartInstance.h"
 #include "v8datamodel/TimerService.h"
 
-#include <boost/bind.hpp>
-
 namespace RBX {
 
 const char sFlag[] = "Flag";
@@ -42,7 +40,7 @@ void Flag::doUglyPeriodicCloneHack()
 	evilClone = clone();
 
 	if (timer && numChildren() == 0) {
-		timer->delay(boost::bind(&Flag::doUglyPeriodicCloneHack, shared_from(this)), 2.0);
+		timer->delay([self = shared_from(this)] { self->doUglyPeriodicCloneHack(); }, 2.0);
 	}
 }
 
@@ -52,7 +50,7 @@ void Flag::onServiceProvider(const ServiceProvider* oldProvider, const ServicePr
 
 	if (oldProvider == NULL) {
 		timer = newProvider ? newProvider->create<TimerService>() : NULL;
-		timer->delay(boost::bind(&Flag::doUglyPeriodicCloneHack, shared_from(this)), 2.0);
+		timer->delay([self = shared_from(this)] { self->doUglyPeriodicCloneHack(); }, 2.0);
 	}
 
 	if (newProvider == NULL) {
@@ -73,7 +71,7 @@ void Flag::onServiceProvider(const ServiceProvider* oldProvider, const ServicePr
 	}
 }
 
-void Flag::onEvent_flagTouched(boost::shared_ptr<Instance> other)
+void Flag::onEvent_flagTouched(std::shared_ptr<Instance> other)
 {
 	Instance* character = other->getParent();
 	if (!Humanoid::modelIsCharacter(character)) {
@@ -106,8 +104,9 @@ void Flag::onChildAdded(Instance* instance)
 {
 	if (dynamic_cast<PartInstance*>(instance)) {
 		if (PartInstance* handle = getHandle()) {
-			flagTouched =
-				PartInstance::event_Touched.connect(handle, boost::bind(&Flag::onEvent_flagTouched, this, _1), 10);
+			flagTouched = PartInstance::event_Touched.connect(
+				handle, [this](const std::shared_ptr<Instance>& other) { onEvent_flagTouched(other); }, 10
+			);
 		}
 	}
 }

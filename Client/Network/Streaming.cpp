@@ -6,7 +6,6 @@
 
 #include <StringCompressor.h>
 #include <algorithm>
-#include <boost/bind.hpp>
 #include <cmath>
 
 namespace RBX {
@@ -528,7 +527,9 @@ void IdSerializer::resolvePendingReferences(Instance* instance, Guid::Data id)
 {
 	WaitItemMap::iterator iter = waitItems.find(id);
 	if (iter != waitItems.end()) {
-		std::for_each(iter->second.begin(), iter->second.end(), boost::bind(&IdSerializer::setRefValue, _1, instance));
+		std::for_each(iter->second.begin(), iter->second.end(), [instance](WaitItem& wi) {
+			setRefValue(wi, instance);
+		});
 		waitItems.erase(iter);
 	}
 }

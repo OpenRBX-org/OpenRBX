@@ -1,12 +1,12 @@
 #ifndef V8DATAMODEL_FLAG_H
 #define V8DATAMODEL_FLAG_H
 
+#include "util/Signals.h"
 #include "v8datamodel/BrickColor.h"
 #include "v8datamodel/Tool.h"
 #include "v8tree/Instance.h"
 
-#include <boost/shared_ptr.hpp>
-#include <boost/signals/connection.hpp>
+#include <memory>
 
 namespace RBX {
 
@@ -26,11 +26,11 @@ public:
 	};
 
 private:
-	boost::shared_ptr<Instance> evilClone;
+	std::shared_ptr<Instance> evilClone;
 	FlagState state;
-	boost::signals::scoped_connection flagTouched;
+	Signals::ScopedConnection flagTouched;
 
-	void onEvent_flagTouched(boost::shared_ptr<Instance> other);
+	void onEvent_flagTouched(std::shared_ptr<Instance> other);
 
 	TimerService* timer;
 

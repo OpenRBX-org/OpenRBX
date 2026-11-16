@@ -7,8 +7,8 @@
 #include "util/RunStateOwner.h"
 #include "v8tree/Instance.h"
 
-#include <boost/shared_ptr.hpp>
-#include <boost/thread/recursive_mutex.hpp>
+#include <memory>
+#include <mutex>
 
 namespace RBX {
 class Script;
@@ -22,12 +22,12 @@ protected:
 	CScriptDoc();
 
 public:
-	void FUN_0044eaf0(boost::shared_ptr<RBX::Script> script);
+	void FUN_0044eaf0(std::shared_ptr<RBX::Script> script);
 
 	friend class CScriptEditor;
 
 private:
-	boost::shared_ptr<RBX::Script> m_unk0x54;
+	std::shared_ptr<RBX::Script> m_unk0x54;
 };
 
 class CScriptEditor
@@ -47,7 +47,7 @@ public:
 	void FUN_00468aa0();
 	void FUN_00468db0();
 	void FUN_004696d0();
-	void FUN_00469b30(boost::shared_ptr<RBX::Script> script);
+	void FUN_00469b30(std::shared_ptr<RBX::Script> script);
 
 protected:
 	virtual void onEvent(const RBX::Instance* source, RBX::AncestorChanged event);
@@ -92,10 +92,10 @@ protected:
 	void DefineMarker(int marker, int markerType, COLORREF fore, COLORREF back);
 
 private:
-	boost::shared_ptr<boost::recursive_mutex> m_unk0x128;
+	std::shared_ptr<std::recursive_mutex> m_unk0x128;
 	CWnd* m_unk0x130;
-	boost::shared_ptr<RBX::Script> m_unk0x134;
-	boost::shared_ptr<RBX::RunService> m_unk0x13c;
+	std::shared_ptr<RBX::Script> m_unk0x134;
+	std::shared_ptr<RBX::RunService> m_unk0x13c;
 	bool m_unk0x144;
 	bool m_unk0x145;
 	bool m_unk0x146;

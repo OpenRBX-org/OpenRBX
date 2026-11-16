@@ -176,8 +176,8 @@ G3D::Vector3 AIController::getLocalTargetPosition() const
 {
 	G3D::Vector3 answer(0, 0, 0);
 
-	boost::shared_ptr<const PVInstance> lockPV = controlledInstance.lock();
-	boost::shared_ptr<const PVInstance> lockTarget = target.lock();
+	std::shared_ptr<const PVInstance> lockPV = controlledInstance.lock();
+	std::shared_ptr<const PVInstance> lockTarget = target.lock();
 
 	if (lockPV && lockTarget) {
 		G3D::CoordinateFrame controlledCoord = lockPV->getLocation();
@@ -194,7 +194,7 @@ void AIController::updateTarget(ControllerType excludeType, float time)
 		int random = rand();
 		retargetTime = random * (2.0f / RAND_MAX) + time + 1.0f;
 
-		boost::shared_ptr<const PVInstance> pvLock = controlledInstance.lock();
+		std::shared_ptr<const PVInstance> pvLock = controlledInstance.lock();
 		if (!pvLock) {
 			return;
 		}

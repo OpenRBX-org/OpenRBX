@@ -1,11 +1,11 @@
 #include "v8datamodel/Lighting.h"
 
 #include "util/RunStateOwner.h"
+#include "util/Utilities.h"
 #include "v8datamodel/Sky.h"
 
-#include <boost/date_time/posix_time/time_formatters.hpp>
-#include <boost/date_time/posix_time/time_parsers.hpp>
-#include <boost/date_time/time_parsing.hpp>
+#include <G3D/format.h>
+#include <vector>
 
 namespace RBX {
 
@@ -99,21 +99,28 @@ void Lighting::replaceSky(Sky* newSky)
 
 double Lighting::getMinutesAfterMidnight()
 {
-	return timeOfDay.total_milliseconds() / 60000.0;
+	return std::chrono::duration_cast<std::chrono::milliseconds>(timeOfDay).count() / 60000.0;
 }
 
 std::string Lighting::getTimeStr() const
 {
-	return boost::posix_time::to_simple_string(timeOfDay);
+	const long long total = std::chrono::abs(timeOfDay).count();
+
+	return G3D::format(
+		"%s%02d:%02d:%02d",
+		timeOfDay.count() < 0 ? "-" : "",
+		static_cast<int>(total / 3600),
+		static_cast<int>(total / 60 % 60),
+		static_cast<int>(total % 60)
+	);
 }
 
 Lighting::Lighting()
 	: ambientTop(209 / 255.0f, 208 / 255.0f, 217 / 255.0f), ambientBottom(122 / 255.0f, 134 / 255.0f, 120 / 255.0f),
-	  hasSky(true), clearColor(G3D::Color3::white()),
-	  timeOfDay(boost::date_time::parse_delimited_time_duration<boost::posix_time::time_duration>("14:00:00"))
+	  hasSky(true), clearColor(G3D::Color3::white()), timeOfDay(std::chrono::hours(14))
 {
 	skyParameters.lightColor = G3D::Color3(152 / 255.0f, 137 / 255.0f, 102 / 255.0f);
-	skyParameters.setTime(timeOfDay.total_seconds());
+	skyParameters.setTime(static_cast<int>(timeOfDay.count()));
 	setName("Lighting");
 }
 
@@ -168,15 +175,15 @@ void Lighting::onChildChanged(Instance* instance, const PropertyChanged& event)
 	}
 }
 
-void Lighting::setTime(const boost::posix_time::time_duration& value)
+void Lighting::setTime(std::chrono::seconds value)
 {
-	int seconds = value.total_seconds();
+	int seconds = static_cast<int>(value.count());
 	seconds = seconds % 86400;
 
-	if (timeOfDay.total_seconds() != seconds) {
-		timeOfDay = boost::posix_time::seconds(seconds);
+	if (timeOfDay.count() != seconds) {
+		timeOfDay = std::chrono::seconds(seconds);
 
-		skyParameters.setTime(timeOfDay.total_seconds());
+		skyParameters.setTime(seconds);
 		raisePropertyChanged(prop_Time);
 		fireLightingChanged(false);
 	}
@@ -202,12 +209,49 @@ void Lighting::setGeographicLatitude(float value)
 
 void Lighting::setMinutesAfterMidnight(double value)
 {
-	setTime(boost::posix_time::seconds(static_cast<long>(value * 60.0)));
+	setTime(std::chrono::seconds(static_cast<long>(value * 60.0)));
 }
 
 void Lighting::setTimeStr(const std::string& value)
 {
-	setTime(boost::posix_time::duration_from_string(value));
+	const bool negative = value.at(0) == '-';
+	const std::vector<std::string> tokens = tokenize(value, "-:,.");
+
+	int hours = 0;
+	unsigned short minutes = 0;
+	unsigned short seconds = 0;
+	long long fraction = 0;
+
+	for (std::vector<std::string>::size_type i = 0; i < tokens.size() && i < 4; ++i) {
+		switch (i) {
+		case 0:
+			hours = lexicalCast<int>(tokens[i]);
+			break;
+		case 1:
+			minutes = lexicalCast<unsigned short>(tokens[i]);
+			break;
+		case 2:
+			seconds = lexicalCast<unsigned short>(tokens[i]);
+			break;
+		case 3: {
+			const std::string::size_type precision = 6;
+
+			fraction = lexicalCast<long long>(tokens[i].substr(0, precision));
+
+			for (std::string::size_type digits = tokens[i].size(); digits < precision; ++digits) {
+				fraction *= 10;
+			}
+		} break;
+		}
+	}
+
+	long long microseconds = (static_cast<long long>(hours) * 3600 + minutes * 60 + seconds) * 1000000 + fraction;
+
+	if (negative) {
+		microseconds = -microseconds;
+	}
+
+	setTime(std::chrono::seconds(microseconds / 1000000));
 }
 
 } // namespace RBX

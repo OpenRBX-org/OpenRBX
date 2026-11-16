@@ -9,9 +9,9 @@
 #include <G3D/System.h>
 #include <atlisapi.h>
 #include <atlsoap.h>
-#include <boost/shared_ptr.hpp>
-#include <boost/thread/mutex.hpp>
 #include <map>
+#include <memory>
+#include <mutex>
 #include <stdexcept>
 #include <string>
 #include <unknwn.h>
@@ -181,14 +181,14 @@ class CWebService : public IWebService, public ATL::CSoapHandler<CWebService>
 {
 	struct Job
 	{
-		boost::shared_ptr<RBX::DataModel> dataModel;
+		std::shared_ptr<RBX::DataModel> dataModel;
 		double expiration;
 	};
 
 	typedef std::map<std::string, Job> Jobs;
 
 	static Jobs jobs;
-	static boost::mutex sync;
+	static std::recursive_mutex sync;
 
 	CStringW errorMessage;
 

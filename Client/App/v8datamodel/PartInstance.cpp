@@ -716,7 +716,7 @@ EnumDesc<PartInstance::FormFactor>::EnumDesc() : EnumDescriptor("FormFactor", ty
 
 } // namespace Reflection
 
-void PartInstance::findParts(Instance* instance, std::vector<boost::weak_ptr<PartInstance> >& parts)
+void PartInstance::findParts(Instance* instance, std::vector<std::weak_ptr<PartInstance> >& parts)
 {
 	if (PartInstance* part = dynamic_cast<PartInstance*>(instance)) {
 		parts.push_back(shared_from(part));

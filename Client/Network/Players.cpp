@@ -16,7 +16,6 @@
 #include <PluginInterface.h>
 #include <RakPeerInterface.h>
 #include <algorithm>
-#include <boost/bind.hpp>
 #include <sstream>
 #include <stdexcept>
 
@@ -55,7 +54,7 @@ Reflection::RefPropDescriptor<Players, Player> Players::propLocalPlayer(
 	"LocalPlayer", "Data", &Players::getLocalPlayer, 0
 );
 
-static Reflection::BoundFuncDesc<Players, boost::shared_ptr<Instance>(int), 1> func_GetPlayerByID(
+static Reflection::BoundFuncDesc<Players, std::shared_ptr<Instance>(int), 1> func_GetPlayerByID(
 	&Players::getPlayerByID, "GetPlayerByID", "userID", Reflection::FunctionDescriptor::NeedTrustedCaller
 );
 
@@ -63,15 +62,15 @@ static Reflection::BoundFuncDesc<Players, void(std::string), 1> funcChat(
 	&Players::chat, "Chat", "message", Reflection::FunctionDescriptor::NeedTrustedCaller
 );
 
-static Reflection::BoundFuncDesc<Players, void(boost::shared_ptr<Instance>, std::string), 2> funcReportAbuse(
+static Reflection::BoundFuncDesc<Players, void(std::shared_ptr<Instance>, std::string), 2> funcReportAbuse(
 	&Players::reportAbuse, "ReportAbuse", "player", "message", Reflection::FunctionDescriptor::NeedTrustedCaller
 );
 
-static Reflection::BoundFuncDesc<Players, boost::shared_ptr<const std::vector<boost::shared_ptr<Instance> > >(), 0>
+static Reflection::BoundFuncDesc<Players, std::shared_ptr<const std::vector<std::shared_ptr<Instance> > >(), 0>
 	func_players(&Players::getPlayers, "players", Reflection::FunctionDescriptor::AnyCaller);
-static Reflection::BoundFuncDesc<Players, boost::shared_ptr<const std::vector<boost::shared_ptr<Instance> > >(), 0>
+static Reflection::BoundFuncDesc<Players, std::shared_ptr<const std::vector<std::shared_ptr<Instance> > >(), 0>
 	func_GetPlayers(&Players::getPlayers, "GetPlayers", Reflection::FunctionDescriptor::AnyCaller);
-static Reflection::BoundFuncDesc<Players, boost::shared_ptr<Instance>(int), 1> func_createLocalPlayer(
+static Reflection::BoundFuncDesc<Players, std::shared_ptr<Instance>(int), 1> func_createLocalPlayer(
 	&Players::createLocalPlayer, "CreateLocalPlayer", "userId", Reflection::FunctionDescriptor::NeedTrustedCaller
 );
 
@@ -79,16 +78,16 @@ static Reflection::BoundFuncDesc<Players, void(std::string), 1> func_setAbuseRep
 	&Players::setAbuseReportUrl, "SetAbuseReportUrl", "url", Reflection::FunctionDescriptor::NeedTrustedCaller
 );
 
-static Reflection::BoundFuncDesc<Players, boost::shared_ptr<Instance>(boost::shared_ptr<Instance>), 1>
+static Reflection::BoundFuncDesc<Players, std::shared_ptr<Instance>(std::shared_ptr<Instance>), 1>
 	func_playerFromCharacterOld(
 		&Players::playerFromCharacter, "playerFromCharacter", "character", Reflection::FunctionDescriptor::AnyCaller
 	);
-static Reflection::BoundFuncDesc<Players, boost::shared_ptr<Instance>(boost::shared_ptr<Instance>), 1>
+static Reflection::BoundFuncDesc<Players, std::shared_ptr<Instance>(std::shared_ptr<Instance>), 1>
 	func_playerFromCharacter(
 		&Players::playerFromCharacter, "GetPlayerFromCharacter", "character", Reflection::FunctionDescriptor::AnyCaller
 	);
-static Reflection::SignalDesc<Players, void(boost::shared_ptr<Instance>)> event_PlayerAdded("PlayerAdded", "player");
-static Reflection::SignalDesc<Players, void(boost::shared_ptr<Instance>)> event_PlayerRemoving(
+static Reflection::SignalDesc<Players, void(std::shared_ptr<Instance>)> event_PlayerAdded("PlayerAdded", "player");
+static Reflection::SignalDesc<Players, void(std::shared_ptr<Instance>)> event_PlayerRemoving(
 	"PlayerRemoving", "player"
 );
 
@@ -162,10 +161,10 @@ static void writeMessage(const RBX::Network::AbuseReport::Message& msg, XmlEleme
 namespace RBX {
 namespace Network {
 
-boost::shared_ptr<Instance> Players::getPlayerByID(int userID)
+std::shared_ptr<Instance> Players::getPlayerByID(int userID)
 {
-	std::vector<boost::shared_ptr<Instance> >::const_iterator iter = players->begin();
-	std::vector<boost::shared_ptr<Instance> >::const_iterator end = players->end();
+	std::vector<std::shared_ptr<Instance> >::const_iterator iter = players->begin();
+	std::vector<std::shared_ptr<Instance> >::const_iterator end = players->end();
 
 	for (; iter != end; ++iter) {
 		if (static_cast<Player*>(iter->get())->getUserID() == userID) {
@@ -173,15 +172,15 @@ boost::shared_ptr<Instance> Players::getPlayerByID(int userID)
 		}
 	}
 
-	return boost::shared_ptr<Instance>();
+	return std::shared_ptr<Instance>();
 }
 
-boost::shared_ptr<Instance> Players::playerFromCharacter(boost::shared_ptr<Instance> character)
+std::shared_ptr<Instance> Players::playerFromCharacter(std::shared_ptr<Instance> character)
 {
-	boost::shared_ptr<const std::vector<boost::shared_ptr<Instance> > > myPlayers = getPlayers();
+	std::shared_ptr<const std::vector<std::shared_ptr<Instance> > > myPlayers = getPlayers();
 
-	std::vector<boost::shared_ptr<Instance> >::const_iterator iter = myPlayers->begin();
-	std::vector<boost::shared_ptr<Instance> >::const_iterator end = myPlayers->end();
+	std::vector<std::shared_ptr<Instance> >::const_iterator iter = myPlayers->begin();
+	std::vector<std::shared_ptr<Instance> >::const_iterator end = myPlayers->end();
 
 	for (; iter != end; ++iter) {
 		if (static_cast<Player*>(iter->get())->getCharacter() == character.get()) {
@@ -189,7 +188,7 @@ boost::shared_ptr<Instance> Players::playerFromCharacter(boost::shared_ptr<Insta
 		}
 	}
 
-	return boost::shared_ptr<Instance>();
+	return std::shared_ptr<Instance>();
 }
 
 void Players::onChildChanged(Instance* instance, const PropertyChanged& event)
@@ -230,14 +229,14 @@ RBX::ModelInstance* Players::findLocalCharacter(const Instance* context)
 Player* Players::getPlayerFromCharacter(Instance* character)
 {
 	if (Players* players = ServiceProvider::find<Players>(character)) {
-		boost::shared_ptr<Instance> player = players->playerFromCharacter(shared_from(character));
+		std::shared_ptr<Instance> player = players->playerFromCharacter(shared_from(character));
 		return static_cast<Player*>(player.get());
 	}
 
 	return NULL;
 }
 
-Players::Players() : players(std::vector<boost::shared_ptr<Instance> >()), peer(NULL), maxPlayers(12)
+Players::Players() : players(std::vector<std::shared_ptr<Instance> >()), peer(NULL), maxPlayers(12)
 {
 	setName("Players");
 	plugin.reset(new Plugin(this));
@@ -245,23 +244,23 @@ Players::Players() : players(std::vector<boost::shared_ptr<Instance> >()), peer(
 
 void AbuseReporter::add(AbuseReport& r, const std::list<ChatMessage>& chatHistory)
 {
-	std::for_each(chatHistory.begin(), chatHistory.end(), boost::bind(&AbuseReport::addMessage, boost::ref(r), _1));
+	std::for_each(chatHistory.begin(), chatHistory.end(), [&r](const ChatMessage& cm) { r.addMessage(cm); });
 
 	{
-		boost::mutex::scoped_lock lock(_data->requestSync);
+		std::lock_guard<std::mutex> lock(_data->requestSync);
 		_data->queue.push(r);
 	}
 
 	requestProcessor->wake();
 }
 
-worker_thread::work_result AbuseReporter::processRequests(boost::shared_ptr<data> _data, std::string abuseUrl)
+worker_thread::work_result AbuseReporter::processRequests(std::shared_ptr<data> _data, std::string abuseUrl)
 {
 	try {
 		AbuseReport r;
 
 		{
-			boost::mutex::scoped_lock lock(_data->requestSync);
+			std::lock_guard<std::mutex> lock(_data->requestSync);
 			if (_data->queue.empty()) {
 				return worker_thread::done;
 			}
@@ -277,7 +276,9 @@ worker_thread::work_result AbuseReporter::processRequests(boost::shared_ptr<data
 
 			root.addChild(new XmlElement(Name::declare("comment", -1), r.comment));
 			XmlElement* messages = root.addChild(new XmlElement(Name::declare("messages", -1)));
-			std::for_each(r.messages.begin(), r.messages.end(), boost::bind(writeMessage, _1, messages));
+			std::for_each(r.messages.begin(), r.messages.end(), [messages](const AbuseReport::Message& msg) {
+				writeMessage(msg, messages);
+			});
 			writer.serialize(&root);
 
 			body.flush();
@@ -295,7 +296,7 @@ worker_thread::work_result AbuseReporter::processRequests(boost::shared_ptr<data
 	}
 
 	{
-		boost::mutex::scoped_lock lock(_data->requestSync);
+		std::lock_guard<std::mutex> lock(_data->requestSync);
 		_data->queue.pop();
 	}
 
@@ -332,7 +333,7 @@ void Players::reportAbuse(Player* player, std::string comment)
 	}
 }
 
-void Players::reportAbuse(boost::shared_ptr<Instance> player, std::string comment)
+void Players::reportAbuse(std::shared_ptr<Instance> player, std::string comment)
 {
 	reportAbuse(dynamic_cast<Player*>(player.get()), comment);
 }
@@ -367,7 +368,7 @@ void Players::setMaxPlayers(int value)
 	}
 }
 
-boost::shared_ptr<Instance> Players::createLocalPlayer(int userId)
+std::shared_ptr<Instance> Players::createLocalPlayer(int userId)
 {
 	if (localPlayer) {
 		throw std::runtime_error("Local player already exists");
@@ -478,7 +479,7 @@ bool Players::OnReceive(RakPeerInterface* peer, Packet* packet)
 void Players::onChildRemoving(Instance* child)
 {
 	if (Player* player = dynamic_cast<Player*>(child)) {
-		boost::shared_ptr<std::vector<boost::shared_ptr<Instance> > >& list = players.write();
+		std::shared_ptr<std::vector<std::shared_ptr<Instance> > >& list = players.write();
 		list->erase(std::find(list->begin(), list->end(), shared_from(child)));
 
 		if (backendProcessing(this, false)) {
@@ -493,14 +494,14 @@ void Players::onChildAdded(Instance* child)
 {
 	if (Player* player = dynamic_cast<Player*>(child)) {
 		if (player->getUserID() > 0) {
-			boost::shared_ptr<Instance> otherPlayer = getPlayerByID(player->getUserID());
+			std::shared_ptr<Instance> otherPlayer = getPlayerByID(player->getUserID());
 
 			if (otherPlayer) {
 				otherPlayer->setParent(NULL);
 			}
 		}
 
-		boost::shared_ptr<std::vector<boost::shared_ptr<Instance> > >& list = players.write();
+		std::shared_ptr<std::vector<std::shared_ptr<Instance> > >& list = players.write();
 		list->push_back(shared_from(child));
 
 		if (backendProcessing(this, true)) {
@@ -531,7 +532,7 @@ namespace Network {
 AbuseReporter::AbuseReporter(std::string abuseUrl) : _data(new data())
 {
 	requestProcessor.reset(
-		new worker_thread(boost::bind(&AbuseReporter::processRequests, _data, abuseUrl), "rbx_abusereporter")
+		new worker_thread([_data = _data, abuseUrl] { return processRequests(_data, abuseUrl); }, "rbx_abusereporter")
 	);
 }
 

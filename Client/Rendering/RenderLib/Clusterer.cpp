@@ -109,7 +109,7 @@ Clusterer::Clusters* Clusterer::go(unsigned int maxSteps)
 				break;
 			}
 
-			std::for_each(clusters.begin(), clusters.end(), std::mem_fun_ref(&Cluster::computeCentroid));
+			std::for_each(clusters.begin(), clusters.end(), [](Cluster& cluster) { cluster.computeCentroid(); });
 		}
 	}
 

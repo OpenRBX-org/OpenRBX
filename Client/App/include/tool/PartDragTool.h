@@ -21,8 +21,8 @@ extern char sPartDragTool[];
 class PartDragTool : public Named<MouseCommand, sPartDragTool>
 {
 private:
-	std::auto_ptr<RunDragger> runDragger;
-	std::auto_ptr<MegaDragger> megaDragger;
+	std::unique_ptr<RunDragger> runDragger;
+	std::unique_ptr<MegaDragger> megaDragger;
 	G3D::Vector2 downPoint;
 	bool dragging;
 	G3D::Vector3 hitWorld;

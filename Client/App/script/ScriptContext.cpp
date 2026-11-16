@@ -19,9 +19,6 @@
 
 #include <G3D/System.h>
 #include <algorithm>
-#include <boost/bind.hpp>
-#include <boost/date_time/posix_time/posix_time_types.hpp>
-#include <boost/signals/connection.hpp>
 #include <lualib.h>
 #include <stdio.h>
 
@@ -51,7 +48,7 @@ Reflection::BoundProp<bool, 1> ScriptContext::propScriptsDisabled(
 namespace Lua {
 
 template <>
-const char* Bridge<boost::shared_ptr<Reflection::DescribedBase>, 0>::className = "Object";
+const char* Bridge<std::shared_ptr<Reflection::DescribedBase>, 0>::className = "Object";
 
 } // namespace Lua
 
@@ -255,9 +252,9 @@ void ScriptContext::reportError(lua_State* thread)
 
 void ScriptContext::disassociateState(Script* script)
 {
-	if (script->association().contains<boost::shared_ptr<Lua::ThreadRef::Node> >()) {
-		script->association().get<boost::shared_ptr<Lua::ThreadRef::Node> >()->eraseAllRefs();
-		script->association().remove<boost::shared_ptr<Lua::ThreadRef::Node> >();
+	if (script->association().contains<std::shared_ptr<Lua::ThreadRef::Node> >()) {
+		script->association().get<std::shared_ptr<Lua::ThreadRef::Node> >()->eraseAllRefs();
+		script->association().remove<std::shared_ptr<Lua::ThreadRef::Node> >();
 	}
 }
 
@@ -266,7 +263,7 @@ void ScriptContext::removeScript(Script* script)
 	if (scripts.erase(script)) {
 		disassociateState(script);
 
-		std::vector<boost::shared_ptr<Script> >::iterator iter =
+		std::vector<std::shared_ptr<Script> >::iterator iter =
 			std::find(pendingScripts.begin(), pendingScripts.end(), shared_from(script));
 		if (iter != pendingScripts.end()) {
 			pendingScripts.erase(iter);
@@ -277,7 +274,7 @@ void ScriptContext::removeScript(Script* script)
 } // namespace RBX
 
 static void readResults(
-	std::auto_ptr<std::vector<RBX::Reflection::Value> >& result, lua_State* thread, unsigned int returnCount
+	std::unique_ptr<std::vector<RBX::Reflection::Value> >& result, lua_State* thread, unsigned int returnCount
 )
 {
 	result.reset(new std::vector<RBX::Reflection::Value>(returnCount));
@@ -302,7 +299,7 @@ void ScriptContext::closeState()
 		Lua::ThreadRef::Node::get(globalState)->eraseAllRefs();
 
 		std::set<Script*> copy(scripts);
-		std::for_each(copy.begin(), copy.end(), boost::bind(&ScriptContext::disassociateState, this, _1));
+		std::for_each(copy.begin(), copy.end(), [this](Script* script) { disassociateState(script); });
 
 		yieldEvent.reset();
 	}
@@ -335,7 +332,8 @@ void ScriptContext::closeState()
 }
 
 ScriptContext::ScriptContext()
-	: globalState(NULL), nextPendingScripts(boost::posix_time::second_clock::local_time()), scriptsDisabled(false)
+	: globalState(NULL), nextPendingScripts(std::chrono::floor<std::chrono::seconds>(std::chrono::steady_clock::now())),
+	  scriptsDisabled(false)
 {
 	setName("Script Context");
 }
@@ -438,7 +436,7 @@ void ScriptContext::onServiceProvider(const ServiceProvider* oldProvider, const 
 		statsItem = Creatable<Instance>::create<Stats::Item>("Lua");
 		statsItem->setParent(stats);
 		statsItem->createBoundChildItem("disabled", scriptsDisabled);
-		statsItem->createChildItem<int>("threads", boost::bind(&ScriptContext::getThreadCount, this));
+		statsItem->createChildItem<int>("threads", [this] { return getThreadCount(); });
 	}
 
 	runService = shared_from(newProvider ? newProvider->create<RunService>() : NULL);
@@ -509,12 +507,12 @@ void ScriptContext::openState()
 
 		Lua::SharedPtrBridge<Reflection::DescribedBase>::registerClass(globalState);
 		Lua::SharedPtrBridge<Reflection::SignalInstance>::registerClass(globalState);
-		Lua::Bridge<boost::signals::connection, 1>::registerClass(globalState);
+		Lua::Bridge<Signals::Connection, 1>::registerClass(globalState);
 		Lua::Bridge<G3D::CoordinateFrame, 1>::registerClass(globalState);
 		Lua::Bridge<G3D::Vector3, 1>::registerClass(globalState);
 		Lua::Bridge<G3D::Color3, 1>::registerClass(globalState);
 		Lua::Bridge<BrickColor, 1>::registerClass(globalState);
-		Lua::Bridge<boost::shared_ptr<Lua::ThreadRef::Node>, 1>::registerClass(globalState);
+		Lua::Bridge<std::shared_ptr<Lua::ThreadRef::Node>, 1>::registerClass(globalState);
 
 		Lua::CoordinateFrameBridge::registerClassLibrary(globalState);
 		Lua::Vector3Bridge::registerClassLibrary(globalState);
@@ -595,8 +593,8 @@ void ScriptContext::setThreadIdentity(lua_State* thread, Security::Identities id
 
 void ScriptContext::resume(
 	lua_State* thread,
-	boost::function1<unsigned int, lua_State*> pushArguments,
-	boost::function2<void, lua_State*, unsigned int> readResults
+	std::function<unsigned int(lua_State*)> pushArguments,
+	std::function<void(lua_State*, unsigned int)> readResults
 )
 {
 	int top = lua_gettop(thread);
@@ -623,14 +621,14 @@ void ScriptContext::resume(
 	}
 }
 
-void ScriptContext::startScript(boost::shared_ptr<Script> script)
+void ScriptContext::startScript(std::shared_ptr<Script> script)
 {
 	if (scriptsDisabled) {
 		pendingScripts.push_back(script);
 		return;
 	}
 
-	boost::shared_ptr<const std::string> code = script->requestCode();
+	std::shared_ptr<const std::string> code = script->requestCode();
 	if (!code) {
 		pendingScripts.push_back(script);
 		return;
@@ -658,7 +656,7 @@ void ScriptContext::startScript(boost::shared_ptr<Script> script)
 
 	setThreadIdentity(thread, Security::GameScript);
 
-	script->association().get<boost::shared_ptr<Lua::ThreadRef::Node> >() = Lua::ThreadRef::Node::create(thread);
+	script->association().get<std::shared_ptr<Lua::ThreadRef::Node> >() = Lua::ThreadRef::Node::create(thread);
 
 	Lua::SharedPtrBridge<Reflection::DescribedBase>::push(thread, script);
 	lua_setfield(thread, LUA_GLOBALSINDEX, "script");
@@ -679,8 +677,8 @@ void ScriptContext::executeInNewThread(
 	Security::Identities identity,
 	const char* script,
 	const char* name,
-	boost::function1<unsigned int, lua_State*> pushArguments,
-	boost::function2<void, lua_State*, unsigned int> readResults
+	std::function<unsigned int(lua_State*)> pushArguments,
+	std::function<void(lua_State*, unsigned int)> readResults
 )
 {
 	openState();
@@ -737,8 +735,8 @@ void ScriptContext::executeInNewThread(
 
 void ScriptContext::call(
 	const Lua::FunctionRef& function,
-	boost::function1<unsigned int, lua_State*> pushArguments,
-	boost::function2<void, lua_State*, unsigned int> readResults
+	std::function<unsigned int(lua_State*)> pushArguments,
+	std::function<void(lua_State*, unsigned int)> readResults
 )
 {
 	if (!function.thread()) {
@@ -752,10 +750,10 @@ void ScriptContext::call(
 void ScriptContext::startPendingScripts()
 {
 	if (!scriptsDisabled) {
-		std::vector<boost::shared_ptr<Script> > copy(pendingScripts);
+		std::vector<std::shared_ptr<Script> > copy(pendingScripts);
 		pendingScripts.clear();
 
-		std::for_each(copy.begin(), copy.end(), boost::bind(&ScriptContext::startScript, this, _1));
+		std::for_each(copy.begin(), copy.end(), [this](const std::shared_ptr<Script>& script) { startScript(script); });
 	}
 }
 
@@ -786,36 +784,36 @@ static void FUN_00751160(lua_State* thread, unsigned int count)
 
 void ScriptContext::executeInNewThread(Security::Identities identity, const char* script, const char* name)
 {
-	executeInNewThread(identity, script, name, boost::bind(&FUN_00407390, _1), boost::bind(&FUN_00751160, _1, _2));
+	executeInNewThread(identity, script, name, FUN_00407390, FUN_00751160);
 }
 
-std::auto_ptr<std::vector<Reflection::Value> > ScriptContext::call(
+std::unique_ptr<std::vector<Reflection::Value> > ScriptContext::call(
 	const Lua::FunctionRef& function, const std::vector<Reflection::Value>& arguments
 )
 {
-	std::auto_ptr<std::vector<Reflection::Value> > result;
+	std::unique_ptr<std::vector<Reflection::Value> > result;
 
 	call(
 		function,
-		boost::bind(&pushArguments, boost::cref(arguments), _1),
-		boost::bind(&readResults, boost::ref(result), _1, _2)
+		[&arguments](lua_State* thread) { return pushArguments(arguments, thread); },
+		[&result](lua_State* thread, unsigned int returnCount) { readResults(result, thread, returnCount); }
 	);
 
 	return result;
 }
 
-std::auto_ptr<std::vector<Reflection::Value> > ScriptContext::executeInNewThread(
+std::unique_ptr<std::vector<Reflection::Value> > ScriptContext::executeInNewThread(
 	Security::Identities identity, const char* script, const char* name, const std::vector<Reflection::Value>& arguments
 )
 {
-	std::auto_ptr<std::vector<Reflection::Value> > result;
+	std::unique_ptr<std::vector<Reflection::Value> > result;
 
 	executeInNewThread(
 		identity,
 		script,
 		name,
-		boost::bind(&pushArguments, boost::cref(arguments), _1),
-		boost::bind(&readResults, boost::ref(result), _1, _2)
+		[&arguments](lua_State* thread) { return pushArguments(arguments, thread); },
+		[&result](lua_State* thread, unsigned int returnCount) { readResults(result, thread, returnCount); }
 	);
 
 	return result;
@@ -823,9 +821,10 @@ std::auto_ptr<std::vector<Reflection::Value> > ScriptContext::executeInNewThread
 
 void ScriptContext::onEvent(const RunService* source, Heartbeat event)
 {
-	if (boost::posix_time::second_clock::local_time() >= nextPendingScripts) {
+	if (std::chrono::floor<std::chrono::seconds>(std::chrono::steady_clock::now()) >= nextPendingScripts) {
 		startPendingScripts();
-		nextPendingScripts = boost::posix_time::second_clock::local_time() + boost::posix_time::seconds(1);
+		nextPendingScripts =
+			std::chrono::floor<std::chrono::seconds>(std::chrono::steady_clock::now()) + std::chrono::seconds(1);
 	}
 
 	if (yieldEvent) {
@@ -840,11 +839,11 @@ void ScriptContext::onEvent(const RunService* source, Heartbeat event)
 } // namespace RBX
 
 template void RBX::Lua::SharedPtrBridge<RBX::Reflection::DescribedBase>::push(
-	lua_State* L, boost::shared_ptr<RBX::Reflection::DescribedBase> instance
+	lua_State* L, std::shared_ptr<RBX::Reflection::DescribedBase> instance
 );
 
 template void RBX::Lua::SharedPtrBridge<RBX::Reflection::SignalInstance>::push(
-	lua_State* L, boost::shared_ptr<RBX::Reflection::SignalInstance> instance
+	lua_State* L, std::shared_ptr<RBX::Reflection::SignalInstance> instance
 );
 
 template const RBX::FactoryProduct<RBX::DebugSettings, RBX::GlobalSettings::Item, RBX::sDebugSettings>::Creator

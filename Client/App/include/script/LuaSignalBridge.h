@@ -3,42 +3,37 @@
 
 #include "lua/LuaBridge.h"
 #include "reflection/signal.h"
-
-#include <boost/signals/connection.hpp>
+#include "util/Signals.h"
 
 namespace RBX {
 namespace Lua {
 
 template <>
-int Bridge<boost::signals::connection, 1>::on_index(
-	const boost::signals::connection& value, const char* name, lua_State* L
-);
+int Bridge<Signals::Connection, 1>::on_index(const Signals::Connection& value, const char* name, lua_State* L);
 
 template <>
-void Bridge<boost::signals::connection, 1>::on_newindex(
-	boost::signals::connection& value, const char* name, lua_State* L
-);
+void Bridge<Signals::Connection, 1>::on_newindex(Signals::Connection& value, const char* name, lua_State* L);
 
 template <>
-inline int Bridge<boost::signals::connection, 1>::on_tostring(const boost::signals::connection& value, lua_State* L)
+inline int Bridge<Signals::Connection, 1>::on_tostring(const Signals::Connection& value, lua_State* L)
 {
 	lua_pushstring(L, "Connection");
 	return 1;
 }
 
 template <>
-int Bridge<boost::shared_ptr<RBX::Reflection::SignalInstance>, 0>::on_index(
-	const boost::shared_ptr<RBX::Reflection::SignalInstance>& value, const char* name, lua_State* L
+int Bridge<std::shared_ptr<RBX::Reflection::SignalInstance>, 0>::on_index(
+	const std::shared_ptr<RBX::Reflection::SignalInstance>& value, const char* name, lua_State* L
 );
 
 template <>
-void Bridge<boost::shared_ptr<RBX::Reflection::SignalInstance>, 0>::on_newindex(
-	boost::shared_ptr<RBX::Reflection::SignalInstance>& value, const char* name, lua_State* L
+void Bridge<std::shared_ptr<RBX::Reflection::SignalInstance>, 0>::on_newindex(
+	std::shared_ptr<RBX::Reflection::SignalInstance>& value, const char* name, lua_State* L
 );
 
 template <>
-inline int Bridge<boost::shared_ptr<RBX::Reflection::SignalInstance>, 0>::on_tostring(
-	const boost::shared_ptr<RBX::Reflection::SignalInstance>& value, lua_State* L
+inline int Bridge<std::shared_ptr<RBX::Reflection::SignalInstance>, 0>::on_tostring(
+	const std::shared_ptr<RBX::Reflection::SignalInstance>& value, lua_State* L
 )
 {
 	std::string result("Signal ");
@@ -47,15 +42,15 @@ inline int Bridge<boost::shared_ptr<RBX::Reflection::SignalInstance>, 0>::on_tos
 	return 1;
 }
 
-class SignalConnectionBridge : public Bridge<boost::signals::connection, 1>
+class SignalConnectionBridge : public Bridge<Signals::Connection, 1>
 {
-	friend class Bridge<boost::signals::connection, 1>;
+	friend class Bridge<Signals::Connection, 1>;
 
 private:
 	static int disconnect(lua_State* L);
 };
 
-class SignalBridge : public Bridge<boost::shared_ptr<RBX::Reflection::SignalInstance>, 0>
+class SignalBridge : public Bridge<std::shared_ptr<RBX::Reflection::SignalInstance>, 0>
 {
 public:
 	static int connect(lua_State* L);

@@ -61,13 +61,13 @@ public:
 
 	/// Append this string to output logs. (newline is useful here)
 	virtual void SetSuffix(const char *_suffix);
-	static char* BaseIDTOString(unsigned char Id);
+	static const char* BaseIDTOString(unsigned char Id);
 
 protected:
 	virtual void AddToLog(const char *str);
-	char* IDTOString(unsigned char Id);
+	const char* IDTOString(unsigned char Id);
 	// Users should override this
-	virtual char* UserIDTOString(unsigned char Id);
+	virtual const char* UserIDTOString(unsigned char Id);
 
 	RakPeerInterface *rakPeer;
 	bool printId, printAcks;

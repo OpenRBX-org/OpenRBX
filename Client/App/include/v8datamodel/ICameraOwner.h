@@ -3,7 +3,7 @@
 
 #include "util/Extents.h"
 
-#include <boost/weak_ptr.hpp>
+#include <memory>
 #include <vector>
 
 namespace G3D {
@@ -22,7 +22,7 @@ public:
 	ICameraOwner() {}
 
 private:
-	std::vector<boost::weak_ptr<PartInstance> > cameraIgnoreParts;
+	std::vector<std::weak_ptr<PartInstance> > cameraIgnoreParts;
 
 public:
 	virtual ~ICameraOwner() {}

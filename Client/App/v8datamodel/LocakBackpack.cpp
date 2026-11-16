@@ -80,10 +80,9 @@ void LocalBackpack::removeBackpackItem(BackpackItem* item)
 void LocalBackpack::onHeartbeat()
 {
 	if (pendingClick.get()) {
-		boost::shared_ptr<const std::vector<boost::shared_ptr<Instance> > > c = getChildren().read();
+		std::shared_ptr<const std::vector<std::shared_ptr<Instance> > > c = getChildren().read();
 		if (c) {
-			for (std::vector<boost::shared_ptr<Instance> >::const_iterator iter = c->begin(); iter != c->end();
-				 ++iter) {
+			for (std::vector<std::shared_ptr<Instance> >::const_iterator iter = c->begin(); iter != c->end(); ++iter) {
 				LocalBackpackItem* item = static_cast<LocalBackpackItem*>(iter->get());
 				if (item->getItem() != pendingClick.get()) {
 					item->getItem()->onLocalOtherClicked();
@@ -262,7 +261,7 @@ void LocalBackpack::onServiceProvider(const ServiceProvider* oldProvider, const 
 
 void LocalBackpack::insertBackpackItem(BackpackItem* item)
 {
-	boost::shared_ptr<LocalBackpackItem> localItem = Creatable<Instance>::create<LocalBackpackItem>();
+	std::shared_ptr<LocalBackpackItem> localItem = Creatable<Instance>::create<LocalBackpackItem>();
 
 	localItem->setParent(this);
 
@@ -305,7 +304,7 @@ void LocalBackpack::onEvent(const Instance* source, DescendentAdded event)
 
 } // namespace RBX
 
-template boost::shared_ptr<RBX::Network::Player> RBX::shared_from(RBX::Network::Player* r);
+template std::shared_ptr<RBX::Network::Player> RBX::shared_from(RBX::Network::Player* r);
 template void RBX::Notifier<RBX::Network::Player, RBX::Network::CharacterAdded>::addListener(
 	RBX::Listener<RBX::Network::Player, RBX::Network::CharacterAdded>* listener
 ) const;

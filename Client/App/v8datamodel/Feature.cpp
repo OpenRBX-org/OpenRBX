@@ -12,8 +12,6 @@
 #include "v8world/Primitive.h"
 #include "v8world/World.h"
 
-#include <boost/bind.hpp>
-
 namespace RBX {
 
 const char sVelocityMotor[] = "VelocityMotor";
@@ -289,7 +287,7 @@ void VelocityMotor::setHole(Hole* value)
 		setPart(1, hole.get());
 		if (hole) {
 			holeAncestorChanged = Instance::event_ancestryChanged.connect(
-				hole.get(), boost::bind(&VelocityMotor::onEvent_HoleAncestorChanged, this), 10
+				hole.get(), [this](const std::shared_ptr<Instance>&) { onEvent_HoleAncestorChanged(); }, 10
 			);
 		}
 		else {
@@ -337,7 +335,7 @@ void FUN_0061a840(Instance* first, Instance* second)
 		Instance* hole = dynamic_cast<Hole*>(first) ? first : second;
 		Instance* feature = hole == first ? second : first;
 
-		boost::shared_ptr<VelocityMotor> motor = Creatable<Instance>::create<VelocityMotor>();
+		std::shared_ptr<VelocityMotor> motor = Creatable<Instance>::create<VelocityMotor>();
 		motor->setHole(static_cast<Hole*>(hole));
 		motor->setParent(feature);
 	}

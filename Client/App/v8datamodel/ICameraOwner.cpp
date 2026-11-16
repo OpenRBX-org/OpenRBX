@@ -21,7 +21,7 @@ void ICameraOwner::setCameraIgnoreParts(const std::vector<PartInstance*>& _set)
 
 	for (unsigned int i = 0; i < _set.size(); i++) {
 		PartInstance* part = _set[i];
-		boost::weak_ptr<PartInstance> ptr = shared_from(part);
+		std::weak_ptr<PartInstance> ptr = shared_from(part);
 		cameraIgnoreParts.push_back(ptr);
 	}
 }

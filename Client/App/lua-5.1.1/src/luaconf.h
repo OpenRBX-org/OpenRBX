@@ -711,7 +711,7 @@ union luai_Cast { double l_d; long l_l; };
 ** CHANGE (define) this if you really need that. This value must be
 ** a multiple of the maximum alignment required for your machine.
 */
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <new>
 
 struct lua_State;
@@ -719,7 +719,7 @@ struct lua_State;
 class RobloxExtraSpace
 {
 private:
-	boost::shared_ptr<int> threadCount;
+	std::shared_ptr<int> threadCount;
 
 	RobloxExtraSpace(RobloxExtraSpace* parent);
 

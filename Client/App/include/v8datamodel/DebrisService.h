@@ -5,8 +5,7 @@
 #include "v8tree/Instance.h"
 #include "v8tree/Service.h"
 
-#include <boost/shared_ptr.hpp>
-#include <boost/weak_ptr.hpp>
+#include <memory>
 #include <queue>
 
 namespace RBX {
@@ -18,14 +17,14 @@ class TimerService;
 class DebrisService : public DescribedCreatable<DebrisService, Instance, sDebrisService>, public Service
 {
 private:
-	std::queue<boost::weak_ptr<Instance> > queue;
+	std::queue<std::weak_ptr<Instance> > queue;
 	int maxItems;
 	TimerService* timer;
 
 public:
 	DebrisService();
 
-	void addItem(boost::shared_ptr<Instance> item, double lifetime);
+	void addItem(std::shared_ptr<Instance> item, double lifetime);
 	void setMaxItems(int value);
 
 	int getMaxItems() const { return maxItems; }

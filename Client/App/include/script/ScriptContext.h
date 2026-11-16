@@ -11,10 +11,8 @@
 #include "v8tree/Instance.h"
 #include "v8tree/Service.h"
 
-#include <boost/date_time/posix_time/ptime.hpp>
-#include <boost/function.hpp>
-#include <boost/scoped_ptr.hpp>
-#include <boost/shared_ptr.hpp>
+#include <chrono>
+#include <functional>
 #include <lua.h>
 #include <memory>
 #include <set>
@@ -48,15 +46,15 @@ public:
 		Error
 	};
 
-	std::auto_ptr<std::vector<Reflection::Value> > call(const Lua::FunctionRef&, const std::vector<Reflection::Value>&);
+	std::unique_ptr<std::vector<Reflection::Value> > call(
+		const Lua::FunctionRef&, const std::vector<Reflection::Value>&
+	);
 	void call(const Lua::FunctionRef&);
 	void call(
-		const Lua::FunctionRef&,
-		boost::function1<unsigned int, lua_State*>,
-		boost::function2<void, lua_State*, unsigned int>
+		const Lua::FunctionRef&, std::function<unsigned int(lua_State*)>, std::function<void(lua_State*, unsigned int)>
 	);
 
-	std::auto_ptr<std::vector<Reflection::Value> > executeInNewThread(
+	std::unique_ptr<std::vector<Reflection::Value> > executeInNewThread(
 		Security::Identities identity,
 		const char* script,
 		const char* name,
@@ -67,16 +65,16 @@ public:
 		Security::Identities identity,
 		const char* script,
 		const char* name,
-		boost::function1<unsigned int, lua_State*> pushArguments,
-		boost::function2<void, lua_State*, unsigned int> readResults
+		std::function<unsigned int(lua_State*)> pushArguments,
+		std::function<void(lua_State*, unsigned int)> readResults
 	);
 
 	Result resume(lua_State* thread, int narg);
 	void gc();
 	void resume(
 		lua_State* thread,
-		boost::function1<unsigned int, lua_State*> pushArguments,
-		boost::function2<void, lua_State*, unsigned int> readResults
+		std::function<unsigned int(lua_State*)> pushArguments,
+		std::function<void(lua_State*, unsigned int)> readResults
 	);
 
 	static Reflection::BoundProp<bool, 1> propScriptsDisabled;
@@ -136,18 +134,18 @@ private:
 
 	void disassociateState(Script* script);
 	void openState();
-	void startScript(boost::shared_ptr<Script> script);
+	void startScript(std::shared_ptr<Script> script);
 	void startPendingScripts();
 
 	lua_State* globalState;
 	Lua::ThreadRef commandLineSandbox;
 	std::set<Script*> scripts;
-	boost::posix_time::ptime nextPendingScripts;
-	std::vector<boost::shared_ptr<Script> > pendingScripts;
-	boost::shared_ptr<RunService> runService;
-	boost::scoped_ptr<Lua::YieldingThreads> yieldEvent;
+	std::chrono::steady_clock::time_point nextPendingScripts;
+	std::vector<std::shared_ptr<Script> > pendingScripts;
+	std::shared_ptr<RunService> runService;
+	std::unique_ptr<Lua::YieldingThreads> yieldEvent;
 	bool scriptsDisabled;
-	boost::shared_ptr<Stats::Item> statsItem;
+	std::shared_ptr<Stats::Item> statsItem;
 
 	class ScriptImpersonator : public Security::Impersonator
 	{
@@ -156,7 +154,7 @@ private:
 	};
 
 public:
-	boost::scoped_ptr<LuaAllocator> allocator;
+	std::unique_ptr<LuaAllocator> allocator;
 };
 
 } // namespace RBX

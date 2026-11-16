@@ -10,11 +10,11 @@ CRobloxDoc* ActiveDocView::g_unk0x00952d8c;
 
 std::set<ActiveDocView*> ActiveDocView::g_unk0x00952d90;
 
-boost::shared_ptr<RBX::DataModel> ActiveDocView::g_unk0x00952d9c;
+std::shared_ptr<RBX::DataModel> ActiveDocView::g_unk0x00952d9c;
 
 void ActiveDocView::FUN_004054f0(bool activate, CRobloxDoc* doc)
 {
-	boost::shared_ptr<RBX::DataModel> oldDataModel = g_unk0x00952d9c;
+	std::shared_ptr<RBX::DataModel> oldDataModel = g_unk0x00952d9c;
 
 	if (activate) {
 		g_unk0x00952d8c = doc;

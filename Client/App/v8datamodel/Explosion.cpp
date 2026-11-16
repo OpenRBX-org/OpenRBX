@@ -24,7 +24,7 @@ static Reflection::PropDescriptor<Explosion, float> propBlastRadius(
 
 Reflection::BoundProp<float, 1> Explosion::propBlastPressure("BlastPressure", "Data", &Explosion::blastPressure);
 Reflection::BoundProp<G3D::Vector3, 1> Explosion::propPosition("Position", "Data", &Explosion::position);
-Reflection::SignalDesc<Explosion, void(boost::shared_ptr<Instance>, float)> signal_Hit("Hit", "part", "distance");
+Reflection::SignalDesc<Explosion, void(std::shared_ptr<Instance>, float)> signal_Hit("Hit", "part", "distance");
 
 void Explosion::doBlast(const G3D::Array<Primitive*>& primitives)
 {

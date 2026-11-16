@@ -7,7 +7,7 @@
 #include "v8datamodel/Hopper.h"
 #include "v8tree/Service.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 class XmlElement;
 
@@ -27,7 +27,7 @@ extern const char sLocalBackpackItem[];
 class LocalBackpackItem : public DescribedCreatable<LocalBackpackItem, Widget, sLocalBackpackItem>
 {
 private:
-	boost::shared_ptr<BackpackItem> myItem;
+	std::shared_ptr<BackpackItem> myItem;
 	GuiDrawImage guiImageDraw;
 
 	virtual bool askSetParent(const Instance* instance) const { return true; }
@@ -54,11 +54,11 @@ class LocalBackpack : public DescribedCreatable<LocalBackpack, RelativePanel, sL
 					  public Listener<Network::Player, Network::CharacterRemoving>
 {
 private:
-	boost::shared_ptr<Network::Players> players;
-	boost::shared_ptr<Network::Player> localPlayer;
-	boost::shared_ptr<Backpack> localBackpack;
-	boost::shared_ptr<Instance> localCharacter;
-	boost::shared_ptr<BackpackItem> pendingClick;
+	std::shared_ptr<Network::Players> players;
+	std::shared_ptr<Network::Player> localPlayer;
+	std::shared_ptr<Backpack> localBackpack;
+	std::shared_ptr<Instance> localCharacter;
+	std::shared_ptr<BackpackItem> pendingClick;
 	int lastRemovedIndex;
 
 	virtual bool askSetParent(const Instance* instance) const { return true; }

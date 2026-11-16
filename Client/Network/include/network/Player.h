@@ -4,11 +4,11 @@
 #include "reflection/property.h"
 #include "reflection/signal.h"
 #include "util/Events.h"
+#include "util/Signals.h"
 #include "v8datamodel/BrickColor.h"
 #include "v8tree/Instance.h"
 
-#include <boost/shared_ptr.hpp>
-#include <boost/signals/connection.hpp>
+#include <memory>
 #include <string>
 
 namespace RBX {
@@ -22,14 +22,14 @@ extern char sPlayer[];
 
 struct CharacterAdded
 {
-	const boost::shared_ptr<Instance> character;
+	const std::shared_ptr<Instance> character;
 
 	CharacterAdded(Instance* character) : character(shared_from(character)) {}
 };
 
 struct CharacterRemoving
 {
-	const boost::shared_ptr<Instance> character;
+	const std::shared_ptr<Instance> character;
 
 	CharacterRemoving(Instance* character) : character(shared_from(character)) {}
 };
@@ -38,10 +38,10 @@ class Player : public DescribedCreatable<Player, Instance, sPlayer>,
 			   public Notifier<Player, CharacterAdded>,
 			   public Notifier<Player, CharacterRemoving>
 {
-	boost::shared_ptr<ModelInstance> character;
+	std::shared_ptr<ModelInstance> character;
 	BrickColor teamColor;
 	bool neutral;
-	boost::signals::scoped_connection characterDiedConnection;
+	Signals::ScopedConnection characterDiedConnection;
 	std::string characterAppearance;
 	bool under13;
 	bool superSafeChat;
@@ -62,7 +62,7 @@ public:
 	Player();
 	virtual ~Player();
 
-	static Reflection::SignalDesc<Player, void(std::string, boost::shared_ptr<Instance>)> event_Chatted;
+	static Reflection::SignalDesc<Player, void(std::string, std::shared_ptr<Instance>)> event_Chatted;
 
 	virtual XmlElement* write() { return NULL; }
 

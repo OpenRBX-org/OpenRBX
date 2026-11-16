@@ -8,7 +8,7 @@
 #include "v8tree/Service.h"
 
 #include <G3D/Color3.h>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <vector>
 
 namespace RBX {
@@ -35,11 +35,11 @@ public:
 	BrickColor getUnusedTeamColor();
 	Team* getTeamFromTeamColor(BrickColor c);
 	Team* getTeamFromPlayer(Network::Player* p);
-	boost::shared_ptr<const std::vector<boost::shared_ptr<Instance> > > getTeams();
+	std::shared_ptr<const std::vector<std::shared_ptr<Instance> > > getTeams();
 	G3D::Color3 getTeamColorForHumanoid(Humanoid* h);
 
 private:
-	CopyOnWrite<std::vector<boost::shared_ptr<Instance> > > teams;
+	CopyOnWrite<std::vector<std::shared_ptr<Instance> > > teams;
 
 protected:
 	virtual void onChildAdded(Instance* child);

@@ -3,7 +3,6 @@
 #include <G3D/RegistryUtil.h>
 #include <GLG3D/DXCaps.h>
 #include <GLG3D/GLCaps.h>
-#include <boost/lexical_cast.hpp>
 #include <intrin.h>
 #include <string>
 #include <windows.h>
@@ -134,8 +133,8 @@ static std::string getMaxRes()
 	int width = GetSystemMetrics(SM_CXSCREEN);
 	int height = GetSystemMetrics(SM_CYSCREEN);
 
-	std::string w = boost::lexical_cast<std::string>(width);
-	std::string h = boost::lexical_cast<std::string>(height);
+	std::string w = std::to_string(width);
+	std::string h = std::to_string(height);
 
 	return w + "x" + h;
 }

@@ -6,7 +6,7 @@
 
 #include <G3D/Array.h>
 #include <G3D/Vector3.h>
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 
 namespace RBX {
 
@@ -66,7 +66,7 @@ public:
 	int numPoints() const;
 	int numConnectors() const;
 
-	boost::scoped_ptr<Profiling::CodeProfiler> profilingKernel;
+	std::unique_ptr<Profiling::CodeProfiler> profilingKernel;
 };
 
 } // namespace RBX

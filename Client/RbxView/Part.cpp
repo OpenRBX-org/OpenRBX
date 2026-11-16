@@ -18,8 +18,6 @@
 #include "v8datamodel/Workspace.h"
 #include "v8datamodel/custommesh.h"
 
-#include <boost/bind.hpp>
-
 namespace RBX {
 namespace View {
 
@@ -122,7 +120,7 @@ void Part::onEvent(const PartInstance* source, CanAggregateChanged event)
 	view->sceneManager->setSleeping(this, event.canClump);
 }
 
-void PartChunk::onAncestorChanged(boost::shared_ptr<Instance> ancestor)
+void PartChunk::onAncestorChanged(std::shared_ptr<Instance> ancestor)
 {
 	Workspace* workspace = Workspace::findWorkspace(partInstance.get());
 	Instance* parent;
@@ -133,7 +131,7 @@ void PartChunk::onAncestorChanged(boost::shared_ptr<Instance> ancestor)
 	}
 }
 
-void Decal::onDecalAncestorChanged(boost::shared_ptr<Instance> ancestor)
+void Decal::onDecalAncestorChanged(std::shared_ptr<Instance> ancestor)
 {
 	Workspace* workspace = Workspace::findWorkspace(decal.get());
 	Instance* parent;
@@ -144,7 +142,7 @@ void Decal::onDecalAncestorChanged(boost::shared_ptr<Instance> ancestor)
 	}
 }
 
-void Texture::onTextureAncestorChanged(boost::shared_ptr<Instance> ancestor)
+void Texture::onTextureAncestorChanged(std::shared_ptr<Instance> ancestor)
 {
 	Workspace* workspace = Workspace::findWorkspace(texture.get());
 	Instance* parent;
@@ -303,7 +301,7 @@ G3D::ReferenceCountedPointer<Render::Material> Texture::getMaterial()
 	return material;
 }
 
-void PartChunk::onChildRemoved(boost::shared_ptr<Instance> child)
+void PartChunk::onChildRemoved(std::shared_ptr<Instance> child)
 {
 	if (child.get() == specialShape) {
 		shapePropertyChangedConnection.disconnect();
@@ -514,7 +512,7 @@ void Texture::updateMesh()
 	}
 }
 
-void PartChunk::onChildAdded(boost::shared_ptr<Instance> child)
+void PartChunk::onChildAdded(std::shared_ptr<Instance> child)
 {
 	SpecialShape* specialShape = dynamic_cast<SpecialShape*>(child.get());
 
@@ -522,53 +520,59 @@ void PartChunk::onChildAdded(boost::shared_ptr<Instance> child)
 		this->specialShape = specialShape;
 
 		shapePropertyChangedConnection = Instance::event_propertyChanged.connect(
-			specialShape, boost::bind(&PartChunk::onSpecialShapeChanged, this), 10
+			specialShape, [this](const Reflection::PropertyDescriptor*) { onSpecialShapeChanged(); }, 10
 		);
 
 		invalidateMesh();
 	}
 }
 
-PartChunk::PartChunk(float polygonOffset, const boost::shared_ptr<PartInstance>& partInstance, View* view)
+PartChunk::PartChunk(float polygonOffset, const std::shared_ptr<PartInstance>& partInstance, View* view)
 	: Render::Chunk(polygonOffset), partInstance(partInstance), materialInvalid(true), view(view), specialShape(NULL)
 {
 	view->sceneManager->addModel(this);
 
-	childAddedConnection =
-		Instance::event_childAdded.connect(partInstance.get(), boost::bind(&PartChunk::onChildAdded, this, _1), 10);
-	childRemovedConnection =
-		Instance::event_childRemoved.connect(partInstance.get(), boost::bind(&PartChunk::onChildRemoved, this, _1), 10);
+	childAddedConnection = Instance::event_childAdded.connect(
+		partInstance.get(), [this](const std::shared_ptr<Instance>& child) { onChildAdded(child); }, 10
+	);
+	childRemovedConnection = Instance::event_childRemoved.connect(
+		partInstance.get(), [this](const std::shared_ptr<Instance>& child) { onChildRemoved(child); }, 10
+	);
 	ancestorChangedConnection = Instance::event_ancestryChanged.connect(
-		partInstance.get(), boost::bind(&PartChunk::onAncestorChanged, this, _1), 10
+		partInstance.get(), [this](const std::shared_ptr<Instance>& ancestor) { onAncestorChanged(ancestor); }, 10
 	);
 	propertyChangedConnection = Instance::event_propertyChanged.connect(
-		partInstance.get(), boost::bind(&PartChunk::onPropertyChanged, this, _1), 10
+		partInstance.get(),
+		[this](const Reflection::PropertyDescriptor* descriptor) { onPropertyChanged(descriptor); },
+		10
 	);
 
-	partInstance->visitChildren(boost::bind(&PartChunk::onChildAdded, this, _1));
+	partInstance->visitChildren([this](const std::shared_ptr<Instance>& child) { onChildAdded(child); });
 }
 
 Decal::Decal(RBX::Decal& decal, PartInstance& parentPart, View* view)
 	: PartChunk(Render::Chunk::DECAL_OFFSET, shared_from(&parentPart), view), decal(shared_from(&decal))
 {
-	decalAncestorChangedConnection =
-		Instance::event_ancestryChanged.connect(&decal, boost::bind(&Decal::onDecalAncestorChanged, this, _1), 10);
-	decalPropertyChangedConnection =
-		Instance::event_propertyChanged.connect(&decal, boost::bind(&Decal::onDecalPropertyChanged, this, _1), 10);
+	decalAncestorChangedConnection = Instance::event_ancestryChanged.connect(
+		&decal, [this](const std::shared_ptr<Instance>& ancestor) { onDecalAncestorChanged(ancestor); }, 10
+	);
+	decalPropertyChangedConnection = Instance::event_propertyChanged.connect(
+		&decal, [this](const Reflection::PropertyDescriptor* descriptor) { onDecalPropertyChanged(descriptor); }, 10
+	);
 }
 
 Texture::Texture(RBX::Texture& texture, PartInstance& parentPart, View* view)
 	: PartChunk(Render::Chunk::TEXTURE_OFFSET, shared_from(&parentPart), view), texture(shared_from(&texture))
 {
 	textureAncestorChangedConnection = Instance::event_ancestryChanged.connect(
-		&texture, boost::bind(&Texture::onTextureAncestorChanged, this, _1), 10
+		&texture, [this](const std::shared_ptr<Instance>& ancestor) { onTextureAncestorChanged(ancestor); }, 10
 	);
 	texturePropertyChangedConnection = Instance::event_propertyChanged.connect(
-		&texture, boost::bind(&Texture::onTexturePropertyChanged, this, _1), 10
+		&texture, [this](const Reflection::PropertyDescriptor* descriptor) { onTexturePropertyChanged(descriptor); }, 10
 	);
 }
 
-Part::Part(const boost::shared_ptr<PartInstance>& partInstance, View* view) : PartChunk(0.0f, partInstance, view)
+Part::Part(const std::shared_ptr<PartInstance>& partInstance, View* view) : PartChunk(0.0f, partInstance, view)
 {
 	if (partInstance->getCanAggregate()) {
 		view->sceneManager->setSleeping(this, true);

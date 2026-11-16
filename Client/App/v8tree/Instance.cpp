@@ -3,9 +3,8 @@
 #include "v8xml/SerializerV2.h"
 
 #include <algorithm>
-#include <boost/bind.hpp>
-#include <boost/scoped_ptr.hpp>
 #include <cstddef>
+#include <memory>
 
 namespace RBX {
 
@@ -13,7 +12,7 @@ const char sInstance[] = "Instance";
 
 Reflection::BoundProp<bool, 1> Instance::propArchivable("archivable", "Behavior", &Instance::archivable);
 
-static Reflection::BoundFuncDesc<Instance, boost::shared_ptr<Instance>(std::string, bool), 2> findFirstChild(
+static Reflection::BoundFuncDesc<Instance, std::shared_ptr<Instance>(std::string, bool), 2> findFirstChild(
 	&Instance::findFirstChildByName2,
 	"FindFirstChild",
 	"name",
@@ -22,7 +21,7 @@ static Reflection::BoundFuncDesc<Instance, boost::shared_ptr<Instance>(std::stri
 	Reflection::FunctionDescriptor::AnyCaller
 );
 
-static Reflection::BoundFuncDesc<Instance, boost::shared_ptr<Instance>(), 0> func_clone(
+static Reflection::BoundFuncDesc<Instance, std::shared_ptr<Instance>(), 0> func_clone(
 	&Instance::clone, "Clone", Reflection::FunctionDescriptor::AnyCaller
 );
 
@@ -30,9 +29,9 @@ static Reflection::BoundFuncDesc<Instance, void(), 0> func_Remove(
 	&Instance::remove, "Remove", Reflection::FunctionDescriptor::AnyCaller
 );
 
-static Reflection::BoundFuncDesc<Instance, boost::shared_ptr<const std::vector<shared_ptr<Instance> > >(), 0>
+static Reflection::BoundFuncDesc<Instance, std::shared_ptr<const std::vector<shared_ptr<Instance> > >(), 0>
 	func_childrenOld(&Instance::getChildren2, "children", Reflection::FunctionDescriptor::AnyCaller);
-static Reflection::BoundFuncDesc<Instance, boost::shared_ptr<const std::vector<shared_ptr<Instance> > >(), 0>
+static Reflection::BoundFuncDesc<Instance, std::shared_ptr<const std::vector<shared_ptr<Instance> > >(), 0>
 	func_children(&Instance::getChildren2, "GetChildren", Reflection::FunctionDescriptor::AnyCaller);
 static Reflection::BoundFuncDesc<Instance, bool(shared_ptr<Instance>), 1> func_isDescendentOf(
 	&Instance::isDescendentOf2, "IsDescendentOf", "ancestor", Reflection::FunctionDescriptor::AnyCaller
@@ -187,7 +186,7 @@ void Instance::signalDescendentAdded(Instance* instance, Instance* beginParent, 
 		walk->onDescendentAdded(instance);
 	}
 
-	boost::shared_ptr<const std::vector<shared_ptr<Instance> > > c = instance->children.read();
+	std::shared_ptr<const std::vector<shared_ptr<Instance> > > c = instance->children.read();
 
 	if (c) {
 		for (std::vector<shared_ptr<Instance> >::const_iterator it = c->begin(); it != c->end(); ++it) {
@@ -212,7 +211,7 @@ void Instance::signalDescendentRemoving(
 		walk->onDescendentRemoving(instance);
 	}
 
-	boost::shared_ptr<const std::vector<shared_ptr<Instance> > > c = instance->children.read();
+	std::shared_ptr<const std::vector<shared_ptr<Instance> > > c = instance->children.read();
 
 	if (c) {
 		for (std::vector<shared_ptr<Instance> >::const_iterator it = c->begin(); it != c->end(); ++it) {
@@ -221,7 +220,7 @@ void Instance::signalDescendentRemoving(
 	}
 }
 
-boost::shared_ptr<Instance> Instance::findFirstChildByName2(std::string findName, bool recursive)
+std::shared_ptr<Instance> Instance::findFirstChildByName2(std::string findName, bool recursive)
 {
 	return recursive ? shared_from(findFirstChildByNameRecursive(findName))
 					 : shared_from(findFirstChildByName(findName));
@@ -290,7 +289,7 @@ void Instance::readProperty(const XmlElement* propertyElement, IReferenceBinder&
 void Instance::onAddListener(Listener<Instance, ChildAdded>* listener) const
 {
 	if (children) {
-		boost::shared_ptr<const std::vector<shared_ptr<Instance> > > c = children.read();
+		std::shared_ptr<const std::vector<shared_ptr<Instance> > > c = children.read();
 		std::vector<shared_ptr<Instance> >::const_iterator end = c->end();
 		for (std::vector<shared_ptr<Instance> >::const_iterator iter = c->begin(); iter != end; ++iter) {
 			Notifier<Instance, ChildAdded>::raise(ChildAdded(iter->get()), listener);
@@ -321,7 +320,7 @@ void Instance::onAddListener(Listener<Instance, DescendentAdded>* listener) cons
 	for_eachChild(RaiseDescendentAdded2(this, listener));
 }
 
-boost::shared_ptr<Instance> Instance::fromXmlRoot(XmlElement* xmlRoot)
+std::shared_ptr<Instance> Instance::fromXmlRoot(XmlElement* xmlRoot)
 {
 	Serializer serializer;
 
@@ -342,9 +341,9 @@ inline XmlElement* Instance::toNewXmlRoot(Instance* instance)
 	return root;
 }
 
-boost::shared_ptr<Instance> Instance::clone()
+std::shared_ptr<Instance> Instance::clone()
 {
-	boost::scoped_ptr<XmlElement> root(toNewXmlRoot(this));
+	std::unique_ptr<XmlElement> root(toNewXmlRoot(this));
 	return fromXmlRoot(root.get());
 }
 
@@ -418,7 +417,7 @@ void Instance::setParent(Instance* newParent)
 void Instance::onAncestorChanged(const AncestorChanged& event)
 {
 	if (children) {
-		boost::shared_ptr<const std::vector<shared_ptr<Instance> > > c = children.read();
+		std::shared_ptr<const std::vector<shared_ptr<Instance> > > c = children.read();
 		for (std::vector<shared_ptr<Instance> >::const_iterator it = c->begin(); it != c->end(); ++it) {
 			(*it)->onAncestorChanged(event);
 		}
@@ -490,10 +489,10 @@ void Instance::predelete()
 
 void Instance::remove()
 {
-	boost::shared_ptr<const std::vector<shared_ptr<Instance> > > c = children.read();
+	std::shared_ptr<const std::vector<shared_ptr<Instance> > > c = children.read();
 	setParent(NULL);
 	if (c) {
-		std::for_each(c->begin(), c->end(), boost::bind(&Instance::remove, _1));
+		std::for_each(c->begin(), c->end(), [](const std::shared_ptr<Instance>& child) { child->remove(); });
 	}
 }
 

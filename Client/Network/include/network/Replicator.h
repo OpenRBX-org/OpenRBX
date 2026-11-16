@@ -5,17 +5,15 @@
 #include "reflection/reflection.h"
 #include "util/Events.h"
 #include "util/RunStateOwner.h"
+#include "util/Signals.h"
 #include "v8tree/Instance.h"
 #include "v8world/Mechanism.h"
 
 #include <PluginInterface.h>
 #include <RakNetTypes.h>
-#include <boost/noncopyable.hpp>
-#include <boost/scoped_ptr.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/signals/connection.hpp>
 #include <list>
 #include <map>
+#include <memory>
 #include <queue>
 #include <set>
 #include <vector>
@@ -60,14 +58,17 @@ extern const char sPeer[];
 extern const char sReplicator[];
 extern const char sMarker[];
 
-class Marker : public DescribedNonCreatable<Marker, Reflection::DescribedBase, sMarker>, private boost::noncopyable
+class Marker : public DescribedNonCreatable<Marker, Reflection::DescribedBase, sMarker>
 {
 	bool returned;
 
 	Marker() : returned(false) {}
 
 public:
-	static boost::shared_ptr<Marker> newMarker() { return boost::shared_ptr<Marker>(new Marker()); }
+	Marker(const Marker&) = delete;
+	Marker& operator=(const Marker&) = delete;
+
+	static std::shared_ptr<Marker> newMarker() { return std::shared_ptr<Marker>(new Marker()); }
 
 	int id() const { return static_cast<int>(reinterpret_cast<intptr_t>(this)); }
 	void fireReturned() { event_Returned.fire(this); }
@@ -108,9 +109,9 @@ class Replicator : public DescribedNonCreatable<Replicator, IdSerializer, sRepli
 	double lastSendTime;
 	MechanismTracker jobStagePos;
 	double lastCharacterSendTime;
-	boost::shared_ptr<ReplicatorStatsItem> statsItem;
+	std::shared_ptr<ReplicatorStatsItem> statsItem;
 
-	typedef std::map<const Reflection::PropertyDescriptor*, boost::shared_ptr<SharedStringDictionary> > Strings;
+	typedef std::map<const Reflection::PropertyDescriptor*, std::shared_ptr<SharedStringDictionary> > Strings;
 
 	Strings strings;
 	SharedStringDictionary classNames;
@@ -119,9 +120,9 @@ class Replicator : public DescribedNonCreatable<Replicator, IdSerializer, sRepli
 protected:
 	struct ReplicationData
 	{
-		boost::shared_ptr<Instance> instance;
-		boost::signals::connection childAdded;
-		boost::signals::connection changed;
+		std::shared_ptr<Instance> instance;
+		Signals::Connection childAdded;
+		Signals::Connection changed;
 		bool deleteOnDisconnect;
 	};
 
@@ -134,7 +135,7 @@ protected:
 	TopReplConts topReplicationContainers;
 	Players* players;
 
-	typedef std::list<boost::shared_ptr<Item> > ItemQueue;
+	typedef std::list<std::shared_ptr<Item> > ItemQueue;
 
 	ItemQueue pendingItems;
 
@@ -145,17 +146,17 @@ protected:
 	bool sendPhysicsEnabled;
 	const Reflection::Property* deserializingProperty;
 	Instance* removingInstance;
-	std::queue<boost::shared_ptr<Marker> > incomingMarkers;
+	std::queue<std::shared_ptr<Marker> > incomingMarkers;
 
-	typedef std::map<const Name*, boost::shared_ptr<Instance> > DefaultObjects;
+	typedef std::map<const Name*, std::shared_ptr<Instance> > DefaultObjects;
 
 	DefaultObjects defaultObjects;
-	boost::scoped_ptr<Profiling::CodeProfiler> profileReplication;
-	boost::scoped_ptr<Profiling::CodeProfiler> profileDataListening;
-	boost::scoped_ptr<Profiling::CodeProfiler> profileDataIn;
-	boost::scoped_ptr<Profiling::CodeProfiler> profileDataOut;
-	boost::scoped_ptr<Profiling::CodeProfiler> profilePhysicsIn;
-	boost::scoped_ptr<Profiling::CodeProfiler> profilePhysicsOut;
+	std::unique_ptr<Profiling::CodeProfiler> profileReplication;
+	std::unique_ptr<Profiling::CodeProfiler> profileDataListening;
+	std::unique_ptr<Profiling::CodeProfiler> profileDataIn;
+	std::unique_ptr<Profiling::CodeProfiler> profileDataOut;
+	std::unique_ptr<Profiling::CodeProfiler> profilePhysicsIn;
+	std::unique_ptr<Profiling::CodeProfiler> profilePhysicsOut;
 
 	virtual Player* findTargetPlayer();
 
@@ -172,7 +173,7 @@ public:
 	Replicator(SystemAddress remotePlayerId, RakPeerInterface* peer);
 	virtual ~Replicator();
 
-	boost::shared_ptr<Instance> getPlayer() { return shared_from(findTargetPlayer()); }
+	std::shared_ptr<Instance> getPlayer();
 
 	static Reflection::BoundProp<int, 1> prop_maxDataModelSendBuffer;
 	static Reflection::SignalDesc<Replicator, void(std::string, bool)> event_Disconnection;
@@ -184,7 +185,7 @@ public:
 
 	virtual XmlElement* write() { return NULL; }
 
-	boost::shared_ptr<Reflection::DescribedBase> sendMarker();
+	std::shared_ptr<Reflection::DescribedBase> sendMarker();
 	bool isSerializePending(const Instance* instance) const;
 	bool isPropertyChangedPending(const Reflection::Property& property) const;
 	void requestCharacter();
@@ -192,11 +193,11 @@ public:
 
 protected:
 	static void closeReplicationItem(const std::pair<const Instance* const, ReplicationData>& pair);
-	bool disconnectReplicationData(boost::shared_ptr<Instance> instance);
+	bool disconnectReplicationData(std::shared_ptr<Instance> instance);
 	virtual void onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider);
-	void onChildAdded(boost::shared_ptr<Instance> child);
-	void onParentChanged(boost::shared_ptr<Instance> instance);
-	void onPropertyChanged(boost::shared_ptr<Instance> instance, const Reflection::PropertyDescriptor* descriptor);
+	void onChildAdded(std::shared_ptr<Instance> child);
+	void onParentChanged(std::shared_ptr<Instance> instance);
+	void onPropertyChanged(std::shared_ptr<Instance> instance, const Reflection::PropertyDescriptor* descriptor);
 	const Instance* getDefault(const Name& className);
 
 	virtual bool wantReplicate(const Instance* source) const;
@@ -208,7 +209,7 @@ protected:
 private:
 	virtual bool remoteDeleteOnDisconnect(const Instance* instance) const;
 
-	ReplicationData& addReplicationData(boost::shared_ptr<Instance> instance, bool listenToChanges);
+	ReplicationData& addReplicationData(std::shared_ptr<Instance> instance, bool listenToChanges);
 	void addTopReplicationContainer(Instance* instance, bool deleteOnDisconnect);
 	void connectToReplicationContainers();
 	void removeFromPendingProperties(const Instance* instance);
@@ -242,11 +243,11 @@ class Peer : public Reflection::Described<Peer, sPeer, Instance>,
 			 public PluginInterface,
 			 public Listener<RunService, Heartbeat>
 {
-	boost::scoped_ptr<PacketLogger> logger;
-	boost::scoped_ptr<Profiling::ThreadProfiler> profilePacketsThread;
+	std::unique_ptr<PacketLogger> logger;
+	std::unique_ptr<Profiling::ThreadProfiler> profilePacketsThread;
 
 protected:
-	const boost::scoped_ptr<RakPeer> rakPeer;
+	const std::unique_ptr<RakPeer> rakPeer;
 
 	Peer();
 	virtual ~Peer();

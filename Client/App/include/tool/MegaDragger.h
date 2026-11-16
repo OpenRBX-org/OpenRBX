@@ -3,7 +3,7 @@
 
 #include <G3D/Matrix3.h>
 #include <G3D/Vector3.h>
-#include <boost/weak_ptr.hpp>
+#include <memory>
 #include <vector>
 
 namespace RBX {
@@ -17,8 +17,8 @@ class UIEvent;
 class MegaDragger
 {
 private:
-	boost::weak_ptr<PartInstance> mousePart;
-	std::vector<boost::weak_ptr<PartInstance> > dragParts;
+	std::weak_ptr<PartInstance> mousePart;
+	std::vector<std::weak_ptr<PartInstance> > dragParts;
 	bool joined;
 	RootInstance* rootInstance;
 	ContactManager* contactManager;
@@ -27,7 +27,7 @@ public:
 	MegaDragger(PartInstance* mousePartPtr, const std::vector<PVInstance*>& pvInstances, RootInstance* rootInstance);
 	MegaDragger(
 		PartInstance* mousePartPtr,
-		const std::vector<boost::weak_ptr<PartInstance> >& partArray,
+		const std::vector<std::weak_ptr<PartInstance> >& partArray,
 		RootInstance* rootInstance
 	);
 	~MegaDragger();
@@ -38,7 +38,7 @@ public:
 	bool mousePartAlive();
 	bool anyDragPartAlive();
 
-	boost::weak_ptr<PartInstance> getMousePart() { return mousePart; }
+	std::weak_ptr<PartInstance> getMousePart() { return mousePart; }
 
 	void alignAndCleanParts();
 	G3D::Vector3 hitObjectOrPlane(const UIEvent& uiEvent);

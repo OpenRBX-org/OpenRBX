@@ -214,7 +214,7 @@ RunDragger::SnapInfo RunDragger::findSnap(const G3D::Array<Primitive*>& triedSna
 
 void RunDragger::smartPtrHackPre()
 {
-	boost::shared_ptr<PartInstance> p = snapPart.lock();
+	std::shared_ptr<PartInstance> p = snapPart.lock();
 	if (PartInstance::nonNullInWorkspace(p)) {
 		snapInfo.snap = p->getPrimitive();
 	}
@@ -223,9 +223,7 @@ void RunDragger::smartPtrHackPre()
 	}
 }
 
-void RunDragger::init(
-	Workspace* _workspace, boost::weak_ptr<PartInstance> _dragPart, const G3D::Vector3& _dragPointWorld
-)
+void RunDragger::init(Workspace* _workspace, std::weak_ptr<PartInstance> _dragPart, const G3D::Vector3& _dragPointWorld)
 {
 	workspace = _workspace;
 	dragPart = _dragPart;

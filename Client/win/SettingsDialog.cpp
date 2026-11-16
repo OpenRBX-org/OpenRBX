@@ -24,7 +24,7 @@ CSettingsDialog::~CSettingsDialog()
 {
 }
 
-void CSettingsExplorer::onEvent(const RBX::Instance* source, RBX::DescendentAdded event)
+void CSettingsExplorer::onEvent(const RBX::Instance* source, RBX::DescendentAdded event) noexcept
 {
 	if (dynamic_cast<RBX::GlobalSettings::Item*>(event.instance.get())) {
 		RBX::MarshaledListener<RBX::Instance, RBX::DescendentAdded, RBX::Instance, RBX::DescendentAdded>::onEvent(
@@ -33,7 +33,7 @@ void CSettingsExplorer::onEvent(const RBX::Instance* source, RBX::DescendentAdde
 	}
 }
 
-void CSettingsExplorer::onEvent(const RBX::Instance* source, RBX::DescendentRemoving event)
+void CSettingsExplorer::onEvent(const RBX::Instance* source, RBX::DescendentRemoving event) noexcept
 {
 	if (dynamic_cast<RBX::GlobalSettings::Item*>(event.instance.get())) {
 		RBX::MarshaledListener<RBX::Instance, RBX::DescendentRemoving, RBX::Instance, RBX::DescendentRemoving>::onEvent(

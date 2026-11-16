@@ -24,7 +24,7 @@ void JointsService::onEvent(const World* source, AutoDestroy event)
 	}
 }
 
-void JointsService::onDescendentRemoving(const boost::shared_ptr<Instance>& instance)
+void JointsService::onDescendentRemoving(const std::shared_ptr<Instance>& instance)
 {
 	IRenderable* renderable = dynamic_cast<IRenderable*>(instance.get());
 	if (renderable) {
@@ -36,7 +36,7 @@ void JointsService::onDescendentRemoving(const boost::shared_ptr<Instance>& inst
 
 void JointsService::onEvent(const World* source, AutoJoin event)
 {
-	boost::shared_ptr<JointInstance> ji;
+	std::shared_ptr<JointInstance> ji;
 
 	switch (event.joint->getJointType()) {
 	case Joint::SNAP_JOINT:

@@ -27,7 +27,7 @@ public:
 	Client();
 	virtual ~Client();
 
-	static Reflection::SignalDesc<Client, void(std::string, boost::shared_ptr<Instance>)> event_ConnectionAccepted;
+	static Reflection::SignalDesc<Client, void(std::string, std::shared_ptr<Instance>)> event_ConnectionAccepted;
 	static Reflection::SignalDesc<Client, void(std::string, int)> event_ConnectionFailed;
 	static Reflection::SignalDesc<Client, void(std::string)> event_ConnectionRejected;
 

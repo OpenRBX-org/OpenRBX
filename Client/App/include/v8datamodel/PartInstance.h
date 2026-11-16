@@ -16,15 +16,13 @@
 #include "v8world/Primitive.h"
 
 #include <G3D/Color3.h>
-#include <boost/scoped_ptr.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/weak_ptr.hpp>
+#include <memory>
 
 namespace RBX {
 
 extern char sPart[];
 
-using boost::shared_ptr;
+using std::shared_ptr;
 
 class World;
 class XmlState;
@@ -69,7 +67,7 @@ private:
 	bool locked;
 	Surfaces surfaces;
 	float renderImportance;
-	boost::scoped_ptr<Primitive> primitive;
+	std::unique_ptr<Primitive> primitive;
 	World* myWorld;
 	float alphaModifier;
 	ComputeProp<Part, PartInstance> PersistentPart;
@@ -213,7 +211,7 @@ public:
 	static void primitivesToParts(
 		const G3D::Array<Primitive*>& primitives, G3D::Array<shared_ptr<PartInstance> >& parts
 	);
-	static void primitivesToParts(const G3D::Array<Primitive*>&, std::vector<boost::weak_ptr<PartInstance> >&);
+	static void primitivesToParts(const G3D::Array<Primitive*>&, std::vector<std::weak_ptr<PartInstance> >&);
 	static bool getLocked(Instance* instance);
 	static void setLocked(Instance*, bool);
 
@@ -237,7 +235,7 @@ public:
 	void setLinearVelocity(const Vector3& set);
 	void setRotationalVelocity(const Vector3& set);
 
-	static void findParts(Instance* instance, std::vector<boost::weak_ptr<PartInstance> >& parts);
+	static void findParts(Instance* instance, std::vector<std::weak_ptr<PartInstance> >& parts);
 
 	virtual const Primitive* getBiggestPrimitive() const;
 	virtual bool hitTest(const G3D::Ray& worldRay, G3D::Vector3& worldHitPoint);

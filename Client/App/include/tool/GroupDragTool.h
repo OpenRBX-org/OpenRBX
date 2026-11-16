@@ -7,7 +7,6 @@
 
 #include <G3D/Vector2.h>
 #include <G3D/Vector3.h>
-#include <boost/weak_ptr.hpp>
 #include <memory>
 #include <string>
 #include <vector>
@@ -21,7 +20,7 @@ extern char sGroupDragTool[];
 class GroupDragTool : public Named<MouseCommand, sGroupDragTool>
 {
 private:
-	std::auto_ptr<MegaDragger> megaDragger;
+	std::unique_ptr<MegaDragger> megaDragger;
 	G3D::Vector2 downPoint;
 	bool dragging;
 	G3D::Vector3 lastHit;
@@ -38,7 +37,7 @@ public:
 	GroupDragTool(
 		PartInstance* mousePart,
 		const G3D::Vector3& hitPointWorld,
-		const std::vector<boost::weak_ptr<PartInstance> >& partArray,
+		const std::vector<std::weak_ptr<PartInstance> >& partArray,
 		Workspace* workspace
 	);
 	virtual ~GroupDragTool();

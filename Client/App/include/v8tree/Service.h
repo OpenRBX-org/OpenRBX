@@ -5,8 +5,9 @@
 #include "util/object.h"
 #include "v8tree/Instance.h"
 
-#include <boost/shared_ptr.hpp>
 #include <map>
+#include <memory>
+#include <mutex>
 #include <vector>
 
 namespace RBX {
@@ -23,7 +24,7 @@ class Closing
 
 struct ServiceAdded
 {
-	const boost::shared_ptr<Instance> service;
+	const std::shared_ptr<Instance> service;
 
 	ServiceAdded(Instance* service) : service(shared_from(service)) {}
 	ServiceAdded(const ServiceAdded& other) : service(other.service) {}
@@ -34,7 +35,7 @@ private:
 
 struct ServiceRemoving
 {
-	const boost::shared_ptr<Instance> service;
+	const std::shared_ptr<Instance> service;
 
 	ServiceRemoving(Instance* service) : service(shared_from(service)) {}
 	ServiceRemoving(const ServiceRemoving& other) : service(other.service) {}
@@ -49,8 +50,8 @@ class ServiceProvider : public DescribedNonCreatable<ServiceProvider, Instance, 
 						public Notifier<ServiceProvider, ServiceRemoving>
 {
 private:
-	mutable std::vector<boost::shared_ptr<Instance> > serviceArray;
-	std::map<const Name*, boost::shared_ptr<Instance> > serviceMap;
+	mutable std::vector<std::shared_ptr<Instance> > serviceArray;
+	std::map<const Name*, std::shared_ptr<Instance> > serviceMap;
 
 public:
 	static Instance* create(Instance* context, const Name& name);
@@ -87,7 +88,7 @@ public:
 			return NULL;
 		}
 
-		boost::shared_ptr<Instance> i = findServiceByClassName(T::className());
+		std::shared_ptr<Instance> i = findServiceByClassName(T::className());
 		if (!i) {
 			return NULL;
 		}
@@ -102,7 +103,7 @@ public:
 	{
 		T* t = find<T>();
 		if (t == NULL) {
-			boost::shared_ptr<T> s = Creatable<Instance>::create<T>();
+			std::shared_ptr<T> s = Creatable<Instance>::create<T>();
 
 			t = s.get();
 
@@ -189,18 +190,18 @@ private:
 	template <class T>
 	static unsigned int getClassIndex()
 	{
-		static boost::once_flag flag = BOOST_ONCE_INIT;
+		static std::once_flag flag;
 
-		boost::call_once(&callDoGetClassIndex<T>, flag);
+		std::call_once(flag, &callDoGetClassIndex<T>);
 
 		return doGetClassIndex<T>();
 	}
 
-	boost::shared_ptr<Instance> findServiceByClassName(const Name& className) const;
-	boost::shared_ptr<Instance> findServiceByClassNameString(std::string sName);
+	std::shared_ptr<Instance> findServiceByClassName(const Name& className) const;
+	std::shared_ptr<Instance> findServiceByClassNameString(std::string sName);
 
-	static Reflection::BoundFuncDesc<ServiceProvider, boost::shared_ptr<Instance>(std::string), 1> func_service;
-	static Reflection::BoundFuncDesc<ServiceProvider, boost::shared_ptr<Instance>(std::string), 1> func_GetService;
+	static Reflection::BoundFuncDesc<ServiceProvider, std::shared_ptr<Instance>(std::string), 1> func_service;
+	static Reflection::BoundFuncDesc<ServiceProvider, std::shared_ptr<Instance>(std::string), 1> func_GetService;
 };
 
 template <class T>
@@ -208,7 +209,7 @@ class ServiceClient
 {
 private:
 	Instance* context;
-	mutable boost::shared_ptr<T> service;
+	mutable std::shared_ptr<T> service;
 
 public:
 	ServiceClient(Instance* context) : context(context) {}

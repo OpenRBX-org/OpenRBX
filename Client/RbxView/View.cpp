@@ -60,7 +60,7 @@ RenderStats& View::getRenderStats()
 	return renderLibScene->renderStats;
 }
 
-void View::onWorkspaceDescendentAdded(boost::shared_ptr<Instance> descendent)
+void View::onWorkspaceDescendentAdded(std::shared_ptr<Instance> descendent)
 {
 	PartInstance* part = dynamic_cast<PartInstance*>(descendent.get());
 	if (part) {
@@ -124,7 +124,7 @@ void View::updateLighting()
 	}
 }
 
-View::View(boost::shared_ptr<DataModel> dataModel)
+View::View(std::shared_ptr<DataModel> dataModel)
 	: dataModel(dataModel), lightingValid(false), renderLibScene(new Render::RenderScene()),
 	  textureManager(new G3D::TextureManager())
 {
@@ -135,12 +135,17 @@ View::View(boost::shared_ptr<DataModel> dataModel)
 	renderLibScene->setThrottle(0, 0, false, 0);
 
 	Lighting* lighting = dataModel ? dataModel->create<Lighting>() : NULL;
-	lightingChangedConnection =
-		Lighting::event_LightingChanged.connect(lighting, boost::bind(&View::invalidateLighting, this, _1), 10);
+	lightingChangedConnection = Lighting::event_LightingChanged.connect(
+		lighting, [this](bool updateSkybox) { invalidateLighting(updateSkybox); }, 10
+	);
 
-	dataModel->getWorkspace()->visitDescendents(boost::bind(&View::onWorkspaceDescendentAdded, this, _1));
+	dataModel->getWorkspace()->visitDescendents([this](const std::shared_ptr<Instance>& descendent) {
+		onWorkspaceDescendentAdded(descendent);
+	});
 	workspaceDescendentAddedConnection = Instance::event_descendentAdded.connect(
-		dataModel->getWorkspace(), boost::bind(&View::onWorkspaceDescendentAdded, this, _1), 10
+		dataModel->getWorkspace(),
+		[this](const std::shared_ptr<Instance>& descendent) { onWorkspaceDescendentAdded(descendent); },
+		10
 	);
 }
 

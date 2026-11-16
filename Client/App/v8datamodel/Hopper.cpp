@@ -19,7 +19,7 @@ static Reflection::EnumPropDescriptor<HopperBin, HopperBin::BinType> desc_BinTyp
 	"BinType", "Data", &HopperBin::getBinType, &HopperBin::setBinType
 );
 
-static Reflection::SignalDesc<HopperBin, void(boost::shared_ptr<Instance>)> desc_Selected("Selected", "mouse");
+static Reflection::SignalDesc<HopperBin, void(std::shared_ptr<Instance>)> desc_Selected("Selected", "mouse");
 static Reflection::SignalDesc<HopperBin, void()> desc_Deselected("Deselected");
 
 static Reflection::PropDescriptor<HopperBin, std::string> desc_legacyCommand(

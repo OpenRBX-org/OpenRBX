@@ -10,8 +10,7 @@
 
 #include <G3D/Vector2int16.h>
 #include <G3D/Vector3.h>
-#include <boost/shared_ptr.hpp>
-#include <boost/weak_ptr.hpp>
+#include <memory>
 #include <string>
 
 namespace RBX {
@@ -47,7 +46,7 @@ extern char sGameTool[];
 class SurfaceTool : public MouseCommand
 {
 protected:
-	boost::shared_ptr<PartInstance> part;
+	std::shared_ptr<PartInstance> part;
 	Surface* surface;
 	int surfaceId;
 	std::string m_unk0x30;
@@ -187,7 +186,7 @@ public:
 class ModelTool : public MouseCommand
 {
 protected:
-	boost::shared_ptr<Instance> m_unk0x20;
+	std::shared_ptr<Instance> m_unk0x20;
 
 	virtual void render3dAdorn(Adorn* adorn);
 	virtual void onMouseHover(const UIEvent& uiEvent);
@@ -224,7 +223,7 @@ public:
 class ResizeTool : public Named<ArrowToolBase, sResizeTool>
 {
 private:
-	boost::weak_ptr<PVInstance> m_unk0x24;
+	std::weak_ptr<PVInstance> m_unk0x24;
 	bool m_unk0x2c;
 	NormalId m_unk0x30;
 	G3D::Vector3 m_unk0x34;
@@ -258,7 +257,7 @@ public:
 class ShootTool : public MouseCommand
 {
 protected:
-	boost::shared_ptr<PartInstance> m_unk0x20;
+	std::shared_ptr<PartInstance> m_unk0x20;
 	bool m_unk0x28;
 	int m_unk0x2c;
 	int m_unk0x30;
@@ -280,7 +279,7 @@ protected:
 public:
 	ShootTool(Workspace* workspace, bool p_unk0x28, int p_unk0x2c);
 
-	virtual boost::shared_ptr<PartInstance> VTable0x40() = 0;
+	virtual std::shared_ptr<PartInstance> VTable0x40() = 0;
 	virtual PV VTable0x44(const UIEvent& uiEvent, const CoordinateFrame& cframe) = 0;
 	virtual SoundType VTable0x48() = 0;
 };
@@ -288,7 +287,7 @@ public:
 class SlingshotTool : public Named<ShootTool, sSlingshotTool>
 {
 private:
-	virtual boost::shared_ptr<PartInstance> VTable0x40();
+	virtual std::shared_ptr<PartInstance> VTable0x40();
 	virtual PV VTable0x44(const UIEvent& uiEvent, const CoordinateFrame& cframe);
 	virtual SoundType VTable0x48() { return RUBBERBAND_SOUND; }
 
@@ -301,7 +300,7 @@ public:
 class RocketTool : public Named<ShootTool, sRocketTool>
 {
 private:
-	virtual boost::shared_ptr<PartInstance> VTable0x40();
+	virtual std::shared_ptr<PartInstance> VTable0x40();
 	virtual PV VTable0x44(const UIEvent& uiEvent, const CoordinateFrame& cframe);
 	virtual SoundType VTable0x48() { return PING_SOUND; }
 
@@ -314,7 +313,7 @@ public:
 class HammerTool : public Named<MouseCommand, sHammerTool>
 {
 private:
-	boost::shared_ptr<PartInstance> part;
+	std::shared_ptr<PartInstance> part;
 
 	virtual void render3dAdorn(Adorn* adorn);
 	virtual MouseCommand* onMouseDown(const UIEvent& uiEvent);
@@ -348,7 +347,7 @@ public:
 class CloneTool : public Named<MouseCommand, sCloneTool>
 {
 private:
-	boost::shared_ptr<PartInstance> part;
+	std::shared_ptr<PartInstance> part;
 
 	virtual MouseCommand* onMouseDown(const UIEvent& uiEvent);
 	virtual void onMouseIdle(const UIEvent& uiEvent);

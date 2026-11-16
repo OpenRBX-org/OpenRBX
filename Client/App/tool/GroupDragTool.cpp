@@ -22,7 +22,7 @@ MouseCommand* GroupDragTool::onMouseDown(const UIEvent& uiEvent)
 GroupDragTool::GroupDragTool(
 	PartInstance* mousePart,
 	const G3D::Vector3& hitPointWorld,
-	const std::vector<boost::weak_ptr<PartInstance> >& partArray,
+	const std::vector<std::weak_ptr<PartInstance> >& partArray,
 	Workspace* workspace
 )
 	: Named<MouseCommand, sGroupDragTool>(workspace), dragging(false)

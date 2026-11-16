@@ -3,10 +3,10 @@
 
 #include "reflection/property.h"
 #include "util/ContentProvider.h"
+#include "util/Signals.h"
 #include "v8tree/Instance.h"
 
-#include <boost/shared_ptr.hpp>
-#include <boost/signals/connection.hpp>
+#include <memory>
 #include <string>
 
 namespace RBX {
@@ -25,15 +25,15 @@ public:
 	class Slot
 	{
 	public:
-		boost::shared_ptr<boost::signals::connection> cnction;
+		std::shared_ptr<Signals::Connection> cnction;
 
 	protected:
-		Slot() : cnction(new boost::signals::connection()) {}
+		Slot() : cnction(new Signals::Connection()) {}
 	};
 
 	const ContentId& getScriptId() const { return scriptId; }
 
-	boost::shared_ptr<const std::string> requestCode();
+	std::shared_ptr<const std::string> requestCode();
 	void setEmbeddedCode(const std::string& value);
 
 	const std::string& getEmbeddedCode() const { return *embeddedSource; }
@@ -54,7 +54,7 @@ protected:
 	virtual void onAncestorChanged(const AncestorChanged& event);
 
 private:
-	boost::shared_ptr<const std::string> embeddedSource;
+	std::shared_ptr<const std::string> embeddedSource;
 	ContentId scriptId;
 	bool disabled;
 	IScriptOwner* owner;

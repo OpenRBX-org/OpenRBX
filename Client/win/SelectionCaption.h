@@ -6,7 +6,7 @@
 #include "v8datamodel/DataModel.h"
 #include "v8datamodel/Selection.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 class CSelectionCaption
 	: public CXTCaption,
@@ -26,9 +26,7 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 
-	virtual void VTable0x00(
-		boost::shared_ptr<RBX::DataModel> newDataModel, boost::shared_ptr<RBX::DataModel> oldDataModel
-	);
+	virtual void VTable0x00(std::shared_ptr<RBX::DataModel> newDataModel, std::shared_ptr<RBX::DataModel> oldDataModel);
 	virtual void VTable0x08(const RBX::Selection* source, RBX::SelectionChanged event);
 	virtual bool VTable0x10(
 		const RBX::Selection* source,
@@ -40,8 +38,8 @@ protected:
 private:
 	void FUN_0046a290();
 
-	boost::shared_ptr<RBX::DataModel> m_unk0x1b0;
-	boost::shared_ptr<RBX::Selection> m_unk0x1b8;
+	std::shared_ptr<RBX::DataModel> m_unk0x1b0;
+	std::shared_ptr<RBX::Selection> m_unk0x1b8;
 };
 
 #endif // SELECTIONCAPTION_H
