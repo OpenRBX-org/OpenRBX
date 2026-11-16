@@ -4,8 +4,7 @@
 #include <ostream>
 #include <string>
 
-namespace RBX {
-namespace LDraw2Lua {
+namespace RBX::LDraw2Lua {
 
 class LDrawParser
 {
@@ -19,7 +18,6 @@ public:
 	std::string m_unk0x04;
 };
 
-} // namespace LDraw2Lua
-} // namespace RBX
+} // namespace RBX::LDraw2Lua
 
 #endif // LDRAWPARSER_H

@@ -8,8 +8,7 @@
 #include <G3D/Vector2.h>
 #include <G3D/Vector3.h>
 
-namespace RBX {
-namespace ViewNew {
+namespace RBX::ViewNew {
 
 class SphereMesh : public RenderNew::Mesh, public MeshFactory<SphereMesh, 1>
 {
@@ -23,7 +22,6 @@ private:
 	SphereMesh(const G3D::Vector3& diameter, RenderSurfaceTypes surfaceTypes);
 };
 
-} // namespace ViewNew
-} // namespace RBX
+} // namespace RBX::ViewNew
 
 #endif // RENDERLIBNEW_SPHEREMESH_H

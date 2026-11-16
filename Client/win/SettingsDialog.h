@@ -11,8 +11,8 @@ class CSettingsExplorer : public CInstanceExplorer
 protected:
 	CSettingsExplorer() {}
 
-	virtual void onEvent(const RBX::Instance* source, RBX::DescendentAdded event) noexcept;
-	virtual void onEvent(const RBX::Instance* source, RBX::DescendentRemoving event) noexcept;
+	void onEvent(const RBX::Instance* source, RBX::DescendentAdded event) noexcept override;
+	void onEvent(const RBX::Instance* source, RBX::DescendentRemoving event) noexcept override;
 };
 
 class CSettingsDialog : public CDialog
@@ -25,13 +25,13 @@ public:
 		IDD = 122
 	};
 
-	CSettingsDialog(CWnd* pParent = NULL);
-	virtual ~CSettingsDialog();
+	CSettingsDialog(CWnd* pParent = nullptr);
+	~CSettingsDialog() override;
 
 	static void FUN_0046b3f0(CWnd* p_unk0x04);
 
 protected:
-	virtual BOOL OnInitDialog();
+	BOOL OnInitDialog() override;
 
 	afx_msg void FUN_0046b120();
 

@@ -21,12 +21,12 @@ protected:
 	CChatPrompt();
 
 public:
-	virtual ~CChatPrompt();
+	~CChatPrompt() override;
 
 	void FUN_0040f4d0(RBX::DataModel* dataModel, CWnd* parent);
 
 protected:
-	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
+	BOOL PreCreateWindow(CREATESTRUCT& cs) override;
 
 	afx_msg HBRUSH CtlColor(CDC* pDC, UINT nCtlColor);
 	afx_msg void FUN_0040dbe0();

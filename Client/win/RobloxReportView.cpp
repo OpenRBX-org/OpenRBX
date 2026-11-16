@@ -16,13 +16,13 @@ IMPLEMENT_DYNCREATE(CRobloxReportPaneView, CRobloxReportView)
 template <class T>
 static T* createService(RBX::DataModel* dataModel)
 {
-	return dataModel ? dataModel->create<T>() : NULL;
+	return dataModel ? dataModel->create<T>() : nullptr;
 }
 
 template <class T>
 static T* findService(RBX::DataModel* dataModel)
 {
-	return dataModel ? dataModel->find<T>() : NULL;
+	return dataModel ? dataModel->find<T>() : nullptr;
 }
 
 int CRobloxReportView::OnCreate(LPCREATESTRUCT lpCreateStruct)
@@ -183,7 +183,7 @@ void CRobloxReportView::FUN_0045cc90(std::shared_ptr<RBX::DataModel> dataModel)
 	if (m_unk0x3a8) {
 		RBX::DataModel::Lock lock(dataModel);
 		m_unk0x3b0 = shared_from(createService<RBX::Stats::StatsService>(m_unk0x3a8.get()));
-		m_unk0x3a4 = SetTimer(1, 333, NULL);
+		m_unk0x3a4 = SetTimer(1, 333, nullptr);
 
 		RBX::startListening<RBX::Instance, RBX::ChildRemoved>(m_unk0x3b0, this);
 		RBX::startListening<RBX::Instance, RBX::ChildAdded>(m_unk0x3b0, this);
@@ -224,9 +224,7 @@ CRobloxReportView::~CRobloxReportView()
 	FUN_0045cc90(std::shared_ptr<RBX::DataModel>());
 }
 
-CRobloxReportPaneView::CRobloxReportPaneView()
-{
-}
+CRobloxReportPaneView::CRobloxReportPaneView() = default;
 
 // clang-format off
 BEGIN_MESSAGE_MAP(CRobloxReportView, CXTPReportView)

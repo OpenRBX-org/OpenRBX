@@ -4,7 +4,7 @@
 
 #include <G3D/g3dmath.h>
 #include <algorithm>
-#include <math.h>
+#include <cmath>
 
 namespace RBX {
 
@@ -213,7 +213,7 @@ void GuiRoot::render2d(Adorn* adorn)
 		Instance* instance = (*getChildren())[i].get();
 		GuiItem* item = dynamic_cast<GuiItem*>(instance);
 
-		if (item != NULL) {
+		if (item != nullptr) {
 			item->render2d(adorn);
 		}
 	}
@@ -238,7 +238,7 @@ G3D::Vector2 TopMenuBar::getSize() const
 		Instance* child = (*getChildren())[i].get();
 		GuiItem* item = dynamic_cast<GuiItem*>(child);
 
-		if (item != NULL) {
+		if (item != nullptr) {
 			G3D::Vector2 childSize = item->getSize();
 
 			switch (layoutStyle) {
@@ -266,7 +266,7 @@ G3D::Vector2 TopMenuBar::getChildPosition(const GuiItem* child) const
 		Instance* instance = (*getChildren())[i].get();
 		GuiItem* item = dynamic_cast<GuiItem*>(instance);
 
-		if (item != NULL) {
+		if (item != nullptr) {
 			G3D::Vector2 myChildSize = item->getSize();
 
 			if (item == child) {
@@ -303,7 +303,7 @@ void TopMenuBar::render2d(Adorn* adorn)
 		Instance* instance = (*getChildren())[i].get();
 		GuiItem* item = dynamic_cast<GuiItem*>(instance);
 
-		if (item != NULL) {
+		if (item != nullptr) {
 			item->render2d(adorn);
 		}
 	}
@@ -327,7 +327,7 @@ void UnifiedWidget::render2dChildren(Adorn* p_unk0x04)
 		for (unsigned int i = 0; i < numChildren(); ++i) {
 			GuiItem* item = getGuiItem(i);
 
-			if (item != NULL) {
+			if (item != nullptr) {
 				item->render2d(p_unk0x04);
 			}
 		}
@@ -370,7 +370,7 @@ G3D::Vector2 UnifiedWidget::getChildPosition(const GuiItem* child) const
 	for (unsigned int i = 0; i < numChildren(); ++i) {
 		const GuiItem* item = getGuiItem(i);
 
-		if (item != NULL) {
+		if (item != nullptr) {
 			if (item == child) {
 				return position;
 			}
@@ -401,7 +401,7 @@ std::string TextDisplay::getLabel() const
 
 void GuiItem::loseFocus()
 {
-	if (focus != NULL) {
+	if (focus != nullptr) {
 		focus->onLoseFocus();
 	}
 
@@ -482,7 +482,7 @@ GuiResponse GuiItem::processNonFocus(const GuiEvent& event)
 		Instance* child = (*getChildren())[i].get();
 		GuiItem* item = dynamic_cast<GuiItem*>(child);
 
-		if (item != NULL && item != focus.get()) {
+		if (item != nullptr && item != focus.get()) {
 			GuiResponse itemResponse = item->process(event);
 
 			if (itemResponse.wasUsed()) {
@@ -504,7 +504,7 @@ GuiResponse GuiItem::process(const GuiEvent& event)
 		return GuiResponse::notUsed();
 	}
 
-	if (focus != NULL) {
+	if (focus != nullptr) {
 		if (focus->canLoseFocus()) {
 			GuiResponse nonFocus = processNonFocus(event);
 
@@ -562,14 +562,14 @@ GuiResponse UnifiedWidget::processShown_OutOfTitle(const GuiEvent& p_unk0x04)
 		return response;
 	}
 	case UIEvent::MOUSE_MOVE: {
-		MenuState state = oldFocus != NULL ? oldFocus->getMenuState() : NOTHING;
+		MenuState state = oldFocus != nullptr ? oldFocus->getMenuState() : NOTHING;
 
 		GuiItem::process(p_unk0x04);
 
-		if (oldFocus != NULL) {
+		if (oldFocus != nullptr) {
 			UnifiedWidget* newFocus = dynamic_cast<UnifiedWidget*>(getFocus());
 
-			if (newFocus != NULL && newFocus != oldFocus) {
+			if (newFocus != nullptr && newFocus != oldFocus) {
 				newFocus->setMenuState(state);
 			}
 		}

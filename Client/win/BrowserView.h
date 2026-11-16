@@ -16,26 +16,26 @@ protected:
 	CBrowserView();
 
 public:
-	virtual ~CBrowserView();
+	~CBrowserView() override;
 
 	static CBrowserView* FUN_0040b6d0(CRect rect, CWnd* parent, CString url, IDispatch* external);
 
 protected:
-	virtual void OnInitialUpdate();
-	virtual HRESULT OnGetExternal(LPDISPATCH* lppDispatch);
-	virtual HRESULT OnGetHostInfo(DOCHOSTUIINFO* pInfo);
-	virtual void OnCommandStateChange(long nCommand, BOOL bEnable);
-	virtual void OnNavigateComplete2(LPCTSTR strURL);
-	virtual void OnBeforeNavigate2(
+	void OnInitialUpdate() override;
+	HRESULT OnGetExternal(LPDISPATCH* lppDispatch) override;
+	HRESULT OnGetHostInfo(DOCHOSTUIINFO* pInfo) override;
+	void OnCommandStateChange(long nCommand, BOOL bEnable) override;
+	void OnNavigateComplete2(LPCTSTR strURL) override;
+	void OnBeforeNavigate2(
 		LPCTSTR lpszURL,
 		DWORD nFlags,
 		LPCTSTR lpszTargetFrameName,
 		CByteArray& baPostedData,
 		LPCTSTR lpszHeaders,
 		BOOL* pbCancel
-	);
-	virtual void OnTitleChange(LPCTSTR lpszText);
-	virtual void OnDocumentComplete(LPCTSTR lpszURL);
+	) override;
+	void OnTitleChange(LPCTSTR lpszText) override;
+	void OnDocumentComplete(LPCTSTR lpszURL) override;
 
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
@@ -90,7 +90,7 @@ class CBrowserDoc : public CNullDoc
 	DECLARE_DYNCREATE(CBrowserDoc)
 
 protected:
-	CBrowserDoc() : m_unk0x54(NULL) {}
+	CBrowserDoc() : m_unk0x54(nullptr) {}
 
 public:
 	CBrowserView* m_unk0x54;

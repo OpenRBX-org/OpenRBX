@@ -106,7 +106,7 @@ GuiResponse Widget::process(const GuiEvent& event)
 
 void VerbWidget::onClick(const GuiEvent& p_unk0x04)
 {
-	if (verb != NULL && verb->isEnabled()) {
+	if (verb != nullptr && verb->isEnabled()) {
 		verb->doIt(p_unk0x04.iDataState);
 	}
 }
@@ -122,12 +122,10 @@ VerbWidget::VerbWidget(Verb* p_unk0x04) : verb(p_unk0x04)
 
 bool VerbWidget::isEnabled()
 {
-	return isVisible() && verb != NULL && verb->isEnabled();
+	return isVisible() && verb != nullptr && verb->isEnabled();
 }
 
-VerbWidget::~VerbWidget()
-{
-}
+VerbWidget::~VerbWidget() = default;
 
 void Widget::render2d(Adorn* adorn)
 {

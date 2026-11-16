@@ -19,7 +19,7 @@ class __declspec(novtable) Contact : public Edge
 {
 public:
 	Contact(Primitive* p0, Primitive* p1);
-	virtual ~Contact() {}
+	~Contact() override = default;
 
 	int& steppingIndexFunc() { return steppingIndex; }
 
@@ -31,9 +31,9 @@ public:
 	void onPrimitiveContactParametersChanged();
 
 private:
-	virtual void putInKernel(Kernel* _kernel);
-	virtual void removeFromKernel();
-	virtual EdgeType getEdgeType() const;
+	void putInKernel(Kernel* _kernel) override;
+	void removeFromKernel() override;
+	EdgeType getEdgeType() const override;
 
 protected:
 	Body* getBody(int index) const { return getPrimitive(index)->getBody(); }
@@ -69,14 +69,14 @@ class BallBallContact : public Contact
 public:
 	BallBallContact(Primitive* p0, Primitive* p1);
 
-	virtual ~BallBallContact() {}
+	~BallBallContact() override = default;
 
 private:
 	Ball* ball(int index) { return static_cast<Ball*>(getPrimitive(index)->getGeometry()); }
 
-	virtual void deleteAllConnectors();
-	virtual bool stepContact();
-	virtual bool computeIsColliding(float overlapIgnored);
+	void deleteAllConnectors() override;
+	bool stepContact() override;
+	bool computeIsColliding(float overlapIgnored) override;
 
 	ContactConnector* ballBallConnector;
 };
@@ -86,7 +86,7 @@ class BallBlockContact : public Contact
 public:
 	BallBlockContact(Primitive* p0, Primitive* p1);
 
-	virtual ~BallBlockContact() {}
+	~BallBlockContact() override = default;
 
 private:
 	Primitive* ballPrim() { return getPrimitive(0); }
@@ -95,9 +95,9 @@ private:
 	Ball* ball() { return static_cast<Ball*>(ballPrim()->getGeometry()); }
 	Block* block() { return static_cast<Block*>(blockPrim()->getGeometry()); }
 
-	virtual void deleteAllConnectors();
-	virtual bool stepContact();
-	virtual bool computeIsColliding(float overlapIgnored);
+	void deleteAllConnectors() override;
+	bool stepContact() override;
+	bool computeIsColliding(float overlapIgnored) override;
 
 	bool computeIsColliding(int& onBorder, Vector3int16& clip, Vector3& projectionInBlock, float overlapIgnored);
 
@@ -114,9 +114,9 @@ public:
 private:
 	Block* block(int index) { return static_cast<Block*>(getPrimitive(index)->getGeometry()); }
 
-	virtual void deleteAllConnectors();
-	virtual bool stepContact();
-	virtual bool computeIsColliding(float overlapIgnored);
+	void deleteAllConnectors() override;
+	bool stepContact() override;
+	bool computeIsColliding(float overlapIgnored) override;
 
 	bool getBestPlaneEdge(bool& temp, float overlapIgnored);
 
@@ -152,7 +152,7 @@ inline float BlockBlockContact::contactPairHitRatio()
 	return denom == 0 ? -1.0f : (float) contactPairMatches / denom;
 }
 
-inline BallBallContact::BallBallContact(Primitive* p0, Primitive* p1) : Contact(p0, p1), ballBallConnector(NULL)
+inline BallBallContact::BallBallContact(Primitive* p0, Primitive* p1) : Contact(p0, p1), ballBallConnector(nullptr)
 {
 }
 
@@ -185,7 +185,7 @@ inline void BallBlockContact::deleteAllConnectors()
 	deleteConnector(ballBlockConnector);
 }
 
-inline BallBlockContact::BallBlockContact(Primitive* p0, Primitive* p1) : Contact(p0, p1), ballBlockConnector(NULL)
+inline BallBlockContact::BallBlockContact(Primitive* p0, Primitive* p1) : Contact(p0, p1), ballBlockConnector(nullptr)
 {
 }
 

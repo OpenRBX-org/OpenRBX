@@ -25,7 +25,7 @@ public:
 	G3D::Vector3 getHitLocationFilterDescendants(Instance* ancestor, G3D::Ray ray);
 
 protected:
-	virtual void onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider);
+	void onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider) override;
 };
 
 } // namespace RBX

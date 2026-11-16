@@ -6,8 +6,7 @@
 #include <G3D/format.h>
 #include <algorithm>
 
-namespace RBX {
-namespace Render {
+namespace RBX::Render {
 
 void TextureProxy::shadePixel(const G3D::Color3uint8& base, G3D::Color3uint8& lighting)
 {
@@ -112,13 +111,13 @@ G3D::ReferenceCountedPointer<G3D::Texture> TextureProxy::resolve(G3D::RenderDevi
 				StandardOut::singleton()->print(
 					MESSAGE_ERROR, "Failed to load texture '%s', %s", filename.c_str(), e.what()
 				);
-				texture = NULL;
+				texture = nullptr;
 			}
 			catch (...) {
 				StandardOut::singleton()->print(
 					MESSAGE_ERROR, "Failed to load texture '%s', unknown exception", filename.c_str()
 				);
-				texture = NULL;
+				texture = nullptr;
 			}
 		}
 		else {
@@ -129,8 +128,8 @@ G3D::ReferenceCountedPointer<G3D::Texture> TextureProxy::resolve(G3D::RenderDevi
 			}
 		}
 
-		root = NULL;
-		shadeTexture = NULL;
+		root = nullptr;
+		shadeTexture = nullptr;
 		loaded = true;
 	}
 
@@ -159,5 +158,4 @@ G3D::Vector2 TextureProxy::getSize()
 	return size;
 }
 
-} // namespace Render
-} // namespace RBX
+} // namespace RBX::Render

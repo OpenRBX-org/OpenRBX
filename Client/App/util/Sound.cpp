@@ -45,11 +45,10 @@ private:
 public:
 	SoundServiceStatsItem(const RBX::Soundscape::SoundService* service);
 
-	virtual void update();
+	void update() override;
 };
 
-namespace RBX {
-namespace Soundscape {
+namespace RBX::Soundscape {
 
 char sSoundService[] = "SoundService";
 
@@ -64,7 +63,7 @@ int SoundChannel::getPlayCount() const
 
 bool SoundChannel::isPaused() const
 {
-	if (fmod_channel == NULL) {
+	if (fmod_channel == nullptr) {
 		return true;
 	}
 
@@ -78,7 +77,7 @@ bool SoundChannel::isPaused() const
 
 bool SoundChannel::isPlaying() const
 {
-	if (fmod_channel == NULL) {
+	if (fmod_channel == nullptr) {
 		return false;
 	}
 
@@ -106,12 +105,11 @@ bool SoundChannel::getLooped() const
 }
 
 Sound::Sound(FMOD::System* system, SoundId id, bool is3D)
-	: fmod_sound(NULL), system(system), refCount(0), id(id), is3D(is3D)
+	: fmod_sound(nullptr), system(system), refCount(0), id(id), is3D(is3D)
 {
 }
 
-} // namespace Soundscape
-} // namespace RBX
+} // namespace RBX::Soundscape
 
 RBX::Reflection::BoundProp<float, 1> RBX::Soundscape::SoundService::prop_dopplerscale(
 	"DopplerScale",
@@ -291,18 +289,13 @@ bool TypedPropertyDescriptor<Soundscape::SoundId>::setStringValue(
 } // namespace Reflection
 } // namespace RBX
 
-namespace RBX {
-namespace Soundscape {
+namespace RBX::Soundscape {
 
-SoundChannel::~SoundChannel()
-{
-}
+SoundChannel::~SoundChannel() = default;
 
-} // namespace Soundscape
-} // namespace RBX
+} // namespace RBX::Soundscape
 
-namespace RBX {
-namespace Soundscape {
+namespace RBX::Soundscape {
 
 void SoundService::getSoundStats(const LoadedSounds& sounds, unsigned int& numSounds, unsigned int& numUnusedSounds)
 {
@@ -320,8 +313,7 @@ void SoundService::getSoundStats(unsigned int& numSounds, unsigned int& numUnuse
 	getSoundStats(loaded3DSounds, numSounds, numUnusedSounds);
 }
 
-} // namespace Soundscape
-} // namespace RBX
+} // namespace RBX::Soundscape
 
 void checkResultNoThrow(FMOD_RESULT result)
 {
@@ -334,8 +326,7 @@ void checkResultNoThrow(FMOD_RESULT result)
 	}
 }
 
-namespace RBX {
-namespace Soundscape {
+namespace RBX::Soundscape {
 
 void SoundService::updateAmbientReverb()
 {
@@ -477,9 +468,9 @@ void SoundService::update3DSettings()
 void SoundChannel::releaseChannel()
 {
 	if (fmod_channel) {
-		checkResultNoThrow(fmod_channel->setUserData(NULL));
+		checkResultNoThrow(fmod_channel->setUserData(nullptr));
 
-		fmod_channel = NULL;
+		fmod_channel = nullptr;
 	}
 
 	if (sound) {
@@ -524,7 +515,7 @@ FMOD::Sound* Sound::get()
 	if (!fmod_sound) {
 		std::shared_ptr<const std::string> data = ContentProvider::singleton().requestContentString(id);
 		if (!data) {
-			return NULL;
+			return nullptr;
 		}
 
 		FMOD_MODE mode = is3D ? FMOD_3D : 0;
@@ -567,7 +558,7 @@ void SoundService::openFmod()
 
 		FMOD_CAPS caps;
 		FMOD_SPEAKERMODE speakermode;
-		checkResult(system->getDriverCaps(0, &caps, 0, 0, &speakermode));
+		checkResult(system->getDriverCaps(0, &caps, nullptr, nullptr, &speakermode));
 
 		checkResult(system->setSpeakerMode(speakermode));
 
@@ -580,14 +571,14 @@ void SoundService::openFmod()
 
 		checkResultNoThrow(system->setHardwareChannels(0, 0, 0, 0));
 
-		FMOD_RESULT result = system->init(100, FMOD_INIT_NORMAL, 0);
+		FMOD_RESULT result = system->init(100, FMOD_INIT_NORMAL, nullptr);
 		if (result == FMOD_ERR_OUTPUT_CREATEBUFFER) {
 			StandardOut::singleton()->print(
 				MESSAGE_WARNING, "The speaker mode selected isn't supported by this soundcard.  Using Stereo"
 			);
 			checkResult(system->setSpeakerMode(FMOD_SPEAKERMODE_STEREO));
 
-			checkResult(system->init(100, FMOD_INIT_NORMAL, 0));
+			checkResult(system->init(100, FMOD_INIT_NORMAL, nullptr));
 		}
 
 		update3DSettings();
@@ -598,15 +589,14 @@ void SoundService::openFmod()
 	catch (const std::exception&) {
 		if (system) {
 			checkResultNoThrow(system->release());
-			system = NULL;
+			system = nullptr;
 		}
 	}
 }
 
-} // namespace Soundscape
-} // namespace RBX
+} // namespace RBX::Soundscape
 
-static void releaseSound(const std::pair<RBX::Soundscape::SoundId, std::shared_ptr<RBX::Soundscape::Sound> >& p)
+static void releaseSound(const std::pair<RBX::Soundscape::SoundId, std::shared_ptr<RBX::Soundscape::Sound>>& p)
 {
 	p.second->release();
 }
@@ -639,7 +629,7 @@ void Sound::release()
 {
 	if (fmod_sound) {
 		checkResultNoThrow(fmod_sound->release());
-		fmod_sound = NULL;
+		fmod_sound = nullptr;
 	}
 }
 
@@ -662,13 +652,11 @@ void SoundService::closeFmod()
 	if (system) {
 		checkResultNoThrow(system->release());
 
-		system = NULL;
+		system = nullptr;
 	}
 }
 
-SoundService::~SoundService()
-{
-}
+SoundService::~SoundService() = default;
 
 } // namespace Soundscape
 
@@ -733,7 +721,7 @@ void registerSound()
 namespace Soundscape {
 
 SoundService::SoundService()
-	: system(NULL), fmod_version(0), dopplerscale(1.0f), distancefactor(10.0f), rolloffscale(1.0f),
+	: system(nullptr), fmod_version(0), dopplerscale(1.0f), distancefactor(10.0f), rolloffscale(1.0f),
 	  ambientReverb(NoReverb), nextGarbageCollectTime(G3D::System::getTick()), mySoundDisabled(false)
 {
 	setName("Soundscape");
@@ -793,8 +781,8 @@ bool SoundChannel::askSetParent(const Instance* parent) const
 }
 
 SoundChannel::SoundChannel()
-	: sound(), fmod_channel(NULL), volume(0.5f), playOnRemove(false), is3D(0), looped(0), soundDisabled(0),
-	  playCount(-1), part(NULL)
+	: sound(), fmod_channel(nullptr), volume(0.5f), playOnRemove(false), is3D(false), looped(false),
+	  soundDisabled(false), playCount(-1), part(nullptr)
 {
 	setName("Sound");
 }
@@ -829,8 +817,7 @@ FMOD_RESULT F_CALLBACK callbackChannelEnd(
 	return FMOD_OK;
 }
 
-namespace RBX {
-namespace Soundscape {
+namespace RBX::Soundscape {
 
 void SoundChannel::onChannelEnd()
 {
@@ -838,8 +825,7 @@ void SoundChannel::onChannelEnd()
 	updateListenState();
 }
 
-} // namespace Soundscape
-} // namespace RBX
+} // namespace RBX::Soundscape
 
 SoundServiceStatsItem::SoundServiceStatsItem(const RBX::Soundscape::SoundService* service)
 	: service(service), currentalloced(0), maxalloced(0)
@@ -871,8 +857,7 @@ void SoundServiceStatsItem::update()
 	}
 }
 
-namespace RBX {
-namespace Soundscape {
+namespace RBX::Soundscape {
 
 void SoundChannel::playSound(Instance* context)
 {
@@ -899,7 +884,7 @@ void SoundChannel::playSound(Instance* context)
 
 			releaseChannel();
 
-			is3D = part != NULL;
+			is3D = part != nullptr;
 			sound = soundService->loadSound(soundId, is3D);
 			sound->refCount++;
 			FMOD::Sound* fmodSound = sound->get();
@@ -926,16 +911,14 @@ void SoundChannel::playSound(Instance* context)
 	}
 }
 
-} // namespace Soundscape
-} // namespace RBX
+} // namespace RBX::Soundscape
 
 StockSound::StockSound()
 {
 	propArchivable.setValue(this, false);
 }
 
-namespace RBX {
-namespace Soundscape {
+namespace RBX::Soundscape {
 
 void SoundService::setAmbientReverb(const ReverbType& value)
 {
@@ -1009,9 +992,9 @@ void SoundChannel::pause()
 void SoundChannel::stop()
 {
 	if (fmod_channel) {
-		checkResultNoThrow(fmod_channel->setUserData(NULL));
+		checkResultNoThrow(fmod_channel->setUserData(nullptr));
 		checkResultNoThrow(fmod_channel->stop());
-		fmod_channel = NULL;
+		fmod_channel = nullptr;
 	}
 
 	updateListenState();
@@ -1047,7 +1030,7 @@ void SoundChannel::onAncestorChanged(const AncestorChanged& event)
 	const ServiceProvider* oldProvider = ServiceProvider::findServiceProvider(event.oldParent);
 	const ServiceProvider* newProvider = ServiceProvider::findServiceProvider(event.newParent);
 
-	stopListening(oldProvider ? oldProvider->find<RunService>() : NULL, this);
+	stopListening(oldProvider ? oldProvider->find<RunService>() : nullptr, this);
 
 	if (oldProvider) {
 		if (looped) {
@@ -1134,10 +1117,10 @@ void SoundService::loadStockSounds()
 
 void SoundService::onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider)
 {
-	stopListening(oldProvider ? oldProvider->find<RunService>() : NULL, this);
+	stopListening(oldProvider ? oldProvider->find<RunService>() : nullptr, this);
 
 	if (statsItem) {
-		statsItem->setParent(NULL);
+		statsItem->setParent(nullptr);
 		statsItem.reset();
 	}
 
@@ -1147,7 +1130,7 @@ void SoundService::onServiceProvider(const ServiceProvider* oldProvider, const S
 
 	Instance::onServiceProvider(oldProvider, newProvider);
 
-	startListening(newProvider ? newProvider->find<RunService>() : NULL, this);
+	startListening(newProvider ? newProvider->find<RunService>() : nullptr, this);
 
 	if (newProvider) {
 		openFmod();
@@ -1161,8 +1144,7 @@ void SoundService::onServiceProvider(const ServiceProvider* oldProvider, const S
 	}
 }
 
-} // namespace Soundscape
-} // namespace RBX
+} // namespace RBX::Soundscape
 
 template const RBX::Name& RBX::Name::doDeclare<RBX::sGameSettings>();
 template const RBX::Name& RBX::Name::doDeclare<sStockSound>();

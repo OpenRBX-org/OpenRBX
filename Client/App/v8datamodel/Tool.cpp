@@ -67,7 +67,7 @@ static Reflection::SignalDesc<Tool, void()> event_Deactivated("Deactivated");
 
 void Tool::readProperty(const XmlElement* propertyElement, IReferenceBinder& binder)
 {
-	const Name* name = NULL;
+	const Name* name = nullptr;
 	const XmlAttribute* nameAttribute = propertyElement->findAttribute(name_name);
 
 	if (nameAttribute && nameAttribute->getValue(name)) {
@@ -155,7 +155,7 @@ void Tool::render3dSelect(Adorn* adorn, SelectState selectState)
 	for (unsigned int i = 0; i < numChildren(); i++) {
 		IRenderable* renderable = dynamic_cast<IRenderable*>(getChild(i));
 
-		if (renderable != NULL) {
+		if (renderable != nullptr) {
 			renderable->render3dSelect(adorn, selectState);
 		}
 	}
@@ -271,15 +271,13 @@ void Tool::onLocalOtherClicked()
 	}
 }
 
-Tool::~Tool()
-{
-}
+Tool::~Tool() = default;
 
 void Tool::upTo_Equipped()
 {
 	handleTouched.disconnect();
 
-	std::vector<std::weak_ptr<PartInstance> > parts;
+	std::vector<std::weak_ptr<PartInstance>> parts;
 	PartInstance::findParts(this, parts);
 	DragUtilities::unJoinFromOutsiders(parts);
 
@@ -331,14 +329,14 @@ void Tool::upTo_HasTorso()
 
 void Tool::downFrom_Equipped()
 {
-	ModelInstance* character = NULL;
+	ModelInstance* character = nullptr;
 
 	if (weld) {
 		if (PartInstance* part0 = weld->getPart0()) {
 			character = dynamic_cast<ModelInstance*>(part0->getParent());
 		}
 
-		weld->setParent(NULL);
+		weld->setParent(nullptr);
 		weld.reset();
 	}
 
@@ -386,9 +384,9 @@ std::shared_ptr<Mouse> Tool::getMouse()
 void Tool::onUnequipped()
 {
 	if (toolMouseCommand) {
-		toolMouseCommand = NULL;
+		toolMouseCommand = nullptr;
 		workspace->setDefaultMouseCommand();
-		workspace = NULL;
+		workspace = nullptr;
 	}
 }
 
@@ -609,7 +607,7 @@ void Tool::setGripRight(const G3D::Vector3& v)
 	setGrip(c);
 }
 
-Tool::Tool() : backendToolState(NOTHING), frontendActivationState(0), enabled(true), toolMouseCommand(NULL)
+Tool::Tool() : backendToolState(NOTHING), frontendActivationState(0), enabled(true), toolMouseCommand(nullptr)
 {
 	setName(sTool);
 }
@@ -647,7 +645,7 @@ void Tool::deactivate()
 
 template class RBX::FactoryProduct<RBX::Tool, RBX::BackpackItem, RBX::sTool>;
 template class RBX::Reflection::
-	Described<RBX::Tool, RBX::sTool, RBX::FactoryProduct<RBX::Tool, RBX::BackpackItem, RBX::sTool> >;
+	Described<RBX::Tool, RBX::sTool, RBX::FactoryProduct<RBX::Tool, RBX::BackpackItem, RBX::sTool>>;
 template class RBX::DescribedCreatable<RBX::Tool, RBX::BackpackItem, RBX::sTool>;
 
 template const RBX::Name& RBX::Name::doDeclare<RBX::sToolMouseCommand>();

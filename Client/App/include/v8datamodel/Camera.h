@@ -85,12 +85,12 @@ private:
 	}
 	void getIgnorePrims(const G3D::Array<Primitive*>&);
 
-	virtual bool askSetParent(const Instance* instance) const;
+	bool askSetParent(const Instance* instance) const override;
 
 public:
 	Camera();
 
-	virtual ~Camera() {}
+	~Camera() override = default;
 
 	const G3D::GCamera& getGCamera() const;
 

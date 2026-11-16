@@ -76,10 +76,10 @@ std::string ThreadLogManager::getLogFileName()
 RBX::Log* LogManager::getLog()
 {
 	if (!logsEnabled) {
-		return NULL;
+		return nullptr;
 	}
 
-	if (log == NULL) {
+	if (log == nullptr) {
 		log = new RBX::Log(getLogFileName().c_str(), name.c_str());
 	}
 
@@ -116,7 +116,9 @@ LONG RobloxCrashReporter::ProcessException(_EXCEPTION_POINTERS* info)
 	static bool showedMessage = silent;
 	if (!showedMessage) {
 		showedMessage = true;
-		MessageBox(NULL, "An unexpected error occurred and ROBLOX needs to quit.  We're sorry!", "ROBLOX Crash", MB_OK);
+		MessageBox(
+			nullptr, "An unexpected error occurred and ROBLOX needs to quit.  We're sorry!", "ROBLOX Crash", MB_OK
+		);
 	}
 
 	return result;
@@ -138,7 +140,7 @@ static void __cdecl purecallHandler()
 	eventMessage.Format("Pure Call Error");
 	LogManager::ReportEvent(EVENTLOG_ERROR_TYPE, eventMessage);
 
-	int* p = NULL;
+	int* p = nullptr;
 	*p = p[1];
 }
 
@@ -277,7 +279,7 @@ MainLogManager::~MainLogManager()
 		}
 	}
 
-	mainLogManager = NULL;
+	mainLogManager = nullptr;
 }
 
 LogManager::~LogManager()
@@ -286,7 +288,7 @@ LogManager::~LogManager()
 		std::string logFile = log->logFile;
 		RBX::Log::Severity severity = log->worstSeverity;
 		delete log;
-		log = NULL;
+		log = nullptr;
 
 		if (severity == RBX::Log::Error) {
 			MoveRelative(logFile.c_str(), "error\\");
@@ -340,7 +342,7 @@ bool MainLogManager::handleG3DFailure(
 	}
 	ReportEvent(EVENTLOG_ERROR_TYPE, eventMessage);
 
-	int* p = NULL;
+	int* p = nullptr;
 	*p = p[1];
 
 	return false;

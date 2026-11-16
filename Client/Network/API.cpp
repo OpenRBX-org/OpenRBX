@@ -7,8 +7,7 @@
 #include "network/Server.h"
 #include "util/Name.h"
 
-namespace RBX {
-namespace Network {
+namespace RBX::Network {
 
 std::string API::version;
 
@@ -26,8 +25,7 @@ void API::init(const char* version)
 	NetworkSettings::singleton();
 }
 
-} // namespace Network
-} // namespace RBX
+} // namespace RBX::Network
 
 template const RBX::Name& RBX::Name::doDeclare<RBX::Network::sClient>();
 template const RBX::Name& RBX::Name::doDeclare<RBX::Network::sServer>();

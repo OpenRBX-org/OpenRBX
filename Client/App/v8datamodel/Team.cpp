@@ -35,9 +35,7 @@ bool Team::getAutoAssignable() const
 	return autoAssignable;
 }
 
-Team::~Team()
-{
-}
+Team::~Team() = default;
 
 Team::Team() : score(0), autoAssignable(true), autoColorCharacters(true)
 {
@@ -67,5 +65,5 @@ void Team::setAutoAssignable(bool autoAssign)
 
 template class RBX::FactoryProduct<RBX::Team, RBX::Instance, RBX::sTeam>;
 template class RBX::Reflection::
-	Described<RBX::Team, RBX::sTeam, RBX::FactoryProduct<RBX::Team, RBX::Instance, RBX::sTeam> >;
+	Described<RBX::Team, RBX::sTeam, RBX::FactoryProduct<RBX::Team, RBX::Instance, RBX::sTeam>>;
 template class RBX::DescribedCreatable<RBX::Team, RBX::Instance, RBX::sTeam>;

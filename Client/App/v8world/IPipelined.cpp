@@ -17,7 +17,7 @@ IStage* IPipelined::getStage(IStage::StageType stageType) const
 
 void IPipelined::removeFromPipeline(IStage* stage)
 {
-	currentStage = 0;
+	currentStage = nullptr;
 }
 
 void IPipelined::removeFromStage(IStage* stage)

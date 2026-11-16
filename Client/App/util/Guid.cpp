@@ -5,9 +5,9 @@
 #define NOMINMAX
 
 #include <algorithm>
+#include <cstdio>
 #include <mutex>
 #include <objbase.h>
-#include <stdio.h>
 #include <windows.h>
 
 namespace RBX {
@@ -27,7 +27,7 @@ void Guid::generateGUID(std::string& result)
 	char ansiClsid[64];
 
 	StringFromGUID2(guid, wszGUID, 64);
-	WideCharToMultiByte(CP_ACP, 0, wszGUID, 64, ansiClsid, 64, NULL, NULL);
+	WideCharToMultiByte(CP_ACP, 0, wszGUID, 64, ansiClsid, 64, nullptr, nullptr);
 
 	result += ansiClsid;
 
@@ -67,14 +67,14 @@ bool Guid::Data::operator<(const Data& other) const
 
 int Guid::compare(const Guid* a, const Guid* b)
 {
-	const Name* scopeA = a != NULL ? a->data.scope : NULL;
-	const Name* scopeB = b != NULL ? b->data.scope : NULL;
+	const Name* scopeA = a != nullptr ? a->data.scope : nullptr;
+	const Name* scopeB = b != nullptr ? b->data.scope : nullptr;
 	int order;
 
-	if (scopeA == NULL) {
-		order = scopeB != NULL ? -1 : 0;
+	if (scopeA == nullptr) {
+		order = scopeB != nullptr ? -1 : 0;
 	}
-	else if (scopeB == NULL) {
+	else if (scopeB == nullptr) {
 		order = 1;
 	}
 	else if (scopeA == scopeB) {
@@ -90,8 +90,8 @@ int Guid::compare(const Guid* a, const Guid* b)
 		}
 
 		if (order == 0) {
-			int indexA = a != NULL ? a->data.index : 0;
-			int indexB = b != NULL ? b->data.index : 0;
+			int indexA = a != nullptr ? a->data.index : 0;
+			int indexB = b != nullptr ? b->data.index : 0;
 
 			if (indexA > indexB) {
 				return 1;

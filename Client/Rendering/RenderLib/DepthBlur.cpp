@@ -3,8 +3,7 @@
 #include <GLG3D/Draw.h>
 #include <GLG3D/GLCaps.h>
 
-namespace RBX {
-namespace Render {
+namespace RBX::Render {
 
 void DepthBlur::allocateTextures(const G3D::Rect2D& screenRect)
 {
@@ -76,5 +75,4 @@ DepthBlur::DepthBlur()
 	}
 }
 
-} // namespace Render
-} // namespace RBX
+} // namespace RBX::Render

@@ -8,9 +8,7 @@ Unknown00409ef0::Unknown00409ef0(const char* host) : m_unk0x00(host)
 {
 }
 
-Unknown00409ef0::~Unknown00409ef0()
-{
-}
+Unknown00409ef0::~Unknown00409ef0() = default;
 
 static bool FUN_00409f10()
 {

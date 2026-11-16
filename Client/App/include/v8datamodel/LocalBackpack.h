@@ -30,10 +30,10 @@ private:
 	std::shared_ptr<BackpackItem> myItem;
 	GuiDrawImage guiImageDraw;
 
-	virtual bool askSetParent(const Instance* instance) const { return true; }
-	virtual G3D::Vector2 getSize() const;
-	virtual void render2d(Adorn* adorn);
-	virtual void onClick(const GuiEvent& event);
+	bool askSetParent(const Instance* instance) const override { return true; }
+	G3D::Vector2 getSize() const override;
+	void render2d(Adorn* adorn) override;
+	void onClick(const GuiEvent& event) override;
 	int getBinId() const { return getParent()->findChildIndex(this) + 1; }
 
 public:
@@ -61,14 +61,14 @@ private:
 	std::shared_ptr<BackpackItem> pendingClick;
 	int lastRemovedIndex;
 
-	virtual bool askSetParent(const Instance* instance) const { return true; }
-	virtual void onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider);
-	virtual void onEvent(const Network::Player* source, Network::CharacterRemoving event);
-	virtual void onEvent(const Network::Player* source, Network::CharacterAdded event);
-	virtual void onEvent(const Instance* source, DescendentRemoving event);
-	virtual void onEvent(const Instance* source, DescendentAdded event);
-	virtual void onEvent(const Instance* source, ChildRemoved event);
-	virtual void onEvent(const Instance* source, ChildAdded event);
+	bool askSetParent(const Instance* instance) const override { return true; }
+	void onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider) override;
+	void onEvent(const Network::Player* source, Network::CharacterRemoving event) override;
+	void onEvent(const Network::Player* source, Network::CharacterAdded event) override;
+	void onEvent(const Instance* source, DescendentRemoving event) override;
+	void onEvent(const Instance* source, DescendentAdded event) override;
+	void onEvent(const Instance* source, ChildRemoved event) override;
+	void onEvent(const Instance* source, ChildAdded event) override;
 
 	void onLocalCharacterAdded(Instance* added);
 	void onLocalPlayerAdded(Network::Player* added);
@@ -82,7 +82,7 @@ private:
 
 public:
 	LocalBackpack();
-	virtual ~LocalBackpack();
+	~LocalBackpack() override;
 
 	void onHeartbeat();
 	void onClick(LocalBackpackItem* clickedItem);
@@ -90,7 +90,7 @@ public:
 	void cycleUp();
 	void cycleDown();
 
-	virtual XmlElement* write() { return NULL; }
+	XmlElement* write() override { return nullptr; }
 };
 
 } // namespace RBX

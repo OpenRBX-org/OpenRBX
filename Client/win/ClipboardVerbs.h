@@ -10,8 +10,8 @@ class PasteVerb : public RBX::Verb
 public:
 	PasteVerb(RBX::DataModel* dataModel, bool pasteInto);
 
-	virtual bool isEnabled() const;
-	virtual void doIt(RBX::IDataState* dataState);
+	bool isEnabled() const override;
+	void doIt(RBX::IDataState* dataState) override;
 
 private:
 	RBX::DataModel* m_unk0x0c;
@@ -23,7 +23,7 @@ class CutVerb : public RBX::DeleteSelectionVerb
 public:
 	CutVerb(RBX::DataModel* dataModel) : RBX::DeleteSelectionVerb(dataModel, dataModel, "Cut") {}
 
-	virtual void doIt(RBX::IDataState* dataState);
+	void doIt(RBX::IDataState* dataState) override;
 };
 
 class CopyVerb : public RBX::EditSelectionVerb
@@ -31,9 +31,9 @@ class CopyVerb : public RBX::EditSelectionVerb
 public:
 	CopyVerb(RBX::DataModel* dataModel);
 
-	virtual ~CopyVerb() {}
+	~CopyVerb() override = default;
 
-	virtual void doIt(RBX::IDataState* dataState);
+	void doIt(RBX::IDataState* dataState) override;
 };
 
 #endif // CLIPBOARDVERBS_H

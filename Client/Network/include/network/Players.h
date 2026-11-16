@@ -81,19 +81,19 @@ class Players : public DescribedNonCreatable<Players, Instance, sPlayers>,
 	class Plugin;
 
 	std::unique_ptr<Plugin> plugin;
-	CopyOnWrite<std::vector<std::shared_ptr<Instance> > > players;
+	CopyOnWrite<std::vector<std::shared_ptr<Instance>>> players;
 	std::shared_ptr<Player> localPlayer;
 	RakPeerInterface* peer;
 	int maxPlayers;
 
-	virtual void onEvent(const Player* source, CharacterAdded event);
-	virtual void onChildChanged(Instance* instance, const PropertyChanged& event);
+	void onEvent(const Player* source, CharacterAdded event) override;
+	void onChildChanged(Instance* instance, const PropertyChanged& event) override;
 
 public:
 	static Reflection::RefPropDescriptor<Players, Player> propLocalPlayer;
 
 	Players();
-	virtual ~Players();
+	~Players() override;
 
 	bool superSafeOn() const;
 	std::shared_ptr<Instance> createLocalPlayer(int userId);
@@ -107,7 +107,7 @@ public:
 
 	void setMaxPlayers(int value);
 
-	std::shared_ptr<const std::vector<std::shared_ptr<Instance> > > getPlayers() { return players.read(); }
+	std::shared_ptr<const std::vector<std::shared_ptr<Instance>>> getPlayers() { return players.read(); }
 
 	void chat(std::string message);
 	void reportAbuse(Player* player, std::string comment);
@@ -135,9 +135,9 @@ public:
 	static bool backendProcessing(const Instance* context, bool testInDatamodel);
 
 protected:
-	virtual bool askAddChild(const Instance* instance) const;
-	virtual void onChildAdded(Instance* child);
-	virtual void onChildRemoving(Instance* child);
+	bool askAddChild(const Instance* instance) const override;
+	void onChildAdded(Instance* child) override;
+	void onChildRemoving(Instance* child) override;
 
 private:
 	void addChatMessage(const ChatMessage& message);

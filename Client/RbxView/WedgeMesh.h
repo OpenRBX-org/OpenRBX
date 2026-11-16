@@ -9,8 +9,7 @@
 #include <G3D/Vector2.h>
 #include <G3D/Vector3.h>
 
-namespace RBX {
-namespace View {
+namespace RBX::View {
 
 class WedgeMesh : public BevelMesh, public MeshFactory<WedgeMesh, 1>
 {
@@ -24,7 +23,6 @@ private:
 	WedgeMesh(const G3D::Vector3& size, NormalId textureFace, const G3D::Vector2& studsPerTile);
 };
 
-} // namespace View
-} // namespace RBX
+} // namespace RBX::View
 
 #endif // RBXVIEW_WEDGEMESH_H

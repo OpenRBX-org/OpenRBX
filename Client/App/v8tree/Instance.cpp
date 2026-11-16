@@ -29,10 +29,11 @@ static Reflection::BoundFuncDesc<Instance, void(), 0> func_Remove(
 	&Instance::remove, "Remove", Reflection::FunctionDescriptor::AnyCaller
 );
 
-static Reflection::BoundFuncDesc<Instance, std::shared_ptr<const std::vector<shared_ptr<Instance> > >(), 0>
+static Reflection::BoundFuncDesc<Instance, std::shared_ptr<const std::vector<shared_ptr<Instance>>>(), 0>
 	func_childrenOld(&Instance::getChildren2, "children", Reflection::FunctionDescriptor::AnyCaller);
-static Reflection::BoundFuncDesc<Instance, std::shared_ptr<const std::vector<shared_ptr<Instance> > >(), 0>
-	func_children(&Instance::getChildren2, "GetChildren", Reflection::FunctionDescriptor::AnyCaller);
+static Reflection::BoundFuncDesc<Instance, std::shared_ptr<const std::vector<shared_ptr<Instance>>>(), 0> func_children(
+	&Instance::getChildren2, "GetChildren", Reflection::FunctionDescriptor::AnyCaller
+);
 static Reflection::BoundFuncDesc<Instance, bool(shared_ptr<Instance>), 1> func_isDescendentOf(
 	&Instance::isDescendentOf2, "IsDescendentOf", "ancestor", Reflection::FunctionDescriptor::AnyCaller
 );
@@ -80,28 +81,24 @@ ChildAdded::ChildAdded(Instance* child) : child(shared_from(child))
 {
 }
 
-ChildAdded::ChildAdded(const ChildAdded& other) : child(other.child)
-{
-}
+ChildAdded::ChildAdded(const ChildAdded& other) = default;
 
 ChildRemoved::ChildRemoved(Instance* child) : child(shared_from(child))
 {
 }
 
-ChildRemoved::ChildRemoved(const ChildRemoved& other) : child(other.child)
-{
-}
+ChildRemoved::ChildRemoved(const ChildRemoved& other) = default;
 
 void Instance::onChildChanged(Instance* instance, const PropertyChanged& event)
 {
-	if (getParent() != NULL) {
+	if (getParent() != nullptr) {
 		getParent()->onChildChanged(instance, event);
 	}
 }
 
 bool Instance::contains(const Instance* child) const
 {
-	while (child != 0) {
+	while (child != nullptr) {
 		if (child == this) {
 			return true;
 		}
@@ -114,20 +111,20 @@ bool Instance::contains(const Instance* child) const
 
 void Instance::readProperties(const XmlElement* container, IReferenceBinder& binder)
 {
-	for (XmlElement* child = container->firstChild(); child != NULL; child = child->nextSibling()) {
+	for (XmlElement* child = container->firstChild(); child != nullptr; child = child->nextSibling()) {
 		readProperty(child, binder);
 	}
 }
 
 void Instance::writeChildren(XmlElement* container)
 {
-	const std::vector<shared_ptr<Instance> >* kids = children.operator->();
+	const std::vector<shared_ptr<Instance>>* kids = children.operator->();
 
-	if (kids != NULL) {
-		for (std::vector<shared_ptr<Instance> >::const_iterator it = kids->begin(); it != kids->end(); ++it) {
+	if (kids != nullptr) {
+		for (std::vector<shared_ptr<Instance>>::const_iterator it = kids->begin(); it != kids->end(); ++it) {
 			XmlElement* child = (*it)->write();
 
-			if (child != NULL) {
+			if (child != nullptr) {
 				container->addChild(child);
 			}
 		}
@@ -136,9 +133,9 @@ void Instance::writeChildren(XmlElement* container)
 
 Instance* Instance::findFirstChildByName(const std::string& findName) const
 {
-	const std::vector<shared_ptr<Instance> >* c = children.operator->();
+	const std::vector<shared_ptr<Instance>>* c = children.operator->();
 	if (!c) {
-		return NULL;
+		return nullptr;
 	}
 
 	for (unsigned int i = 0; i < c->size(); ++i) {
@@ -147,7 +144,7 @@ Instance* Instance::findFirstChildByName(const std::string& findName) const
 		}
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 Instance* Instance::findFirstChildByNameRecursive(const std::string& findName) const
@@ -157,9 +154,9 @@ Instance* Instance::findFirstChildByNameRecursive(const std::string& findName) c
 		return result;
 	}
 
-	const std::vector<shared_ptr<Instance> >* c = children.operator->();
+	const std::vector<shared_ptr<Instance>>* c = children.operator->();
 	if (!c) {
-		return NULL;
+		return nullptr;
 	}
 
 	for (unsigned int i = 0; i < c->size(); ++i) {
@@ -169,12 +166,12 @@ Instance* Instance::findFirstChildByNameRecursive(const std::string& findName) c
 		}
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 void Instance::signalDescendentAdded(Instance* instance, Instance* beginParent, Instance* oldParent)
 {
-	for (Instance* walk = beginParent; walk != NULL; walk = walk->parent) {
+	for (Instance* walk = beginParent; walk != nullptr; walk = walk->parent) {
 		if (walk == oldParent) {
 			break;
 		}
@@ -186,10 +183,10 @@ void Instance::signalDescendentAdded(Instance* instance, Instance* beginParent, 
 		walk->onDescendentAdded(instance);
 	}
 
-	std::shared_ptr<const std::vector<shared_ptr<Instance> > > c = instance->children.read();
+	std::shared_ptr<const std::vector<shared_ptr<Instance>>> c = instance->children.read();
 
 	if (c) {
-		for (std::vector<shared_ptr<Instance> >::const_iterator it = c->begin(); it != c->end(); ++it) {
+		for (std::vector<shared_ptr<Instance>>::const_iterator it = c->begin(); it != c->end(); ++it) {
 			signalDescendentAdded(it->get(), beginParent, oldParent);
 		}
 	}
@@ -199,7 +196,7 @@ void Instance::signalDescendentRemoving(
 	const shared_ptr<Instance>& instance, Instance* beginParent, Instance* newParent
 )
 {
-	for (Instance* walk = beginParent; walk != NULL; walk = walk->parent) {
+	for (Instance* walk = beginParent; walk != nullptr; walk = walk->parent) {
 		if (walk == newParent) {
 			break;
 		}
@@ -211,10 +208,10 @@ void Instance::signalDescendentRemoving(
 		walk->onDescendentRemoving(instance);
 	}
 
-	std::shared_ptr<const std::vector<shared_ptr<Instance> > > c = instance->children.read();
+	std::shared_ptr<const std::vector<shared_ptr<Instance>>> c = instance->children.read();
 
 	if (c) {
-		for (std::vector<shared_ptr<Instance> >::const_iterator it = c->begin(); it != c->end(); ++it) {
+		for (std::vector<shared_ptr<Instance>>::const_iterator it = c->begin(); it != c->end(); ++it) {
 			signalDescendentRemoving(*it, beginParent, newParent);
 		}
 	}
@@ -269,15 +266,15 @@ XmlElement* Instance::write()
 
 int Instance::findChildIndex(const Instance* instance) const
 {
-	const std::vector<shared_ptr<Instance> >& c = *children;
-	std::vector<shared_ptr<Instance> >::const_iterator iter =
+	const std::vector<shared_ptr<Instance>>& c = *children;
+	std::vector<shared_ptr<Instance>>::const_iterator iter =
 		std::find(c.begin(), c.end(), instance->shared_from_this());
 	return iter - c.begin();
 }
 
 void Instance::readProperty(const XmlElement* propertyElement, IReferenceBinder& binder)
 {
-	const Name* name = NULL;
+	const Name* name = nullptr;
 	if (propertyElement->findAttributeValue(name_name, name)) {
 		Reflection::MemberDescriptorContainer<Reflection::PropertyDescriptor>::Iterator iter = findProperty(*name);
 		if (iter != properties_end()) {
@@ -289,9 +286,9 @@ void Instance::readProperty(const XmlElement* propertyElement, IReferenceBinder&
 void Instance::onAddListener(Listener<Instance, ChildAdded>* listener) const
 {
 	if (children) {
-		std::shared_ptr<const std::vector<shared_ptr<Instance> > > c = children.read();
-		std::vector<shared_ptr<Instance> >::const_iterator end = c->end();
-		for (std::vector<shared_ptr<Instance> >::const_iterator iter = c->begin(); iter != end; ++iter) {
+		std::shared_ptr<const std::vector<shared_ptr<Instance>>> c = children.read();
+		std::vector<shared_ptr<Instance>>::const_iterator end = c->end();
+		for (std::vector<shared_ptr<Instance>>::const_iterator iter = c->begin(); iter != end; ++iter) {
 			Notifier<Instance, ChildAdded>::raise(ChildAdded(iter->get()), listener);
 		}
 	}
@@ -325,7 +322,7 @@ std::shared_ptr<Instance> Instance::fromXmlRoot(XmlElement* xmlRoot)
 	Serializer serializer;
 
 	SerializerV2::isolateHandles(xmlRoot);
-	std::vector<shared_ptr<Instance> > newInstances;
+	std::vector<shared_ptr<Instance>> newInstances;
 	serializer.loadInstances(xmlRoot, newInstances);
 	if (newInstances.size() == 0) {
 		return shared_ptr<Instance>();
@@ -352,9 +349,7 @@ shared_ptr<Instance> Instance::createChild(const Name& className)
 	return Instance::create(className);
 }
 
-Instance::~Instance()
-{
-}
+Instance::~Instance() = default;
 
 void Instance::setParent(Instance* newParent)
 {
@@ -372,7 +367,7 @@ void Instance::setParent(Instance* newParent)
 
 		oldParent->onChildRemoving(this);
 
-		shared_ptr<std::vector<shared_ptr<Instance> > >& children = oldParent->children.write();
+		shared_ptr<std::vector<shared_ptr<Instance>>>& children = oldParent->children.write();
 
 		children->erase(std::find(children->begin(), children->end(), self));
 
@@ -380,7 +375,7 @@ void Instance::setParent(Instance* newParent)
 			oldParent->children.reset();
 		}
 
-		parent = NULL;
+		parent = nullptr;
 
 		event_childRemoved.fire(oldParent.get(), self);
 
@@ -392,13 +387,13 @@ void Instance::setParent(Instance* newParent)
 		}
 	}
 
-	if (newParent != NULL) {
+	if (newParent != nullptr) {
 		newParent->children.write()->push_back(self);
 	}
 
 	parent = newParent;
 
-	if (newParent != NULL) {
+	if (newParent != nullptr) {
 		newParent->onChildAdded(this);
 
 		if (!newParent->contains(oldParent.get())) {
@@ -417,8 +412,8 @@ void Instance::setParent(Instance* newParent)
 void Instance::onAncestorChanged(const AncestorChanged& event)
 {
 	if (children) {
-		std::shared_ptr<const std::vector<shared_ptr<Instance> > > c = children.read();
-		for (std::vector<shared_ptr<Instance> >::const_iterator it = c->begin(); it != c->end(); ++it) {
+		std::shared_ptr<const std::vector<shared_ptr<Instance>>> c = children.read();
+		for (std::vector<shared_ptr<Instance>>::const_iterator it = c->begin(); it != c->end(); ++it) {
 			(*it)->onAncestorChanged(event);
 		}
 	}
@@ -455,7 +450,7 @@ void Instance::setName(const std::string& value)
 void Instance::removeAllChildren()
 {
 	while (children) {
-		children->back()->setParent(NULL);
+		children->back()->setParent(nullptr);
 	}
 }
 
@@ -465,12 +460,12 @@ void Instance::predelete()
 		shared_ptr<Instance> child;
 
 		{
-			shared_ptr<std::vector<shared_ptr<Instance> > > c = children.write();
+			shared_ptr<std::vector<shared_ptr<Instance>>> c = children.write();
 			child = c->back();
 
-			signalDescendentRemoving(child, this, NULL);
+			signalDescendentRemoving(child, this, nullptr);
 			onChildRemoving(child.get());
-			child->parent = NULL;
+			child->parent = nullptr;
 
 			c->pop_back();
 
@@ -482,15 +477,15 @@ void Instance::predelete()
 		event_childRemoved.fire(this, child);
 		Notifier<Instance, ChildRemoved>::raise(child.get());
 
-		child->onAncestorChanged(AncestorChanged(child.get(), this, NULL));
+		child->onAncestorChanged(AncestorChanged(child.get(), this, nullptr));
 		child->raisePropertyChanged(propParent);
 	}
 }
 
 void Instance::remove()
 {
-	std::shared_ptr<const std::vector<shared_ptr<Instance> > > c = children.read();
-	setParent(NULL);
+	std::shared_ptr<const std::vector<shared_ptr<Instance>>> c = children.read();
+	setParent(nullptr);
 	if (c) {
 		std::for_each(c->begin(), c->end(), [](const std::shared_ptr<Instance>& child) { child->remove(); });
 	}
@@ -505,7 +500,7 @@ void Instance::promoteChildren()
 
 void Instance::readChild(const XmlElement* childElement, IReferenceBinder& binder)
 {
-	const Name* className = NULL;
+	const Name* className = nullptr;
 	if (childElement->findAttributeValue(tag_class, className)) {
 		shared_ptr<Instance> childInstance = createChild(*className);
 
@@ -518,7 +513,7 @@ void Instance::readChild(const XmlElement* childElement, IReferenceBinder& binde
 		else {
 			const XmlAttribute* referent = childElement->findAttribute(name_referent);
 			if (referent) {
-				binder.announceID(referent, NULL);
+				binder.announceID(referent, nullptr);
 			}
 		}
 	}
@@ -526,10 +521,10 @@ void Instance::readChild(const XmlElement* childElement, IReferenceBinder& binde
 
 void Instance::readChildren(const XmlElement* element, IReferenceBinder& binder)
 {
-	if (element != NULL) {
+	if (element != nullptr) {
 		const XmlElement* item = element->findFirstChildByTag(tag_Item);
 
-		while (item != NULL) {
+		while (item != nullptr) {
 			readChild(item, binder);
 			item = element->findNextChildWithSameTag(item);
 		}
@@ -561,11 +556,11 @@ void Instance::predelete(Instance* instance)
 	instance->predelete();
 }
 
-Instance::Instance() : parent(NULL), name("Instance"), archivable(true)
+Instance::Instance() : parent(nullptr), name("Instance"), archivable(true)
 {
 }
 
-Instance::Instance(const char* name) : parent(NULL), name(name), archivable(true)
+Instance::Instance(const char* name) : parent(nullptr), name(name), archivable(true)
 {
 }
 

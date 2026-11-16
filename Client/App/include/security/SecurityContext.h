@@ -5,8 +5,7 @@
 #include <memory>
 #include <stdexcept>
 
-namespace RBX {
-namespace Security {
+namespace RBX::Security {
 
 enum Identities
 {
@@ -34,7 +33,7 @@ public:
 	{
 		Context* context = ptr().get();
 
-		if (context == NULL) {
+		if (context == nullptr) {
 			context = new Context(Anonymous);
 			ptr().reset(context);
 		}
@@ -45,7 +44,7 @@ public:
 	void requirePermission(Permissions permission, const char* operation) const
 	{
 		if (!isInRole(identity, permission)) {
-			if (operation != NULL) {
+			if (operation != nullptr) {
 				throw std::runtime_error(G3D::format("The current security context cannot %s", operation));
 			}
 			else {
@@ -88,7 +87,6 @@ public:
 	~Impersonator() { Context::ptr().reset(previous); }
 };
 
-} // namespace Security
-} // namespace RBX
+} // namespace RBX::Security
 
 #endif // SECURITY_SECURITYCONTEXT_H

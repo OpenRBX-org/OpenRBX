@@ -18,7 +18,7 @@ public:
 	IndexArray<Connector, &Connector::getKernelIndex> connectors;
 	IndexArray<Connector, &Connector::getKernelIndex> connectors2ndPass;
 
-	~KernelData() {}
+	~KernelData() = default;
 };
 
 } // namespace RBX

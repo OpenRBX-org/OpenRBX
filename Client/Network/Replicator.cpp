@@ -37,8 +37,8 @@
 #include <RakNetStatistics.h>
 #include <RakPeer.h>
 #include <algorithm>
+#include <cstdio>
 #include <stdexcept>
-#include <stdio.h>
 
 struct TimeStamp
 {
@@ -58,19 +58,18 @@ class FilePacketLogger : public PacketLogger
 public:
 	FilePacketLogger(RBX::Network::Peer* peer);
 
-	virtual ~FilePacketLogger()
+	~FilePacketLogger() override
 	{
 		if (packetLogFile) {
 			fclose(packetLogFile);
 		}
 	}
 
-	virtual void OnAttach(RakPeerInterface* peer);
-	virtual void WriteLog(const char* str);
+	void OnAttach(RakPeerInterface* peer) override;
+	void WriteLog(const char* str) override;
 };
 
-namespace RBX {
-namespace Network {
+namespace RBX::Network {
 
 const char sPeer[] = "NetworkPeer";
 const char sReplicator[] = "NetworkReplicator";
@@ -79,8 +78,7 @@ const char sMarker[] = "NetworkMarker";
 Reflection::SignalDesc<Replicator, void(std::string, bool)> Replicator::event_Disconnection(
 	"Disconnection", "peer", "lostConnection"
 );
-} // namespace Network
-} // namespace RBX
+} // namespace RBX::Network
 
 static RBX::Reflection::BoundFuncDesc<RBX::Network::Replicator, std::shared_ptr<RBX::Reflection::DescribedBase>(), 0>
 	func_SendMarker(
@@ -102,8 +100,7 @@ static RBX::Reflection::BoundFuncDesc<RBX::Network::Replicator, std::shared_ptr<
 	&RBX::Network::Replicator::getPlayer, "GetPlayer", RBX::Reflection::FunctionDescriptor::NeedTrustedCaller
 );
 
-namespace RBX {
-namespace Network {
+namespace RBX::Network {
 
 Reflection::SignalDesc<Marker, void()> Marker::event_Returned("Received");
 
@@ -123,7 +120,7 @@ public:
 
 	ReplicatorStatsItem(const std::shared_ptr<Replicator>& replicator, const RakNetStatistics* statistics);
 
-	virtual void update();
+	void update() override;
 };
 
 class __declspec(novtable) Replicator::Item
@@ -146,7 +143,7 @@ public:
 		ItemTypeMarker = 4
 	};
 
-	virtual ~Item() {}
+	virtual ~Item() = default;
 
 	virtual void write(RakNet::BitStream& bitStream) = 0;
 	static void writeItemType(RakNet::BitStream& stream, ItemType value);
@@ -159,7 +156,7 @@ class Replicator::NewInstanceItem : public Item
 
 public:
 	NewInstanceItem(Replicator& replicator, const std::shared_ptr<Instance>& instance);
-	virtual void write(RakNet::BitStream& bitStream);
+	void write(RakNet::BitStream& bitStream) override;
 };
 
 class Replicator::DeleteInstanceItem : public Item
@@ -168,7 +165,7 @@ class Replicator::DeleteInstanceItem : public Item
 
 public:
 	DeleteInstanceItem(Replicator& replicator, const std::shared_ptr<const Instance>& instance);
-	virtual void write(RakNet::BitStream& bitStream);
+	void write(RakNet::BitStream& bitStream) override;
 };
 
 class Replicator::MarkerItem : public Item
@@ -178,7 +175,7 @@ class Replicator::MarkerItem : public Item
 public:
 	MarkerItem(Replicator& replicator, long id) : Item(replicator), id(id) {}
 
-	virtual void write(RakNet::BitStream& bitStream);
+	void write(RakNet::BitStream& bitStream) override;
 };
 
 class Replicator::ChangePropertyItem : public Item
@@ -192,7 +189,7 @@ public:
 		const std::shared_ptr<const Instance>& instance,
 		const Reflection::PropertyDescriptor& desc
 	);
-	virtual void write(RakNet::BitStream& bitStream);
+	void write(RakNet::BitStream& bitStream) override;
 };
 
 class Replicator::ItemSender
@@ -241,8 +238,7 @@ void Replicator::onSentMarker(long id)
 {
 }
 
-} // namespace Network
-} // namespace RBX
+} // namespace RBX::Network
 
 void FilePacketLogger::OnAttach(RakPeerInterface* peer)
 {
@@ -262,12 +258,11 @@ static void checkDisconnect(RBX::Instance* instance)
 {
 	RBX::Network::Replicator* replicator = dynamic_cast<RBX::Network::Replicator*>(instance);
 	if (replicator && replicator->disconnected) {
-		replicator->setParent(NULL);
+		replicator->setParent(nullptr);
 	}
 }
 
-namespace RBX {
-namespace Network {
+namespace RBX::Network {
 
 void Replicator::writeValueType(bool includeLength, ValueType vt, RakNet::BitStream& outBitStream)
 {
@@ -305,7 +300,7 @@ class Replicator::JobSender
 
 	void closePacket()
 	{
-		replicator.serializeId(bitStream, NULL);
+		replicator.serializeId(bitStream, nullptr);
 
 		peer->Send(&bitStream, packetPriority, UNRELIABLE, 0, replicator.remotePlayerId, false);
 
@@ -319,7 +314,7 @@ public:
 	bool sentPacket;
 
 	JobSender(Replicator& replicator, RakPeerInterface* peer)
-		: firstA(NULL), firstM(NULL), replicator(replicator), peer(peer), hasOpenPacket(false),
+		: firstA(nullptr), firstM(nullptr), replicator(replicator), peer(peer), hasOpenPacket(false),
 		  bitStream(maxStreamSize), packetPriority(MEDIUM_PRIORITY), sentPacket(false)
 	{
 	}
@@ -353,7 +348,7 @@ void Replicator::closeConnection()
 {
 	peer->CloseConnection(remotePlayerId, true);
 
-	setParent(NULL);
+	setParent(nullptr);
 }
 
 void Replicator::Item::writeItemType(RakNet::BitStream& stream, ItemType value)
@@ -377,10 +372,9 @@ inline void Replicator::Item::readItemType(RakNet::BitStream& stream, ItemType& 
 	}
 }
 
-} // namespace Network
-} // namespace RBX
+} // namespace RBX::Network
 
-FilePacketLogger::FilePacketLogger(RBX::Network::Peer* peer) : packetLogFile(NULL)
+FilePacketLogger::FilePacketLogger(RBX::Network::Peer* peer) : packetLogFile(nullptr)
 {
 	std::string pathName = RBX::Log::current()->logFile;
 	size_t pos = pathName.rfind('\\');
@@ -399,8 +393,7 @@ FilePacketLogger::FilePacketLogger(RBX::Network::Peer* peer) : packetLogFile(NUL
 	}
 }
 
-namespace RBX {
-namespace Network {
+namespace RBX::Network {
 
 RakPeerInterface* Peer::peerInterface()
 {
@@ -412,7 +405,7 @@ void Replicator::closeReplicationItem(const std::pair<const Instance* const, Rep
 	pair.second.childAdded.disconnect();
 	pair.second.changed.disconnect();
 	if (pair.second.deleteOnDisconnect) {
-		pair.second.instance->setParent(NULL);
+		pair.second.instance->setParent(nullptr);
 	}
 }
 
@@ -512,7 +505,7 @@ void Peer::Update(RakPeerInterface* peer)
 
 Player* Replicator::findTargetPlayer()
 {
-	return players ? players->getLocalPlayer() : NULL;
+	return players ? players->getLocalPlayer() : nullptr;
 }
 
 std::shared_ptr<Instance> Replicator::getPlayer()
@@ -530,7 +523,7 @@ Mechanism* Replicator::findTargetPlayerCharacterMechanism()
 		}
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 inline Replicator::ItemSender::~ItemSender()
@@ -613,7 +606,7 @@ void Peer::onEvent(const RunService* source, Heartbeat event)
 
 bool Replicator::isSerializePending(const Instance* instance) const
 {
-	return pendingNewInstances.find(instance) != pendingNewInstances.end();
+	return pendingNewInstances.contains(instance);
 }
 
 void Replicator::sendPhysicsData(RakNet::BitStream& bitStream, const Assembly& assembly)
@@ -626,7 +619,7 @@ void Replicator::sendPhysicsData(RakNet::BitStream& bitStream, const Assembly& a
 			const Velocity& velocity = part->getVelocity();
 
 			Player* player = findTargetPlayer();
-			ModelInstance* character = player ? player->getCharacter() : NULL;
+			ModelInstance* character = player ? player->getCharacter() : nullptr;
 
 			writePosition(bitStream, cf.translation, character && character->isAncestorOf(part));
 
@@ -669,7 +662,7 @@ inline bool Replicator::JobSender::report(const Mechanism& m)
 
 	replicator.sendPhysicsData(bitStream, m);
 
-	replicator.serializeId(bitStream, NULL);
+	replicator.serializeId(bitStream, nullptr);
 
 	unsigned int numBytes = bitStream.GetNumberOfBytesUsed();
 
@@ -762,7 +755,7 @@ void Replicator::onChildAdded(std::shared_ptr<Instance> child)
 		return;
 	}
 
-	if (replicationContainers.find(child.get()) == replicationContainers.end()) {
+	if (!replicationContainers.contains(child.get())) {
 		addReplicationData(child, true);
 
 		pendingItems.push_back(std::shared_ptr<Item>(new NewInstanceItem(*this, child)));
@@ -779,7 +772,7 @@ inline bool Replicator::removeFromPendingNewInstances(const Instance* instance)
 
 void Replicator::onParentChanged(std::shared_ptr<Instance> instance)
 {
-	if (replicationContainers.find(instance->getParent()) != replicationContainers.end()) {
+	if (replicationContainers.contains(instance->getParent())) {
 		pendingItems.push_back(std::shared_ptr<Item>(new ChangePropertyItem(*this, instance, Instance::propParent)));
 	}
 	else {
@@ -818,7 +811,7 @@ void Replicator::onPropertyChanged(std::shared_ptr<Instance> instance, const Ref
 	}
 
 	Player* player = findTargetPlayer();
-	ModelInstance* character = player ? player->getCharacter() : NULL;
+	ModelInstance* character = player ? player->getCharacter() : nullptr;
 	if (character && instance->isDescendentOf(character)) {
 		pendingItems.push_front(std::shared_ptr<Item>(new ChangePropertyItem(*this, instance, *descriptor)));
 	}
@@ -931,14 +924,14 @@ void Replicator::readInstanceDelete(RakNet::BitStream& inBitstream)
 			removeFromPendingNewInstances(instance);
 
 			ScopedAssign<Instance*> assign(removingInstance, instance);
-			instance->setParent(NULL);
+			instance->setParent(nullptr);
 		}
 	}
 	else if (NetworkSettings::singleton().printInstances) {
 		StandardOut::singleton()->print(MESSAGE_INFO, "Replication ~??? << %s", remotePlayerId.ToString());
 	}
 
-	resolvePendingReferences(NULL, id);
+	resolvePendingReferences(nullptr, id);
 }
 
 Peer::Peer() : profilePacketsThread(new Profiling::ThreadProfiler("Packets Thread")), rakPeer(new RakPeer())
@@ -974,7 +967,7 @@ bool Replicator::sendPhysicsPacket()
 				lastCharacterSendTime = t;
 			}
 			else {
-				characterMechanism = NULL;
+				characterMechanism = nullptr;
 			}
 		}
 
@@ -1120,22 +1113,22 @@ PluginReceiveResult Replicator::OnReceive_ID_TIMESTAMP(Packet* packet)
 
 void Peer::onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider)
 {
-	Stats::StatsService* stats = oldProvider ? oldProvider->find<Stats::StatsService>() : NULL;
+	Stats::StatsService* stats = oldProvider ? oldProvider->find<Stats::StatsService>() : nullptr;
 	if (stats) {
 		std::shared_ptr<Stats::Item> network =
 			shared_from_polymorphic_downcast<Stats::Item>(stats->findFirstChildByName("Network"));
 		if (network) {
-			network->setParent(NULL);
+			network->setParent(nullptr);
 		}
 	}
 
-	stopListening(oldProvider ? oldProvider->find<RunService>() : NULL, this);
+	stopListening(oldProvider ? oldProvider->find<RunService>() : nullptr, this);
 
 	Instance::onServiceProvider(oldProvider, newProvider);
 
-	startListening(newProvider ? newProvider->find<RunService>() : NULL, this);
+	startListening(newProvider ? newProvider->find<RunService>() : nullptr, this);
 
-	stats = newProvider ? newProvider->find<Stats::StatsService>() : NULL;
+	stats = newProvider ? newProvider->find<Stats::StatsService>() : nullptr;
 	if (stats) {
 		std::shared_ptr<Stats::Item> network = Creatable<Instance>::create<Stats::Item>();
 		network->setName("Network");
@@ -1252,7 +1245,7 @@ const Instance* Replicator::getDefault(const Name& className)
 void Replicator::createStatsItems(Stats::StatsService* stats)
 {
 	if (statsItem) {
-		statsItem->setParent(NULL);
+		statsItem->setParent(nullptr);
 		statsItem.reset();
 	}
 
@@ -1343,7 +1336,7 @@ void Replicator::serializeValue(
 
 inline bool Replicator::isReplicationContainer(const Instance* instance) const
 {
-	return replicationContainers.find(instance) != replicationContainers.end();
+	return replicationContainers.contains(instance);
 }
 
 void Replicator::deserializeValue(RakNet::BitStream& inBitStream, Reflection::Property& property)
@@ -1694,7 +1687,7 @@ void Replicator::onServiceProvider(const ServiceProvider* oldProvider, const Ser
 
 	DescribedNonCreatable<Replicator, IdSerializer, sReplicator>::onServiceProvider(oldProvider, newProvider);
 
-	createStatsItems(newProvider ? newProvider->find<Stats::StatsService>() : NULL);
+	createStatsItems(newProvider ? newProvider->find<Stats::StatsService>() : nullptr);
 
 	if (newProvider) {
 		Instance* lighting = newProvider->create<Lighting>();
@@ -1712,7 +1705,7 @@ void Replicator::onServiceProvider(const ServiceProvider* oldProvider, const Ser
 	}
 	else if (peer) {
 		peer->DetachPlugin(this);
-		peer = NULL;
+		peer = nullptr;
 	}
 }
 
@@ -1890,8 +1883,8 @@ Replicator::~Replicator()
 }
 
 Replicator::Replicator(SystemAddress remotePlayerId, RakPeerInterface* peer)
-	: lastSendTime(G3D::System::getLocalTime()), lastCharacterSendTime(G3D::System::getLocalTime()), players(NULL),
-	  sendPhysicsEnabled(false), deserializingProperty(NULL), removingInstance(NULL),
+	: lastSendTime(G3D::System::getLocalTime()), lastCharacterSendTime(G3D::System::getLocalTime()), players(nullptr),
+	  sendPhysicsEnabled(false), deserializingProperty(nullptr), removingInstance(nullptr),
 	  profileReplication(new Profiling::CodeProfiler("Replication")),
 	  profileDataListening(new Profiling::CodeProfiler("Data Listening")),
 	  profileDataIn(new Profiling::CodeProfiler("Data In")), profileDataOut(new Profiling::CodeProfiler("Data Out")),
@@ -1910,8 +1903,7 @@ Replicator::Replicator(SystemAddress remotePlayerId, RakPeerInterface* peer)
 	profilePhysicsOut->parent = profileReplication.get();
 }
 
-} // namespace Network
-} // namespace RBX
+} // namespace RBX::Network
 
 template const RBX::Name& RBX::Name::doDeclare<RBX::Network::sReplicator>();
 template void RBX::Name::callDoDeclare<RBX::Network::sReplicator>();

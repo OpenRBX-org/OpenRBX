@@ -15,13 +15,13 @@ private:
 	std::string accelerator;
 
 protected:
-	virtual bool canLoseFocus() { return true; }
+	bool canLoseFocus() override { return true; }
 
 public:
 	MenuItem(Verb* p_unk0x04, const std::string& p_unk0x08, std::string p_unk0x0c);
 	MenuItem(Verb* p_unk0x04, const std::string& p_unk0x08);
 
-	virtual void render2d(Adorn* adorn);
+	void render2d(Adorn* adorn) override;
 };
 
 } // namespace RBX

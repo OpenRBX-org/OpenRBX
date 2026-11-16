@@ -3,8 +3,7 @@
 
 #include <MessageIdentifiers.h>
 
-namespace RBX {
-namespace Network {
+namespace RBX::Network {
 
 enum
 {
@@ -17,7 +16,6 @@ enum
 	ID_REPORT_ABUSE
 };
 
-} // namespace Network
-} // namespace RBX
+} // namespace RBX::Network
 
 #endif // NETWORK_PACKETIDS_H

@@ -18,27 +18,29 @@ class CSelectionTreeCtrl : public CRobloxTreeCtrl,
 
 public:
 	CSelectionTreeCtrl();
-	virtual ~CSelectionTreeCtrl();
+	~CSelectionTreeCtrl() override;
 
-	virtual BOOL OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo);
+	BOOL OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo) override;
 
-	virtual RBX::Selection* VTable0x148();
-	virtual std::shared_ptr<RBX::DataModel> VTable0x14c() const;
-	virtual void VTable0x150(RBX::Instance* instance);
-	virtual void VTable0x154(CRobloxTreeCtrlNode* node);
-	virtual void VTable0x158(CRobloxTreeCtrlNode* node);
-	virtual void VTable0x15c();
+	RBX::Selection* VTable0x148() override;
+	std::shared_ptr<RBX::DataModel> VTable0x14c() const override;
+	void VTable0x150(RBX::Instance* instance) override;
+	void VTable0x154(CRobloxTreeCtrlNode* node) override;
+	void VTable0x158(CRobloxTreeCtrlNode* node) override;
+	void VTable0x15c() override;
 
 protected:
-	virtual void VTable0x00(std::shared_ptr<RBX::DataModel> newDataModel, std::shared_ptr<RBX::DataModel> oldDataModel);
-	virtual void onEvent(const RBX::Selection* source, RBX::SelectionChanged event);
+	void VTable0x00(
+		std::shared_ptr<RBX::DataModel> newDataModel, std::shared_ptr<RBX::DataModel> oldDataModel
+	) override;
+	void onEvent(const RBX::Selection* source, RBX::SelectionChanged event) override;
 
-	virtual void SelectAllIgnore(BOOL bSelect, HTREEITEM hIgnore);
-	virtual BOOL OnButtonDown(BOOL bLeft, UINT nFlags, CPoint point);
-	virtual void DoPreSelection(HTREEITEM hItem, BOOL bLeft, UINT nFlags);
-	virtual void DoAction(HTREEITEM hItem, BOOL bLeft, UINT nFlags, CPoint point);
-	virtual void DoBanding(UINT nFlags, CPoint point);
-	virtual void UpdateSelectionForRect(LPCRECT pRect, UINT nFlags, CTypedPtrList<CPtrList, HTREEITEM>& list);
+	void SelectAllIgnore(BOOL bSelect, HTREEITEM hIgnore) override;
+	BOOL OnButtonDown(BOOL bLeft, UINT nFlags, CPoint point) override;
+	void DoPreSelection(HTREEITEM hItem, BOOL bLeft, UINT nFlags) override;
+	void DoAction(HTREEITEM hItem, BOOL bLeft, UINT nFlags, CPoint point) override;
+	void DoBanding(UINT nFlags, CPoint point) override;
+	void UpdateSelectionForRect(LPCRECT pRect, UINT nFlags, CTypedPtrList<CPtrList, HTREEITEM>& list) override;
 
 	afx_msg void FUN_00422230(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
@@ -63,7 +65,7 @@ private:
 	bool m_unk0xcc;
 	bool m_unk0xcd;
 	bool m_unk0xce;
-	std::set<std::shared_ptr<RBX::Instance>, std::owner_less<std::shared_ptr<RBX::Instance> > > m_unk0xd0;
+	std::set<std::shared_ptr<RBX::Instance>, std::owner_less<std::shared_ptr<RBX::Instance>>> m_unk0xd0;
 	std::set<CRobloxTreeCtrlNode*> m_unk0xdc;
 	std::shared_ptr<RBX::DataModel> m_unk0xe8;
 	std::unique_ptr<CImageList> m_unk0xf0;

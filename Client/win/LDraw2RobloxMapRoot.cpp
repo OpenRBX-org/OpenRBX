@@ -11,8 +11,7 @@
 #include <fstream>
 #include <memory>
 
-namespace RBX {
-namespace LDraw2Lua {
+namespace RBX::LDraw2Lua {
 
 static const RBX::Name& g_unk0x00955318 = RBX::Name::declare("LDraw2RobloxMap", -1);
 static const RBX::Name& g_unk0x0095531c = RBX::Name::declare("schema_version", -1);
@@ -82,7 +81,7 @@ LDraw2RobloxColorMap* LDraw2RobloxMapRoot::FUN_004716b0(int p_unk0x04)
 		return iter->second;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 int LDraw2RobloxMapRoot::FUN_00471710(int p_unk0x04)
@@ -102,7 +101,7 @@ LDraw2RobloxPartMap* LDraw2RobloxMapRoot::FUN_00471730(const std::string& p_unk0
 		return iter->second;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 LDraw2RobloxPartMap* LDraw2RobloxMapRoot::FUN_00471790(const std::string& p_unk0x04)
@@ -283,5 +282,4 @@ LDraw2RobloxMapRoot::LDraw2RobloxMapRoot(std::string p_unk0x04) : m_unk0x04(p_un
 	}
 }
 
-} // namespace LDraw2Lua
-} // namespace RBX
+} // namespace RBX::LDraw2Lua

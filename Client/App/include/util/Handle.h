@@ -16,13 +16,9 @@ public:
 	InstanceHandle() {}
 	InstanceHandle(Instance* target);
 	InstanceHandle(std::shared_ptr<Instance>);
-	InstanceHandle(const InstanceHandle& other) : target(other.target) {}
+	InstanceHandle(const InstanceHandle& other) = default;
 
-	InstanceHandle& operator=(const InstanceHandle& other)
-	{
-		target = other.target;
-		return *this;
-	}
+	InstanceHandle& operator=(const InstanceHandle& other) = default;
 
 	InstanceHandle& operator=(std::shared_ptr<Instance>);
 

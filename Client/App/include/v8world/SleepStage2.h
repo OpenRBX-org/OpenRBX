@@ -20,23 +20,23 @@ class SimJobStage;
 class SleepStage : public IWorldStage
 {
 public:
-	typedef std::set<Assembly*> AssemblySet;
-	typedef std::set<Joint*> JointSet;
-	typedef AssemblySet::iterator AssemblySetIt;
-	typedef AssemblySet::const_iterator CAssemblySetIt;
-	typedef IndexArray<Contact, &Contact::steppingIndexFunc> ContactList;
+	using AssemblySet = std::set<Assembly*>;
+	using JointSet = std::set<Joint*>;
+	using AssemblySetIt = AssemblySet::iterator;
+	using CAssemblySetIt = AssemblySet::const_iterator;
+	using ContactList = IndexArray<Contact, &Contact::steppingIndexFunc>;
 
 	SleepStage(IStage* upstream, World* world);
 
-	virtual ~SleepStage();
+	~SleepStage() override;
 
-	virtual StageType getStageType() { return SLEEP_STAGE; }
+	StageType getStageType() override { return SLEEP_STAGE; }
 
-	virtual void stepWorld(int worldStepId, int _uiStepId, bool _throttling);
+	void stepWorld(int worldStepId, int _uiStepId, bool _throttling) override;
 
-	virtual void onEdgeAdded(Edge* edge);
-	virtual void onEdgeRemoving(Edge* edge);
-	virtual int getMetric(MetricType metricType);
+	void onEdgeAdded(Edge* edge) override;
+	void onEdgeRemoving(Edge* edge) override;
+	int getMetric(MetricType metricType) override;
 
 	void onAssemblyAdded(Assembly* assembly);
 	void onAssemblyRemoving(Assembly* assembly);

@@ -1,7 +1,7 @@
 #ifndef SCRIPT_LUAMEMORY_H
 #define SCRIPT_LUAMEMORY_H
 
-#include <stddef.h>
+#include <cstddef>
 
 class LuaAllocator
 {

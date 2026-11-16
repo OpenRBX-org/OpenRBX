@@ -6,9 +6,7 @@
 #include <fstream>
 #include <shlwapi.h>
 
-namespace RBX {
-namespace Reflection {
-namespace Metadata {
+namespace RBX::Reflection::Metadata {
 
 char sReflection[] = "ReflectionMetadata";
 
@@ -28,22 +26,22 @@ char sMember[] = "ReflectionMetadataMember";
 
 bool Reflection::askAddChild(const Instance* instance) const
 {
-	return dynamic_cast<const Classes*>(instance) != NULL;
+	return dynamic_cast<const Classes*>(instance) != nullptr;
 }
 
 bool Classes::askAddChild(const Instance* instance) const
 {
-	return dynamic_cast<const Class*>(instance) != NULL;
+	return dynamic_cast<const Class*>(instance) != nullptr;
 }
 
 bool Class::askAddChild(const Instance* instance) const
 {
-	return dynamic_cast<const Members*>(instance) != NULL;
+	return dynamic_cast<const Members*>(instance) != nullptr;
 }
 
 bool Members::askAddChild(const Instance* instance) const
 {
-	return dynamic_cast<const Member*>(instance) != NULL;
+	return dynamic_cast<const Member*>(instance) != nullptr;
 }
 
 Class* Classes::FUN_00446130(const ClassDescriptor* descriptor, bool recurse)
@@ -55,7 +53,7 @@ Class* Classes::FUN_00446130(const ClassDescriptor* descriptor, bool recurse)
 	if (recurse && descriptor->getBase()) {
 		return FUN_00446130(descriptor->getBase(), true);
 	}
-	return NULL;
+	return nullptr;
 }
 
 Class* Reflection::FUN_00446220(const ClassDescriptor* descriptor, bool recurse)
@@ -63,43 +61,43 @@ Class* Reflection::FUN_00446220(const ClassDescriptor* descriptor, bool recurse)
 	if (m_unk0xf8) {
 		return m_unk0xf8->FUN_00446130(descriptor, recurse);
 	}
-	return NULL;
+	return nullptr;
 }
 
 Member* Reflection::FUN_00446920(const PropertyDescriptor* descriptor)
 {
-	Class* item = m_unk0xf8 ? m_unk0xf8->FUN_00446130(&descriptor->owner, false) : NULL;
+	Class* item = m_unk0xf8 ? m_unk0xf8->FUN_00446130(&descriptor->owner, false) : nullptr;
 	if (item) {
 		Properties* members = item->findFirstChildOfType<Properties>();
 		if (members) {
 			return static_cast<Member*>(members->findFirstChildByName(descriptor->name.toString()));
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 Member* Reflection::FUN_00446970(const FunctionDescriptor* descriptor)
 {
-	Class* item = m_unk0xf8 ? m_unk0xf8->FUN_00446130(&descriptor->owner, false) : NULL;
+	Class* item = m_unk0xf8 ? m_unk0xf8->FUN_00446130(&descriptor->owner, false) : nullptr;
 	if (item) {
 		Functions* members = item->findFirstChildOfType<Functions>();
 		if (members) {
 			return static_cast<Member*>(members->findFirstChildByName(descriptor->name.toString()));
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 Member* Reflection::FUN_004469c0(const SignalDescriptor* descriptor)
 {
-	Class* item = m_unk0xf8 ? m_unk0xf8->FUN_00446130(&descriptor->owner, false) : NULL;
+	Class* item = m_unk0xf8 ? m_unk0xf8->FUN_00446130(&descriptor->owner, false) : nullptr;
 	if (item) {
 		Events* members = item->findFirstChildOfType<Events>();
 		if (members) {
 			return static_cast<Member*>(members->findFirstChildByName(descriptor->name.toString()));
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 void FUN_00447680()
@@ -112,7 +110,7 @@ void FUN_00447680()
 	Events::classDescriptor();
 }
 
-Reflection::Reflection() : m_unk0xf8(NULL)
+Reflection::Reflection() : m_unk0xf8(nullptr)
 {
 }
 
@@ -189,9 +187,7 @@ RBX::Reflection::BoundProp<int, 1> Class::prop_ExplorerImageIndex(
 	"ExplorerImageIndex", "Reflection", &Class::explorerImageIndex
 );
 
-} // namespace Metadata
-} // namespace Reflection
-} // namespace RBX
+} // namespace RBX::Reflection::Metadata
 
 template class RBX::
 	FactoryProduct<RBX::Reflection::Metadata::Reflection, RBX::Instance, RBX::Reflection::Metadata::sReflection>;

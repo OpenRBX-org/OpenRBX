@@ -32,7 +32,7 @@ static Reflection::PropDescriptor<HopperBin, std::string> desc_legacyTextureName
 
 bool BackpackItem::inBackpack()
 {
-	return getParent() && dynamic_cast<Backpack*>(getParent()) != NULL;
+	return getParent() && dynamic_cast<Backpack*>(getParent()) != nullptr;
 }
 
 int BackpackItem::getBinId() const
@@ -47,7 +47,7 @@ const TextureId BackpackItem::getTextureId() const
 
 bool Hopper::askAddChild(const Instance* instance) const
 {
-	return dynamic_cast<const BackpackItem*>(instance) != NULL;
+	return dynamic_cast<const BackpackItem*>(instance) != nullptr;
 }
 
 Hopper::Hopper()
@@ -78,9 +78,7 @@ void StarterPackService::render2d(Adorn* adorn)
 	}
 }
 
-LegacyHopperService::~LegacyHopperService()
-{
-}
+LegacyHopperService::~LegacyHopperService() = default;
 
 template <>
 Reflection::EnumDesc<HopperBin::BinType>::EnumDesc() : EnumDescriptor("BinType", typeid(HopperBin::BinType))
@@ -170,7 +168,7 @@ void LegacyHopperService::onServiceProvider(const ServiceProvider* oldProvider, 
 			getChild(0)->setParent(starterPack);
 		}
 
-		setParent(NULL);
+		setParent(nullptr);
 	}
 }
 
@@ -298,26 +296,24 @@ template class RBX::FactoryProduct<RBX::StarterPackService, RBX::Hopper, RBX::sS
 template class RBX::Reflection::Described<
 	RBX::StarterPackService,
 	RBX::sStarterPackService,
-	RBX::FactoryProduct<RBX::StarterPackService, RBX::Hopper, RBX::sStarterPackService> >;
+	RBX::FactoryProduct<RBX::StarterPackService, RBX::Hopper, RBX::sStarterPackService>>;
 template class RBX::DescribedCreatable<RBX::StarterPackService, RBX::Hopper, RBX::sStarterPackService>;
 
 template class RBX::FactoryProduct<RBX::LegacyHopperService, RBX::Hopper, RBX::sLegacyHopperService>;
 template class RBX::Reflection::Described<
 	RBX::LegacyHopperService,
 	RBX::sLegacyHopperService,
-	RBX::FactoryProduct<RBX::LegacyHopperService, RBX::Hopper, RBX::sLegacyHopperService> >;
+	RBX::FactoryProduct<RBX::LegacyHopperService, RBX::Hopper, RBX::sLegacyHopperService>>;
 template class RBX::DescribedCreatable<RBX::LegacyHopperService, RBX::Hopper, RBX::sLegacyHopperService>;
 
 template class RBX::FactoryProduct<RBX::HopperBin, RBX::BackpackItem, RBX::sHopperBin>;
-template class RBX::Reflection::Described<
-	RBX::HopperBin,
-	RBX::sHopperBin,
-	RBX::FactoryProduct<RBX::HopperBin, RBX::BackpackItem, RBX::sHopperBin> >;
+template class RBX::Reflection::
+	Described<RBX::HopperBin, RBX::sHopperBin, RBX::FactoryProduct<RBX::HopperBin, RBX::BackpackItem, RBX::sHopperBin>>;
 template class RBX::DescribedCreatable<RBX::HopperBin, RBX::BackpackItem, RBX::sHopperBin>;
 
 template class RBX::NonFactoryProduct<RBX::Widget, RBX::sBackpackItem>;
 template class RBX::Reflection::
-	Described<RBX::BackpackItem, RBX::sBackpackItem, RBX::NonFactoryProduct<RBX::Widget, RBX::sBackpackItem> >;
+	Described<RBX::BackpackItem, RBX::sBackpackItem, RBX::NonFactoryProduct<RBX::Widget, RBX::sBackpackItem>>;
 template class RBX::DescribedNonCreatable<RBX::BackpackItem, RBX::Widget, RBX::sBackpackItem>;
 
 template const RBX::Name& RBX::Name::doDeclare<RBX::sBackpackItem>();

@@ -164,7 +164,7 @@ Point* Kernel::newPoint(Body* _body, const Vector3& worldPos)
 
 void Kernel::deletePoint(Point* _point)
 {
-	if (_point != NULL) {
+	if (_point != nullptr) {
 
 		if (--_point->numOwners == 0) {
 			removePoint(_point);
@@ -186,7 +186,7 @@ Kernel* Kernel::getKernel()
 }
 
 Kernel::Kernel(IStage* upstream)
-	: IStage(upstream, NULL), inStepCode(false), kernelData(new KernelData()), maxBodies(0), maxPoints(0),
+	: IStage(upstream, nullptr), inStepCode(false), kernelData(new KernelData()), maxBodies(0), maxPoints(0),
 	  maxConnectors(0), profilingKernel(new Profiling::CodeProfiler("Kernel"))
 {
 	numKernels++;

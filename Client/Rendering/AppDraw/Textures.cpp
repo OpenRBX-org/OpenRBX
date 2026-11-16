@@ -14,7 +14,7 @@ G3D::ReferenceCountedPointer<TextureProxyBase> Textures::getTextureProxy(Adorn* 
 		return adorn->createTextureProxy(fileName);
 	}
 	catch (...) {
-		return NULL;
+		return nullptr;
 	}
 }
 

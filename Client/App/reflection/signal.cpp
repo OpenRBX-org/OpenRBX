@@ -4,45 +4,40 @@
 
 #include <cstddef>
 
-namespace RBX {
-namespace Reflection {
+namespace RBX::Reflection {
 
-GenericSlotWrapper::~GenericSlotWrapper()
-{
-}
+GenericSlotWrapper::~GenericSlotWrapper() = default;
 
-SignalInstance::~SignalInstance()
-{
-}
+SignalInstance::~SignalInstance() = default;
 
 SignalInstance* SignalDescriptor::findSignalInstance(const SignalSource* source) const
 {
-	if (source == NULL) {
-		return NULL;
+	if (source == nullptr) {
+		return nullptr;
 	}
 
-	if (source->signals.get() == NULL) {
-		return NULL;
+	if (source->signals.get() == nullptr) {
+		return nullptr;
 	}
 
 	SignalSource::SignalMap::const_iterator it = source->signals->find(this);
 
 	if (it == source->signals->end()) {
-		return NULL;
+		return nullptr;
 	}
 
 	return it->second.get();
 }
 
 SignalDescriptor::SignalDescriptor(ClassDescriptor& classDescriptor, const char* name)
-	: MemberDescriptor(classDescriptor, name, "Signals"), signalCreatedHook(NULL)
+	: MemberDescriptor(classDescriptor, name, "Signals"), signalCreatedHook(nullptr)
 {
 	classDescriptor.MemberDescriptorContainer<SignalDescriptor>::declare(this);
 }
 
 std::shared_ptr<SignalInstance> SignalDescriptor::getSignalInstance(SignalSource& source) const
 {
-	if (source.signals.get() == NULL) {
+	if (source.signals.get() == nullptr) {
 		source.signals.reset(new SignalSource::SignalMap());
 	}
 	else {
@@ -57,7 +52,7 @@ std::shared_ptr<SignalInstance> SignalDescriptor::getSignalInstance(SignalSource
 
 	(*source.signals)[this] = si;
 
-	if (signalCreatedHook != NULL) {
+	if (signalCreatedHook != nullptr) {
 		signalCreatedHook(&source);
 	}
 
@@ -69,14 +64,11 @@ std::shared_ptr<SignalInstance> Signal::getSignalInstance() const
 	return descriptor->getSignalInstance(*instance);
 }
 
-SignalSource::~SignalSource()
-{
-}
+SignalSource::~SignalSource() = default;
 
 void SignalSource::disconnect_all_slots()
 {
 	signals.reset();
 }
 
-} // namespace Reflection
-} // namespace RBX
+} // namespace RBX::Reflection

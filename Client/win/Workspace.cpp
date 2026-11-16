@@ -29,7 +29,7 @@ std::shared_ptr<RBX::DataModel> CWorkspace::FUN_0046edc0() const
 
 RBX::Workspace* CWorkspace::FUN_0046edf0() const
 {
-	return m_unk0x24 ? m_unk0x24->getWorkspace() : NULL;
+	return m_unk0x24 ? m_unk0x24->getWorkspace() : nullptr;
 }
 
 void CWorkspace::onEvent(const RBX::Workspace* source, RBX::DrawChanged event)
@@ -37,9 +37,7 @@ void CWorkspace::onEvent(const RBX::Workspace* source, RBX::DrawChanged event)
 	m_unk0x2c->invalidateRunViews();
 }
 
-CWorkspace::~CWorkspace()
-{
-}
+CWorkspace::~CWorkspace() = default;
 
 void CWorkspace::FUN_0046ef00(std::istream& stream)
 {
@@ -54,9 +52,7 @@ void CWorkspace::onEvent(const RBX::Selection* source, RBX::SelectionChanged eve
 	m_unk0x2c->invalidateRunViews();
 }
 
-CWorkspace::CWorkspace()
-{
-}
+CWorkspace::CWorkspace() = default;
 
 std::unique_ptr<XmlElement> CWorkspace::FUN_0046f040()
 {
@@ -72,7 +68,7 @@ void FUN_0046f230(HRESULT hr, const GUID& guid)
 	exception->m_sc = E_NOTIMPL;
 	char message[1024];
 	exception->GetErrorMessage(message, 1024);
-	AtlReportError(guid, message, 0, NULL, GUID_NULL, hr);
+	AtlReportError(guid, message, 0, nullptr, GUID_NULL, hr);
 	throw exception;
 }
 
@@ -103,9 +99,9 @@ HRESULT CWorkspace::DoExecScript(
 		arguments.FUN_00431c00(arg3);
 		arguments.FUN_00431c00(arg4);
 
-		std::unique_ptr<std::vector<RBX::Reflection::Value> > values =
+		std::unique_ptr<std::vector<RBX::Reflection::Value>> values =
 			FUN_0046edc0()->create<RBX::ScriptContext>()->executeInNewThread(
-				RBX::Security::TrustedCOM, script, NULL, arguments
+				RBX::Security::TrustedCOM, script, nullptr, arguments
 			);
 		if (result) {
 			*result = FUN_00413500(*values);
@@ -142,7 +138,7 @@ STDMETHODIMP CWorkspace::ExecUrlScript(
 	}
 	catch (CException* e) {
 		char message[255];
-		e->GetErrorMessage(message, 255, NULL);
+		e->GetErrorMessage(message, 255, nullptr);
 		std::string text = G3D::format("CException %s", message);
 		return LogManager::ReportCOMError(CLSID_Workspace, text.c_str(), S_OK);
 	}
@@ -220,7 +216,7 @@ void CWorkspace::FUN_004702b0(RBX::ContentId contentId, bool p_unk0x20)
 	RBX::Instance* parent = p_unk0x20 && selection->size() == 1 ? selection->front().get() : FUN_0046edf0();
 	RBX::InsertMode insertMode = p_unk0x20 ? RBX::INSERT_TO_TREE : RBX::INSERT_TO_3D_VIEW;
 	RBX::PromptMode promptMode = p_unk0x20 ? RBX::SUPPRESS_PROMPTS : RBX::ALLOW_PROMPTS;
-	std::vector<std::shared_ptr<RBX::Instance> > instances;
+	std::vector<std::shared_ptr<RBX::Instance>> instances;
 
 	try {
 		{
@@ -233,13 +229,13 @@ void CWorkspace::FUN_004702b0(RBX::ContentId contentId, bool p_unk0x20)
 		FUN_0046edf0()->insertInstances(instances, parent, insertMode, promptMode);
 
 		if (m_unk0x2c->getRunState() == RBX::RS_NORMAL) {
-			const std::vector<std::shared_ptr<RBX::Instance> >& items = instances;
+			const std::vector<std::shared_ptr<RBX::Instance>>& items = instances;
 			selection->setSelection(items.begin(), items.end());
 		}
 	}
 	catch (...) {
 		std::for_each(instances.begin(), instances.end(), [](const std::shared_ptr<RBX::Instance>& instance) {
-			instance->setParent(NULL);
+			instance->setParent(nullptr);
 		});
 		throw;
 	}
@@ -323,7 +319,7 @@ STDMETHODIMP CWorkspace::Insert(BSTR url)
 	try {
 		if (HRESULT hr = FUN_0041e630(url)) {
 			CString message;
-			message.Format("Untrusted Url: %s", CString(url));
+			message.Format("Untrusted Url: %s", static_cast<LPCTSTR>(CString(url)));
 			return LogManager::ReportCOMError(CLSID_Workspace, message, hr);
 		}
 

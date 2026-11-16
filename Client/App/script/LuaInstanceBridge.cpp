@@ -23,12 +23,11 @@
 #include <lua.h>
 #include <stdexcept>
 
-namespace RBX {
-namespace Lua {
+namespace RBX::Lua {
 
 const luaL_Reg ObjectBridge::classLibrary[] = {
 	{"new", newInstance},
-	{NULL, NULL},
+	{nullptr, nullptr},
 };
 
 void newweaktable(lua_State* L, const char* mode)
@@ -41,8 +40,7 @@ void newweaktable(lua_State* L, const char* mode)
 	lua_settable(L, -3);
 }
 
-} // namespace Lua
-} // namespace RBX
+} // namespace RBX::Lua
 
 static void pushLuaValue(RBX::Reflection::ConstProperty p, lua_State* L)
 {
@@ -71,17 +69,16 @@ static void pushLuaValue(RBX::Reflection::ConstProperty p, lua_State* L)
 		return;
 	}
 
-	if (p.getDescriptor().type == RBX::Reflection::Type::singleton<std::shared_ptr<RBX::Instance> >()) {
+	if (p.getDescriptor().type == RBX::Reflection::Type::singleton<std::shared_ptr<RBX::Instance>>()) {
 		RBX::Lua::SharedPtrBridge<RBX::Reflection::DescribedBase>::push(
-			L, p.getValue<std::shared_ptr<RBX::Instance> >()
+			L, p.getValue<std::shared_ptr<RBX::Instance>>()
 		);
 		return;
 	}
 
-	if (p.getDescriptor().type ==
-		RBX::Reflection::Type::singleton<std::shared_ptr<RBX::Reflection::DescribedBase> >()) {
+	if (p.getDescriptor().type == RBX::Reflection::Type::singleton<std::shared_ptr<RBX::Reflection::DescribedBase>>()) {
 		RBX::Lua::SharedPtrBridge<RBX::Reflection::DescribedBase>::push(
-			L, p.getValue<std::shared_ptr<RBX::Reflection::DescribedBase> >()
+			L, p.getValue<std::shared_ptr<RBX::Reflection::DescribedBase>>()
 		);
 		return;
 	}
@@ -117,12 +114,12 @@ static void pushLuaValue(RBX::Reflection::ConstProperty p, lua_State* L)
 	}
 
 	if (p.getDescriptor().type ==
-		RBX::Reflection::Type::singleton<std::shared_ptr<const std::vector<std::shared_ptr<RBX::Instance> > > >()) {
-		std::shared_ptr<const std::vector<std::shared_ptr<RBX::Instance> > > objects =
-			p.getValue<std::shared_ptr<const std::vector<std::shared_ptr<RBX::Instance> > > >();
+		RBX::Reflection::Type::singleton<std::shared_ptr<const std::vector<std::shared_ptr<RBX::Instance>>>>()) {
+		std::shared_ptr<const std::vector<std::shared_ptr<RBX::Instance>>> objects =
+			p.getValue<std::shared_ptr<const std::vector<std::shared_ptr<RBX::Instance>>>>();
 		if (objects) {
-			std::vector<std::shared_ptr<RBX::Instance> >::const_iterator iter = objects->begin();
-			std::vector<std::shared_ptr<RBX::Instance> >::const_iterator end = objects->end();
+			std::vector<std::shared_ptr<RBX::Instance>>::const_iterator iter = objects->begin();
+			std::vector<std::shared_ptr<RBX::Instance>>::const_iterator end = objects->end();
 			lua_createtable(L, end - iter, 0);
 			int index = 1;
 			while (iter != end) {
@@ -165,8 +162,7 @@ static void pushLuaValue(RBX::Reflection::ConstProperty p, lua_State* L)
 	);
 }
 
-namespace RBX {
-namespace Lua {
+namespace RBX::Lua {
 
 std::shared_ptr<Instance> ObjectBridge::getInstance(lua_State* L, unsigned int index)
 {
@@ -179,8 +175,7 @@ std::shared_ptr<Instance> ObjectBridge::getInstance(lua_State* L, unsigned int i
 	return shared_from(static_cast<Instance*>(object.get()));
 }
 
-} // namespace Lua
-} // namespace RBX
+} // namespace RBX::Lua
 
 static void assignLuaValue(RBX::Reflection::Property p, lua_State* L, int index)
 {
@@ -209,14 +204,13 @@ static void assignLuaValue(RBX::Reflection::Property p, lua_State* L, int index)
 		return;
 	}
 
-	if (p.getDescriptor().type == RBX::Reflection::Type::singleton<std::shared_ptr<RBX::Instance> >()) {
-		p.setValue<std::shared_ptr<RBX::Instance> >(RBX::Lua::ObjectBridge::getInstance(L, index));
+	if (p.getDescriptor().type == RBX::Reflection::Type::singleton<std::shared_ptr<RBX::Instance>>()) {
+		p.setValue<std::shared_ptr<RBX::Instance>>(RBX::Lua::ObjectBridge::getInstance(L, index));
 		return;
 	}
 
-	if (p.getDescriptor().type ==
-		RBX::Reflection::Type::singleton<std::shared_ptr<RBX::Reflection::DescribedBase> >()) {
-		p.setValue<std::shared_ptr<RBX::Reflection::DescribedBase> >(
+	if (p.getDescriptor().type == RBX::Reflection::Type::singleton<std::shared_ptr<RBX::Reflection::DescribedBase>>()) {
+		p.setValue<std::shared_ptr<RBX::Reflection::DescribedBase>>(
 			RBX::Lua::SharedPtrBridge<RBX::Reflection::DescribedBase>::getPtr(L, index)
 		);
 		return;
@@ -276,8 +270,7 @@ static void assignLuaValue(RBX::Reflection::Property p, lua_State* L, int index)
 	);
 }
 
-namespace RBX {
-namespace Lua {
+namespace RBX::Lua {
 
 template <>
 void Bridge<std::shared_ptr<Reflection::DescribedBase>, 0>::on_newindex(
@@ -455,11 +448,10 @@ int Bridge<std::shared_ptr<Reflection::DescribedBase>, 0>::on_index(
 	throw std::runtime_error(G3D::format("%s is not a valid member of %s", name, instance->getClassName().c_str()));
 }
 
-} // namespace Lua
-} // namespace RBX
+} // namespace RBX::Lua
 
 template bool RBX::Lua::Bridge<std::shared_ptr<RBX::Reflection::DescribedBase>, 0>::getValue<
-	std::shared_ptr<RBX::Reflection::DescribedBase> >(
+	std::shared_ptr<RBX::Reflection::DescribedBase>>(
 	lua_State* L, unsigned int index, std::shared_ptr<RBX::Reflection::DescribedBase>& value
 );
 

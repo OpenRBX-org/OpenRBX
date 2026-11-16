@@ -17,12 +17,11 @@ static Reflection::BoundFuncDesc<Teams, void(), 0> teams_rebalanceTeamsFunction(
 	&Teams::rebalanceTeams, "RebalanceTeams", Reflection::FunctionDescriptor::AnyCaller
 );
 
-static Reflection::BoundFuncDesc<Teams, std::shared_ptr<const std::vector<std::shared_ptr<Instance> > >(), 0>
-	func_teams(&Teams::getTeams, "GetTeams", Reflection::FunctionDescriptor::AnyCaller);
+static Reflection::BoundFuncDesc<Teams, std::shared_ptr<const std::vector<std::shared_ptr<Instance>>>(), 0> func_teams(
+	&Teams::getTeams, "GetTeams", Reflection::FunctionDescriptor::AnyCaller
+);
 
-Teams::~Teams()
-{
-}
+Teams::~Teams() = default;
 
 Team* Teams::getTeamFromTeamColor(BrickColor c)
 {
@@ -34,26 +33,26 @@ Team* Teams::getTeamFromTeamColor(BrickColor c)
 		}
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 Team* Teams::getTeamFromPlayer(Network::Player* p)
 {
 	if (p->getNeutral()) {
-		return NULL;
+		return nullptr;
 	}
 
 	return getTeamFromTeamColor(p->getTeamColor());
 }
 
-std::shared_ptr<const std::vector<std::shared_ptr<Instance> > > Teams::getTeams()
+std::shared_ptr<const std::vector<std::shared_ptr<Instance>>> Teams::getTeams()
 {
 	return teams.read();
 }
 
 bool Teams::teamExists(BrickColor color)
 {
-	return getTeamFromTeamColor(color) != NULL;
+	return getTeamFromTeamColor(color) != nullptr;
 }
 
 bool Teams::isTeamGame()
@@ -134,7 +133,7 @@ void Teams::assignNewPlayerToTeam(Network::Player* p)
 void Teams::onChildAdded(Instance* child)
 {
 	if (dynamic_cast<Team*>(child)) {
-		std::shared_ptr<std::vector<std::shared_ptr<Instance> > >& t = teams.write();
+		std::shared_ptr<std::vector<std::shared_ptr<Instance>>>& t = teams.write();
 		t->push_back(shared_from(child));
 	}
 }
@@ -142,12 +141,12 @@ void Teams::onChildAdded(Instance* child)
 void Teams::onChildRemoving(Instance* child)
 {
 	if (dynamic_cast<Team*>(child)) {
-		std::shared_ptr<std::vector<std::shared_ptr<Instance> > >& t = teams.write();
+		std::shared_ptr<std::vector<std::shared_ptr<Instance>>>& t = teams.write();
 		t->erase(std::find(t->begin(), t->end(), shared_from(child)));
 	}
 }
 
-Teams::Teams() : teams(std::vector<std::shared_ptr<Instance> >())
+Teams::Teams() : teams(std::vector<std::shared_ptr<Instance>>())
 {
 	setName(sTeams);
 }
@@ -160,5 +159,5 @@ void Teams::rebalanceTeams()
 
 template class RBX::FactoryProduct<RBX::Teams, RBX::Instance, RBX::sTeams>;
 template class RBX::Reflection::
-	Described<RBX::Teams, RBX::sTeams, RBX::FactoryProduct<RBX::Teams, RBX::Instance, RBX::sTeams> >;
+	Described<RBX::Teams, RBX::sTeams, RBX::FactoryProduct<RBX::Teams, RBX::Instance, RBX::sTeams>>;
 template class RBX::DescribedCreatable<RBX::Teams, RBX::Instance, RBX::sTeams>;

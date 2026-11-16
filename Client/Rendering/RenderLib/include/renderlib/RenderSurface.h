@@ -8,8 +8,7 @@
 #include <G3D/CoordinateFrame.h>
 #include <G3D/ReferenceCount.h>
 
-namespace RBX {
-namespace Render {
+namespace RBX::Render {
 
 class RenderSurface
 {
@@ -28,7 +27,6 @@ void sortByMaterialAndDepth(G3D::Array<RenderSurface*>& array);
 void sortByMaterial(G3D::Array<RenderSurface*>& array);
 void sortByDepth(G3D::Array<RenderSurface*>& array);
 
-} // namespace Render
-} // namespace RBX
+} // namespace RBX::Render
 
 #endif // RENDERLIB_RENDERSURFACE_H

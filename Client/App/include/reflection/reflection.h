@@ -10,8 +10,7 @@
 
 #include <memory>
 
-namespace RBX {
-namespace Reflection {
+namespace RBX::Reflection {
 
 template <class T, const char* sName, class Base>
 class __declspec(novtable) Described : public Base
@@ -52,20 +51,20 @@ public:
 	{
 	}
 
-	virtual bool isReadOnly() const { return getset->isReadOnly(); }
+	bool isReadOnly() const override { return getset->isReadOnly(); }
 
 	T getValue(const DescribedBase* instance) const { return getset->getValue(instance); }
 
 	void setValue(DescribedBase* instance, T value) const { getset->setValue(instance, value); }
 
-	virtual bool equalValues(const DescribedBase* a, const DescribedBase* b) const
+	bool equalValues(const DescribedBase* a, const DescribedBase* b) const override
 	{
 		return getValue(a) == getValue(b);
 	}
 
-	virtual int getEnumValue(const DescribedBase* instance) const { return getValue(instance); }
+	int getEnumValue(const DescribedBase* instance) const override { return getValue(instance); }
 
-	virtual bool setEnumValue(DescribedBase* instance, int intValue) const
+	bool setEnumValue(DescribedBase* instance, int intValue) const override
 	{
 		if (EnumDesc<T>::singleton().isValue(intValue)) {
 			setValue(instance, static_cast<T>(intValue));
@@ -76,12 +75,12 @@ public:
 		}
 	}
 
-	virtual unsigned int getIndexValue(const DescribedBase* instance) const
+	unsigned int getIndexValue(const DescribedBase* instance) const override
 	{
 		return EnumDesc<T>::singleton().convertToIndex(getValue(instance));
 	}
 
-	virtual bool setIndexValue(DescribedBase* instance, unsigned int index) const
+	bool setIndexValue(DescribedBase* instance, unsigned int index) const override
 	{
 		T value;
 
@@ -94,14 +93,14 @@ public:
 		}
 	}
 
-	virtual bool hasStringValue() const { return true; }
+	bool hasStringValue() const override { return true; }
 
-	virtual std::string getStringValue(const DescribedBase* instance) const
+	std::string getStringValue(const DescribedBase* instance) const override
 	{
 		return EnumDesc<T>::singleton().convertToString(getValue(instance));
 	}
 
-	virtual bool setStringValue(DescribedBase* instance, const std::string& text) const
+	bool setStringValue(DescribedBase* instance, const std::string& text) const override
 	{
 		T value;
 
@@ -127,7 +126,7 @@ public:
 		}
 	}
 
-	virtual void readValue(DescribedBase* instance, const XmlElement* element, IReferenceBinder& binder) const
+	void readValue(DescribedBase* instance, const XmlElement* element, IReferenceBinder& binder) const override
 	{
 		if (!element->isXsiNil()) {
 			if (element->isValueType<std::string>()) {
@@ -156,7 +155,7 @@ public:
 		}
 	}
 
-	virtual void writeValue(const DescribedBase* instance, XmlElement* element) const
+	void writeValue(const DescribedBase* instance, XmlElement* element) const override
 	{
 		element->setValue(static_cast<int>(getValue(instance)));
 	}
@@ -179,37 +178,37 @@ public:
 	{
 	}
 
-	virtual bool isReadOnly() const { return getset->isReadOnly(); }
+	bool isReadOnly() const override { return getset->isReadOnly(); }
 
 	T* getValue(const DescribedBase* instance) const { return getset->getValue(instance); }
 
 	void setValue(DescribedBase* instance, T* value) const { getset->setValue(instance, value); }
 
-	virtual bool equalValues(const DescribedBase* a, const DescribedBase* b) const
+	bool equalValues(const DescribedBase* a, const DescribedBase* b) const override
 	{
 		return getValue(a) == getValue(b);
 	}
 
-	virtual DescribedBase* getRefValue(const DescribedBase* instance) const { return getValue(instance); }
+	DescribedBase* getRefValue(const DescribedBase* instance) const override { return getValue(instance); }
 
-	virtual void setRefValue(DescribedBase* instance, DescribedBase* value) const
+	void setRefValue(DescribedBase* instance, DescribedBase* value) const override
 	{
-		T* t = value != NULL ? polymorphicCast<T*>(value) : NULL;
+		T* t = value != nullptr ? polymorphicCast<T*>(value) : nullptr;
 
 		setValue(instance, t);
 	}
 
-	virtual void readValue(DescribedBase* instance, const XmlElement* element, IReferenceBinder& binder) const
+	void readValue(DescribedBase* instance, const XmlElement* element, IReferenceBinder& binder) const override
 	{
 		binder.announceIDREF(element, instance, this);
 	}
 
-	virtual void writeValue(const DescribedBase* instance, XmlElement* element) const
+	void writeValue(const DescribedBase* instance, XmlElement* element) const override
 	{
 		element->setValue(InstanceHandle(getValue(instance)));
 	}
 
-	virtual void assignIDREF(DescribedBase* propertyOwner, const InstanceHandle& handle) const
+	void assignIDREF(DescribedBase* propertyOwner, const InstanceHandle& handle) const override
 	{
 		std::shared_ptr<Instance> t = handle.getTarget();
 
@@ -234,8 +233,8 @@ template <class Class, class Signature>
 class BoundFuncDesc<Class, Signature, 0> : public FuncDesc<Class>
 {
 public:
-	typedef ResultType<Signature> result_type;
-	typedef result_type (Class::*Function)();
+	using result_type = ResultType<Signature>;
+	using Function = result_type (Class::*)();
 
 private:
 	Function function;
@@ -261,7 +260,7 @@ public:
 		declareSignature();
 	}
 
-	virtual void execute(DescribedBase* instance, typename FunctionDescriptor::Arguments& arguments) const
+	void execute(DescribedBase* instance, typename FunctionDescriptor::Arguments& arguments) const override
 	{
 		call<result_type>(polymorphicCast<Class*>(instance), arguments.returnValue);
 	}
@@ -271,9 +270,9 @@ template <class Class, class Signature>
 class BoundFuncDesc<Class, Signature, 1> : public FuncDesc<Class>
 {
 public:
-	typedef ResultType<Signature> result_type;
-	typedef ArgumentType<Signature, 0> Arg1;
-	typedef result_type (Class::*Function)(Arg1);
+	using result_type = ResultType<Signature>;
+	using Arg1 = ArgumentType<Signature, 0>;
+	using Function = result_type (Class::*)(Arg1);
 
 private:
 	Function function;
@@ -318,7 +317,7 @@ public:
 		declareSignature(arg1Name);
 	}
 
-	virtual void execute(DescribedBase* instance, typename FunctionDescriptor::Arguments& arguments) const
+	void execute(DescribedBase* instance, typename FunctionDescriptor::Arguments& arguments) const override
 	{
 		Value arg1(default1);
 		arguments.get(1, arg1);
@@ -330,10 +329,10 @@ template <class Class, class Signature>
 class BoundFuncDesc<Class, Signature, 2> : public FuncDesc<Class>
 {
 public:
-	typedef ResultType<Signature> result_type;
-	typedef ArgumentType<Signature, 0> Arg1;
-	typedef ArgumentType<Signature, 1> Arg2;
-	typedef result_type (Class::*Function)(Arg1, Arg2);
+	using result_type = ResultType<Signature>;
+	using Arg1 = ArgumentType<Signature, 0>;
+	using Arg2 = ArgumentType<Signature, 1>;
+	using Function = result_type (Class::*)(Arg1, Arg2);
 
 private:
 	Function function;
@@ -399,7 +398,7 @@ public:
 		declareSignature(arg1Name, arg2Name);
 	}
 
-	virtual void execute(DescribedBase* instance, typename FunctionDescriptor::Arguments& arguments) const
+	void execute(DescribedBase* instance, typename FunctionDescriptor::Arguments& arguments) const override
 	{
 		Value arg1(default1);
 		arguments.get(1, arg1);
@@ -413,11 +412,11 @@ template <class Class, class Signature>
 class BoundFuncDesc<Class, Signature, 3> : public FuncDesc<Class>
 {
 public:
-	typedef ResultType<Signature> result_type;
-	typedef ArgumentType<Signature, 0> Arg1;
-	typedef ArgumentType<Signature, 1> Arg2;
-	typedef ArgumentType<Signature, 2> Arg3;
-	typedef result_type (Class::*Function)(Arg1, Arg2, Arg3);
+	using result_type = ResultType<Signature>;
+	using Arg1 = ArgumentType<Signature, 0>;
+	using Arg2 = ArgumentType<Signature, 1>;
+	using Arg3 = ArgumentType<Signature, 2>;
+	using Function = result_type (Class::*)(Arg1, Arg2, Arg3);
 
 private:
 	Function function;
@@ -473,7 +472,7 @@ public:
 		declareSignature(arg1Name, arg2Name, arg3Name);
 	}
 
-	virtual void execute(DescribedBase* instance, typename FunctionDescriptor::Arguments& arguments) const
+	void execute(DescribedBase* instance, typename FunctionDescriptor::Arguments& arguments) const override
 	{
 		Value arg1(default1);
 		arguments.get(1, arg1);
@@ -489,12 +488,12 @@ template <class Class, class Signature>
 class BoundFuncDesc<Class, Signature, 4> : public FuncDesc<Class>
 {
 public:
-	typedef ResultType<Signature> result_type;
-	typedef ArgumentType<Signature, 0> Arg1;
-	typedef ArgumentType<Signature, 1> Arg2;
-	typedef ArgumentType<Signature, 2> Arg3;
-	typedef ArgumentType<Signature, 3> Arg4;
-	typedef result_type (Class::*Function)(Arg1, Arg2, Arg3, Arg4);
+	using result_type = ResultType<Signature>;
+	using Arg1 = ArgumentType<Signature, 0>;
+	using Arg2 = ArgumentType<Signature, 1>;
+	using Arg3 = ArgumentType<Signature, 2>;
+	using Arg4 = ArgumentType<Signature, 3>;
+	using Function = result_type (Class::*)(Arg1, Arg2, Arg3, Arg4);
 
 private:
 	Function function;
@@ -608,7 +607,7 @@ public:
 		declareSignature(arg1Name, arg2Name, arg3Name, arg4Name);
 	}
 
-	virtual void execute(DescribedBase* instance, typename FunctionDescriptor::Arguments& arguments) const
+	void execute(DescribedBase* instance, typename FunctionDescriptor::Arguments& arguments) const override
 	{
 		Value arg1(default1);
 		arguments.get(1, arg1);
@@ -622,7 +621,6 @@ public:
 	}
 };
 
-} // namespace Reflection
-} // namespace RBX
+} // namespace RBX::Reflection
 
 #endif // REFLECTION_REFLECTION_H

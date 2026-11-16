@@ -25,7 +25,7 @@ class Client : public DescribedCreatable<Client, Peer, sClient>,
 
 public:
 	Client();
-	virtual ~Client();
+	~Client() override;
 
 	static Reflection::SignalDesc<Client, void(std::string, std::shared_ptr<Instance>)> event_ConnectionAccepted;
 	static Reflection::SignalDesc<Client, void(std::string, int)> event_ConnectionFailed;
@@ -34,15 +34,15 @@ public:
 	void connect(std::string server, int serverPort, int clientPort, int threadSleepTime);
 	void disconnect(int blockDuration);
 
-	virtual PluginReceiveResult OnReceive(RakPeerInterface* peer, Packet* packet);
+	PluginReceiveResult OnReceive(RakPeerInterface* peer, Packet* packet) override;
 
-	virtual XmlElement* write() { return NULL; }
+	XmlElement* write() override { return nullptr; }
 
 	static bool clientIsPresent(const Instance* context, bool testInDatamodel);
 
 protected:
-	virtual void onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider);
-	virtual void onEvent(const ServiceProvider* source, Closing event);
+	void onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider) override;
+	void onEvent(const ServiceProvider* source, Closing event) override;
 };
 
 } // namespace Network

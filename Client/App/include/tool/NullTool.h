@@ -17,15 +17,15 @@ extern char sNewNullTool[];
 class NullTool : public Named<MouseCommand, sNullTool>
 {
 private:
-	virtual const std::string getCursorName() const { return "ArrowFarCursor"; }
+	const std::string getCursorName() const override { return "ArrowFarCursor"; }
 
 public:
 	NullTool(Workspace* workspace);
-	virtual ~NullTool() {}
+	~NullTool() override = default;
 
-	virtual MouseCommand* isSticky() const { return new NullTool(workspace); }
+	MouseCommand* isSticky() const override { return new NullTool(workspace); }
 
-	virtual MouseCommand* onMouseUp(const UIEvent& uiEvent)
+	MouseCommand* onMouseUp(const UIEvent& uiEvent) override
 	{
 		releaseCapture();
 		return this;
@@ -39,22 +39,22 @@ private:
 	bool hasWaypoint;
 	G3D::Vector3 waypoint;
 
-	virtual void onMouseIdle(const UIEvent& uiEvent);
-	virtual void onMouseHover(const UIEvent& uiEvent);
-	virtual MouseCommand* onMouseDown(const UIEvent& uiEvent);
-	virtual const std::string getCursorName() const { return cursor; }
-	virtual MouseCommand* isSticky() const { return new NewNullTool(workspace); }
-	virtual MouseCommand* onMouseUp(const UIEvent& uiEvent)
+	void onMouseIdle(const UIEvent& uiEvent) override;
+	void onMouseHover(const UIEvent& uiEvent) override;
+	MouseCommand* onMouseDown(const UIEvent& uiEvent) override;
+	const std::string getCursorName() const override { return cursor; }
+	MouseCommand* isSticky() const override { return new NewNullTool(workspace); }
+	MouseCommand* onMouseUp(const UIEvent& uiEvent) override
 	{
 		releaseCapture();
 		return this;
 	}
-	virtual bool shouldRender3dAdorn() const { return true; }
-	virtual void render3dAdorn(Adorn* adorn);
+	bool shouldRender3dAdorn() const override { return true; }
+	void render3dAdorn(Adorn* adorn) override;
 
 public:
 	NewNullTool(Workspace* workspace);
-	virtual ~NewNullTool();
+	~NewNullTool() override;
 };
 
 } // namespace RBX

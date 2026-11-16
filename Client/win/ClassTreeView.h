@@ -4,13 +4,9 @@
 #include "reflection/EnumConverter.h"
 #include "reflection/object.h"
 
-namespace RBX {
-namespace Reflection {
-namespace Metadata {
+namespace RBX::Reflection::Metadata {
 class Item;
 }
-} // namespace Reflection
-} // namespace RBX
 
 class CDeclarationView;
 class CMemberTreeView;
@@ -23,9 +19,9 @@ protected:
 	CClassTreeView();
 
 public:
-	virtual ~CClassTreeView();
+	~CClassTreeView() override;
 
-	virtual void OnInitialUpdate();
+	void OnInitialUpdate() override;
 
 	void FUN_00437f90(const RBX::Reflection::EnumDescriptor* descriptor);
 	void FUN_00438130(HTREEITEM item, RBX::Reflection::Metadata::Item* metadata);

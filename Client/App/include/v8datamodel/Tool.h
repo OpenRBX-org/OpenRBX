@@ -89,24 +89,24 @@ private:
 	void onChildAdded();
 	void onChildRemoved();
 
-	virtual void onAncestorChanged(const AncestorChanged& event);
+	void onAncestorChanged(const AncestorChanged& event) override;
 
-	virtual bool askSetParent(const Instance* instance) const { return true; }
+	bool askSetParent(const Instance* instance) const override { return true; }
 
-	virtual bool askAddChild(const Instance* instance) const { return true; }
-	virtual void readProperty(const XmlElement* element, IReferenceBinder& binder);
-	virtual const CoordinateFrame getLocation() const;
+	bool askAddChild(const Instance* instance) const override { return true; }
+	void readProperty(const XmlElement* element, IReferenceBinder& binder) override;
+	const CoordinateFrame getLocation() const override;
 
-	virtual bool drawSelected() const { return backendToolState >= EQUIPPED; }
+	bool drawSelected() const override { return backendToolState >= EQUIPPED; }
 
-	virtual void onLocalClicked();
-	virtual void onLocalOtherClicked();
-	virtual void render3dSelect(Adorn* adorn, SelectState selectState);
+	void onLocalClicked() override;
+	void onLocalOtherClicked() override;
+	void render3dSelect(Adorn* adorn, SelectState selectState) override;
 	static bool characterCanUnequipTool(ModelInstance* character);
 
 public:
 	Tool();
-	virtual ~Tool();
+	~Tool() override;
 
 	static void dropAll(ModelInstance* model);
 

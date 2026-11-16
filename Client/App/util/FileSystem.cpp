@@ -9,13 +9,13 @@ namespace RBX {
 
 class VistaAPIs
 {
-	typedef HRESULT(WINAPI* GetKnownFolderPathPtr)(const GUID& rfid, DWORD dwFlags, HANDLE hToken, PWSTR* ppszPath);
+	using GetKnownFolderPathPtr = HRESULT(WINAPI*)(const GUID& rfid, DWORD dwFlags, HANDLE hToken, PWSTR* ppszPath);
 
 	GetKnownFolderPathPtr getKnownFolderPath;
 	HINSTANCE gShell32DLLInst;
 
 public:
-	VistaAPIs() : getKnownFolderPath(NULL)
+	VistaAPIs() : getKnownFolderPath(nullptr)
 	{
 		gShell32DLLInst = LoadLibrary("Shell32.dll");
 		if (gShell32DLLInst) {
@@ -33,10 +33,12 @@ public:
 		return E_NOTIMPL;
 	}
 
-	typedef struct _TOKEN_MANDATORY_LABEL
+	struct TOKEN_MANDATORY_LABEL
 	{
 		SID_AND_ATTRIBUTES Label;
-	} TOKEN_MANDATORY_LABEL, *PTOKEN_MANDATORY_LABEL;
+	};
+
+	using PTOKEN_MANDATORY_LABEL = TOKEN_MANDATORY_LABEL*;
 
 	HRESULT STDMETHODCALLTYPE GetIntegrity(BYTE* pVal);
 };
@@ -63,11 +65,11 @@ HRESULT STDMETHODCALLTYPE VistaAPIs::GetIntegrity(BYTE* pVal)
 	HANDLE hProcess = GetCurrentProcess();
 	if (OpenProcessToken(hProcess, TOKEN_QUERY | TOKEN_QUERY_SOURCE, &hToken)) {
 		DWORD dwLengthNeeded;
-		if (!GetTokenInformation(hToken, (TOKEN_INFORMATION_CLASS) 25, NULL, 0, &dwLengthNeeded)) {
+		if (!GetTokenInformation(hToken, (TOKEN_INFORMATION_CLASS) 25, nullptr, 0, &dwLengthNeeded)) {
 			DWORD dwError = GetLastError();
 			if (dwError == ERROR_INSUFFICIENT_BUFFER) {
 				PTOKEN_MANDATORY_LABEL pTIL = (PTOKEN_MANDATORY_LABEL) LocalAlloc(0, dwLengthNeeded);
-				if (pTIL != NULL) {
+				if (pTIL != nullptr) {
 					if (GetTokenInformation(
 							hToken, (TOKEN_INFORMATION_CLASS) 25, pTIL, dwLengthNeeded, &dwLengthNeeded
 						)) {
@@ -110,14 +112,14 @@ std::string FileSystem::getUserAppDataDirectory(bool create, const char* subDire
 			CLSIDFromString(L"{F1B32785-6FBA-4FCF-9D55-7B8E7F157091}", &folderID);
 		}
 
-		LPWSTR lppwstrPath = NULL;
-		if (apis.SHGetKnownFolderPath(folderID, create ? 0x8000 : 0, NULL, &lppwstrPath) != E_NOTIMPL) {
+		LPWSTR lppwstrPath = nullptr;
+		if (apis.SHGetKnownFolderPath(folderID, create ? 0x8000 : 0, nullptr, &lppwstrPath) != E_NOTIMPL) {
 			CString s(lppwstrPath);
 			CoTaskMemFree(lppwstrPath);
 
 			s += "\\Roblox\\";
 			if (create) {
-				if (!CreateDirectory(s, NULL) && GetLastError() != ERROR_ALREADY_EXISTS) {
+				if (!CreateDirectory(s, nullptr) && GetLastError() != ERROR_ALREADY_EXISTS) {
 					return "";
 				}
 			}
@@ -125,7 +127,7 @@ std::string FileSystem::getUserAppDataDirectory(bool create, const char* subDire
 			if (subDirectory) {
 				s += subDirectory;
 				if (create) {
-					if (!CreateDirectory(s, NULL) && GetLastError() != ERROR_ALREADY_EXISTS) {
+					if (!CreateDirectory(s, nullptr) && GetLastError() != ERROR_ALREADY_EXISTS) {
 						return "";
 					}
 				}
@@ -144,11 +146,12 @@ std::string FileSystem::getUserAppDataDirectory(bool create, const char* subDire
 	}
 
 	CPath path;
-	HRESULT hr =
-		SHGetFolderPathAndSubDir(NULL, flags | CSIDL_APPDATA, NULL, 0, s.c_str(), path.m_strPath.GetBuffer(MAX_PATH));
+	HRESULT hr = SHGetFolderPathAndSubDir(
+		nullptr, flags | CSIDL_APPDATA, nullptr, 0, s.c_str(), path.m_strPath.GetBuffer(MAX_PATH)
+	);
 	if (hr != S_OK) {
 		hr = SHGetFolderPathAndSubDir(
-			NULL, flags | CSIDL_COMMON_APPDATA, NULL, 0, s.c_str(), path.m_strPath.GetBuffer(MAX_PATH)
+			nullptr, flags | CSIDL_COMMON_APPDATA, nullptr, 0, s.c_str(), path.m_strPath.GetBuffer(MAX_PATH)
 		);
 	}
 	if (hr == S_OK) {
@@ -171,14 +174,14 @@ std::string FileSystem::getCacheDirectory(bool create)
 		GUID folderID;
 		CLSIDFromString(L"{352481E8-33BE-4251-BA85-6007CAEDCF9D", &folderID);
 
-		LPWSTR lppwstrPath = NULL;
-		if (apis.SHGetKnownFolderPath(folderID, 0x8000, NULL, &lppwstrPath) != E_NOTIMPL) {
+		LPWSTR lppwstrPath = nullptr;
+		if (apis.SHGetKnownFolderPath(folderID, 0x8000, nullptr, &lppwstrPath) != E_NOTIMPL) {
 			CString s(lppwstrPath);
 			CoTaskMemFree(lppwstrPath);
 
 			s += "\\Roblox\\";
 			if (create) {
-				if (!CreateDirectory(s, NULL) && GetLastError() != ERROR_ALREADY_EXISTS) {
+				if (!CreateDirectory(s, nullptr) && GetLastError() != ERROR_ALREADY_EXISTS) {
 					return "";
 				}
 			}
@@ -191,7 +194,7 @@ std::string FileSystem::getCacheDirectory(bool create)
 
 	char path[MAX_PATH];
 	if (SHGetFolderPathAndSubDir(
-			NULL, (create ? CSIDL_FLAG_CREATE : 0) | CSIDL_COMMON_APPDATA, NULL, 0, "Roblox\\Cache", path
+			nullptr, (create ? CSIDL_FLAG_CREATE : 0) | CSIDL_COMMON_APPDATA, nullptr, 0, "Roblox\\Cache", path
 		) == S_OK) {
 		return path;
 	}

@@ -8,8 +8,7 @@
 #include <G3D/Vector2.h>
 #include <G3D/Vector3.h>
 
-namespace RBX {
-namespace ViewNew {
+namespace RBX::ViewNew {
 
 class CylinderAlongXMesh : public RenderNew::Mesh, public MeshFactory<CylinderAlongXMesh, 1>
 {
@@ -23,7 +22,6 @@ private:
 	CylinderAlongXMesh(const G3D::Vector3& size, NormalId textureFace, const G3D::Vector2& studsPerTile);
 };
 
-} // namespace ViewNew
-} // namespace RBX
+} // namespace RBX::ViewNew
 
 #endif // RENDERLIBNEW_CYLINDERMESH_H

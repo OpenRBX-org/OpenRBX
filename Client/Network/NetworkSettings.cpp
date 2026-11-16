@@ -40,5 +40,5 @@ template class RBX::FactoryProduct<RBX::NetworkSettings, RBX::GlobalSettings::It
 template class RBX::Reflection::Described<
 	RBX::NetworkSettings,
 	RBX::sNetworkSettings,
-	RBX::FactoryProduct<RBX::NetworkSettings, RBX::GlobalSettings::Item, RBX::sNetworkSettings> >;
+	RBX::FactoryProduct<RBX::NetworkSettings, RBX::GlobalSettings::Item, RBX::sNetworkSettings>>;
 template class RBX::DescribedCreatable<RBX::NetworkSettings, RBX::GlobalSettings::Item, RBX::sNetworkSettings>;

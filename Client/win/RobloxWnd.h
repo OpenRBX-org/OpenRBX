@@ -33,7 +33,7 @@ class CRobloxWnd : public CWnd, public RBX::IRunView, public RBX::IMetric
 
 public:
 	CRobloxWnd(bool p_unk0x80);
-	virtual ~CRobloxWnd();
+	~CRobloxWnd() override;
 
 	void FUN_0045f9f0();
 	void FUN_0045f670(UINT nType, int cx, int cy);
@@ -55,15 +55,15 @@ public:
 	bool FUN_00462890();
 	void FUN_00463c30(CWorkspace* workspace);
 
-	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
-	virtual BOOL OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult);
+	BOOL PreCreateWindow(CREATESTRUCT& cs) override;
+	BOOL OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult) override;
 
-	virtual void InvalidateRunView();
-	virtual void AdjustThrottle(double frameRate);
+	void InvalidateRunView() override;
+	void AdjustThrottle(double frameRate) override;
 
 	static bool renderIdle();
 
-	virtual std::string getMetric(const std::string& metric) const;
+	std::string getMetric(const std::string& metric) const override;
 
 protected:
 	afx_msg LRESULT FUN_0045f4d0(WPARAM wParam, LPARAM lParam);
@@ -86,7 +86,7 @@ private:
 	public:
 		RenderStatsItem(RenderStats* stats);
 
-		virtual void update();
+		void update() override;
 
 	private:
 		RBX::Stats::Item* m_unk0x120;

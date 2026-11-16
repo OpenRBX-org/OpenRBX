@@ -17,7 +17,7 @@ Joint* JointBuilder::canJoin(Primitive* p0, Primitive* p1)
 	const Extents& e1 = p1->getFastFuzzyExtents();
 
 	if (e0.separatedByMoreThan(e1, 0.05f)) {
-		return NULL;
+		return nullptr;
 	}
 
 	const Matrix3& r0 = p0->getCoordinateFrame().rotation;
@@ -45,7 +45,7 @@ Joint* JointBuilder::canJoin(Primitive* p0, Primitive* p1)
 		}
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 } // namespace RBX

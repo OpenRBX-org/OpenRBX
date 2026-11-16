@@ -9,8 +9,7 @@
 #include <string>
 #include <vector>
 
-namespace RBX {
-namespace Reflection {
+namespace RBX::Reflection {
 
 class EnumDescriptor : public Type
 {
@@ -42,7 +41,7 @@ public:
 
 protected:
 	EnumDescriptor(const char* name, const std::type_info& type);
-	virtual ~EnumDescriptor();
+	~EnumDescriptor() override;
 
 	std::vector<const Item*> allItems;
 	unsigned int enumCount;
@@ -79,7 +78,7 @@ public:
 
 private:
 	EnumDesc();
-	virtual ~EnumDesc();
+	~EnumDesc() override;
 
 	void addPair(T value, const char* name);
 	void addLegacyName(const char* name, T value);
@@ -221,7 +220,6 @@ EnumDesc<T>::~EnumDesc()
 	std::for_each(allItems.begin(), allItems.end(), std::default_delete<const Item>());
 }
 
-} // namespace Reflection
-} // namespace RBX
+} // namespace RBX::Reflection
 
 #endif // REFLECTION_ENUMCONVERTER_H

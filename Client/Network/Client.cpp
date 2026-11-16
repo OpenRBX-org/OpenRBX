@@ -11,8 +11,7 @@
 #include <RakPeer.h>
 #include <stdexcept>
 
-namespace RBX {
-namespace Network {
+namespace RBX::Network {
 
 char sClient[] = "NetworkClient";
 
@@ -53,8 +52,7 @@ void Client::onEvent(const ServiceProvider* source, Closing event)
 	disconnect(3000);
 }
 
-} // namespace Network
-} // namespace RBX
+} // namespace RBX::Network
 
 class Exposer : protected PacketLogger
 {
@@ -66,8 +64,7 @@ public:
 	}
 };
 
-namespace RBX {
-namespace Network {
+namespace RBX::Network {
 
 Client::~Client()
 {
@@ -93,7 +90,7 @@ void Client::connect(std::string server, int serverPort, int clientPort, int thr
 bool Client::clientIsPresent(const Instance* context, bool testInDatamodel)
 {
 	const ServiceProvider* serviceProvider = ServiceProvider::findServiceProvider(context);
-	return (serviceProvider ? serviceProvider->find<Client>() : NULL) != NULL;
+	return (serviceProvider ? serviceProvider->find<Client>() : nullptr) != nullptr;
 }
 
 void Client::onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider)
@@ -109,7 +106,7 @@ void Client::onServiceProvider(const ServiceProvider* oldProvider, const Service
 		disconnect(3000);
 
 		Players* players = oldProvider->find<Players>();
-		players->setConnection(NULL);
+		players->setConnection(nullptr);
 	}
 
 	Peer::onServiceProvider(oldProvider, newProvider);
@@ -204,5 +201,4 @@ PluginReceiveResult Client::OnReceive(RakPeerInterface* peer, Packet* packet)
 	return RR_CONTINUE_PROCESSING;
 }
 
-} // namespace Network
-} // namespace RBX
+} // namespace RBX::Network

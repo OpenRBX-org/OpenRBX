@@ -31,9 +31,7 @@ bool Flag::canBePickedUpByPlayer(Network::Player* p)
 	return p->getTeamColor() == getTeamColor() ? false : true;
 }
 
-Flag::~Flag()
-{
-}
+Flag::~Flag() = default;
 
 void Flag::doUglyPeriodicCloneHack()
 {
@@ -48,15 +46,15 @@ void Flag::onServiceProvider(const ServiceProvider* oldProvider, const ServicePr
 {
 	Instance::onServiceProvider(oldProvider, newProvider);
 
-	if (oldProvider == NULL) {
-		timer = newProvider ? newProvider->create<TimerService>() : NULL;
+	if (oldProvider == nullptr) {
+		timer = newProvider ? newProvider->create<TimerService>() : nullptr;
 		timer->delay([self = shared_from(this)] { self->doUglyPeriodicCloneHack(); }, 2.0);
 	}
 
-	if (newProvider == NULL) {
+	if (newProvider == nullptr) {
 		flagTouched.disconnect();
 
-		RunService* runService = oldProvider ? oldProvider->create<RunService>() : NULL;
+		RunService* runService = oldProvider ? oldProvider->create<RunService>() : nullptr;
 		if (runService->getRunState() == RS_RUNNING && evilClone) {
 			Flag* flag = dynamic_cast<Flag*>(evilClone.get());
 			flag->getHandle();
@@ -111,7 +109,7 @@ void Flag::onChildAdded(Instance* instance)
 	}
 }
 
-Flag::Flag() : timer(NULL)
+Flag::Flag() : timer(nullptr)
 {
 	setName(sFlag);
 }
@@ -125,6 +123,5 @@ void Flag::setTeamColor(BrickColor color)
 } // namespace RBX
 
 template class RBX::FactoryProduct<RBX::Flag, RBX::Tool, RBX::sFlag>;
-template class RBX::Reflection::
-	Described<RBX::Flag, RBX::sFlag, RBX::FactoryProduct<RBX::Flag, RBX::Tool, RBX::sFlag> >;
+template class RBX::Reflection::Described<RBX::Flag, RBX::sFlag, RBX::FactoryProduct<RBX::Flag, RBX::Tool, RBX::sFlag>>;
 template class RBX::DescribedCreatable<RBX::Flag, RBX::Tool, RBX::sFlag>;

@@ -170,7 +170,7 @@ static Reflection::PropDescriptor<PartInstance, bool> prop_Dragging(
 
 bool PartInstance::askSetParent(const Instance* instance) const
 {
-	return dynamic_cast<const ModelInstance*>(instance) != NULL;
+	return dynamic_cast<const ModelInstance*>(instance) != nullptr;
 }
 
 void PartInstance::onChildAdded(Instance* child)
@@ -227,33 +227,33 @@ bool PartInstance::lockedInPlace() const
 
 bool PartInstance::nonNullInWorkspace(shared_ptr<PartInstance> part)
 {
-	return part.get() != NULL && part->myWorld != NULL;
+	return part.get() != nullptr && part->myWorld != nullptr;
 }
 
 PartInstance* PartInstance::fromPrimitive(Primitive* p)
 {
-	if (p != NULL) {
+	if (p != nullptr) {
 		IMoving* owner = p->getOwner();
 
-		if (owner != NULL) {
+		if (owner != nullptr) {
 			return static_cast<PartInstance*>(owner);
 		}
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 const PartInstance* PartInstance::fromPrimitiveConst(const Primitive* p)
 {
-	if (p != NULL) {
+	if (p != nullptr) {
 		IMoving* owner = p->getOwner();
 
-		if (owner != NULL) {
+		if (owner != nullptr) {
 			return static_cast<const PartInstance*>(owner);
 		}
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 void PartInstance::destroyJoints()
@@ -380,7 +380,7 @@ bool PartInstance::getCanCollide() const
 
 bool PartInstance::getAnchored() const
 {
-	return primitive->getAnchorObject() != NULL;
+	return primitive->getAnchorObject() != nullptr;
 }
 
 float PartInstance::getFriction() const
@@ -426,7 +426,7 @@ Surface* PartInstance::getSurface(const G3D::Ray& worldRay, int& surfaceId)
 			return &surfaces[(NormalId) (i + 3)];
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 Vector3 PartInstance::xmlToUiSize(const Vector3& size) const
@@ -545,15 +545,15 @@ void PartInstance::onAncestorChanged(const AncestorChanged& event)
 	World* world = Workspace::getWorldIfInWorkspace(this);
 
 	if (world != myWorld) {
-		if (myWorld != NULL) {
-			setMovingManager(NULL);
+		if (myWorld != nullptr) {
+			setMovingManager(nullptr);
 
 			myWorld->removePrimitive(getPrimitive());
 		}
 
 		myWorld = world;
 
-		if (world != NULL) {
+		if (world != nullptr) {
 			world->insertPrimitive(getPrimitive());
 
 			setMovingManager(Workspace::getMyWorkspaceFast(this));
@@ -664,7 +664,7 @@ void PartInstance::safeMove()
 }
 
 void PartInstance::primitivesToParts(
-	const G3D::Array<Primitive*>& primitives, G3D::Array<shared_ptr<PartInstance> >& parts
+	const G3D::Array<Primitive*>& primitives, G3D::Array<shared_ptr<PartInstance>>& parts
 )
 {
 	for (int i = 0; i < primitives.size(); i++) {
@@ -673,9 +673,7 @@ void PartInstance::primitivesToParts(
 	}
 }
 
-PartInstance::~PartInstance()
-{
-}
+PartInstance::~PartInstance() = default;
 
 PartInstance* PartInstance::getPrimaryPart()
 {
@@ -716,7 +714,7 @@ EnumDesc<PartInstance::FormFactor>::EnumDesc() : EnumDescriptor("FormFactor", ty
 
 } // namespace Reflection
 
-void PartInstance::findParts(Instance* instance, std::vector<std::weak_ptr<PartInstance> >& parts)
+void PartInstance::findParts(Instance* instance, std::vector<std::weak_ptr<PartInstance>>& parts)
 {
 	if (PartInstance* part = dynamic_cast<PartInstance*>(instance)) {
 		parts.push_back(shared_from(part));
@@ -735,7 +733,7 @@ void PartInstance::onGuidChanged()
 PartInstance::PartInstance()
 	: DescribedCreatable<PartInstance, PVInstance, sPart>("Part"), partType(Part::BLOCK_PART), formFactor(BRICK),
 	  transparency(0.0f), reflectance(0.0f), locked(false), surfaces(this), renderImportance(0.0f),
-	  primitive(new Primitive(Geometry::GEOMETRY_BLOCK)), myWorld(NULL), alphaModifier(1.0f),
+	  primitive(new Primitive(Geometry::GEOMETRY_BLOCK)), myWorld(nullptr), alphaModifier(1.0f),
 	  PersistentPart(this, &PartInstance::computePersistentPart),
 	  SurfacesNeedAdorn(this, &PartInstance::computeSurfacesNeedAdorn)
 {
@@ -836,7 +834,7 @@ void PartInstance::setPartSizeUi(const Vector3& uiSize)
 {
 	World* world = Workspace::getWorldIfInWorkspace(this);
 
-	if (world != NULL) {
+	if (world != nullptr) {
 		world->destroyJoints(primitive.get());
 	}
 
@@ -846,7 +844,7 @@ void PartInstance::setPartSizeUi(const Vector3& uiSize)
 
 	world = Workspace::getWorldIfInWorkspace(this);
 
-	if (world != NULL) {
+	if (world != nullptr) {
 		world->createJoints(primitive.get());
 	}
 }
@@ -1156,7 +1154,7 @@ void PartInstance::setPartTypeUi(Part::PartType _type)
 	if (partType != _type) {
 		World* world = Workspace::getWorldIfInWorkspace(this);
 
-		if (world != NULL) {
+		if (world != nullptr) {
 			world->destroyJoints(primitive.get());
 		}
 
@@ -1173,7 +1171,7 @@ void PartInstance::setPartTypeUi(Part::PartType _type)
 
 		world = Workspace::getWorldIfInWorkspace(this);
 
-		if (world != NULL) {
+		if (world != nullptr) {
 			world->createJoints(primitive.get());
 		}
 	}

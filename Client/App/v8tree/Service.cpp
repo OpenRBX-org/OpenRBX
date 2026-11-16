@@ -24,18 +24,18 @@ unsigned int ServiceProvider::newIndex()
 void ServiceProvider::onDescendentAdded(Instance* instance)
 {
 	Instance::onDescendentAdded(instance);
-	instance->onServiceProvider(NULL, this);
+	instance->onServiceProvider(nullptr, this);
 }
 
 void ServiceProvider::onDescendentRemoving(const shared_ptr<Instance>& instance)
 {
-	instance->onServiceProvider(this, NULL);
+	instance->onServiceProvider(this, nullptr);
 	Instance::onDescendentRemoving(instance);
 }
 
 Instance* ServiceProvider::create(Instance* context, const Name& name)
 {
-	while (context != NULL) {
+	while (context != nullptr) {
 		ServiceProvider* provider = dynamic_cast<ServiceProvider*>(context);
 		if (provider) {
 			std::shared_ptr<Instance> child = provider->createChild(name);
@@ -48,7 +48,7 @@ Instance* ServiceProvider::create(Instance* context, const Name& name)
 		context = context->getParent();
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 std::shared_ptr<Instance> ServiceProvider::findServiceByClassNameString(std::string sName)
@@ -63,7 +63,7 @@ std::shared_ptr<Instance> ServiceProvider::findServiceByClassNameString(std::str
 
 std::shared_ptr<Instance> ServiceProvider::findServiceByClassName(const Name& className) const
 {
-	std::map<const Name*, std::shared_ptr<Instance> >::const_iterator iter = serviceMap.find(&className);
+	std::map<const Name*, std::shared_ptr<Instance>>::const_iterator iter = serviceMap.find(&className);
 
 	if (iter != serviceMap.end()) {
 		return iter->second;
@@ -74,7 +74,7 @@ std::shared_ptr<Instance> ServiceProvider::findServiceByClassName(const Name& cl
 
 void ServiceProvider::onChildRemoving(Instance* instance)
 {
-	std::map<const Name*, std::shared_ptr<Instance> >::iterator iter = serviceMap.find(&instance->getClassName());
+	std::map<const Name*, std::shared_ptr<Instance>>::iterator iter = serviceMap.find(&instance->getClassName());
 
 	if (iter != serviceMap.end()) {
 		Notifier<ServiceProvider, ServiceRemoving>::raise(instance);
@@ -84,8 +84,8 @@ void ServiceProvider::onChildRemoving(Instance* instance)
 void ServiceProvider::onAddListener(Listener<ServiceProvider, ServiceAdded>* listener) const
 {
 	if (getChildren()) {
-		std::vector<std::shared_ptr<Instance> >::const_iterator end = getChildren()->end();
-		for (std::vector<std::shared_ptr<Instance> >::const_iterator iter = getChildren()->begin(); iter != end;
+		std::vector<std::shared_ptr<Instance>>::const_iterator end = getChildren()->end();
+		for (std::vector<std::shared_ptr<Instance>>::const_iterator iter = getChildren()->begin(); iter != end;
 			 ++iter) {
 			if (dynamic_cast<Service*>(iter->get())) {
 				Notifier<ServiceProvider, ServiceAdded>::raise(iter->get(), listener);
@@ -96,7 +96,7 @@ void ServiceProvider::onAddListener(Listener<ServiceProvider, ServiceAdded>* lis
 
 void ServiceProvider::onChildAdded(Instance* instance)
 {
-	if (dynamic_cast<Service*>(instance) != NULL) {
+	if (dynamic_cast<Service*>(instance) != nullptr) {
 		const Name& nullName = Name::getNullName();
 
 		if (&instance->getClassName() != &nullName) {
@@ -125,7 +125,7 @@ shared_ptr<Instance> ServiceProvider::createChild(const Name& className)
 
 bool ServiceProvider::askAddChild(const Instance* instance) const
 {
-	return dynamic_cast<const Service*>(instance) != NULL;
+	return dynamic_cast<const Service*>(instance) != nullptr;
 }
 
 } // namespace RBX

@@ -29,9 +29,7 @@ static std::string FUN_00660930()
 	return file;
 }
 
-ChatOption::ChatOption()
-{
-}
+ChatOption::ChatOption() = default;
 
 ChatOption::ChatOption(std::string text)
 {
@@ -45,7 +43,7 @@ ChatOption::~ChatOption()
 
 void SafeChat::loadChildren(ChatOption* parent, XmlElement* element)
 {
-	for (const XmlElement* child = element->findFirstChildByTag(utterance); child != NULL;
+	for (const XmlElement* child = element->findFirstChildByTag(utterance); child != nullptr;
 		 child = element->findNextChildWithSameTag(child)) {
 		std::string text;
 		child->getValue(text);

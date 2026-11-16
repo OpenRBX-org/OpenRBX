@@ -47,9 +47,9 @@ class Player : public DescribedCreatable<Player, Instance, sPlayer>,
 	bool superSafeChat;
 	int userId;
 
-	virtual bool askAddChild(const Instance* instance) const { return true; }
+	bool askAddChild(const Instance* instance) const override { return true; }
 
-	virtual void onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider);
+	void onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider) override;
 
 	void onCharacterChangedFrontend();
 	void registerLocalPlayerNotIdle();
@@ -60,13 +60,13 @@ public:
 	static Reflection::BoundProp<bool, 1> prop_SuperSafeChat;
 
 	Player();
-	virtual ~Player();
+	~Player() override;
 
 	static Reflection::SignalDesc<Player, void(std::string, std::shared_ptr<Instance>)> event_Chatted;
 
-	virtual XmlElement* write() { return NULL; }
+	XmlElement* write() override { return nullptr; }
 
-	virtual void setName(const std::string& name);
+	void setName(const std::string& name) override;
 
 	ModelInstance* getCharacter() const { return character.get(); }
 

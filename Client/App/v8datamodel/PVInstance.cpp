@@ -47,11 +47,11 @@ void PVInstance::moveToPoint(G3D::Vector3 point)
 void PVInstance::readProperty(const XmlElement* propertyElement, IReferenceBinder& binder)
 {
 	if (propertyElement->getTag().name.compare("Feature") == 0) {
-		const RBX::Name* name = NULL;
+		const RBX::Name* name = nullptr;
 
 		const XmlAttribute* attribute = propertyElement->findAttribute(name_name);
 
-		if (attribute != NULL) {
+		if (attribute != nullptr) {
 			attribute->getValue(name);
 		}
 
@@ -73,7 +73,7 @@ void PVInstance::onChildAdded(Instance* instance)
 {
 	PVInstance* pvInstance = dynamic_cast<PVInstance*>(instance);
 
-	if (pvInstance != NULL) {
+	if (pvInstance != nullptr) {
 		pvInstance->onChildControllerChanged();
 		pvInstance->onParentControllerChanged();
 	}
@@ -83,7 +83,7 @@ void PVInstance::onChildRemoving(Instance* instance)
 {
 	PVInstance* pvInstance = dynamic_cast<PVInstance*>(instance);
 
-	if (pvInstance != NULL) {
+	if (pvInstance != nullptr) {
 		pvInstance->onChildControllerChanged();
 		pvInstance->onParentControllerChanged();
 	}
@@ -109,7 +109,7 @@ void PVInstance::onChildControllerChanged()
 
 	PVInstance* pvInstance = dynamic_cast<PVInstance*>(getParent());
 
-	if (pvInstance != NULL) {
+	if (pvInstance != nullptr) {
 		pvInstance->onChildControllerChanged();
 	}
 }
@@ -136,7 +136,7 @@ void PVInstance::onExtentsChanged() const
 {
 	const PVInstance* pvInstance = dynamic_cast<const PVInstance*>(getParent());
 
-	if (pvInstance != NULL) {
+	if (pvInstance != nullptr) {
 		pvInstance->onExtentsChanged();
 	}
 }
@@ -151,7 +151,7 @@ void PVInstance::onParentControllerChanged()
 		Instance* child = (*getChildren())[i].get();
 		PVInstance* pvInstance = dynamic_cast<PVInstance*>(child);
 
-		if (pvInstance != NULL) {
+		if (pvInstance != nullptr) {
 			pvInstance->onParentControllerChanged();
 		}
 	}
@@ -163,7 +163,7 @@ bool PVInstance::computeIsControllable() const
 		Instance* child = (*getChildren())[i].get();
 		IControllable* controllable = dynamic_cast<IControllable*>(child);
 
-		if (controllable != NULL && controllable->isControllable()) {
+		if (controllable != nullptr && controllable->isControllable()) {
 			return true;
 		}
 	}
@@ -175,7 +175,7 @@ Controller* PVInstance::getTopPVController() const
 {
 	Controller* controller = TopPVController.getValue().getPointer();
 
-	if (controller != NULL) {
+	if (controller != nullptr) {
 		return controller;
 	}
 
@@ -202,9 +202,7 @@ void PVInstance::clearLegacyOffset()
 	}
 }
 
-PVInstance::~PVInstance()
-{
-}
+PVInstance::~PVInstance() = default;
 
 bool PVInstance::computeIsTopFlag() const
 {

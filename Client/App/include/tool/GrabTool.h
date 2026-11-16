@@ -17,17 +17,17 @@ class GrabTool : public Named<MouseCommand, sGrabTool>
 private:
 	std::string cursor;
 
-	virtual void onMouseIdle(const UIEvent& uiEvent) { onMouseHover(uiEvent); }
-	virtual void onMouseHover(const UIEvent& uiEvent);
-	virtual MouseCommand* onMouseDown(const UIEvent& uiEvent);
+	void onMouseIdle(const UIEvent& uiEvent) override { onMouseHover(uiEvent); }
+	void onMouseHover(const UIEvent& uiEvent) override;
+	MouseCommand* onMouseDown(const UIEvent& uiEvent) override;
 
-	virtual const std::string getCursorName() const { return cursor; }
+	const std::string getCursorName() const override { return cursor; }
 
 public:
 	GrabTool(Workspace* workspace);
-	virtual ~GrabTool();
+	~GrabTool() override;
 
-	virtual MouseCommand* isSticky() const { return new GrabTool(workspace); }
+	MouseCommand* isSticky() const override { return new GrabTool(workspace); }
 };
 
 } // namespace RBX

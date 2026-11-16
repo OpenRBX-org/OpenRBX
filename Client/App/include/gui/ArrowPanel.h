@@ -34,8 +34,8 @@ protected:
 public:
 	ArrowPanel(Adorn* adorn, DataModel* dataModel, Controller::ControllerType controller);
 
-	virtual bool isVisible() const;
-	virtual G3D::Vector2 getSize() const;
+	bool isVisible() const override;
+	G3D::Vector2 getSize() const override;
 };
 
 } // namespace RBX

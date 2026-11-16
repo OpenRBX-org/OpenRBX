@@ -13,11 +13,11 @@ class Team : public DescribedCreatable<Team, Instance, sTeam>
 {
 public:
 	Team();
-	virtual ~Team();
+	~Team() override;
 
-	virtual bool askSetParent(const Instance* instance) const { return true; }
+	bool askSetParent(const Instance* instance) const override { return true; }
 
-	virtual bool askAddChild(const Instance* instance) const { return true; }
+	bool askAddChild(const Instance* instance) const override { return true; }
 
 	int getScore() const;
 

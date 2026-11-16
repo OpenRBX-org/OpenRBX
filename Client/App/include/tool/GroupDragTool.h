@@ -26,21 +26,21 @@ private:
 	G3D::Vector3 lastHit;
 
 public:
-	virtual MouseCommand* onKeyDown(const UIEvent& uiEvent);
-	virtual MouseCommand* onMouseDown(const UIEvent& uiEvent);
-	virtual void onMouseIdle(const UIEvent& uiEvent);
-	virtual void onMouseMove(const UIEvent& uiEvent);
-	virtual MouseCommand* onMouseUp(const UIEvent& uiEvent);
+	MouseCommand* onKeyDown(const UIEvent& uiEvent) override;
+	MouseCommand* onMouseDown(const UIEvent& uiEvent) override;
+	void onMouseIdle(const UIEvent& uiEvent) override;
+	void onMouseMove(const UIEvent& uiEvent) override;
+	MouseCommand* onMouseUp(const UIEvent& uiEvent) override;
 
-	virtual const std::string getCursorName() const { return dragging ? "GrabRotateCursor" : "DragCursor"; }
+	const std::string getCursorName() const override { return dragging ? "GrabRotateCursor" : "DragCursor"; }
 
 	GroupDragTool(
 		PartInstance* mousePart,
 		const G3D::Vector3& hitPointWorld,
-		const std::vector<std::weak_ptr<PartInstance> >& partArray,
+		const std::vector<std::weak_ptr<PartInstance>>& partArray,
 		Workspace* workspace
 	);
-	virtual ~GroupDragTool();
+	~GroupDragTool() override;
 };
 
 } // namespace RBX

@@ -51,7 +51,7 @@ void FUN_004132b0(const RBX::Reflection::Value& value, VARIANT* result)
 		return;
 	}
 
-	if (value.isType<std::vector<RBX::Reflection::Value> >()) {
+	if (value.isType<std::vector<RBX::Reflection::Value>>()) {
 		CComVariant variant(FUN_00413500(value.cast<const std::vector<RBX::Reflection::Value>&>()));
 		variant.Detach(result);
 		return;
@@ -79,7 +79,7 @@ STDMETHODIMP CContent::Upload(BSTR url)
 
 	if (HRESULT hr = FUN_0041e630(url)) {
 		CString message;
-		message.Format("Untrusted Url: %s", CString(url));
+		message.Format("Untrusted Url: %s", static_cast<LPCTSTR>(CString(url)));
 		return LogManager::ReportCOMError(CLSID_Content, message, hr);
 	}
 

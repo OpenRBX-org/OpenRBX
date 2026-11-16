@@ -10,8 +10,7 @@
 #include <set>
 #include <vector>
 
-namespace RBX {
-namespace Render {
+namespace RBX::Render {
 
 class AggregatingSceneManager : public SceneManager
 {
@@ -44,7 +43,7 @@ public:
 		void clear() { queue.clear(); }
 		void optimize(AggregatingSceneManager& sceneManager, double maxTime);
 
-		typedef std::vector<G3D::ReferenceCountedPointer<Chunk> > Queue;
+		using Queue = std::vector<G3D::ReferenceCountedPointer<Chunk>>;
 
 	private:
 		Queue queue;
@@ -52,25 +51,25 @@ public:
 	public:
 	};
 
-	typedef G3D::ReferenceCountedPointer<Bucket> BucketRef;
+	using BucketRef = G3D::ReferenceCountedPointer<Bucket>;
 
 private:
 	std::map<BucketKey, BucketRef> buckets;
-	std::set<G3D::WeakReferenceCountedPointer<Chunk> > invalidSleepingModels;
-	std::set<G3D::WeakReferenceCountedPointer<Chunk> > invalidMovingModels;
+	std::set<G3D::WeakReferenceCountedPointer<Chunk>> invalidSleepingModels;
+	std::set<G3D::WeakReferenceCountedPointer<Chunk>> invalidMovingModels;
 
 public:
 	static unsigned int aggregationSize;
 
 	AggregatingSceneManager(RenderScene* renderScene);
-	virtual ~AggregatingSceneManager();
+	~AggregatingSceneManager() override;
 
-	virtual void invalidateModel(const G3D::ReferenceCountedPointer<Chunk>& chunk, bool isSleeping);
-	virtual void addModel(const G3D::ReferenceCountedPointer<Chunk>& chunk);
-	virtual void removeModel(const G3D::ReferenceCountedPointer<Chunk>& chunk);
-	virtual void clear();
-	virtual void setSleeping(const G3D::ReferenceCountedPointer<Chunk>& chunk, bool sleeping);
-	virtual void prerender(double optimizationTime);
+	void invalidateModel(const G3D::ReferenceCountedPointer<Chunk>& chunk, bool isSleeping) override;
+	void addModel(const G3D::ReferenceCountedPointer<Chunk>& chunk) override;
+	void removeModel(const G3D::ReferenceCountedPointer<Chunk>& chunk) override;
+	void clear() override;
+	void setSleeping(const G3D::ReferenceCountedPointer<Chunk>& chunk, bool sleeping) override;
+	void prerender(double optimizationTime) override;
 
 private:
 	void dequeueSleepingChunk(const G3D::ReferenceCountedPointer<Chunk>& chunk);
@@ -80,7 +79,6 @@ private:
 public:
 };
 
-} // namespace Render
-} // namespace RBX
+} // namespace RBX::Render
 
 #endif // RENDERLIB_AGGREGATINGSCENEMANAGER_H

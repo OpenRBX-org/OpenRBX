@@ -7,7 +7,7 @@ template <class T, class Class>
 class ComputeProp
 {
 public:
-	typedef T (Class::*GetFunc)() const;
+	using GetFunc = T (Class::*)() const;
 
 	ComputeProp(Class* object, GetFunc getFunc) : dirty(true), object(object), getFunc(getFunc) {}
 

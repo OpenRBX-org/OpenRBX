@@ -98,7 +98,7 @@ Reflection::BoundProp<G3D::Vector3, 1> BodyThrust::prop_location("location", "Go
 
 bool BodyMover::askSetParent(const Instance* instance) const
 {
-	return dynamic_cast<const PartInstance*>(instance) != NULL;
+	return dynamic_cast<const PartInstance*>(instance) != nullptr;
 }
 
 void Rocket::fire()
@@ -119,13 +119,11 @@ void Rocket::abort()
 	active = false;
 }
 
-BodyMover::BodyMover(const char* name) : Instance(name), world(NULL), part(NULL)
+BodyMover::BodyMover(const char* name) : Instance(name), world(nullptr), part(nullptr)
 {
 }
 
-BodyMover::~BodyMover()
-{
-}
+BodyMover::~BodyMover() = default;
 
 void BodyMover::onEvent(const RunService* source, Stepped event)
 {
@@ -392,7 +390,7 @@ Rocket::Rocket()
 
 void BodyMover::updateWorld()
 {
-	World* newWorld = part ? Workspace::getWorldIfInWorkspace(this) : NULL;
+	World* newWorld = part ? Workspace::getWorldIfInWorkspace(this) : nullptr;
 
 	if (world != newWorld) {
 		if (world) {
@@ -411,7 +409,7 @@ void BodyMover::updateWorld()
 
 void BodyMover::onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider)
 {
-	stopListening(oldProvider ? oldProvider->create<RunService>() : NULL, this);
+	stopListening(oldProvider ? oldProvider->create<RunService>() : nullptr, this);
 
 	Instance::onServiceProvider(oldProvider, newProvider);
 

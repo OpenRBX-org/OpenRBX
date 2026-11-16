@@ -22,7 +22,7 @@ void ActiveDocView::FUN_004054f0(bool activate, CRobloxDoc* doc)
 	}
 	else {
 		if (doc == g_unk0x00952d8c) {
-			g_unk0x00952d8c = NULL;
+			g_unk0x00952d8c = nullptr;
 		}
 
 		if (doc->FUN_00403290() == g_unk0x00952d9c) {

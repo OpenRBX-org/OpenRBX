@@ -1,8 +1,7 @@
 #include "reflection/function.h"
 #include "reflection/object.h"
 
-namespace RBX {
-namespace Reflection {
+namespace RBX::Reflection {
 
 extern template class MemberDescriptorContainer<FunctionDescriptor>;
 
@@ -12,5 +11,4 @@ FunctionDescriptor::FunctionDescriptor(ClassDescriptor& classDescriptor, const c
 	classDescriptor.MemberDescriptorContainer<FunctionDescriptor>::declare(this);
 }
 
-} // namespace Reflection
-} // namespace RBX
+} // namespace RBX::Reflection

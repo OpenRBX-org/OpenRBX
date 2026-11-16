@@ -27,7 +27,7 @@ public:
 		double elapsedTime;
 	};
 
-	typedef std::vector<WaitingThread> ThreadRefs;
+	using ThreadRefs = std::vector<WaitingThread>;
 
 	YieldingThreads(ScriptContext* context);
 

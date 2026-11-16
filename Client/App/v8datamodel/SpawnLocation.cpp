@@ -8,8 +8,8 @@
 #include "v8datamodel/ForceField.h"
 #include "v8datamodel/Workspace.h"
 
+#include <cstdlib>
 #include <stdexcept>
-#include <stdlib.h>
 #include <vector>
 
 namespace RBX {
@@ -55,9 +55,7 @@ void SpawnLocation::onEvent_spawnerTouched(std::shared_ptr<Instance> other)
 	}
 }
 
-SpawnerService::~SpawnerService()
-{
-}
+SpawnerService::~SpawnerService() = default;
 
 void SpawnerService::SpawnPlayer(std::shared_ptr<ModelInstance> model, Network::Player* p)
 {
@@ -123,19 +121,19 @@ void SpawnLocation::onServiceProvider(const ServiceProvider* oldProvider, const 
 {
 	Instance::onServiceProvider(oldProvider, newProvider);
 
-	if (oldProvider == NULL) {
+	if (oldProvider == nullptr) {
 		spawnerTouched = PartInstance::event_Touched.connect(
 			this, [this](const std::shared_ptr<Instance>& other) { onEvent_spawnerTouched(other); }, 10
 		);
 
-		SpawnerService* spawnerService = newProvider ? newProvider->create<SpawnerService>() : NULL;
+		SpawnerService* spawnerService = newProvider ? newProvider->create<SpawnerService>() : nullptr;
 		spawnerService->RegisterSpawner(this);
 	}
 
-	if (newProvider == NULL) {
+	if (newProvider == nullptr) {
 		spawnerTouched.disconnect();
 
-		SpawnerService* spawnerService = oldProvider ? oldProvider->find<SpawnerService>() : NULL;
+		SpawnerService* spawnerService = oldProvider ? oldProvider->find<SpawnerService>() : nullptr;
 		spawnerService->UnregisterSpawner(this);
 	}
 }
@@ -146,12 +144,12 @@ template class RBX::FactoryProduct<RBX::SpawnerService, RBX::Instance, RBX::sSpa
 template class RBX::Reflection::Described<
 	RBX::SpawnerService,
 	RBX::sSpawnerService,
-	RBX::FactoryProduct<RBX::SpawnerService, RBX::Instance, RBX::sSpawnerService> >;
+	RBX::FactoryProduct<RBX::SpawnerService, RBX::Instance, RBX::sSpawnerService>>;
 template class RBX::DescribedCreatable<RBX::SpawnerService, RBX::Instance, RBX::sSpawnerService>;
 
 template class RBX::FactoryProduct<RBX::SpawnLocation, RBX::PartInstance, RBX::sSpawnLocation>;
 template class RBX::Reflection::Described<
 	RBX::SpawnLocation,
 	RBX::sSpawnLocation,
-	RBX::FactoryProduct<RBX::SpawnLocation, RBX::PartInstance, RBX::sSpawnLocation> >;
+	RBX::FactoryProduct<RBX::SpawnLocation, RBX::PartInstance, RBX::sSpawnLocation>>;
 template class RBX::DescribedCreatable<RBX::SpawnLocation, RBX::PartInstance, RBX::sSpawnLocation>;

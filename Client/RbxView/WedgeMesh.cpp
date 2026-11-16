@@ -4,7 +4,7 @@
 #include "QuadVolume.h"
 
 #include <G3D/Vector2int16.h>
-#include <math.h>
+#include <cmath>
 
 const float bevel = 0.065f;
 
@@ -119,12 +119,12 @@ public:
 	}
 
 protected:
-	virtual void buildRight(Purpose purpose);
-	virtual void buildTop(Purpose purpose);
-	virtual void buildBack(Purpose purpose);
-	virtual void buildLeft(Purpose purpose);
-	virtual void buildBottom(Purpose purpose);
-	virtual void buildFront(Purpose purpose);
+	void buildRight(Purpose purpose) override;
+	void buildTop(Purpose purpose) override;
+	void buildBack(Purpose purpose) override;
+	void buildLeft(Purpose purpose) override;
+	void buildBottom(Purpose purpose) override;
+	void buildFront(Purpose purpose) override;
 };
 
 inline void WedgeBuilder::buildRight(Purpose purpose)
@@ -147,8 +147,7 @@ inline void WedgeBuilder::buildFront(Purpose purpose)
 	buildFace<RBX::NORM_Z_NEG>(DeformFront(bevel), 1, 1, purpose);
 }
 
-namespace RBX {
-namespace View {
+namespace RBX::View {
 
 WedgeMesh::WedgeMesh(const G3D::Vector3& size, RenderSurfaceTypes surfaceTypes)
 {
@@ -189,8 +188,7 @@ template WedgeMesh* MeshFactory<WedgeMesh, 1>::createDecal(const G3D::Vector3&, 
 
 template WedgeMesh* MeshFactory<WedgeMesh, 1>::createTexture(const G3D::Vector3&, NormalId, const G3D::Vector2&);
 
-} // namespace View
-} // namespace RBX
+} // namespace RBX::View
 
 inline void WedgeBuilder::buildBack(Purpose purpose)
 {

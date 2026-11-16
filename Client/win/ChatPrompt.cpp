@@ -68,21 +68,19 @@ int CChatPrompt::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	return 0;
 }
 
-ChatEnter::ChatEnter()
-{
-}
+ChatEnter::ChatEnter() = default;
 
-CChatPrompt::CChatPrompt() : m_unk0x88(NULL), m_unk0xa4(NULL)
+CChatPrompt::CChatPrompt() : m_unk0x88(nullptr), m_unk0xa4(nullptr)
 {
 }
 
 // clang-format off
 BEGIN_MESSAGE_MAP(CChatPrompt, CEditView)
-	ON_CONTROL_REFLECT(EN_CHANGE, FUN_00751160)
+	ON_CONTROL_REFLECT(EN_CHANGE, &CChatPrompt::FUN_00751160)
 	ON_WM_CHAR()
 	ON_WM_SYSCHAR()
-	ON_MESSAGE(0x468, FUN_0045f4d0)
-	ON_CONTROL_REFLECT(EN_SETFOCUS, FUN_0040dbe0)
+	ON_MESSAGE(0x468, &CChatPrompt::FUN_0045f4d0)
+	ON_CONTROL_REFLECT(EN_SETFOCUS, &CChatPrompt::FUN_0040dbe0)
 	ON_WM_CREATE()
 	ON_WM_CTLCOLOR_REFLECT()
 END_MESSAGE_MAP()
@@ -124,13 +122,13 @@ void CChatPrompt::FUN_0040f4d0(RBX::DataModel* dataModel, CWnd* parent)
 	RBX::DataModel::Lock lock(m_unk0x9c);
 
 	if (m_unk0x8c) {
-		m_unk0x8c->m_unk0x10c = NULL;
-		m_unk0x8c->setParent(NULL);
+		m_unk0x8c->m_unk0x10c = nullptr;
+		m_unk0x8c->setParent(nullptr);
 		m_unk0x8c.reset();
 	}
 
 	m_unk0x88 = parent;
-	m_unk0xa4 = dataModel ? dataModel->create<RBX::Network::Players>() : NULL;
+	m_unk0xa4 = dataModel ? dataModel->create<RBX::Network::Players>() : nullptr;
 	if (dataModel) {
 		m_unk0x8c = RBX::Creatable<RBX::Instance>::create<ChatEnter>();
 		m_unk0x8c->m_unk0x10c = this;
@@ -138,13 +136,13 @@ void CChatPrompt::FUN_0040f4d0(RBX::DataModel* dataModel, CWnd* parent)
 	}
 
 	if (m_hWnd) {
-		EnableWindow(m_unk0xa4 != NULL);
+		EnableWindow(m_unk0xa4 != nullptr);
 	}
 }
 
 CChatPrompt::~CChatPrompt()
 {
-	FUN_0040f4d0(NULL, NULL);
+	FUN_0040f4d0(nullptr, nullptr);
 }
 
 void CChatPrompt::FUN_00751160()

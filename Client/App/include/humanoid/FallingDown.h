@@ -14,14 +14,14 @@ private:
 	float time;
 	const float timeToGetUp;
 
-	virtual State* onStep(const float stepDt, Controller& controller);
+	State* onStep(const float stepDt, Controller& controller) override;
 
-	virtual void onComputeForce(const float dt) {}
+	void onComputeForce(const float dt) override {}
 
 public:
 	FallingDown(Humanoid* humanoid, float timeToGetUp);
 
-	virtual ~FallingDown();
+	~FallingDown() override;
 };
 
 } // namespace RBX

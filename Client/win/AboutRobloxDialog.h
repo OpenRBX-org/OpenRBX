@@ -8,13 +8,13 @@ class CAboutRobloxDialog : public CRobloxDHtmlDialog
 	DECLARE_DYNCREATE(CAboutRobloxDialog)
 
 public:
-	CAboutRobloxDialog(CWnd* pParentWnd = NULL);
-	virtual ~CAboutRobloxDialog();
+	CAboutRobloxDialog(CWnd* pParentWnd = nullptr);
+	~CAboutRobloxDialog() override;
 
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);
-	virtual BOOL OnInitDialog();
-	virtual void OnDocumentComplete(LPDISPATCH pDisp, LPCTSTR szUrl);
+	void DoDataExchange(CDataExchange* pDX) override;
+	BOOL OnInitDialog() override;
+	void OnDocumentComplete(LPDISPATCH pDisp, LPCTSTR szUrl) override;
 
 	HRESULT OnButtonOK(IHTMLElement* pElement);
 

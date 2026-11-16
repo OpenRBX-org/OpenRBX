@@ -11,13 +11,12 @@
 #include <G3D/Vector4.h>
 #include <G3D/g3dmath.h>
 #include <algorithm>
-#include <float.h>
+#include <cfloat>
+#include <cstring>
 #include <limits>
 #include <lua.h>
-#include <string.h>
 
-namespace RBX {
-namespace Lua {
+namespace RBX::Lua {
 
 float lua_tofloat(lua_State* L, int idx)
 {
@@ -238,8 +237,7 @@ template RBX::BrickColor* Bridge<RBX::BrickColor, 1>::pushNewObject<RBX::BrickCo
 	lua_State* L, RBX::BrickColor value
 );
 
-} // namespace Lua
-} // namespace RBX
+} // namespace RBX::Lua
 
 static int pushRed(lua_State* L)
 {
@@ -289,8 +287,7 @@ static int pushBlue(lua_State* L)
 	return 1;
 }
 
-namespace RBX {
-namespace Lua {
+namespace RBX::Lua {
 
 int BrickColorBridge::newBrickColor(lua_State* L)
 {
@@ -306,7 +303,7 @@ int BrickColorBridge::newBrickColor(lua_State* L)
 		}
 
 		if (lua_isstring(L, 1)) {
-			pushNewObject(L, RBX::BrickColor::parse(lua_tolstring(L, 1, 0)));
+			pushNewObject(L, RBX::BrickColor::parse(lua_tolstring(L, 1, nullptr)));
 			return 1;
 		}
 
@@ -801,12 +798,12 @@ template int Bridge<G3D::Vector3, 1>::on_tostring(lua_State* L);
 
 const luaL_Reg Color3Bridge::classLibrary[] = {
 	{"new", newColor3},
-	{NULL, NULL},
+	{nullptr, nullptr},
 };
 
 const luaL_Reg Vector3Bridge::classLibrary[] = {
 	{"new", newVector3},
-	{NULL, NULL},
+	{nullptr, nullptr},
 };
 
 const luaL_Reg BrickColorBridge::classLibrary[] = {
@@ -822,15 +819,14 @@ const luaL_Reg BrickColorBridge::classLibrary[] = {
 	{"Yellow", pushYellow},
 	{"Green", pushGreen},
 	{"Blue", pushBlue},
-	{NULL, NULL},
+	{nullptr, nullptr},
 };
 
 const luaL_Reg CoordinateFrameBridge::classLibrary[] = {
 	{"new", newCoordinateFrame},
 	{"fromEulerAnglesXYZ", fromEulerAnglesXYZ},
 	{"fromAxisAngle", fromAxisAngle},
-	{NULL, NULL},
+	{nullptr, nullptr},
 };
 
-} // namespace Lua
-} // namespace RBX
+} // namespace RBX::Lua

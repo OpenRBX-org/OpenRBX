@@ -35,8 +35,8 @@ public:
 	void delay(std::function<void()> func, double seconds);
 
 protected:
-	virtual void onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider);
-	virtual void onEvent(const RunService* source, Heartbeat event);
+	void onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider) override;
+	void onEvent(const RunService* source, Heartbeat event) override;
 
 public:
 };

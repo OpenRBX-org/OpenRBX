@@ -82,7 +82,7 @@ public:
 	const Part& getPart() const;
 
 	PartInstance();
-	virtual ~PartInstance();
+	~PartInstance() override;
 
 	static const Reflection::PropDescriptor<PartInstance, float> prop_RenderImportance;
 	static const Reflection::EnumPropDescriptor<PartInstance, Part::PartType> prop_shapeXml;
@@ -180,38 +180,38 @@ private:
 	static float defaultElasticity();
 
 public:
-	virtual void onCanAggregateChanged(bool canAggregate);
-	virtual bool reportTouches() const;
+	void onCanAggregateChanged(bool canAggregate) override;
+	bool reportTouches() const override;
 
-	virtual void onAncestorChanged(const AncestorChanged& event);
-	virtual bool askSetParent(const Instance* instance) const;
-	virtual void onChildAdded(Instance* child);
-	virtual void onGuidChanged();
-	virtual void setName(const std::string& value);
+	void onAncestorChanged(const AncestorChanged& event) override;
+	bool askSetParent(const Instance* instance) const override;
+	void onChildAdded(Instance* child) override;
+	void onGuidChanged() override;
+	void setName(const std::string& value) override;
 
-	virtual const CoordinateFrame getLocation() const;
+	const CoordinateFrame getLocation() const override;
 
-	virtual void onCameraNear(float distance);
-	virtual void getCameraIgnorePrimitives(std::vector<const Primitive*>& primitives);
+	void onCameraNear(float distance) override;
+	void getCameraIgnorePrimitives(std::vector<const Primitive*>& primitives) override;
 
-	virtual bool shouldRender3dAdorn() const;
-	virtual void render3dAdorn(Adorn* adorn);
-	virtual void render3dSelect(Adorn* adorn, SelectState selectState);
+	bool shouldRender3dAdorn() const override;
+	void render3dAdorn(Adorn* adorn) override;
+	void render3dSelect(Adorn* adorn, SelectState selectState) override;
 
-	virtual bool isControllable() const;
+	bool isControllable() const override;
 
-	virtual PartInstance* getPrimaryPart();
-	virtual const PartInstance* getPrimaryPartConst() const;
+	PartInstance* getPrimaryPart() override;
+	const PartInstance* getPrimaryPartConst() const override;
 
-	virtual void legacyTraverseState(const CoordinateFrame& parentState);
-	virtual void onParentControllerChanged();
+	void legacyTraverseState(const CoordinateFrame& parentState) override;
+	void onParentControllerChanged() override;
 
 	static PartInstance* fromPrimitive(Primitive* primitive);
 	static const PartInstance* fromPrimitiveConst(const Primitive* primitive);
 	static void primitivesToParts(
-		const G3D::Array<Primitive*>& primitives, G3D::Array<shared_ptr<PartInstance> >& parts
+		const G3D::Array<Primitive*>& primitives, G3D::Array<shared_ptr<PartInstance>>& parts
 	);
-	static void primitivesToParts(const G3D::Array<Primitive*>&, std::vector<std::weak_ptr<PartInstance> >&);
+	static void primitivesToParts(const G3D::Array<Primitive*>&, std::vector<std::weak_ptr<PartInstance>>&);
 	static bool getLocked(Instance* instance);
 	static void setLocked(Instance*, bool);
 
@@ -235,13 +235,13 @@ public:
 	void setLinearVelocity(const Vector3& set);
 	void setRotationalVelocity(const Vector3& set);
 
-	static void findParts(Instance* instance, std::vector<std::weak_ptr<PartInstance> >& parts);
+	static void findParts(Instance* instance, std::vector<std::weak_ptr<PartInstance>>& parts);
 
-	virtual const Primitive* getBiggestPrimitive() const;
-	virtual bool hitTest(const G3D::Ray& worldRay, G3D::Vector3& worldHitPoint);
+	const Primitive* getBiggestPrimitive() const override;
+	bool hitTest(const G3D::Ray& worldRay, G3D::Vector3& worldHitPoint) override;
 
-	virtual Extents getExtentsWorld() const;
-	virtual Extents getExtentsLocal() const;
+	Extents getExtentsWorld() const override;
+	Extents getExtentsLocal() const override;
 };
 
 } // namespace RBX

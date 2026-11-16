@@ -16,7 +16,7 @@ class Unlocked : public HitTestFilter
 public:
 	static bool unlocked(const Primitive* testMe);
 
-	virtual Result filterResult(const Primitive* testMe) const { return unlocked(testMe) ? INCLUDE_PRIM : STOP_TEST; }
+	Result filterResult(const Primitive* testMe) const override { return unlocked(testMe) ? INCLUDE_PRIM : STOP_TEST; }
 };
 
 class PartByLocalCharacter : public HitTestFilter
@@ -28,7 +28,7 @@ protected:
 public:
 	PartByLocalCharacter(Instance* root);
 
-	virtual Result filterResult(const Primitive* testMe) const;
+	Result filterResult(const Primitive* testMe) const override;
 };
 
 class UnlockedPartByLocalCharacter : public PartByLocalCharacter
@@ -36,7 +36,7 @@ class UnlockedPartByLocalCharacter : public PartByLocalCharacter
 public:
 	UnlockedPartByLocalCharacter(Instance* root) : PartByLocalCharacter(root) {}
 
-	virtual Result filterResult(const Primitive* testMe) const;
+	Result filterResult(const Primitive* testMe) const override;
 };
 
 class IgnoreDescendantsOf : public HitTestFilter
@@ -47,7 +47,7 @@ protected:
 public:
 	IgnoreDescendantsOf(Instance* i);
 
-	virtual Result filterResult(const Primitive* testMe) const;
+	Result filterResult(const Primitive* testMe) const override;
 };
 
 } // namespace RBX

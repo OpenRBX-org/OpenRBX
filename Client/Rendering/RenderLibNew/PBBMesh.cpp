@@ -9,8 +9,7 @@
 #include <G3D/g3dmath.h>
 #include <algorithm>
 
-namespace RBX {
-namespace ViewNew {
+namespace RBX::ViewNew {
 
 class Face
 {
@@ -102,12 +101,12 @@ public:
 	);
 
 protected:
-	virtual void buildTop(Purpose purpose);
-	virtual void buildBottom(Purpose purpose);
-	virtual void buildLeft(Purpose purpose);
-	virtual void buildRight(Purpose purpose);
-	virtual void buildFront(Purpose purpose);
-	virtual void buildBack(Purpose purpose);
+	void buildTop(Purpose purpose) override;
+	void buildBottom(Purpose purpose) override;
+	void buildLeft(Purpose purpose) override;
+	void buildRight(Purpose purpose) override;
+	void buildFront(Purpose purpose) override;
+	void buildBack(Purpose purpose) override;
 };
 
 PBBBuilder::PBBBuilder(
@@ -209,5 +208,4 @@ template PBBMesh* MeshFactory<PBBMesh, 4>::createDecal(const G3D::Vector3&, Norm
 
 template PBBMesh* MeshFactory<PBBMesh, 4>::createTexture(const G3D::Vector3&, NormalId, const G3D::Vector2&);
 
-} // namespace ViewNew
-} // namespace RBX
+} // namespace RBX::ViewNew

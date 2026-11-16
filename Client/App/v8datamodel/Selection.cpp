@@ -7,12 +7,12 @@
 #include <algorithm>
 
 static RBX::Reflection::
-	BoundFuncDesc<RBX::Selection, std::shared_ptr<const std::vector<std::shared_ptr<RBX::Instance> > >(), 0>
+	BoundFuncDesc<RBX::Selection, std::shared_ptr<const std::vector<std::shared_ptr<RBX::Instance>>>(), 0>
 		func_getSelection(
 			&RBX::Selection::getSelection2, "Get", RBX::Reflection::FunctionDescriptor::NeedTrustedCaller
 		);
 static RBX::Reflection::
-	BoundFuncDesc<RBX::Selection, void(std::shared_ptr<const std::vector<std::shared_ptr<RBX::Instance> > >), 1>
+	BoundFuncDesc<RBX::Selection, void(std::shared_ptr<const std::vector<std::shared_ptr<RBX::Instance>>>), 1>
 		func_setSelection(
 			&RBX::Selection::setSelection, "Set", "selection", RBX::Reflection::FunctionDescriptor::NeedTrustedCaller
 		);
@@ -50,9 +50,7 @@ void Selection::raiseRemoved(std::shared_ptr<Instance> source)
 	Notifier<Selection, SelectionChanged>::raise(event);
 }
 
-Selection::~Selection()
-{
-}
+Selection::~Selection() = default;
 
 void Selection::addFilteredSelection(ISelectionBase* fs)
 {
@@ -63,8 +61,8 @@ void Selection::toggleSelection(Instance* instance)
 {
 	std::shared_ptr<Instance> shared = shared_from(instance);
 
-	std::shared_ptr<std::vector<std::shared_ptr<Instance> > > sel = selection.write();
-	std::vector<std::shared_ptr<Instance> >::iterator iter = std::find(sel->begin(), sel->end(), shared);
+	std::shared_ptr<std::vector<std::shared_ptr<Instance>>> sel = selection.write();
+	std::vector<std::shared_ptr<Instance>>::iterator iter = std::find(sel->begin(), sel->end(), shared);
 	if (iter == sel->end()) {
 		sel->push_back(shared);
 		instance->Notifier<Instance, AncestorChanged>::addListener(this);
@@ -81,8 +79,8 @@ void Selection::addToSelection(Instance* instance)
 {
 	std::shared_ptr<Instance> shared = shared_from(instance);
 
-	std::shared_ptr<std::vector<std::shared_ptr<Instance> > > sel = selection.write();
-	std::vector<std::shared_ptr<Instance> >::iterator iter = std::find(sel->begin(), sel->end(), shared);
+	std::shared_ptr<std::vector<std::shared_ptr<Instance>>> sel = selection.write();
+	std::vector<std::shared_ptr<Instance>>::iterator iter = std::find(sel->begin(), sel->end(), shared);
 	if (iter == sel->end()) {
 		sel->push_back(shared);
 		instance->Notifier<Instance, AncestorChanged>::addListener(this);
@@ -112,7 +110,7 @@ void Selection::setSelection(Instance* instance)
 				return;
 			}
 
-			std::shared_ptr<std::vector<std::shared_ptr<Instance> > > sel = selection.write();
+			std::shared_ptr<std::vector<std::shared_ptr<Instance>>> sel = selection.write();
 			sel->back() = sel->front();
 			sel->front() = item;
 		}
@@ -132,9 +130,9 @@ void Selection::setSelection(Instance* instance)
 
 void Selection::removeFromSelection(const Instance* instance)
 {
-	std::shared_ptr<std::vector<std::shared_ptr<Instance> > > sel = selection.write();
+	std::shared_ptr<std::vector<std::shared_ptr<Instance>>> sel = selection.write();
 
-	std::vector<std::shared_ptr<Instance> >::iterator iter = std::find(sel->begin(), sel->end(), shared_from(instance));
+	std::vector<std::shared_ptr<Instance>>::iterator iter = std::find(sel->begin(), sel->end(), shared_from(instance));
 
 	if (iter != sel->end()) {
 		std::shared_ptr<Instance> nonConst = *iter;
@@ -147,14 +145,14 @@ void Selection::removeFromSelection(const Instance* instance)
 	}
 }
 
-Selection::Selection() : selection(std::vector<std::shared_ptr<Instance> >())
+Selection::Selection() : selection(std::vector<std::shared_ptr<Instance>>())
 {
 	setName("Selection");
 }
 
 void Selection::onEvent(const Instance* source, AncestorChanged event)
 {
-	const Instance* sourceRoot = source->getParent() != NULL ? source->getParent()->getRootAncestor() : source;
+	const Instance* sourceRoot = source->getParent() != nullptr ? source->getParent()->getRootAncestor() : source;
 
 	if (sourceRoot != getRootAncestor()) {
 		removeFromSelection(source);
@@ -165,5 +163,5 @@ void Selection::onEvent(const Instance* source, AncestorChanged event)
 
 template class RBX::FactoryProduct<RBX::Selection, RBX::Instance, RBX::sSelection>;
 template class RBX::Reflection::
-	Described<RBX::Selection, RBX::sSelection, RBX::FactoryProduct<RBX::Selection, RBX::Instance, RBX::sSelection> >;
+	Described<RBX::Selection, RBX::sSelection, RBX::FactoryProduct<RBX::Selection, RBX::Instance, RBX::sSelection>>;
 template class RBX::DescribedCreatable<RBX::Selection, RBX::Instance, RBX::sSelection>;

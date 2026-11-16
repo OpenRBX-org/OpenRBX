@@ -7,8 +7,7 @@
 #include <GLG3D/LightingParameters.h>
 #include <GLG3D/ToneMap.h>
 
-namespace RBX {
-namespace Render {
+namespace RBX::Render {
 
 class EffectSettings
 {
@@ -60,7 +59,6 @@ public:
 	bool applyDepthBlur() const { return _depthBlur; }
 };
 
-} // namespace Render
-} // namespace RBX
+} // namespace RBX::Render
 
 #endif // RENDERLIB_EFFECTSETTINGS_H

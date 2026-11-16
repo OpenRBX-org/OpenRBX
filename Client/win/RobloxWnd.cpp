@@ -189,7 +189,7 @@ BOOL CRobloxWnd::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* p
 		if (m_unk0x7c) {
 			m_unk0x7c->FUN_0046cbc0(message, wParam, lParam);
 		}
-		InvalidateRect(NULL);
+		InvalidateRect(nullptr);
 	}
 
 	if (handled) {
@@ -263,7 +263,7 @@ void CRobloxWnd::FUN_00460360()
 
 	if (m_unk0x9c) {
 		delete m_unk0x9c;
-		m_unk0x9c = NULL;
+		m_unk0x9c = nullptr;
 	}
 }
 
@@ -289,8 +289,9 @@ void CRobloxWnd::FUN_00460430()
 
 BOOL CRobloxWnd::PreCreateWindow(CREATESTRUCT& cs)
 {
-	cs.lpszClass =
-		AfxRegisterWndClass(CS_DBLCLKS | CS_HREDRAW | CS_VREDRAW | CS_OWNDC, LoadCursor(NULL, IDC_ARROW), NULL, NULL);
+	cs.lpszClass = AfxRegisterWndClass(
+		CS_DBLCLKS | CS_HREDRAW | CS_VREDRAW | CS_OWNDC, LoadCursor(nullptr, IDC_ARROW), nullptr, nullptr
+	);
 	cs.style |= WS_CLIPSIBLINGS | WS_CLIPCHILDREN;
 	cs.cx = std::max<int>(cs.cx, 100);
 	cs.cy = std::max<int>(cs.cy, 100);
@@ -320,8 +321,8 @@ void CRobloxWnd::OnClose()
 
 CRobloxWnd::CRobloxWnd(bool p_unk0x80)
 	: m_unk0x78(true), m_unk0x80(p_unk0x80), m_unk0x81(false), m_unk0x82(false), m_unk0x83(true), m_unk0x88(666.0),
-	  m_unk0x90(new RBX::Profiling::CodeProfiler("Render")), m_unk0x94(false), m_unk0x98(0), m_unk0x9c(NULL),
-	  m_unk0xa0(false), m_unk0xb0(NULL)
+	  m_unk0x90(new RBX::Profiling::CodeProfiler("Render")), m_unk0x94(false), m_unk0x98(0), m_unk0x9c(nullptr),
+	  m_unk0xa0(false), m_unk0xb0(nullptr)
 {
 	m_unk0x60 = 0;
 	m_unk0x5c = CRenderSettings::singleton().FUN_0044d430();
@@ -332,7 +333,7 @@ CRobloxWnd::CRobloxWnd(bool p_unk0x80)
 
 void CRobloxWnd::InvalidateRunView()
 {
-	InvalidateRgn(NULL, FALSE);
+	InvalidateRgn(nullptr, FALSE);
 }
 
 void CRobloxWnd::FUN_00460d30()
@@ -347,7 +348,7 @@ void CRobloxWnd::FUN_00460d30()
 		m_unk0x88 = 666.0;
 	}
 
-	if (m_unk0xa8.get() == NULL || m_unk0x70 == NULL) {
+	if (m_unk0xa8.get() == nullptr || m_unk0x70 == nullptr) {
 		return;
 	}
 
@@ -373,7 +374,7 @@ void CRobloxWnd::FUN_00460d30()
 		const G3D::CoordinateFrame& cameraFrame = m_unk0x70->getWorkspace()->getCamera()->getCameraCoordinateFrame();
 		float distance =
 			(cameraFrame.translation - m_unk0x70->getWorkspace()->getCamera()->getCameraFocus().translation).length();
-		if (m_unk0xb0 != NULL &&
+		if (m_unk0xb0 != nullptr &&
 			!Ogre::g_unk0x0096134c->getRenderSystem()->getCapabilities()->hasCapability(Ogre::RSC_VERTEX_PROGRAM)) {
 			RBX::ViewBase::getShadowsEnabled() = false;
 		}
@@ -559,8 +560,8 @@ int CRobloxWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		return -1;
 	}
 
-	SetTimer(0, 200, NULL);
-	SetTimer(1, 100, NULL);
+	SetTimer(0, 200, nullptr);
+	SetTimer(1, 100, nullptr);
 	idleWindows.insert(this);
 	return 0;
 }
@@ -636,7 +637,7 @@ void CRobloxWnd::FUN_004622d0(bool p_unk0x04)
 
 void CRobloxWnd::FUN_00462450(bool p_unk0x04)
 {
-	if (RBX::Network::Players::findLocalCharacter(m_unk0x70.get()) == NULL) {
+	if (RBX::Network::Players::findLocalCharacter(m_unk0x70.get()) == nullptr) {
 		Ogre::g_unk0x00949dd0 = false;
 	}
 	else {
@@ -705,10 +706,10 @@ bool CRobloxWnd::FUN_00462710()
 		}
 		if (resized) {
 			CWnd* frame = this;
-			while (frame->GetParent() != NULL) {
+			while (frame->GetParent() != nullptr) {
 				frame = frame->GetParent();
 			}
-			frame->InvalidateRgn(NULL, FALSE);
+			frame->InvalidateRgn(nullptr, FALSE);
 			g_unk0x00954484 = true;
 			return false;
 		}
@@ -781,7 +782,7 @@ bool CRobloxWnd::renderIdle()
 	bool rendered = false;
 	for (std::vector<CRobloxWnd*>::iterator it = windows.begin(); it != windows.end(); ++it) {
 		CRobloxWnd* window = *it;
-		if (!idleWindows.count(window) || !window->m_unk0x70 || !window->IsWindowVisible() ||
+		if (!idleWindows.contains(window) || !window->m_unk0x70 || !window->IsWindowVisible() ||
 			window->GetTopLevelParent()->IsIconic()) {
 			continue;
 		}
@@ -789,7 +790,7 @@ bool CRobloxWnd::renderIdle()
 		active = true;
 		if (RBX::getRealTime() + paintDuration < RBX::FrameInterpolator::getNextStepTime()) {
 			RBX::FrameInterpolator::setExtraFrame(true);
-			window->RedrawWindow(NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
+			window->RedrawWindow(nullptr, nullptr, RDW_INVALIDATE | RDW_UPDATENOW);
 			RBX::FrameInterpolator::setExtraFrame(false);
 			rendered = true;
 		}
@@ -798,7 +799,7 @@ bool CRobloxWnd::renderIdle()
 	if (active && !rendered) {
 		double remaining = RBX::FrameInterpolator::getNextStepTime() - RBX::getRealTime();
 		DWORD timeout = remaining > 0.0 ? (DWORD) (remaining * 1000.0) + 1 : 1;
-		MsgWaitForMultipleObjects(0, NULL, FALSE, timeout, QS_ALLINPUT);
+		MsgWaitForMultipleObjects(0, nullptr, FALSE, timeout, QS_ALLINPUT);
 	}
 
 	return active;
@@ -978,11 +979,11 @@ void CRobloxWnd::FUN_00463c30(CWorkspace* workspace)
 		if (m_unk0x70) {
 			RBX::DataModel::Lock lock(m_unk0x70);
 			if (m_unk0x64) {
-				m_unk0x64->setParent(NULL);
+				m_unk0x64->setParent(nullptr);
 				m_unk0x64.reset();
 			}
-			if (RBX::ControllerService* controllers = m_unk0x70 ? m_unk0x70->find<RBX::ControllerService>() : NULL) {
-				controllers->setHardwareDevice(NULL);
+			if (RBX::ControllerService* controllers = m_unk0x70 ? m_unk0x70->find<RBX::ControllerService>() : nullptr) {
+				controllers->setHardwareDevice(nullptr);
 			}
 			m_unk0x9c->makeCurrent();
 			m_unk0xa8.reset();
@@ -1015,8 +1016,8 @@ void CRobloxWnd::FUN_00463c30(CWorkspace* workspace)
 			AdjustThrottle(0.0);
 			FUN_00460d30();
 
-			(m_unk0x70 ? m_unk0x70->create<RBX::ControllerService>() : NULL)->setHardwareDevice(m_unk0x7c.get());
-			RBX::Stats::StatsService* stats = m_unk0x70 ? m_unk0x70->create<RBX::Stats::StatsService>() : NULL;
+			(m_unk0x70 ? m_unk0x70->create<RBX::ControllerService>() : nullptr)->setHardwareDevice(m_unk0x7c.get());
+			RBX::Stats::StatsService* stats = m_unk0x70 ? m_unk0x70->create<RBX::Stats::StatsService>() : nullptr;
 
 			m_unk0x64 = RBX::Creatable<RBX::Instance>::create<RenderStatsItem>(&m_unk0xa8->getRenderStats());
 			m_unk0x64->setName("Render");
@@ -1031,21 +1032,21 @@ void CRobloxWnd::FUN_00463c30(CWorkspace* workspace)
 			}
 		}
 	}
-	if (m_hWnd != NULL) {
+	if (m_hWnd != nullptr) {
 		Invalidate();
 	}
 }
 
 CRobloxWnd::~CRobloxWnd()
 {
-	FUN_00463c30(NULL);
+	FUN_00463c30(nullptr);
 }
 
 void CRobloxWnd::OnDestroy()
 {
 	idleWindows.erase(this);
 	FUN_00460430();
-	FUN_00463c30(NULL);
+	FUN_00463c30(nullptr);
 
 	if (m_unk0x5c == 2) {
 		FUN_00460360();
@@ -1071,7 +1072,7 @@ BEGIN_MESSAGE_MAP(CRobloxWnd, CWnd)
 	ON_WM_TIMER()
 	ON_WM_SETFOCUS()
 	ON_WM_KILLFOCUS()
-	ON_MESSAGE(WM_USER + 0xbb, FUN_0045f4d0)
+	ON_MESSAGE(WM_USER + 0xbb, &CRobloxWnd::FUN_0045f4d0)
 	ON_WM_WINDOWPOSCHANGING()
 	ON_WM_CLOSE()
 END_MESSAGE_MAP()

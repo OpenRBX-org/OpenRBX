@@ -28,7 +28,7 @@ void ArrowToolBase::onMouseHover(const UIEvent& uiEvent)
 
 void ArrowToolBase::onMouseIdle(const UIEvent& uiEvent)
 {
-	overInstance = getUnlockedPart(uiEvent) != NULL;
+	overInstance = getUnlockedPart(uiEvent) != nullptr;
 }
 
 const std::string ArrowToolBase::getCursorName() const
@@ -95,7 +95,7 @@ MouseCommand* ArrowToolBase::onMouseDown(const UIEvent& uiEvent)
 			}
 
 			if (uiEvent.eventType == UIEvent::MOUSE_LEFT_BUTTON_DOWN) {
-				ServiceClient<FilteredSelection<Instance> > instanceSelection(workspace);
+				ServiceClient<FilteredSelection<Instance>> instanceSelection(workspace);
 
 				return DragTool::onMouseDown(hitPart, hitWorld, instanceSelection->items(), uiEvent, workspace);
 			}
@@ -106,7 +106,7 @@ MouseCommand* ArrowToolBase::onMouseDown(const UIEvent& uiEvent)
 		return boxSelect->onMouseDown(uiEvent);
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 void BoxSelectCommand::selectAnd(const std::set<Instance*>& newItemsInBox)

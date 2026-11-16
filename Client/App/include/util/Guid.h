@@ -49,7 +49,7 @@ class __declspec(novtable) GuidItem
 	struct StaticData
 	{
 
-		typedef std::map<Guid::Data, T*> Map;
+		using Map = std::map<Guid::Data, T*>;
 
 		Map map;
 		std::recursive_mutex mutex;
@@ -87,12 +87,12 @@ public:
 	static bool lookupByGuid(const Guid::Data& data, T*& result)
 	{
 		if (Name::getNullName() == *data.scope) {
-			result = NULL;
+			result = nullptr;
 			return true;
 		}
 
 		StaticData& s = getStaticData();
-		std::lock_guard<std::recursive_mutex> lock(s.mutex);
+		std::scoped_lock lock(s.mutex);
 		typename StaticData::Map::const_iterator iter = s.map.find(data);
 
 		if (iter != s.map.end()) {
@@ -100,7 +100,7 @@ public:
 			return true;
 		}
 
-		result = NULL;
+		result = nullptr;
 		return false;
 	}
 
@@ -118,7 +118,7 @@ private:
 			Guid::Data data;
 			guid.extract(data);
 			StaticData& s = getStaticData();
-			std::lock_guard<std::recursive_mutex> lock(s.mutex);
+			std::scoped_lock lock(s.mutex);
 			s.map.erase(data);
 		}
 		registeredGuid = false;
@@ -130,7 +130,7 @@ private:
 			Guid::Data data;
 			guid.extract(data);
 			StaticData& s = getStaticData();
-			std::lock_guard<std::recursive_mutex> lock(s.mutex);
+			std::scoped_lock lock(s.mutex);
 			s.map[data] = const_cast<T*>(static_cast<const T*>(this));
 		}
 		registeredGuid = true;

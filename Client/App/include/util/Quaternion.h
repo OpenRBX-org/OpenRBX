@@ -22,7 +22,7 @@ public:
 	Quaternion(float x, float y, float z, float w) : x(x), y(y), z(z), w(w) {}
 	Quaternion(const G3D::Matrix3& rot);
 
-	Quaternion& operator=(const Quaternion& other);
+	Quaternion& operator=(const Quaternion& other) = default;
 	void toRotationMatrix(G3D::Matrix3& rot) const;
 
 	Quaternion operator+(const Quaternion& other) const

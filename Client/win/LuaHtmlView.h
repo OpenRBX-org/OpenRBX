@@ -66,7 +66,7 @@ public:
 	private:
 		friend class CLuaHtmlView;
 
-		std::list<std::shared_ptr<PropBinding> > m_unk0x0c;
+		std::list<std::shared_ptr<PropBinding>> m_unk0x0c;
 		bool m_unk0x18;
 		CComPtr<EventHandler> m_unk0x1c;
 		CComPtr<IHTMLInputElement> m_unk0x20;
@@ -76,13 +76,13 @@ protected:
 	CLuaHtmlView();
 
 public:
-	virtual ~CLuaHtmlView();
+	~CLuaHtmlView() override;
 
-	virtual void OnInitialUpdate() { CSecureHtmlView::OnInitialUpdate(); }
+	void OnInitialUpdate() override { CSecureHtmlView::OnInitialUpdate(); }
 
-	virtual HRESULT OnGetHostInfo(DOCHOSTUIINFO* pInfo);
-	virtual HRESULT OnGetExternal(LPDISPATCH* lppDispatch);
-	virtual void OnDocumentComplete(LPCTSTR lpszURL);
+	HRESULT OnGetHostInfo(DOCHOSTUIINFO* pInfo) override;
+	HRESULT OnGetExternal(LPDISPATCH* lppDispatch) override;
+	void OnDocumentComplete(LPCTSTR lpszURL) override;
 
 	void FUN_0042d640();
 	void FUN_0042e330(LPCTSTR html);
@@ -93,7 +93,7 @@ public:
 	);
 
 protected:
-	virtual BOOL OnAmbientProperty(COleControlSite* pSite, DISPID dispid, VARIANT* pvar);
+	BOOL OnAmbientProperty(COleControlSite* pSite, DISPID dispid, VARIANT* pvar) override;
 
 	afx_msg void OnDestroy();
 
@@ -106,7 +106,7 @@ private:
 	CComObjectNoLock<CLuaFunction>* m_unk0xf8;
 	std::shared_ptr<RBX::DataModel> m_unk0xfc;
 	std::shared_ptr<DHTMLWindow> m_unk0x104;
-	std::list<std::shared_ptr<Binder> > m_unk0x10c;
+	std::list<std::shared_ptr<Binder>> m_unk0x10c;
 };
 
 #endif // LUAHTMLVIEW_H

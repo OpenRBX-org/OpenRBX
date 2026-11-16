@@ -6,7 +6,7 @@ namespace RBX {
 
 bool InstanceHandle::empty() const
 {
-	return target.get() == 0;
+	return target.get() == nullptr;
 }
 
 void InstanceHandle::linkTo(std::shared_ptr<Instance> target)

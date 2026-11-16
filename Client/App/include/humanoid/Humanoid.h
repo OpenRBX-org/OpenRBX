@@ -34,7 +34,7 @@ class Humanoid : public DescribedCreatable<Humanoid, Instance, sHumanoid>,
 {
 	void resetTimer();
 	void getPrimitives(std::vector<Primitive*>&);
-	void getAccoutrements(std::vector<std::shared_ptr<Accoutrement> >&);
+	void getAccoutrements(std::vector<std::shared_ptr<Accoutrement>>&);
 
 public:
 	enum WalkMode
@@ -48,7 +48,7 @@ public:
 	class State : public INamed
 	{
 	public:
-		virtual ~State() {}
+		virtual ~State() = default;
 
 		virtual void onComputeForce(const float stepDt) = 0;
 		virtual State* onStep(const float stepDt, Controller& controller) = 0;
@@ -70,7 +70,7 @@ public:
 	static Reflection::SignalDesc<Humanoid, void(bool)> event_FallingDown;
 	static Reflection::SignalDesc<Humanoid, void(bool)> event_Seated;
 
-	virtual ~Humanoid();
+	~Humanoid() override;
 
 	static Humanoid* modelIsCharacter(const Instance* instance);
 	static Humanoid* getLocalHumanoidFromContext(const Instance* context);
@@ -126,7 +126,7 @@ public:
 	{
 		PartInstance* part = getHead();
 
-		return part != NULL ? part->getPrimitive() : NULL;
+		return part != nullptr ? part->getPrimitive() : nullptr;
 	}
 	Primitive* getTorsoPrimitive() const;
 	Primitive* getLeftLegPrimitive();
@@ -154,34 +154,34 @@ private:
 	void checkForJointDeath();
 	bool hasWalkToPoint(G3D::Vector3& worldPosition) const;
 
-	virtual bool shouldRender2d() const;
-	virtual bool shouldRender3dAdorn() const;
-	virtual void render2d(Adorn* adorn);
-	virtual void render3dAdorn(Adorn* adorn);
+	bool shouldRender2d() const override;
+	bool shouldRender3dAdorn() const override;
+	void render2d(Adorn* adorn) override;
+	void render3dAdorn(Adorn* adorn) override;
 	void renderMultiplayer(Adorn* adorn, const G3D::GCamera& camera);
-	virtual bool isControllable() const;
-	virtual void onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider);
-	virtual void onAncestorChanged(const AncestorChanged& event);
-	virtual bool askSetParent(const Instance* instance) const;
-	virtual void onEvent(const RunService* source, Stepped event);
+	bool isControllable() const override;
+	void onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider) override;
+	void onAncestorChanged(const AncestorChanged& event) override;
+	bool askSetParent(const Instance* instance) const override;
+	void onEvent(const RunService* source, Stepped event) override;
 	void onLocalHumanoidEnteringWorkspace();
-	virtual void computeForce(float dt, bool throttling);
-	virtual const CoordinateFrame getLocation() const;
-	virtual ContactManager* getContactManager();
-	virtual void tellCameraNear(float distance);
-	virtual float getIntendedRotationAboutYAxis();
-	virtual void getCameraIgnorePrimitives(std::vector<const Primitive*>& primitives);
-	virtual void cameraSetWalkOrientation(float rad, bool noAdjust);
+	void computeForce(float dt, bool throttling) override;
+	const CoordinateFrame getLocation() const override;
+	ContactManager* getContactManager() override;
+	void tellCameraNear(float distance) override;
+	float getIntendedRotationAboutYAxis() override;
+	void getCameraIgnorePrimitives(std::vector<const Primitive*>& primitives) override;
+	void cameraSetWalkOrientation(float rad, bool noAdjust) override;
 	void onChangedHealth(const Reflection::PropertyDescriptor&);
 
 public:
-	virtual void getIgnorePrims(std::vector<const Primitive*>& ignore);
+	void getIgnorePrims(std::vector<const Primitive*>& ignore) override;
 
 	Humanoid();
 
 private:
 	G3D::Vector3 getIntendedMovementVector(bool setWalkMode);
-	virtual G3D::Vector3 getIntendedMovementVector();
+	G3D::Vector3 getIntendedMovementVector() override;
 
 private:
 	float health;

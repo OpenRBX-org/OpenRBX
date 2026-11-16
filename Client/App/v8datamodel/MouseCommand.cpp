@@ -66,7 +66,7 @@ PartInstance* MouseCommand::getMousePart(
 
 	Primitive* hit = contactManager.getHit(searchRay, &ignore, filter, hitPoint);
 
-	return hit ? const_cast<PartInstance*>(PartInstance::fromPrimitiveConst(hit)) : NULL;
+	return hit ? const_cast<PartInstance*>(PartInstance::fromPrimitiveConst(hit)) : nullptr;
 }
 
 TextureId MouseCommand::getCursorId() const
@@ -104,9 +104,7 @@ MouseCommand::MouseCommand(Workspace* workspace) : capturedMouse(false), workspa
 {
 }
 
-MouseCommand::~MouseCommand()
-{
-}
+MouseCommand::~MouseCommand() = default;
 
 PartInstance* MouseCommand::getPart(const UIEvent& uiEvent, const HitTestFilter* filter, G3D::Vector3& hitWorld)
 {
@@ -123,7 +121,7 @@ PartInstance* MouseCommand::getPart(const UIEvent& uiEvent, const HitTestFilter*
 
 	PartInstance* part = getMousePart(unitRay, contactManager, ignorePrims, filter, hitWorld, maxSearch());
 
-	if (part == NULL) {
+	if (part == nullptr) {
 		hitWorld = unitRay.origin + unitRay.direction * 10000.0f;
 	}
 
@@ -140,7 +138,7 @@ Surface* MouseCommand::getSurface(const UIEvent& uiEvent, PartInstance*& part, i
 			return surface;
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 PartInstance* MouseCommand::getPartByLocalCharacter(const UIEvent& uiEvent, G3D::Vector3& hitWorld)

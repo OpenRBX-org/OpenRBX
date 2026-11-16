@@ -19,10 +19,10 @@
 #include <OgreVertexIndexData.h>
 #include <OgreViewport.h>
 #include <algorithm>
+#include <cstdio>
 #include <d3d9.h>
 #include <ddraw.h>
 #include <stdexcept>
-#include <stdio.h>
 #include <vector>
 
 namespace Ogre {
@@ -39,7 +39,7 @@ int g_unk0x00961358;
 
 int g_unk0x0096135c;
 
-Unknown00671c70::Unknown00671c70() : m_unk0x84(false), m_unk0x88(NULL)
+Unknown00671c70::Unknown00671c70() : m_unk0x84(false), m_unk0x88(nullptr)
 {
 }
 
@@ -56,13 +56,13 @@ ColourValue FUN_00671cd0(const G3D::Color4& color)
 unsigned int FUN_00671cf0()
 {
 	if (!g_unk0x00961354) {
-		CoInitialize(NULL);
-		IDirectDraw2* directDraw = NULL;
+		CoInitialize(nullptr);
+		IDirectDraw2* directDraw = nullptr;
 		DWORD freeMemory = 0;
-		if (SUCCEEDED(
-				CoCreateInstance(CLSID_DirectDraw, NULL, CLSCTX_INPROC_SERVER, IID_IDirectDraw2, (void**) &directDraw)
-			)) {
-			directDraw->Initialize(NULL);
+		if (SUCCEEDED(CoCreateInstance(
+				CLSID_DirectDraw, nullptr, CLSCTX_INPROC_SERVER, IID_IDirectDraw2, (void**) &directDraw
+			))) {
+			directDraw->Initialize(nullptr);
 			DDSCAPS caps;
 			caps.dwCaps = DDSCAPS_VIDEOMEMORY | DDSCAPS_LOCALVIDMEM;
 			if (FAILED(directDraw->GetAvailableVidMem(&caps, &g_unk0x00961350, &freeMemory))) {
@@ -120,7 +120,7 @@ VisualEngine::Unk0x18::Unk0x08& VisualEngine::Unk0x18::FUN_00671ef0(int back)
 }
 
 VisualEngine::VisualEngine()
-	: m_unk0x04(NULL), m_unk0x08(NULL), m_unk0x0c(NULL), m_unk0x10(NULL), m_unk0x14(NULL), m_unk0x7f8(-1)
+	: m_unk0x04(nullptr), m_unk0x08(nullptr), m_unk0x0c(nullptr), m_unk0x10(nullptr), m_unk0x14(nullptr), m_unk0x7f8(-1)
 {
 }
 
@@ -141,7 +141,7 @@ void FUN_00672010()
 {
 	if (g_unk0x0096134c) {
 		delete g_unk0x0096134c;
-		g_unk0x0096134c = NULL;
+		g_unk0x0096134c = nullptr;
 	}
 }
 
@@ -237,7 +237,7 @@ void VisualEngine::FUN_00672e60(
 {
 	if (mesh->sharedVertexData) {
 		delete mesh->sharedVertexData;
-		mesh->sharedVertexData = NULL;
+		mesh->sharedVertexData = nullptr;
 	}
 	mesh->sharedVertexData = FUN_00672ab0(positions, vertexCount, normals, colours, textureCoords);
 
@@ -339,7 +339,7 @@ Unknown00671c70* VisualEngine::FUN_006735b0(
 )
 {
 	Unknown00671c70* subMesh = new Unknown00671c70();
-	subMesh->parent = NULL;
+	subMesh->parent = nullptr;
 	subMesh->vertexData = FUN_00672ab0(positions, vertexCount, normals, colours, textureCoords);
 	subMesh->useSharedVertices = false;
 
@@ -393,7 +393,7 @@ void VisualEngine::FUN_00673860(
 )
 {
 	try {
-		if (g_unk0x0096134c == NULL) {
+		if (g_unk0x0096134c == nullptr) {
 			g_unk0x0096134c = new Root("", "", logFileName);
 
 			static RbxSceneManagerFactory factory;

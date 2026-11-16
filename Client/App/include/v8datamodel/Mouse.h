@@ -30,13 +30,13 @@ private:
 
 	void checkActive() const
 	{
-		if (command == NULL) {
+		if (command == nullptr) {
 			throw std::runtime_error("This Mouse is no longer active");
 		}
 	}
 
 public:
-	Mouse() : command(NULL) {}
+	Mouse() : command(nullptr) {}
 
 	void update(const UIEvent& uiEvent);
 	G3D::CoordinateFrame getHit() const;

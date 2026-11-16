@@ -32,7 +32,7 @@ IMPLEMENT_DYNCREATE(CRobloxDoc, CDocument)
 template <class T>
 static T* createService(RBX::DataModel* dataModel)
 {
-	return dataModel ? dataModel->create<T>() : NULL;
+	return dataModel ? dataModel->create<T>() : nullptr;
 }
 
 static bool canSave(RBX::DataModel* dataModel)
@@ -45,7 +45,7 @@ static bool canSave(RBX::DataModel* dataModel)
 template <class T>
 static T* findService(RBX::DataModel* dataModel)
 {
-	return dataModel ? dataModel->find<T>() : NULL;
+	return dataModel ? dataModel->find<T>() : nullptr;
 }
 
 void CRobloxDoc::OnCloseDocument()
@@ -93,7 +93,7 @@ void CRobloxDoc::FUN_00454430()
 	CString filter;
 	filter.LoadString(184);
 
-	CFileDialog dialog(FALSE, "rbxm", NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, filter);
+	CFileDialog dialog(FALSE, "rbxm", nullptr, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, filter);
 	if (dialog.DoModal() == IDOK) {
 		CComBSTR pathName(dialog.GetPathName());
 		m_unk0x78->SaveSelectionToFile(pathName);
@@ -141,19 +141,19 @@ void CRobloxDoc::SetTitle(LPCTSTR lpszTitle)
 
 void CRobloxDoc::FUN_00454920()
 {
-	CPublishAsPlaceDialog dialog(m_unk0x78, NULL);
+	CPublishAsPlaceDialog dialog(m_unk0x78, nullptr);
 	dialog.DoModal();
 }
 
 void CRobloxDoc::FUN_004549c0()
 {
-	CSaveModelToRobloxDialog dialog(m_unk0x78, NULL);
+	CSaveModelToRobloxDialog dialog(m_unk0x78, nullptr);
 	dialog.DoModal();
 }
 
 void CRobloxDoc::FUN_00454a60()
 {
-	CRobloxDHtmlDialog dialog(123, FUN_00407190() + "/AbuseReport/InGameChat.aspx", NULL);
+	CRobloxDHtmlDialog dialog(123, FUN_00407190() + "/AbuseReport/InGameChat.aspx", nullptr);
 	dialog.SetExternalDispatch(m_unk0x78);
 	dialog.DoModal();
 }
@@ -178,7 +178,7 @@ CString CRobloxDoc::FUN_00454b50(CRobloxDoc* doc, const char* name)
 static void FUN_00454cb0(const char* file, const char* arguments)
 {
 	CString folder;
-	if (SHGetFolderPath(NULL, CSIDL_COMMON_DOCUMENTS, NULL, SHGFP_TYPE_CURRENT, folder.GetBuffer(MAX_PATH))) {
+	if (SHGetFolderPath(nullptr, CSIDL_COMMON_DOCUMENTS, nullptr, SHGFP_TYPE_CURRENT, folder.GetBuffer(MAX_PATH))) {
 		throw std::runtime_error("Unable to get common document folder");
 	}
 	folder.ReleaseBuffer();
@@ -213,7 +213,7 @@ void CRobloxDoc::FUN_00454f50()
 {
 	try {
 		FUN_00454cb0(FUN_00454b50(this, "Server"), " -script " + FUN_00407190() + "/game/gameserver.ashx");
-		FUN_00454cb0(NULL, " -script " + FUN_00407190() + "/game/join.ashx");
+		FUN_00454cb0(nullptr, " -script " + FUN_00407190() + "/game/join.ashx");
 	}
 	catch (std::exception& e) {
 		AfxMessageBox(e.what());
@@ -224,8 +224,8 @@ void CRobloxDoc::FUN_004550b0()
 {
 	try {
 		FUN_00454cb0(FUN_00454b50(this, "Server"), " -script " + FUN_00407190() + "/game/gameserver.ashx");
-		FUN_00454cb0(NULL, " -script " + FUN_00407190() + "/game/join.ashx");
-		FUN_00454cb0(NULL, " -script " + FUN_00407190() + "/game/join.ashx?UserID=0&port=4344");
+		FUN_00454cb0(nullptr, " -script " + FUN_00407190() + "/game/join.ashx");
+		FUN_00454cb0(nullptr, " -script " + FUN_00407190() + "/game/join.ashx?UserID=0&port=4344");
 	}
 	catch (std::exception& e) {
 		AfxMessageBox(e.what());
@@ -292,7 +292,7 @@ void CRobloxDoc::FUN_004561a0()
 	CString filter;
 	filter.LoadString(184);
 
-	CFileDialog dialog(TRUE, "rbxm", NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, filter);
+	CFileDialog dialog(TRUE, "rbxm", nullptr, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, filter);
 	if (dialog.DoModal() == IDOK) {
 		RBX::DataModel::Lock lock(m_unk0x78->FUN_0046edc0());
 		m_unk0x78->FUN_004702b0(RBX::ContentId::fromFile(static_cast<LPCTSTR>(dialog.GetPathName())), true);
@@ -316,7 +316,7 @@ void CRobloxDoc::DeleteContents()
 	if (m_unk0x78) {
 		m_unk0x78->FUN_0046f420();
 		m_unk0x78->Release();
-		m_unk0x78 = NULL;
+		m_unk0x78 = nullptr;
 	}
 
 	if (ActiveDocView::g_unk0x00952d8c == this) {
@@ -326,9 +326,7 @@ void CRobloxDoc::DeleteContents()
 	CDocument::DeleteContents();
 }
 
-CRobloxDoc::~CRobloxDoc()
-{
-}
+CRobloxDoc::~CRobloxDoc() = default;
 
 void CRobloxDoc::FUN_00455ff0(CCmdUI* pCmdUI)
 {
@@ -351,7 +349,7 @@ void CRobloxDoc::FUN_00456c50(int id, RBX::Verb* verb)
 	bind(id, verb);
 }
 
-CRobloxDoc::CRobloxDoc() : m_unk0x78(NULL)
+CRobloxDoc::CRobloxDoc() : m_unk0x78(nullptr)
 {
 }
 
@@ -433,7 +431,7 @@ void CRobloxDoc::FUN_00456d30()
 BOOL CRobloxDoc::OnOpenDocument(LPCTSTR lpszPathName)
 {
 	char cachePath[MAX_PATH];
-	if (SHGetFolderPath(NULL, CSIDL_INTERNET_CACHE, NULL, 0, cachePath) == S_OK) {
+	if (SHGetFolderPath(nullptr, CSIDL_INTERNET_CACHE, nullptr, 0, cachePath) == S_OK) {
 		CString relativePath;
 		LPTSTR buffer = relativePath.GetBuffer(MAX_PATH);
 		BOOL relative = PathRelativePathTo(buffer, cachePath, FILE_ATTRIBUTE_DIRECTORY, lpszPathName, 0);
@@ -459,7 +457,7 @@ BOOL CRobloxDoc::OnOpenDocument(LPCTSTR lpszPathName)
 	}
 	catch (std::exception& e) {
 		FUN_0042b3c0(e);
-		ReportSaveLoadException(lpszPathName, NULL, FALSE, AFX_IDP_FAILED_TO_OPEN_DOC);
+		ReportSaveLoadException(lpszPathName, nullptr, FALSE, AFX_IDP_FAILED_TO_OPEN_DOC);
 		return FALSE;
 	}
 
@@ -551,7 +549,7 @@ void CRobloxDoc::FUN_00458dc0(CCmdUI* pCmdUI)
 {
 	RBX::DataModel::Lock lock(m_unk0x78->FUN_0046edc0());
 	RBX::RunState runState = FUN_00403290()->create<RBX::RunService>()->getRunState();
-	bool hasLocalPlayer = RBX::Network::Players::findLocalPlayer(FUN_00403290().get()) != NULL;
+	bool hasLocalPlayer = RBX::Network::Players::findLocalPlayer(FUN_00403290().get()) != nullptr;
 	pCmdUI->Enable(runState != RBX::RS_NORMAL && !hasLocalPlayer);
 }
 
@@ -675,7 +673,7 @@ void CRobloxDoc::FUN_00459c80()
 	CString filter;
 	filter.LoadString(208);
 
-	CFileDialog dialog(TRUE, "lua", NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, filter);
+	CFileDialog dialog(TRUE, "lua", nullptr, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, filter);
 	if (dialog.DoModal() == IDOK) {
 		FUN_00459950(static_cast<LPCTSTR>(dialog.GetPathName()));
 	}
@@ -686,7 +684,7 @@ void CRobloxDoc::FUN_00459da0()
 	CString filter;
 	filter.LoadString(141);
 
-	CFileDialog dialog(TRUE, "ldr", NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, filter);
+	CFileDialog dialog(TRUE, "ldr", nullptr, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, filter);
 	if (dialog.DoModal() == IDOK) {
 		RBX::LDraw2Lua::LDrawParser parser(dialog.GetPathName());
 		std::ostringstream stream;
@@ -729,7 +727,7 @@ BOOL CRobloxDoc::SaveModified()
 	RBX::Visit* visit = findService<RBX::Visit>(FUN_00403290().get());
 
 	BOOL result;
-	if (visit == NULL || visit->getUploadUrl() == "NoVisit") {
+	if (visit == nullptr || visit->getUploadUrl() == "NoVisit") {
 		SetForegroundWindow(AfxGetMainWnd()->m_hWnd);
 		result = CDocument::SaveModified();
 	}
@@ -740,7 +738,7 @@ BOOL CRobloxDoc::SaveModified()
 
 		FlashWindow(AfxGetMainWnd()->m_hWnd, FALSE);
 
-		CUploadPlaceDialog dialog(m_unk0x78, NULL);
+		CUploadPlaceDialog dialog(m_unk0x78, nullptr);
 		result = dialog.DoModal() == IDOK;
 		if (!result && wasRunning) {
 			createService<RBX::RunService>(m_unk0x78->FUN_0046edc0().get())->run();
@@ -781,43 +779,43 @@ void CRobloxDoc::FUN_0045a9e0()
 
 // clang-format off
 BEGIN_MESSAGE_MAP(CRobloxDoc, CDocument)
-	ON_COMMAND(0x80b6, FUN_00454920)
-	ON_UPDATE_COMMAND_UI(0x80b6, FUN_00453eb0)
-	ON_COMMAND(0x80b7, FUN_004549c0)
-	ON_UPDATE_COMMAND_UI(0x80b7, FUN_00458750)
-	ON_NOTIFY(CBN_XTP_EXECUTE, 0x80c3, FUN_004588a0)
-	ON_UPDATE_COMMAND_UI(0x80c3, FUN_00453eb0)
-	ON_UPDATE_COMMAND_UI(0xbb, FUN_00455ff0)
-	ON_UPDATE_COMMAND_UI(0xbe, FUN_004590a0)
-	ON_COMMAND(0x80f1, FUN_00459c80)
-	ON_UPDATE_COMMAND_UI(0x80f1, FUN_00453eb0)
-	ON_COMMAND(0x80f8, FUN_00459da0)
-	ON_UPDATE_COMMAND_UI(0x80f8, FUN_00453eb0)
-	ON_COMMAND(0x8100, FUN_00454a60)
-	ON_UPDATE_COMMAND_UI(0x8100, FUN_0045a0b0)
-	ON_COMMAND(0x8104, FUN_00454e50)
-	ON_UPDATE_COMMAND_UI(0x8104, FUN_00453eb0)
-	ON_UPDATE_COMMAND_UI(0x8105, FUN_00453eb0)
-	ON_COMMAND(0x8105, FUN_00454f50)
-	ON_COMMAND(0x8106, FUN_004550b0)
-	ON_UPDATE_COMMAND_UI(0x8106, FUN_00453eb0)
-	ON_COMMAND(0x8021, FUN_004561a0)
-	ON_COMMAND(0x8025, FUN_00454430)
-	ON_UPDATE_COMMAND_UI(0x8025, FUN_00458750)
-	ON_COMMAND(ID_EDIT_UNDO, FUN_00455900)
-	ON_UPDATE_COMMAND_UI(ID_EDIT_UNDO, FUN_00455a30)
-	ON_COMMAND(ID_EDIT_REDO, FUN_00455bb0)
-	ON_UPDATE_COMMAND_UI(ID_EDIT_REDO, FUN_00455ce0)
-	ON_COMMAND(0x80c7, FUN_0045a600)
-	ON_UPDATE_COMMAND_UI(0x80c7, FUN_00458c80)
-	ON_COMMAND(0x80c8, FUN_0045a730)
-	ON_UPDATE_COMMAND_UI(0x80c8, FUN_00458dc0)
-	ON_COMMAND(0x80c6, FUN_0045a9e0)
-	ON_UPDATE_COMMAND_UI(0x80c6, FUN_00458f60)
-	ON_UPDATE_COMMAND_UI(0x80da, FUN_004592c0)
-	ON_COMMAND(0x80da, FUN_00459400)
-	ON_UPDATE_COMMAND_UI(0x80f6, FUN_00459600)
-	ON_UPDATE_COMMAND_UI(0x80db, FUN_00459790)
+	ON_COMMAND(0x80b6, &CRobloxDoc::FUN_00454920)
+	ON_UPDATE_COMMAND_UI(0x80b6, &CRobloxDoc::FUN_00453eb0)
+	ON_COMMAND(0x80b7, &CRobloxDoc::FUN_004549c0)
+	ON_UPDATE_COMMAND_UI(0x80b7, &CRobloxDoc::FUN_00458750)
+	ON_NOTIFY(CBN_XTP_EXECUTE, 0x80c3, &CRobloxDoc::FUN_004588a0)
+	ON_UPDATE_COMMAND_UI(0x80c3, &CRobloxDoc::FUN_00453eb0)
+	ON_UPDATE_COMMAND_UI(0xbb, &CRobloxDoc::FUN_00455ff0)
+	ON_UPDATE_COMMAND_UI(0xbe, &CRobloxDoc::FUN_004590a0)
+	ON_COMMAND(0x80f1, &CRobloxDoc::FUN_00459c80)
+	ON_UPDATE_COMMAND_UI(0x80f1, &CRobloxDoc::FUN_00453eb0)
+	ON_COMMAND(0x80f8, &CRobloxDoc::FUN_00459da0)
+	ON_UPDATE_COMMAND_UI(0x80f8, &CRobloxDoc::FUN_00453eb0)
+	ON_COMMAND(0x8100, &CRobloxDoc::FUN_00454a60)
+	ON_UPDATE_COMMAND_UI(0x8100, &CRobloxDoc::FUN_0045a0b0)
+	ON_COMMAND(0x8104, &CRobloxDoc::FUN_00454e50)
+	ON_UPDATE_COMMAND_UI(0x8104, &CRobloxDoc::FUN_00453eb0)
+	ON_UPDATE_COMMAND_UI(0x8105, &CRobloxDoc::FUN_00453eb0)
+	ON_COMMAND(0x8105, &CRobloxDoc::FUN_00454f50)
+	ON_COMMAND(0x8106, &CRobloxDoc::FUN_004550b0)
+	ON_UPDATE_COMMAND_UI(0x8106, &CRobloxDoc::FUN_00453eb0)
+	ON_COMMAND(0x8021, &CRobloxDoc::FUN_004561a0)
+	ON_COMMAND(0x8025, &CRobloxDoc::FUN_00454430)
+	ON_UPDATE_COMMAND_UI(0x8025, &CRobloxDoc::FUN_00458750)
+	ON_COMMAND(ID_EDIT_UNDO, &CRobloxDoc::FUN_00455900)
+	ON_UPDATE_COMMAND_UI(ID_EDIT_UNDO, &CRobloxDoc::FUN_00455a30)
+	ON_COMMAND(ID_EDIT_REDO, &CRobloxDoc::FUN_00455bb0)
+	ON_UPDATE_COMMAND_UI(ID_EDIT_REDO, &CRobloxDoc::FUN_00455ce0)
+	ON_COMMAND(0x80c7, &CRobloxDoc::FUN_0045a600)
+	ON_UPDATE_COMMAND_UI(0x80c7, &CRobloxDoc::FUN_00458c80)
+	ON_COMMAND(0x80c8, &CRobloxDoc::FUN_0045a730)
+	ON_UPDATE_COMMAND_UI(0x80c8, &CRobloxDoc::FUN_00458dc0)
+	ON_COMMAND(0x80c6, &CRobloxDoc::FUN_0045a9e0)
+	ON_UPDATE_COMMAND_UI(0x80c6, &CRobloxDoc::FUN_00458f60)
+	ON_UPDATE_COMMAND_UI(0x80da, &CRobloxDoc::FUN_004592c0)
+	ON_COMMAND(0x80da, &CRobloxDoc::FUN_00459400)
+	ON_UPDATE_COMMAND_UI(0x80f6, &CRobloxDoc::FUN_00459600)
+	ON_UPDATE_COMMAND_UI(0x80db, &CRobloxDoc::FUN_00459790)
 END_MESSAGE_MAP()
 // clang-format on
 

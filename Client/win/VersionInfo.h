@@ -50,7 +50,7 @@ protected:
 
 	WORD m_wLangID;
 	WORD m_wCharset;
-	void* m_pVerData;
+	BYTE* m_pVerData;
 	TRANSLATION* m_pTranslations;
 	int m_nTranslations;
 	VS_FIXEDFILEINFO* m_pffi;

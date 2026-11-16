@@ -5,7 +5,7 @@
 namespace RBX {
 
 Edge::Edge(Primitive* prim0, Primitive* prim1)
-	: prim0(prim0), prim1(prim1), edgeState(Sim::UNDEFINED), next0(NULL), next1(NULL), inEdgeList(false)
+	: prim0(prim0), prim1(prim1), edgeState(Sim::UNDEFINED), next0(nullptr), next1(nullptr), inEdgeList(false)
 {
 }
 

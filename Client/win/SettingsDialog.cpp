@@ -7,7 +7,7 @@
 template <class T>
 static T* createService(RBX::GlobalSettings* settings)
 {
-	return settings ? settings->create<T>() : NULL;
+	return settings ? settings->create<T>() : nullptr;
 }
 
 IMPLEMENT_DYNCREATE(CSettingsDialog, CDialog)
@@ -20,9 +20,7 @@ void CSettingsDialog::FUN_0046b120()
 	EndDialog(IDCANCEL);
 }
 
-CSettingsDialog::~CSettingsDialog()
-{
-}
+CSettingsDialog::~CSettingsDialog() = default;
 
 void CSettingsExplorer::onEvent(const RBX::Instance* source, RBX::DescendentAdded event) noexcept
 {
@@ -42,7 +40,7 @@ void CSettingsExplorer::onEvent(const RBX::Instance* source, RBX::DescendentRemo
 	}
 }
 
-CSettingsDialog::CSettingsDialog(CWnd* pParent) : CDialog(IDD, pParent), m_unk0x18c(NULL)
+CSettingsDialog::CSettingsDialog(CWnd* pParent) : CDialog(IDD, pParent), m_unk0x18c(nullptr)
 {
 }
 
@@ -77,7 +75,7 @@ BOOL CSettingsDialog::OnInitDialog()
 		return FALSE;
 	}
 
-	if (!m_unk0x74.CreateView(0, 0, RUNTIME_CLASS(CSettingsExplorer), CSize(200, 200), NULL)) {
+	if (!m_unk0x74.CreateView(0, 0, RUNTIME_CLASS(CSettingsExplorer), CSize(200, 200), nullptr)) {
 		return FALSE;
 	}
 
@@ -97,6 +95,6 @@ BOOL CSettingsDialog::OnInitDialog()
 
 // clang-format off
 BEGIN_MESSAGE_MAP(CSettingsDialog, CDialog)
-	ON_BN_CLICKED(1002, FUN_0046b120)
+	ON_BN_CLICKED(1002, &CSettingsDialog::FUN_0046b120)
 END_MESSAGE_MAP()
 // clang-format on

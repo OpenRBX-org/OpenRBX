@@ -193,7 +193,7 @@ public:
 		}
 		else
 		{
-			delete p;
+			delete[] static_cast<char*>(p);
 		}
 	};
 

@@ -20,7 +20,7 @@ private:
 
 public:
 	Visit();
-	virtual ~Visit();
+	~Visit() override;
 
 	void setPing(std::string url, int interval);
 	static worker_thread::work_result ping(std::string url, int interval);
@@ -29,7 +29,7 @@ public:
 
 	std::string getUploadUrl() { return uploadUrl; }
 
-	virtual XmlElement* write() { return NULL; }
+	XmlElement* write() override { return nullptr; }
 };
 
 } // namespace RBX

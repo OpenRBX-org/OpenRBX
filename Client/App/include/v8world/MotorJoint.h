@@ -11,21 +11,21 @@ class MotorJoint : public Joint
 public:
 	MotorJoint();
 
-	virtual ~MotorJoint();
+	~MotorJoint() override;
 
 	static bool isMotorJoint(Edge* e) { return isJoint(e) && static_cast<Joint*>(e)->getJointType() == MOTOR_JOINT; }
 	unsigned int hashCode() const;
 
 private:
-	virtual JointType getJointType() const;
+	JointType getJointType() const override;
 
-	virtual bool isAligned();
+	bool isAligned() override;
 
 	int getParentId() const;
 	void setJointAngle(float);
 
 public:
-	virtual void stepUi(int frameCount);
+	void stepUi(int frameCount) override;
 
 	RevoluteLink* resetLink();
 

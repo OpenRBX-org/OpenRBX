@@ -10,7 +10,7 @@ class ChatEnter : public RBX::GuiItem
 public:
 	ChatEnter();
 
-	virtual RBX::GuiResponse process(const RBX::GuiEvent& event);
+	RBX::GuiResponse process(const RBX::GuiEvent& event) override;
 
 private:
 	friend class CChatPrompt;

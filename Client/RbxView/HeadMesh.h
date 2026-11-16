@@ -8,8 +8,7 @@
 #include <G3D/Vector2.h>
 #include <G3D/Vector3.h>
 
-namespace RBX {
-namespace View {
+namespace RBX::View {
 
 class HeadMesh : public Render::Mesh, public MeshFactory<HeadMesh, 1>
 {
@@ -23,7 +22,6 @@ private:
 	HeadMesh(const G3D::Vector3& size, NormalId textureFace, const G3D::Vector2& studsPerTile);
 };
 
-} // namespace View
-} // namespace RBX
+} // namespace RBX::View
 
 #endif // RBXVIEW_HEADMESH_H

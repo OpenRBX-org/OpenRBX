@@ -4,22 +4,20 @@
 
 IMPLEMENT_DYNAMIC(CMultiPlayerPane, CWnd)
 
-CMultiPlayerPane::CMultiPlayerPane() : m_unk0x54(NULL)
+CMultiPlayerPane::CMultiPlayerPane() : m_unk0x54(nullptr)
 {
 }
 
-CMultiPlayerPane::~CMultiPlayerPane()
-{
-}
+CMultiPlayerPane::~CMultiPlayerPane() = default;
 
 BOOL CMultiPlayerPane::FUN_00436ff0(CWnd* parent, RBX::DataModel* dataModel)
 {
-	if (!CWnd::Create(NULL, NULL, WS_CHILD | WS_VISIBLE, CRect(0, 0, 0, 0), parent, 1002)) {
+	if (!CWnd::Create(nullptr, nullptr, WS_CHILD | WS_VISIBLE, CRect(0, 0, 0, 0), parent, 1002)) {
 		return FALSE;
 	}
 
 	m_unk0x54 = static_cast<CChatPrompt*>(RUNTIME_CLASS(CChatPrompt)->CreateObject());
-	if (!m_unk0x54->Create(NULL, NULL, WS_CHILD | WS_VISIBLE, CRect(0, 0, 0, 0), this, 1003)) {
+	if (!m_unk0x54->Create(nullptr, nullptr, WS_CHILD | WS_VISIBLE, CRect(0, 0, 0, 0), this, 1003)) {
 		return FALSE;
 	}
 
@@ -39,7 +37,7 @@ void CMultiPlayerPane::OnSize(UINT nType, int cx, int cy)
 
 void CMultiPlayerPane::OnDestroy()
 {
-	m_unk0x54 = NULL;
+	m_unk0x54 = nullptr;
 	CWnd::OnDestroy();
 }
 

@@ -10,8 +10,7 @@
 #include <GLG3D/Texture.h>
 #include <OgreMaterial.h>
 
-namespace RBX {
-namespace RenderNew {
+namespace RBX::RenderNew {
 
 class Material : public G3D::ReferenceCountedObject
 {
@@ -47,7 +46,7 @@ public:
 		G3D::TextureRef baseTexture(G3D::RenderDevice* rd) const
 		{
 			if (mBaseTexture.isNull()) {
-				return NULL;
+				return nullptr;
 			}
 
 			return mBaseTexture->resolve(rd);
@@ -57,7 +56,7 @@ public:
 		G3D::TextureRef matte(G3D::RenderDevice* rd) const
 		{
 			if (mMatte.isNull()) {
-				return NULL;
+				return nullptr;
 			}
 
 			return mMatte->resolve(rd);
@@ -84,7 +83,7 @@ private:
 
 public:
 	Material();
-	virtual ~Material();
+	~Material() override;
 
 	const Level& appendEmptyLevel();
 	const Level& appendLevel(G3D::Color3 color, float specular, float shiny, float reflect, float transparent);
@@ -97,17 +96,16 @@ public:
 	const Level* detailLevel(float lvl) const
 	{
 		if (levels.size() == 0) {
-			return NULL;
+			return nullptr;
 		}
 
 		const Level* level = &levels[G3D::iClamp((int) (levels.size() * lvl), 0, levels.size() - 1)];
 
-		return level->isEmptyLevel() ? NULL : level;
+		return level->isEmptyLevel() ? nullptr : level;
 	}
 	bool veryTransparent() const;
 };
 
-} // namespace RenderNew
-} // namespace RBX
+} // namespace RBX::RenderNew
 
 #endif // RENDERLIBNEW_MATERIAL_H

@@ -35,30 +35,30 @@ class Server : public DescribedCreatable<Server, Peer, sServer>, public Service
 
 	public:
 		ClientProxy(SystemAddress systemAddress, Server* server);
-		virtual ~ClientProxy();
+		~ClientProxy() override;
 
 		void sendTop();
-		virtual PluginReceiveResult OnReceive(RakPeerInterface* peer, Packet* packet);
+		PluginReceiveResult OnReceive(RakPeerInterface* peer, Packet* packet) override;
 
 	protected:
-		virtual Player* findTargetPlayer() { return remotePlayer.get(); }
+		Player* findTargetPlayer() override { return remotePlayer.get(); }
 
-		virtual void onSentMarker(long id);
+		void onSentMarker(long id) override;
 
 	private:
-		virtual bool remoteDeleteOnDisconnect(const Instance* instance) const
+		bool remoteDeleteOnDisconnect(const Instance* instance) const override
 		{
 			TopReplConts::const_iterator begin = topReplicationContainers.begin();
 			TopReplConts::const_iterator end = topReplicationContainers.end();
 			return std::find(begin, end, instance) == end;
 		}
 
-		virtual bool canSendItems() { return true; }
+		bool canSendItems() override { return true; }
 	};
 
 public:
 	Server();
-	virtual ~Server();
+	~Server() override;
 
 	static Reflection::SignalDesc<Server, void(std::string, std::shared_ptr<Instance>)> event_IncommingConnection;
 
@@ -68,16 +68,16 @@ public:
 	void stop(int blockDuration);
 	int getClientCount();
 
-	virtual XmlElement* write() { return NULL; }
+	XmlElement* write() override { return nullptr; }
 
-	virtual PluginReceiveResult OnReceive(RakPeerInterface* peer, Packet* packet);
+	PluginReceiveResult OnReceive(RakPeerInterface* peer, Packet* packet) override;
 
 protected:
-	virtual void onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider);
+	void onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider) override;
 
-	virtual bool askAddChild(const Instance* instance) const
+	bool askAddChild(const Instance* instance) const override
 	{
-		return dynamic_cast<const ClientProxy*>(instance) != NULL;
+		return dynamic_cast<const ClientProxy*>(instance) != nullptr;
 	}
 };
 

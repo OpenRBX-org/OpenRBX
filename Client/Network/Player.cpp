@@ -22,8 +22,7 @@
 #include <algorithm>
 #include <stdexcept>
 
-namespace RBX {
-namespace Network {
+namespace RBX::Network {
 
 char sPlayer[] = "Player";
 
@@ -82,7 +81,7 @@ std::string Player::getCharacterAppearance() const
 static void setAppearanceParentNull(Instance* instance)
 {
 	if (dynamic_cast<CharacterAppearance*>(instance)) {
-		instance->setParent(NULL);
+		instance->setParent(nullptr);
 	}
 }
 
@@ -168,7 +167,7 @@ void Player::rebuildBackpack()
 	}
 
 	while (Backpack* oldBackpack = findFirstChildOfType<Backpack>()) {
-		oldBackpack->setParent(NULL);
+		oldBackpack->setParent(nullptr);
 	}
 
 	std::shared_ptr<Instance> backpack = Creatable<Instance>::create<Backpack>();
@@ -190,7 +189,7 @@ void Player::setCharacter(ModelInstance* value)
 			characterDiedConnection.disconnect();
 			Notifier<Player, CharacterRemoving>::raise(CharacterRemoving(character.get()));
 			if (Players::backendProcessing(this, false)) {
-				character->setParent(NULL);
+				character->setParent(nullptr);
 			}
 			character.reset();
 		}
@@ -251,7 +250,7 @@ void Player::doPeriodicIdleCheck()
 void Player::onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider)
 {
 	if (oldProvider && Players::backendProcessing(oldProvider, true)) {
-		setCharacter(NULL);
+		setCharacter(nullptr);
 	}
 
 	Instance::onServiceProvider(oldProvider, newProvider);
@@ -272,12 +271,12 @@ void Player::removeCharacter()
 		throw std::runtime_error("RemoveCharacter can only be called by the backend server");
 	}
 
-	setCharacter(NULL);
+	setCharacter(nullptr);
 }
 
 Player::~Player()
 {
-	setCharacter(NULL);
+	setCharacter(nullptr);
 }
 
 void Player::setName(const std::string& value)
@@ -303,7 +302,7 @@ void Player::loadCharacterAppearance()
 	removeCharacterAppearance();
 
 	if (character && !characterAppearance.empty()) {
-		std::vector<std::shared_ptr<Instance> > characterApperance;
+		std::vector<std::shared_ptr<Instance>> characterApperance;
 
 		{
 			std::vector<std::string> strings = split(characterAppearance, ";");
@@ -340,7 +339,7 @@ void Player::loadCharacter()
 		throw std::runtime_error("LoadCharacter can only be called by the backend server");
 	}
 
-	std::vector<std::shared_ptr<Instance> > instances;
+	std::vector<std::shared_ptr<Instance>> instances;
 	ContentProvider::singleton().load(ContentId::fromAssets("fonts\\character.rbxm"), instances);
 
 	if (instances.size() != 1) {
@@ -358,7 +357,7 @@ void Player::loadCharacter()
 	}
 
 	{
-		std::vector<std::shared_ptr<Instance> > extraSound;
+		std::vector<std::shared_ptr<Instance>> extraSound;
 		ContentProvider::singleton().load(ContentId::fromAssets("fonts\\humanoidSound.rbxm"), extraSound);
 		std::for_each(extraSound.begin(), extraSound.end(), [model](const std::shared_ptr<Instance>& child) {
 			addChild(model, child);
@@ -366,7 +365,7 @@ void Player::loadCharacter()
 	}
 
 	{
-		std::vector<std::shared_ptr<Instance> > extraHealth;
+		std::vector<std::shared_ptr<Instance>> extraHealth;
 		ContentProvider::singleton().load(ContentId::fromAssets("fonts\\humanoidHealth.rbxm"), extraHealth);
 		std::for_each(extraHealth.begin(), extraHealth.end(), [model](const std::shared_ptr<Instance>& child) {
 			addChild(model, child);
@@ -374,7 +373,7 @@ void Player::loadCharacter()
 	}
 
 	{
-		std::vector<std::shared_ptr<Instance> > extraAnimate;
+		std::vector<std::shared_ptr<Instance>> extraAnimate;
 		ContentProvider::singleton().load(ContentId::fromAssets("fonts\\humanoidAnimate.rbxm"), extraAnimate);
 		std::for_each(extraAnimate.begin(), extraAnimate.end(), [model](const std::shared_ptr<Instance>& child) {
 			addChild(model, child);
@@ -414,13 +413,12 @@ void Player::setCharacterAppearance(const std::string& value)
 	}
 }
 
-} // namespace Network
-} // namespace RBX
+} // namespace RBX::Network
 
 template class RBX::Reflection::Described<
 	RBX::Network::Player,
 	RBX::Network::sPlayer,
-	RBX::FactoryProduct<RBX::Network::Player, RBX::Instance, RBX::Network::sPlayer> >;
+	RBX::FactoryProduct<RBX::Network::Player, RBX::Instance, RBX::Network::sPlayer>>;
 template class RBX::DescribedCreatable<RBX::Network::Player, RBX::Instance, RBX::Network::sPlayer>;
 
 template const RBX::FactoryProduct<RBX::HopperBin, RBX::BackpackItem, RBX::sHopperBin>::Creator

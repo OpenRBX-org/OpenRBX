@@ -26,10 +26,10 @@ public:
 	void update(const std::shared_ptr<RunService>& runService);
 	void sleep();
 
-	virtual ~ClientPhysics();
+	~ClientPhysics() override;
 
 protected:
-	virtual void onEvent(const RunService* source, Heartbeat event);
+	void onEvent(const RunService* source, Heartbeat event) override;
 };
 
 } // namespace Network

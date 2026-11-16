@@ -14,11 +14,10 @@
 #include <string>
 #include <vector>
 
-namespace RBX {
-namespace Reflection {
+namespace RBX::Reflection {
 
 template <>
-const Type& Type::singleton<std::shared_ptr<DescribedBase> >()
+const Type& Type::singleton<std::shared_ptr<DescribedBase>>()
 {
 	static Type type("Object", typeid(std::shared_ptr<DescribedBase>));
 
@@ -26,7 +25,7 @@ const Type& Type::singleton<std::shared_ptr<DescribedBase> >()
 }
 
 template <>
-const Type& Type::singleton<std::shared_ptr<Instance> >()
+const Type& Type::singleton<std::shared_ptr<Instance>>()
 {
 	static Type type("Instance", typeid(std::shared_ptr<Instance>));
 
@@ -34,9 +33,9 @@ const Type& Type::singleton<std::shared_ptr<Instance> >()
 }
 
 template <>
-const Type& Type::singleton<std::shared_ptr<const std::vector<std::shared_ptr<Instance> > > >()
+const Type& Type::singleton<std::shared_ptr<const std::vector<std::shared_ptr<Instance>>>>()
 {
-	static Type type("Objects", typeid(std::shared_ptr<const std::vector<std::shared_ptr<Instance> > >));
+	static Type type("Objects", typeid(std::shared_ptr<const std::vector<std::shared_ptr<Instance>>>));
 
 	return type;
 }
@@ -114,7 +113,7 @@ const Type& Type::singleton<G3D::Color3>()
 }
 
 template <>
-const Type& Type::singleton<std::vector<Value> >()
+const Type& Type::singleton<std::vector<Value>>()
 {
 	static Type type("Table", typeid(std::vector<Value>));
 
@@ -122,11 +121,11 @@ const Type& Type::singleton<std::vector<Value> >()
 }
 
 template <>
-std::shared_ptr<const std::vector<std::shared_ptr<Instance> > >& Value::convert<
-	std::shared_ptr<const std::vector<std::shared_ptr<Instance> > > >()
+std::shared_ptr<const std::vector<std::shared_ptr<Instance>>>& Value::convert<
+	std::shared_ptr<const std::vector<std::shared_ptr<Instance>>>>()
 {
-	if (std::shared_ptr<const std::vector<std::shared_ptr<Instance> > >* objects =
-			std::any_cast<std::shared_ptr<const std::vector<std::shared_ptr<Instance> > > >(&value)) {
+	if (std::shared_ptr<const std::vector<std::shared_ptr<Instance>>>* objects =
+			std::any_cast<std::shared_ptr<const std::vector<std::shared_ptr<Instance>>>>(&value)) {
 		return *objects;
 	}
 
@@ -134,9 +133,9 @@ std::shared_ptr<const std::vector<std::shared_ptr<Instance> > >& Value::convert<
 }
 
 template <>
-std::vector<Value>& Value::convert<std::vector<Value> >()
+std::vector<Value>& Value::convert<std::vector<Value>>()
 {
-	if (std::vector<Value>* values = std::any_cast<std::vector<Value> >(&value)) {
+	if (std::vector<Value>* values = std::any_cast<std::vector<Value>>(&value)) {
 		return *values;
 	}
 
@@ -731,18 +730,18 @@ std::string TypedPropertyDescriptor<ContentId>::getStringValue(const DescribedBa
 }
 
 template <>
-std::shared_ptr<Instance>& Value::convert<std::shared_ptr<Instance> >()
+std::shared_ptr<Instance>& Value::convert<std::shared_ptr<Instance>>()
 {
 	if (isType<void>()) {
 		value = std::shared_ptr<Instance>();
-		_type = &Type::singleton<std::shared_ptr<Instance> >();
+		_type = &Type::singleton<std::shared_ptr<Instance>>();
 	}
 
-	if (isType<std::shared_ptr<DescribedBase> >()) {
-		std::shared_ptr<DescribedBase>* described = std::any_cast<std::shared_ptr<DescribedBase> >(&value);
+	if (isType<std::shared_ptr<DescribedBase>>()) {
+		std::shared_ptr<DescribedBase>* described = std::any_cast<std::shared_ptr<DescribedBase>>(&value);
 		if (described) {
 			Instance* instance = dynamic_cast<Instance*>(described->get());
-			if (instance == NULL) {
+			if (instance == nullptr) {
 				throw std::runtime_error("Unable to cast value to Object");
 			}
 
@@ -752,10 +751,10 @@ std::shared_ptr<Instance>& Value::convert<std::shared_ptr<Instance> >()
 			value = std::shared_ptr<Instance>();
 		}
 
-		_type = &Type::singleton<std::shared_ptr<Instance> >();
+		_type = &Type::singleton<std::shared_ptr<Instance>>();
 	}
 
-	if (std::shared_ptr<Instance>* instance = std::any_cast<std::shared_ptr<Instance> >(&value)) {
+	if (std::shared_ptr<Instance>* instance = std::any_cast<std::shared_ptr<Instance>>(&value)) {
 		return *instance;
 	}
 
@@ -785,5 +784,4 @@ bool TypedPropertyDescriptor<ContentId>::setStringValue(DescribedBase* instance,
 	return false;
 }
 
-} // namespace Reflection
-} // namespace RBX
+} // namespace RBX::Reflection

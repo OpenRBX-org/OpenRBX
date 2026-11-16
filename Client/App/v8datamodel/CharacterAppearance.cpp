@@ -58,7 +58,7 @@ BoundProp<BrickColor, 1> BodyColors::prop_RightLegColor(
 
 bool CharacterAppearance::askSetParent(const Instance* instance) const
 {
-	return dynamic_cast<const ModelInstance*>(instance) != NULL;
+	return dynamic_cast<const ModelInstance*>(instance) != nullptr;
 }
 
 void CharacterAppearance::onAncestorChanged(const AncestorChanged& event)
@@ -94,7 +94,7 @@ void Shirt::apply(Humanoid* humanoid)
 
 void Skin::apply(Humanoid* humanoid)
 {
-	bool hasShirt = getParent()->findFirstChildOfType<Shirt>() != NULL;
+	bool hasShirt = getParent()->findFirstChildOfType<Shirt>() != nullptr;
 
 	if (PartInstance* head = humanoid->getHead()) {
 		head->setColor(skinColor);
@@ -120,10 +120,10 @@ void Skin::apply(Humanoid* humanoid)
 
 void BodyColors::apply(Humanoid* humanoid)
 {
-	bool hasSkin = getParent()->findFirstChildOfType<Skin>() != NULL;
+	bool hasSkin = getParent()->findFirstChildOfType<Skin>() != nullptr;
 
 	if (!hasSkin) {
-		bool hasShirt = getParent()->findFirstChildOfType<Shirt>() != NULL;
+		bool hasShirt = getParent()->findFirstChildOfType<Shirt>() != nullptr;
 
 		if (PartInstance* head = humanoid->getHead()) {
 			head->setColor(headColor);
@@ -177,22 +177,22 @@ template class RBX::FactoryProduct<RBX::BodyColors, RBX::CharacterAppearance, RB
 template class RBX::Reflection::Described<
 	RBX::BodyColors,
 	RBX::sBodyColors,
-	RBX::FactoryProduct<RBX::BodyColors, RBX::CharacterAppearance, RBX::sBodyColors> >;
+	RBX::FactoryProduct<RBX::BodyColors, RBX::CharacterAppearance, RBX::sBodyColors>>;
 template class RBX::DescribedCreatable<RBX::BodyColors, RBX::CharacterAppearance, RBX::sBodyColors>;
 
 template class RBX::FactoryProduct<RBX::ShirtGraphic, RBX::CharacterAppearance, RBX::sShirtGraphic>;
 template class RBX::Reflection::Described<
 	RBX::ShirtGraphic,
 	RBX::sShirtGraphic,
-	RBX::FactoryProduct<RBX::ShirtGraphic, RBX::CharacterAppearance, RBX::sShirtGraphic> >;
+	RBX::FactoryProduct<RBX::ShirtGraphic, RBX::CharacterAppearance, RBX::sShirtGraphic>>;
 template class RBX::DescribedCreatable<RBX::ShirtGraphic, RBX::CharacterAppearance, RBX::sShirtGraphic>;
 
 template class RBX::FactoryProduct<RBX::Skin, RBX::CharacterAppearance, RBX::sSkin>;
 template class RBX::Reflection::
-	Described<RBX::Skin, RBX::sSkin, RBX::FactoryProduct<RBX::Skin, RBX::CharacterAppearance, RBX::sSkin> >;
+	Described<RBX::Skin, RBX::sSkin, RBX::FactoryProduct<RBX::Skin, RBX::CharacterAppearance, RBX::sSkin>>;
 template class RBX::DescribedCreatable<RBX::Skin, RBX::CharacterAppearance, RBX::sSkin>;
 
 template class RBX::FactoryProduct<RBX::Shirt, RBX::ShirtGraphic, RBX::sShirt>;
 template class RBX::Reflection::
-	Described<RBX::Shirt, RBX::sShirt, RBX::FactoryProduct<RBX::Shirt, RBX::ShirtGraphic, RBX::sShirt> >;
+	Described<RBX::Shirt, RBX::sShirt, RBX::FactoryProduct<RBX::Shirt, RBX::ShirtGraphic, RBX::sShirt>>;
 template class RBX::DescribedCreatable<RBX::Shirt, RBX::ShirtGraphic, RBX::sShirt>;

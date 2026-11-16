@@ -15,7 +15,7 @@ class __declspec(novtable) ICameraSubject : public virtual ILocation
 public:
 	ICameraSubject() {}
 
-	virtual ~ICameraSubject() {}
+	virtual ~ICameraSubject() = default;
 
 	virtual void onCameraNear(float distance) {}
 

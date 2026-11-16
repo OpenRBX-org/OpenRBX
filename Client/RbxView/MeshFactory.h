@@ -11,8 +11,7 @@
 #include <G3D/g3dmath.h>
 #include <map>
 
-namespace RBX {
-namespace View {
+namespace RBX::View {
 
 enum RenderSurfaceType
 {
@@ -53,8 +52,8 @@ private:
 		G3D::ReferenceCountedPointer<Render::Mesh> meshes[N];
 	};
 
-	typedef G3D::Table<G3D::Vector3, Variations> Cache2;
-	typedef G3D::Table<RenderSurfaceTypes, Cache2> Cache1;
+	using Cache2 = G3D::Table<G3D::Vector3, Variations>;
+	using Cache1 = G3D::Table<RenderSurfaceTypes, Cache2>;
 
 	static Cache1 cache1;
 
@@ -85,7 +84,7 @@ private:
 		}
 	};
 
-	typedef std::map<DecalKey, G3D::ReferenceCountedPointer<Render::Mesh> > DecalCache;
+	using DecalCache = std::map<DecalKey, G3D::ReferenceCountedPointer<Render::Mesh>>;
 
 	static DecalCache decalCache;
 
@@ -114,7 +113,7 @@ private:
 		}
 	};
 
-	typedef std::map<TextureKey, G3D::ReferenceCountedPointer<Render::Mesh> > TextureCache;
+	using TextureCache = std::map<TextureKey, G3D::ReferenceCountedPointer<Render::Mesh>>;
 
 	static TextureCache textureCache;
 
@@ -206,7 +205,6 @@ inline unsigned int hashCode(const RenderSurfaceTypes& surfaceTypes)
 	return surfaceTypes.hashCode();
 }
 
-} // namespace View
-} // namespace RBX
+} // namespace RBX::View
 
 #endif // RBXVIEW_MESHFACTORY_H

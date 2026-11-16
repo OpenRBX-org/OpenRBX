@@ -18,7 +18,7 @@ template <class T>
 class Sibling
 {
 protected:
-	Sibling() : next(NULL) {}
+	Sibling() : next(nullptr) {}
 
 public:
 	T* nextSibling() const { return next; }
@@ -36,13 +36,13 @@ template <class T>
 class Parent
 {
 public:
-	Parent() : first(NULL), last(NULL) {}
+	Parent() : first(nullptr), last(nullptr) {}
 
 	T* firstChild() const { return first; }
 
 	void pushBackChild(T* child)
 	{
-		if (last == NULL) {
+		if (last == nullptr) {
 			first = child;
 		}
 		else {
@@ -54,7 +54,7 @@ public:
 
 	void pushFrontChild(T* child)
 	{
-		if (first == NULL) {
+		if (first == nullptr) {
 			last = child;
 		}
 		else {
@@ -66,7 +66,7 @@ public:
 
 	void addChild(T* child)
 	{
-		if (last == NULL) {
+		if (last == nullptr) {
 			first = child;
 		}
 		else {

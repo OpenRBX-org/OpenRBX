@@ -2,7 +2,7 @@
 
 #include <OgreMath.h>
 #include <OgreRenderOperation.h>
-#include <math.h>
+#include <cmath>
 #include <vector>
 
 namespace Ogre {
@@ -33,7 +33,7 @@ ManualObject* Unknown0067eb00::FUN_0067ecc0(
 	int stacks
 )
 {
-	if (manual == NULL) {
+	if (manual == nullptr) {
 		manual = sceneManager->createManualObject(name);
 	}
 
@@ -60,13 +60,13 @@ ManualObject* Unknown0067eb00::FUN_0067ecc0(
 		slices = 239;
 	}
 	if (slices < 2 || stacks < 1 || baseRadius < 0.0 || topRadius < 0.0 || height < 0.0) {
-		return NULL;
+		return nullptr;
 	}
 
 	deltaRadius = baseRadius - topRadius;
 	length = sqrt(deltaRadius * deltaRadius + height * height);
 	if (length == 0.0) {
-		return NULL;
+		return nullptr;
 	}
 
 	needCache2 = needCache3 = 0;
@@ -511,7 +511,7 @@ ManualObject* Unknown0067eb00::FUN_00680b30(
 	float sweepAngle
 )
 {
-	if (manual == NULL) {
+	if (manual == nullptr) {
 		manual = sceneManager->createManualObject(name);
 	}
 
@@ -533,7 +533,7 @@ ManualObject* Unknown0067eb00::FUN_00680b30(
 		slices = 239;
 	}
 	if (slices < 2 || loops < 1 || outerRadius <= 0.0 || innerRadius < 0.0 || innerRadius > outerRadius) {
-		return NULL;
+		return nullptr;
 	}
 
 	if (sweepAngle < -360.0) {
@@ -991,7 +991,7 @@ ManualObject* Unknown0067eb00::FUN_00682ad0(
 	SceneManager* sceneManager, const String& name, ManualObject* manual, float radius, int slices, int stacks
 )
 {
-	if (manual == NULL) {
+	if (manual == nullptr) {
 		manual = sceneManager->createManualObject(name);
 	}
 
@@ -1024,7 +1024,7 @@ ManualObject* Unknown0067eb00::FUN_00682ad0(
 		stacks = 239;
 	}
 	if (slices < 2 || stacks < 1 || radius < 0.0) {
-		return NULL;
+		return nullptr;
 	}
 
 	needCache2 = needCache3 = false;

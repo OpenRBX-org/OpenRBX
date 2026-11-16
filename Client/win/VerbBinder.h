@@ -11,7 +11,7 @@ template <class T, class Base>
 class VerbBinder : public Base
 {
 public:
-	virtual BOOL OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo)
+	BOOL OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo) override
 	{
 		if (nCode == CN_COMMAND || nCode == CN_UPDATE_COMMAND_UI) {
 			typename std::map<UINT, const RBX::Name*>::iterator it = m_unk0x58.find(nID);

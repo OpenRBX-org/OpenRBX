@@ -102,7 +102,7 @@ class SoundService : public DescribedCreatable<SoundService, Instance, sSoundSer
 					 public Listener<RunService, Heartbeat>
 {
 private:
-	typedef std::map<SoundType, std::shared_ptr<SoundChannel> > StockSounds;
+	using StockSounds = std::map<SoundType, std::shared_ptr<SoundChannel>>;
 
 	FMOD::System* system;
 	unsigned int fmod_version;
@@ -115,7 +115,7 @@ private:
 	ReverbType ambientReverb;
 	double nextGarbageCollectTime;
 
-	typedef std::map<SoundId, std::shared_ptr<Sound> > LoadedSounds;
+	using LoadedSounds = std::map<SoundId, std::shared_ptr<Sound>>;
 
 	LoadedSounds loadedSounds;
 	LoadedSounds loaded3DSounds;
@@ -127,13 +127,13 @@ public:
 
 	std::shared_ptr<Sound> loadSound(SoundId id, bool is3D);
 
-	bool enabled() const { return system != NULL; }
+	bool enabled() const { return system != nullptr; }
 
 	void disable();
 
 	SoundService();
 
-	virtual ~SoundService();
+	~SoundService() override;
 
 	void playSound(SoundType soundType);
 
@@ -161,8 +161,8 @@ private:
 	static void gcSounds(LoadedSounds& sounds);
 
 protected:
-	virtual void onEvent(const RunService* source, Heartbeat event);
-	virtual void onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider);
+	void onEvent(const RunService* source, Heartbeat event) override;
+	void onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider) override;
 
 private:
 	void loadStockSounds();
@@ -180,7 +180,7 @@ class SoundChannel : public DescribedCreatable<SoundChannel, Instance, sSoundCha
 public:
 	SoundChannel();
 
-	virtual ~SoundChannel();
+	~SoundChannel() override;
 
 	void setSoundId(SoundId value);
 	SoundId getSoundId() const;
@@ -204,13 +204,13 @@ public:
 	static Reflection::BoundProp<bool, 1> sound_desc_playOnRemove;
 
 protected:
-	virtual bool askSetParent(const Instance* parent) const;
+	bool askSetParent(const Instance* parent) const override;
 
-	virtual void onAncestorChanged(const AncestorChanged& event);
+	void onAncestorChanged(const AncestorChanged& event) override;
 
-	virtual void onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider);
+	void onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider) override;
 
-	virtual void onEvent(const RunService* source, Heartbeat event);
+	void onEvent(const RunService* source, Heartbeat event) override;
 
 private:
 	void updateListenState();

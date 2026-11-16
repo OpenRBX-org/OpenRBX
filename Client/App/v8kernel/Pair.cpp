@@ -8,7 +8,7 @@
 
 namespace RBX {
 
-GeoPair::GeoPair() : body0(NULL), body1(NULL), offset0(NULL), offset1(NULL)
+GeoPair::GeoPair() : body0(nullptr), body1(nullptr), offset0(nullptr), offset1(nullptr)
 {
 }
 

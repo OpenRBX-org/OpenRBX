@@ -19,10 +19,10 @@ private:
 protected:
 	bool keyIsDown;
 
-	virtual void onDown(const UIEvent& event);
-	virtual void onUp(const UIEvent& event);
-	virtual bool isEnabled() { return isVisible(); }
-	virtual GuiResponse process(const GuiEvent& p_unk0x04);
+	void onDown(const UIEvent& event) override;
+	void onUp(const UIEvent& event) override;
+	bool isEnabled() override { return isVisible(); }
+	GuiResponse process(const GuiEvent& p_unk0x04) override;
 
 public:
 	KeyButton(const std::string& p_unk0x04, SDLKey p_unk0x08);
@@ -36,9 +36,9 @@ private:
 public:
 	ImageKeyButton(Adorn* p_unk0x04, const std::string& p_unk0x08, SDLKey p_unk0x0c);
 
-	virtual void render2d(Adorn* adorn);
+	void render2d(Adorn* adorn) override;
 
-	virtual G3D::Vector2 getSize() const { return imageDraw.getImageSize(); }
+	G3D::Vector2 getSize() const override { return imageDraw.getImageSize(); }
 };
 
 class ImageWidget : public Widget
@@ -49,9 +49,9 @@ private:
 public:
 	ImageWidget(Adorn* p_unk0x04, const std::string& p_unk0x08);
 
-	virtual void render2d(Adorn* adorn);
+	void render2d(Adorn* adorn) override;
 
-	virtual G3D::Vector2 getSize() const { return guiImageDraw.getImageSize(); }
+	G3D::Vector2 getSize() const override { return guiImageDraw.getImageSize(); }
 };
 
 class ImageButton : public VerbWidget
@@ -62,11 +62,11 @@ protected:
 public:
 	ImageButton(Adorn* p_unk0x04, Verb* p_unk0x08, const std::string& p_unk0x0c);
 
-	virtual void render2d(Adorn* adorn);
+	void render2d(Adorn* adorn) override;
 
 	void setSize(const G3D::Vector2& p_unk0x04) { guiImageDraw.setImageSize(p_unk0x04); }
 
-	virtual G3D::Vector2 getSize() const { return guiImageDraw.getImageSize(); }
+	G3D::Vector2 getSize() const override { return guiImageDraw.getImageSize(); }
 };
 
 } // namespace RBX

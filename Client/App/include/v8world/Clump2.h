@@ -34,7 +34,7 @@ public:
 	{
 		return PrimIterator(primitive, searchType);
 	}
-	static PrimIterator end(SearchType searchType) { return PrimIterator(NULL, searchType); }
+	static PrimIterator end(SearchType searchType) { return PrimIterator(nullptr, searchType); }
 
 	Primitive* operator*() const { return primitive; }
 
@@ -54,7 +54,7 @@ class EdgeIterator
 public:
 	static EdgeIterator begin(Primitive* primitive);
 
-	EdgeIterator() : primitive(NULL), edge(NULL) {}
+	EdgeIterator() : primitive(nullptr), edge(nullptr) {}
 
 	EdgeIterator(Primitive* primitive, Edge* edge) : primitive(primitive), edge(edge) {}
 

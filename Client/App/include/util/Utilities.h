@@ -38,7 +38,7 @@ public:
 
 	CopyOnWrite(const T& value) : object(new T(value)) {}
 
-	explicit operator bool() const { return object != NULL; }
+	explicit operator bool() const { return object != nullptr; }
 
 	const T& operator*() const { return *object; }
 

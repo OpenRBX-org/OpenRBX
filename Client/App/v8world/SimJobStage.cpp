@@ -30,7 +30,7 @@ void SimJobStage::notifyMovingPrimitives()
 
 void SimJobStage::destroyMechanism(Mechanism* m)
 {
-	Mechanism* next = mechanisms.size() > 1 ? nextMechanism(mechanisms, m) : NULL;
+	Mechanism* next = mechanisms.size() > 1 ? nextMechanism(mechanisms, m) : nullptr;
 
 	MechanismTracker::transferTrackers(m, next);
 

@@ -4,8 +4,7 @@
 #include <string>
 #include <vector>
 
-namespace RBX {
-namespace LDraw2Lua {
+namespace RBX::LDraw2Lua {
 
 struct Unknown00473110
 {
@@ -36,7 +35,6 @@ public:
 	std::vector<Unknown00473110> m_unk0x5c;
 };
 
-} // namespace LDraw2Lua
-} // namespace RBX
+} // namespace RBX::LDraw2Lua
 
 #endif // LDRAW2ROBLOXPARTMAP_H

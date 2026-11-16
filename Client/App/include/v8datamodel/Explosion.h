@@ -36,20 +36,20 @@ private:
 	void doBlast(const G3D::Array<Primitive*>& primitives);
 	void signalBlast(const G3D::Array<Primitive*>& primitives);
 
-	virtual void onEvent(const RunService* source, Stepped event);
+	void onEvent(const RunService* source, Stepped event) override;
 
-	virtual bool askSetParent(const Instance* instance) const;
+	bool askSetParent(const Instance* instance) const override;
 
-	virtual void onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider);
+	void onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider) override;
 
-	virtual bool shouldRender3dAdorn() const { return true; }
+	bool shouldRender3dAdorn() const override { return true; }
 
-	virtual void render3dAdorn(Adorn* adorn);
+	void render3dAdorn(Adorn* adorn) override;
 
 public:
 	Explosion();
 
-	virtual ~Explosion() {}
+	~Explosion() override = default;
 
 	static Reflection::BoundProp<G3D::Vector3, 1> propPosition;
 	static Reflection::BoundProp<float, 1> propBlastPressure;

@@ -26,7 +26,7 @@ private:
 
 public:
 	Face() {}
-	Face(const Face& other) : c0(other.c0), c1(other.c1), c2(other.c2), c3(other.c3) {}
+	Face(const Face& other) = default;
 
 private:
 	Vector3 getAxis(int i) const { return i == 0 ? (c1 - c0).direction() : (c3 - c0).direction(); }

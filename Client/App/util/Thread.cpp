@@ -91,7 +91,7 @@ worker_thread::worker_thread(const std::function<work_result()>& work_function, 
 worker_thread::~worker_thread()
 {
 	{
-		std::lock_guard<std::mutex> lock(_data->sync);
+		std::scoped_lock lock(_data->sync);
 		_data->endRequest = true;
 		_data->wakeCondition.notify_all();
 	}
@@ -104,7 +104,7 @@ worker_thread::~worker_thread()
 void worker_thread::join()
 {
 	{
-		std::lock_guard<std::mutex> lock(_data->sync);
+		std::scoped_lock lock(_data->sync);
 		_data->endRequest = true;
 		_data->wakeCondition.notify_all();
 	}
@@ -114,7 +114,7 @@ void worker_thread::join()
 
 void worker_thread::wake()
 {
-	std::lock_guard<std::mutex> lock(_data->sync);
+	std::scoped_lock lock(_data->sync);
 	_data->wakeCondition.notify_all();
 }
 
@@ -122,7 +122,7 @@ void worker_thread::threadProc(const std::shared_ptr<data>& data, const std::fun
 {
 	while (true) {
 		{
-			std::lock_guard<std::mutex> lock(data->sync);
+			std::scoped_lock lock(data->sync);
 
 			if (data->endRequest) {
 				return;
@@ -130,7 +130,7 @@ void worker_thread::threadProc(const std::shared_ptr<data>& data, const std::fun
 		}
 
 		if (work_function() != more) {
-			std::unique_lock<std::mutex> lock(data->sync);
+			std::unique_lock lock(data->sync);
 
 			if (!data->endRequest) {
 				data->wakeCondition.wait(lock);

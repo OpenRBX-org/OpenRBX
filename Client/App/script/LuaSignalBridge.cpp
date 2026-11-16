@@ -11,9 +11,9 @@
 
 #include <G3D/format.h>
 #include <any>
+#include <cstring>
 #include <lua.h>
 #include <stdexcept>
-#include <string.h>
 #include <string>
 #include <typeinfo>
 #include <vector>
@@ -43,8 +43,7 @@ private:
 	int executionDepth;
 };
 
-namespace RBX {
-namespace Lua {
+namespace RBX::Lua {
 
 template <>
 const char* Bridge<Signals::Connection, 1>::className = "RBXScriptConnection";
@@ -67,7 +66,7 @@ void Bridge<std::shared_ptr<RBX::Reflection::SignalInstance>, 0>::on_newindex(
 	std::shared_ptr<RBX::Reflection::SignalInstance>& value, const char* name, lua_State* L
 )
 {
-	if (value.get() == NULL) {
+	if (value.get() == nullptr) {
 		throw std::runtime_error(G3D::format("The %s event has been deleted", name));
 	}
 
@@ -96,8 +95,7 @@ int Bridge<Signals::Connection, 1>::on_index(const Signals::Connection& value, c
 	throw std::runtime_error(G3D::format("%s is not a valid member", name));
 }
 
-} // namespace Lua
-} // namespace RBX
+} // namespace RBX::Lua
 
 static unsigned int pushArgs(lua_State* L, const std::vector<std::any>& arguments)
 {
@@ -124,7 +122,7 @@ static unsigned int pushArgs(lua_State* L, const std::vector<std::any>& argument
 		}
 		else if (type == typeid(std::shared_ptr<RBX::Instance>)) {
 			RBX::Lua::SharedPtrBridge<RBX::Reflection::DescribedBase>::push(
-				L, std::any_cast<std::shared_ptr<RBX::Instance> >(*iter)
+				L, std::any_cast<std::shared_ptr<RBX::Instance>>(*iter)
 			);
 		}
 		else if (type == typeid(const RBX::Reflection::PropertyDescriptor*)) {
@@ -147,7 +145,7 @@ void WaitScriptSlot::operator()(const std::vector<std::any>& arguments)
 
 	lua_State* thread = waitThread.thread();
 
-	if (thread != NULL) {
+	if (thread != nullptr) {
 		int top = lua_gettop(thread);
 
 		RBX::ScriptContext::getContext(thread).resume(thread, pushArgs(thread, arguments));
@@ -168,21 +166,21 @@ void FunctionScriptSlot::operator()(const std::vector<std::any>& arguments)
 
 	lua_State* thread = function.thread();
 
-	if (thread == NULL) {
+	if (thread == nullptr) {
 		cnction->disconnect();
 		return;
 	}
 
-	lua_State* slotThread = reentrant ? NULL : cachedSlotThread.thread();
+	lua_State* slotThread = reentrant ? nullptr : cachedSlotThread.thread();
 	bool createdThread;
 
-	if (slotThread != NULL) {
+	if (slotThread != nullptr) {
 		createdThread = false;
 	}
 	else {
 		slotThread = lua_newthread(thread);
 
-		if (slotThread == NULL) {
+		if (slotThread == nullptr) {
 			throw std::runtime_error("lua_newthread failed");
 		}
 
@@ -212,12 +210,12 @@ void FunctionScriptSlot::operator()(const std::vector<std::any>& arguments)
 		break;
 	}
 
-	if (function.thread() == NULL) {
+	if (function.thread() == nullptr) {
 		cnction->disconnect();
 	}
 
 	if (createdThread) {
-		if (!reentrant && result == RBX::ScriptContext::Success && function.thread() != NULL) {
+		if (!reentrant && result == RBX::ScriptContext::Success && function.thread() != nullptr) {
 			cachedSlotThread = RBX::Lua::ThreadRef(slotThread);
 		}
 
@@ -236,8 +234,7 @@ WaitScriptSlot::WaitScriptSlot(lua_State* L) : waitThread(L)
 {
 }
 
-namespace RBX {
-namespace Lua {
+namespace RBX::Lua {
 
 int SignalBridge::wait(lua_State* L)
 {
@@ -272,7 +269,7 @@ int Bridge<std::shared_ptr<RBX::Reflection::SignalInstance>, 0>::on_index(
 	const std::shared_ptr<RBX::Reflection::SignalInstance>& value, const char* name, lua_State* L
 )
 {
-	if (value.get() == NULL) {
+	if (value.get() == nullptr) {
 		throw std::runtime_error(G3D::format("The %s event has been deleted", name));
 	}
 
@@ -295,5 +292,4 @@ int Bridge<std::shared_ptr<RBX::Reflection::SignalInstance>, 0>::on_index(
 	throw std::runtime_error(G3D::format("%s is not a valid member", name));
 }
 
-} // namespace Lua
-} // namespace RBX
+} // namespace RBX::Lua

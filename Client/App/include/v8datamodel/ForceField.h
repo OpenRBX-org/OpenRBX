@@ -15,16 +15,16 @@ class ForceField : public DescribedCreatable<ForceField, Instance, sForceField>,
 private:
 	int cycle;
 
-	virtual bool askSetParent(const Instance* instance) const;
+	bool askSetParent(const Instance* instance) const override;
 
-	virtual bool shouldRender3dAdorn() const { return true; }
+	bool shouldRender3dAdorn() const override { return true; }
 
-	virtual void render3dAdorn(Adorn* adorn);
+	void render3dAdorn(Adorn* adorn) override;
 
 public:
 	ForceField();
 
-	virtual ~ForceField() {}
+	~ForceField() override = default;
 
 	static bool partInForceField(PartInstance* part);
 	static int cycles();

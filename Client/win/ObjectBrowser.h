@@ -9,11 +9,11 @@ protected:
 	CObjectBrowser();
 
 public:
-	virtual ~CObjectBrowser();
+	~CObjectBrowser() override;
 
-	virtual void OnDraw(CDC* pDC);
-	virtual void OnInitialUpdate();
-	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
+	void OnDraw(CDC* pDC) override;
+	void OnInitialUpdate() override;
+	BOOL PreCreateWindow(CREATESTRUCT& cs) override;
 
 protected:
 	afx_msg void OnSize(UINT nType, int cx, int cy);

@@ -3,8 +3,7 @@
 #include "reflection/property.h"
 #include "v8xml/XmlElement.h"
 
-namespace RBX {
-namespace Reflection {
+namespace RBX::Reflection {
 
 extern template class MemberDescriptorContainer<PropertyDescriptor>;
 
@@ -25,11 +24,11 @@ XmlElement* PropertyDescriptor::write(const DescribedBase* instance, bool ignore
 {
 	if (!ignoreWriteProtection) {
 		if (isReadOnly()) {
-			return NULL;
+			return nullptr;
 		}
 
 		if (!canStreamWrite()) {
-			return NULL;
+			return nullptr;
 		}
 	}
 
@@ -78,5 +77,4 @@ PropertyDescriptor::PropertyDescriptor(
 	classDescriptor.MemberDescriptorContainer<PropertyDescriptor>::declare(this);
 }
 
-} // namespace Reflection
-} // namespace RBX
+} // namespace RBX::Reflection

@@ -22,7 +22,7 @@ public:
 	void SetSize(int rows, int columns);
 	void AddField(std::string field, int index);
 
-	std::vector<std::vector<std::string> > data;
+	std::vector<std::vector<std::string>> data;
 	std::vector<std::string> fields;
 };
 
@@ -42,17 +42,17 @@ protected:
 	Network::Players* players;
 
 	void BuildBoardData(BoardData& boardData);
-	virtual void onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider);
-	virtual void onEvent(const Instance* source, ChildRemoved event);
-	virtual void onEvent(const Instance* source, ChildAdded event);
-	virtual void render2d(Adorn* adorn);
+	void onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider) override;
+	void onEvent(const Instance* source, ChildRemoved event) override;
+	void onEvent(const Instance* source, ChildAdded event) override;
+	void render2d(Adorn* adorn) override;
 	void renderTeamDeathmatchLeaderboard(Adorn* adorn, BoardType boardType);
 	void renderFFALeaderboard(Adorn* adorn);
 	BoardType DetermineBoardType();
 
 public:
 	ScoreHud(const ServiceProvider* serviceProvider);
-	virtual ~ScoreHud();
+	~ScoreHud() override;
 };
 
 } // namespace RBX

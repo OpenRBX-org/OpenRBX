@@ -70,18 +70,18 @@ private:
 public:
 	TreeStage(IStage* upstream, World* world);
 
-	virtual ~TreeStage();
+	~TreeStage() override;
 
-	virtual StageType getStageType() { return TREE_STAGE; }
+	StageType getStageType() override { return TREE_STAGE; }
 
-	virtual void onEdgeAdded(Edge* edge);
-	virtual void onEdgeRemoving(Edge* edge);
-	virtual int getMetric(MetricType metricType);
+	void onEdgeAdded(Edge* edge) override;
+	void onEdgeRemoving(Edge* edge) override;
+	int getMetric(MetricType metricType) override;
 
 	void onPrimitiveAdded(Primitive*);
 	void onPrimitiveRemoving(Primitive*);
 
-	virtual void stepWorld(int worldStepId, int uiStepId, bool throttling);
+	void stepWorld(int worldStepId, int uiStepId, bool throttling) override;
 
 	void stepUi(int);
 	void process();
@@ -92,7 +92,7 @@ class ClumpStage : public IWorldStage
 public:
 	ClumpStage(IStage* upstream, World* world);
 
-	virtual ~ClumpStage() {}
+	~ClumpStage() override = default;
 
 	void onPrimitiveCanSleepChanged(Primitive* p);
 
@@ -102,9 +102,9 @@ public:
 	void onPrimitiveCanCollideChanged(Primitive* p);
 	void onMotorAngleChanged(MotorJoint* motorJoint);
 
-	virtual StageType getStageType();
+	StageType getStageType() override;
 
-	virtual void stepWorld(int worldStepId, int uiStepId, bool throttling)
+	void stepWorld(int worldStepId, int uiStepId, bool throttling) override
 	{
 		getDownstream()->stepWorld(worldStepId, uiStepId, throttling);
 	}

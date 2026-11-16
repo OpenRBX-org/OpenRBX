@@ -30,7 +30,7 @@ void HealthHud::render2d(Adorn* adorn)
 	}
 
 	Humanoid* humanoid = Humanoid::getLocalHumanoidFromContext(this);
-	if (humanoid == NULL) {
+	if (humanoid == nullptr) {
 		return;
 	}
 

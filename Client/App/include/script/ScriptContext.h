@@ -37,7 +37,7 @@ class ScriptContext : public DescribedCreatable<ScriptContext, Instance, sScript
 {
 public:
 	ScriptContext();
-	virtual ~ScriptContext();
+	~ScriptContext() override;
 
 	enum Result
 	{
@@ -46,7 +46,7 @@ public:
 		Error
 	};
 
-	std::unique_ptr<std::vector<Reflection::Value> > call(
+	std::unique_ptr<std::vector<Reflection::Value>> call(
 		const Lua::FunctionRef&, const std::vector<Reflection::Value>&
 	);
 	void call(const Lua::FunctionRef&);
@@ -54,7 +54,7 @@ public:
 		const Lua::FunctionRef&, std::function<unsigned int(lua_State*)>, std::function<void(lua_State*, unsigned int)>
 	);
 
-	std::unique_ptr<std::vector<Reflection::Value> > executeInNewThread(
+	std::unique_ptr<std::vector<Reflection::Value>> executeInNewThread(
 		Security::Identities identity,
 		const char* script,
 		const char* name,
@@ -81,10 +81,10 @@ public:
 
 	static ScriptContext& getContext(lua_State* L);
 
-	virtual XmlElement* write() { return NULL; }
+	XmlElement* write() override { return nullptr; }
 
 	unsigned int getThreadCount() const;
-	bool hasState() const { return globalState != NULL; }
+	bool hasState() const { return globalState != nullptr; }
 
 	lua_State* state();
 
@@ -93,9 +93,9 @@ public:
 	void removeScript(Script* script);
 
 protected:
-	virtual void onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider);
-	virtual void onEvent(const RunService* source, RunTransition event);
-	virtual void onEvent(const RunService* source, Heartbeat event);
+	void onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider) override;
+	void onEvent(const RunService* source, RunTransition event) override;
+	void onEvent(const RunService* source, Heartbeat event) override;
 
 private:
 	static void sandboxThread(lua_State* thread);
@@ -141,7 +141,7 @@ private:
 	Lua::ThreadRef commandLineSandbox;
 	std::set<Script*> scripts;
 	std::chrono::steady_clock::time_point nextPendingScripts;
-	std::vector<std::shared_ptr<Script> > pendingScripts;
+	std::vector<std::shared_ptr<Script>> pendingScripts;
 	std::shared_ptr<RunService> runService;
 	std::unique_ptr<Lua::YieldingThreads> yieldEvent;
 	bool scriptsDisabled;

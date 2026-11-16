@@ -27,7 +27,7 @@ void CSelectionCaption::FUN_0046a290()
 		std::string name;
 		if (m_unk0x1b8) {
 			RBX::DataModel::Lock lock(m_unk0x1b0);
-			std::vector<std::shared_ptr<RBX::Instance> >::const_iterator it = m_unk0x1b8->begin();
+			std::vector<std::shared_ptr<RBX::Instance>>::const_iterator it = m_unk0x1b8->begin();
 			if (it != m_unk0x1b8->end()) {
 				name = (*it)->getName();
 				const RBX::Name* className = &(*it)->getClassName();
@@ -39,7 +39,7 @@ void CSelectionCaption::FUN_0046a290()
 						}
 					}
 					if (&(*it)->getClassName() != className) {
-						className = NULL;
+						className = nullptr;
 						if (name == "") {
 							break;
 						}
@@ -62,7 +62,7 @@ void CSelectionCaption::FUN_0046a290()
 				}
 			}
 		}
-		UpdateCaption(caption, NULL);
+		UpdateCaption(caption, nullptr);
 	}
 }
 
@@ -87,9 +87,7 @@ void CSelectionCaption::VTable0x08(const RBX::Selection* source, RBX::SelectionC
 	FUN_0046a290();
 }
 
-CSelectionCaption::CSelectionCaption()
-{
-}
+CSelectionCaption::CSelectionCaption() = default;
 
 void CSelectionCaption::VTable0x00(
 	std::shared_ptr<RBX::DataModel> newDataModel, std::shared_ptr<RBX::DataModel> oldDataModel
@@ -107,7 +105,7 @@ void CSelectionCaption::VTable0x00(
 		m_unk0x1b0 = newDataModel;
 
 		RBX::DataModel::Lock lock(m_unk0x1b0);
-		m_unk0x1b8 = RBX::shared_from(m_unk0x1b0 ? m_unk0x1b0->create<RBX::Selection>() : NULL);
+		m_unk0x1b8 = RBX::shared_from(m_unk0x1b0 ? m_unk0x1b0->create<RBX::Selection>() : nullptr);
 		RBX::startListening<RBX::Selection, RBX::SelectionChanged>(m_unk0x1b8, this);
 	}
 

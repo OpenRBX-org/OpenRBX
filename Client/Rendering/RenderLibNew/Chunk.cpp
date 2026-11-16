@@ -5,8 +5,7 @@
 
 #include <G3D/g3dmath.h>
 
-namespace RBX {
-namespace RenderNew {
+namespace RBX::RenderNew {
 
 const float Chunk::DECAL_OFFSET = -0.2f;
 const float Chunk::TEXTURE_OFFSET = -0.1f;
@@ -20,8 +19,8 @@ void Chunk::VTable0x20()
 		m_unk0x0c->FUN_00675a70(m_unk0x10);
 	}
 
-	m_unk0x10 = NULL;
-	m_unk0x0c = NULL;
+	m_unk0x10 = nullptr;
+	m_unk0x0c = nullptr;
 }
 
 void AggregateChunk::makeMesh()
@@ -32,8 +31,8 @@ void AggregateChunk::makeMesh()
 Chunk::Chunk(float polygonOffset) : m_unk0x14(0.0f), polygonOffset(polygonOffset), radius(G3D::inf())
 {
 	RenderStats::chunkCount++;
-	m_unk0x10 = NULL;
-	m_unk0x0c = NULL;
+	m_unk0x10 = nullptr;
+	m_unk0x0c = nullptr;
 }
 
 Chunk::~Chunk()
@@ -57,7 +56,7 @@ AggregateChunk::AggregateChunk(const G3D::ReferenceCountedPointer<Chunk>& firstC
 
 	if (randomColors) {
 		material = new Material();
-		material->appendLevel(NULL, (G3D::Color3::wheelRandom() + G3D::Color3::white()) / 2.0f, 0, 50, 0, 0);
+		material->appendLevel(nullptr, (G3D::Color3::wheelRandom() + G3D::Color3::white()) / 2.0f, 0, 50, 0, 0);
 	}
 }
 
@@ -68,5 +67,4 @@ AggregateChunk::~AggregateChunk()
 	RenderStats::aggregatedChunkCount -= components.size();
 }
 
-} // namespace RenderNew
-} // namespace RBX
+} // namespace RBX::RenderNew

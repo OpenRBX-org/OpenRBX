@@ -50,7 +50,7 @@ public:
 	}
 
 private:
-	virtual void computeChildInParent(CoordinateFrame& answer) const;
+	void computeChildInParent(CoordinateFrame& answer) const override;
 
 	float jointAngle;
 };

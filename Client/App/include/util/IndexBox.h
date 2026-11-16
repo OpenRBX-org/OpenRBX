@@ -13,7 +13,7 @@ class IndexBox
 public:
 	IndexBox(const Vector3& min, const Vector3& max);
 
-	virtual ~IndexBox() {}
+	virtual ~IndexBox() = default;
 
 	Vector3 getFaceNormal(int f) const
 	{

@@ -23,9 +23,12 @@ public:
 	GuiItem();
 
 private:
-	virtual bool askAddChild(const Instance* instance) const { return dynamic_cast<const GuiItem*>(instance) != NULL; }
+	bool askAddChild(const Instance* instance) const override
+	{
+		return dynamic_cast<const GuiItem*>(instance) != nullptr;
+	}
 
-	virtual const Name& getClassName() const { return Name::getNullName(); }
+	const Name& getClassName() const override { return Name::getNullName(); }
 
 public:
 
@@ -48,7 +51,7 @@ public:
 
 	virtual void render2d(Adorn* adorn) {}
 
-	virtual GuiResponse process(const GuiEvent& event);
+	GuiResponse process(const GuiEvent& event) override;
 
 	void addGuiItem(shared_ptr<GuiItem> item) { item->setParent(this); }
 
@@ -87,7 +90,7 @@ private:
 	GuiResponse processNonFocus(const GuiEvent& event);
 	void switchFocus(GuiItem* item);
 
-	virtual void onDescendentRemoving(const shared_ptr<Instance>& instance);
+	void onDescendentRemoving(const shared_ptr<Instance>& instance) override;
 
 	shared_ptr<GuiItem> focus;
 	G3D::Vector2 guiSize;
@@ -105,15 +108,15 @@ public:
 	static G3D::Vector2 toPixelSize(const G3D::Vector2& size);
 	static int normalizedFontSize(int size);
 
-	virtual void render2d(Adorn* adorn);
+	void render2d(Adorn* adorn) override;
 	static GuiResponse processTarget(const GuiEvent&, GuiTarget*);
 	static void render2dItem(Adorn*, GuiItem*);
 
 protected:
-	virtual bool askSetParent(const Instance* instance) const { return true; }
+	bool askSetParent(const Instance* instance) const override { return true; }
 
 private:
-	virtual G3D::Vector2 getSize() const { return canvasSize; }
+	G3D::Vector2 getSize() const override { return canvasSize; }
 
 	static G3D::Vector2 canvasSize;
 	static G3D::Matrix4 oldProjectionMatrix;
@@ -127,15 +130,15 @@ public:
 	TopMenuBar(const std::string& p_unk0x04, Layout::Style p_unk0x08, bool p_unk0x0c = false);
 	TopMenuBar(const std::string& p_unk0x04, Layout::Style p_unk0x08, G3D::Color4 p_unk0x0c);
 
-	virtual GuiResponse process(const GuiEvent& event);
-	virtual void render2d(Adorn* adorn);
-	virtual G3D::Vector2 getSize() const;
-	virtual bool isVisible() const { return visible; }
+	GuiResponse process(const GuiEvent& event) override;
+	void render2d(Adorn* adorn) override;
+	G3D::Vector2 getSize() const override;
+	bool isVisible() const override { return visible; }
 
 	void setVisible(bool value) { visible = value; }
 
 protected:
-	virtual G3D::Vector2 getChildPosition(const GuiItem* child) const;
+	G3D::Vector2 getChildPosition(const GuiItem* child) const override;
 
 	G3D::Color4 backdropColor;
 	Layout::Style layoutStyle;
@@ -156,7 +159,7 @@ public:
 
 	RelativePanel(const Layout& layout) : offset(0, 0) { init(layout); }
 
-	virtual G3D::Vector2 getPosition() const;
+	G3D::Vector2 getPosition() const override;
 
 protected:
 	void init(const Layout& layout);
@@ -174,7 +177,7 @@ public:
 	{
 	}
 
-	virtual G3D::Vector2 getPosition() const;
+	G3D::Vector2 getPosition() const override;
 
 protected:
 	Rect::Location xLocation;
@@ -203,10 +206,10 @@ private:
 	GuiResponse processShown(const GuiEvent& p_unk0x04);
 	GuiResponse processKey(const GuiEvent& p_unk0x04);
 	void render2dChildren(Adorn* p_unk0x04);
-	virtual G3D::Vector2 getChildPosition(const GuiItem* child) const;
-	virtual bool canLoseFocus() { return true; }
-	virtual void onLoseFocus() { menuState = NOTHING; }
-	virtual int getFontSize() const;
+	G3D::Vector2 getChildPosition(const GuiItem* child) const override;
+	bool canLoseFocus() override { return true; }
+	void onLoseFocus() override { menuState = NOTHING; }
+	int getFontSize() const override;
 	void init();
 
 protected:
@@ -223,8 +226,8 @@ public:
 	MenuState getMenuState() const { return menuState; }
 	void setMenuState(MenuState p_unk0x04);
 
-	virtual GuiResponse process(const GuiEvent& p_unk0x04);
-	virtual void render2d(Adorn* adorn);
+	GuiResponse process(const GuiEvent& p_unk0x04) override;
+	void render2d(Adorn* adorn) override;
 };
 
 class MenuSpacer : public GuiItem
@@ -248,14 +251,14 @@ protected:
 	G3D::Color4 borderColor;
 	Adorn::XAlign align;
 
-	virtual int getFontSize() const;
+	int getFontSize() const override;
 	virtual std::string getLabel() const;
 
 public:
 	TextDisplay(const std::string& p_unk0x04, const std::string& p_unk0x08);
 	TextDisplay();
 
-	virtual void render2d(Adorn* adorn);
+	void render2d(Adorn* adorn) override;
 
 	void setLabel(const std::string& value) { label = value; }
 

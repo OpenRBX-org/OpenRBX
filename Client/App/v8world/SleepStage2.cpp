@@ -229,9 +229,7 @@ void SleepStage::onAssemblyAdded(Assembly* assembly)
 	wakePending.insert(assembly);
 }
 
-SleepStage::~SleepStage()
-{
-}
+SleepStage::~SleepStage() = default;
 
 void SleepStage::changeJointState(Joint* j, Sim::EdgeState newState)
 {
@@ -300,7 +298,7 @@ void SleepStage::onAssemblyRemoving(Assembly* assembly)
 
 	delete assembly->getSleepInfo();
 
-	assembly->setSleepInfo(NULL);
+	assembly->setSleepInfo(nullptr);
 	assembly->removeFromStage(this);
 }
 

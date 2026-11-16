@@ -16,11 +16,9 @@
 
 namespace RBX {
 
-ChatLine::~ChatLine()
-{
-}
+ChatLine::~ChatLine() = default;
 
-ChatOutput::ChatOutput() : runService(NULL), players(NULL), time(0)
+ChatOutput::ChatOutput() : runService(nullptr), players(nullptr), time(0)
 {
 }
 
@@ -154,8 +152,8 @@ void ChatOutput::onServiceProvider(const ServiceProvider* oldProvider, const Ser
 
 	GuiItem::onServiceProvider(oldProvider, newProvider);
 
-	runService = newProvider ? newProvider->create<RunService>() : NULL;
-	players = newProvider ? newProvider->create<Network::Players>() : NULL;
+	runService = newProvider ? newProvider->create<RunService>() : nullptr;
+	players = newProvider ? newProvider->create<Network::Players>() : nullptr;
 
 	startListening<RunService, Heartbeat>(runService, this);
 	startListening<Network::Players, Network::ChatMessage>(players, this);

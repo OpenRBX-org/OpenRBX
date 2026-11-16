@@ -131,12 +131,12 @@ public:
 	}
 
 protected:
-	virtual void buildRight(Purpose purpose);
-	virtual void buildTop(Purpose purpose);
-	virtual void buildBack(Purpose purpose);
-	virtual void buildLeft(Purpose purpose);
-	virtual void buildBottom(Purpose purpose);
-	virtual void buildFront(Purpose purpose);
+	void buildRight(Purpose purpose) override;
+	void buildTop(Purpose purpose) override;
+	void buildBack(Purpose purpose) override;
+	void buildLeft(Purpose purpose) override;
+	void buildBottom(Purpose purpose) override;
+	void buildFront(Purpose purpose) override;
 };
 
 inline void TorsoBuilder::buildRight(Purpose purpose)
@@ -164,8 +164,7 @@ inline void TorsoBuilder::buildFront(Purpose purpose)
 	buildFace<RBX::NORM_Z_NEG>(DeformFrontBack(bevel, shoulderInset), 1, 1, purpose);
 }
 
-namespace RBX {
-namespace View {
+namespace RBX::View {
 
 TorsoMesh::TorsoMesh(const G3D::Vector3& size, RenderSurfaceTypes surfaceTypes)
 {
@@ -212,8 +211,7 @@ template TorsoMesh* MeshFactory<TorsoMesh, 1>::createDecal(const G3D::Vector3&, 
 
 template TorsoMesh* MeshFactory<TorsoMesh, 1>::createTexture(const G3D::Vector3&, NormalId, const G3D::Vector2&);
 
-} // namespace View
-} // namespace RBX
+} // namespace RBX::View
 
 inline void TorsoBuilder::buildBottom(Purpose purpose)
 {

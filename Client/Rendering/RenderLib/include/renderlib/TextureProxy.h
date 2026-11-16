@@ -12,12 +12,11 @@ namespace G3D {
 class RenderDevice;
 }
 
-namespace RBX {
-namespace Render {
+namespace RBX::Render {
 
 class TextureProxy;
 
-typedef G3D::ReferenceCountedPointer<TextureProxy> TextureProxyRef;
+using TextureProxyRef = G3D::ReferenceCountedPointer<TextureProxy>;
 
 class TextureProxy : public TextureProxyBase
 {
@@ -30,7 +29,7 @@ protected:
 	TextureProxyRef shadeTexture;
 	G3D::Color3 shadeColor;
 
-	TextureProxy(TextureProxyRef root) : loaded(false), textureManager(NULL), root(root) { filename = ""; }
+	TextureProxy(TextureProxyRef root) : loaded(false), textureManager(nullptr), root(root) { filename = ""; }
 
 public:
 	TextureProxy(G3D::TextureManager& textureManager, const std::string& filename, bool tiled)
@@ -48,10 +47,9 @@ public:
 
 	static void shadePixel(const G3D::Color3uint8& base, G3D::Color3uint8& lighting);
 
-	virtual G3D::Vector2 getSize();
+	G3D::Vector2 getSize() override;
 };
 
-} // namespace Render
-} // namespace RBX
+} // namespace RBX::Render
 
 #endif // RENDERLIB_TEXTUREPROXY_H

@@ -85,13 +85,13 @@ G3D::Vector3 Lighting::getSunPosition()
 
 bool Lighting::askAddChild(const Instance* instance) const
 {
-	return dynamic_cast<const Sky*>(instance) != NULL;
+	return dynamic_cast<const Sky*>(instance) != nullptr;
 }
 
 void Lighting::replaceSky(Sky* newSky)
 {
 	while (Sky* oldSky = findFirstChildOfType<Sky>()) {
-		oldSky->setParent(NULL);
+		oldSky->setParent(nullptr);
 	}
 
 	newSky->setParent(this);
@@ -258,7 +258,7 @@ void Lighting::setTimeStr(const std::string& value)
 
 template class RBX::FactoryProduct<RBX::Lighting, RBX::Instance, RBX::sLighting>;
 template class RBX::Reflection::
-	Described<RBX::Lighting, RBX::sLighting, RBX::FactoryProduct<RBX::Lighting, RBX::Instance, RBX::sLighting> >;
+	Described<RBX::Lighting, RBX::sLighting, RBX::FactoryProduct<RBX::Lighting, RBX::Instance, RBX::sLighting>>;
 template class RBX::DescribedCreatable<RBX::Lighting, RBX::Instance, RBX::sLighting>;
 template const RBX::FactoryProduct<RBX::Sky, RBX::Instance, RBX::sSky>::Creator
 	RBX::FactoryProduct<RBX::Sky, RBX::Instance, RBX::sSky>::creator;

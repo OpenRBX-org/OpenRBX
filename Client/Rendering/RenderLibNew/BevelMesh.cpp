@@ -1,7 +1,6 @@
 #include "BevelMesh.h"
 
-namespace RBX {
-namespace ViewNew {
+namespace RBX::ViewNew {
 
 void BevelMesh::Builder::build(Purpose purpose)
 {
@@ -30,5 +29,4 @@ void BevelMesh::Builder::build(Purpose purpose)
 	}
 }
 
-} // namespace ViewNew
-} // namespace RBX
+} // namespace RBX::ViewNew

@@ -38,7 +38,7 @@ public:
 		int m_unk0x0c;
 	};
 
-	virtual ~TwoDManager();
+	~TwoDManager() override;
 	TwoDManager();
 
 	void FUN_0067c6c0(
@@ -62,8 +62,8 @@ public:
 	void FUN_0067dcc0(int type, float x0, float y0, float x1, float y1, const G3D::Color4& color);
 	void FUN_0067dd70(float x0, float y0, float x1, float y1, const G3D::Color4& color);
 
-	virtual void renderQueueStarted(uint8 queueGroupId, const String& invocation, bool& skipThisInvocation);
-	virtual void renderQueueEnded(uint8 queueGroupId, const String& invocation, bool& repeatThisInvocation);
+	void renderQueueStarted(uint8 queueGroupId, const String& invocation, bool& skipThisInvocation) override;
+	void renderQueueEnded(uint8 queueGroupId, const String& invocation, bool& repeatThisInvocation) override;
 
 private:
 	SceneManager* m_unk0x04;

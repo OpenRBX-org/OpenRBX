@@ -45,21 +45,21 @@ private:
 
 public:
 	View(std::shared_ptr<DataModel> dataModel);
-	virtual ~View();
+	~View() override;
 
-	virtual void render(void* rd);
+	void render(void* rd) override;
 
-	virtual float getShadingQuality() const;
-	virtual float getMeshDetail() const;
-	virtual void updateSettings(float shadingQuality, float meshDetail, bool shadows, float cameraDistance);
-	virtual void suppressSkybox();
-	virtual Instance* getWorkspace();
-	virtual RenderStats& getRenderStats();
+	float getShadingQuality() const override;
+	float getMeshDetail() const override;
+	void updateSettings(float shadingQuality, float meshDetail, bool shadows, float cameraDistance) override;
+	void suppressSkybox() override;
+	Instance* getWorkspace() override;
+	RenderStats& getRenderStats() override;
 
 private:
-	virtual void onWorkspaceDescendentAdded(std::shared_ptr<Instance> descendent);
-	virtual void updateLighting();
-	virtual void invalidateLighting(bool updateSkybox);
+	void onWorkspaceDescendentAdded(std::shared_ptr<Instance> descendent) override;
+	void updateLighting() override;
+	void invalidateLighting(bool updateSkybox) override;
 
 	void FUN_0050c5c0(void* rd);
 	void FUN_0050d3d0(void* rd);

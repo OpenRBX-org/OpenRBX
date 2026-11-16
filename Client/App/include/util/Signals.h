@@ -1,6 +1,7 @@
 #ifndef UTIL_SIGNALS_H
 #define UTIL_SIGNALS_H
 
+#include <compare>
 #include <functional>
 #include <iterator>
 #include <list>
@@ -8,8 +9,7 @@
 #include <memory>
 #include <utility>
 
-namespace RBX {
-namespace Signals {
+namespace RBX::Signals {
 
 enum ConnectPosition
 {
@@ -94,7 +94,7 @@ template <class... Args>
 class Signal<void(Args...)>
 {
 public:
-	typedef std::function<void(Args...)> Function;
+	using Function = std::function<void(Args...)>;
 
 	Signal() : impl(std::make_shared<Impl>()) {}
 	Signal(const Signal&) = delete;
@@ -154,7 +154,7 @@ private:
 
 		Key(Kind kind, int value) : kind(kind), value(value) {}
 
-		bool operator<(const Key& other) const { return kind != other.kind ? kind < other.kind : value < other.value; }
+		auto operator<=>(const Key&) const = default;
 	};
 
 	struct Impl;
@@ -181,10 +181,10 @@ private:
 		}
 	};
 
-	typedef std::list<ConnectedSlot> Slots;
-	typedef std::map<Key, Slots> Groups;
-	typedef typename Groups::iterator GroupIterator;
-	typedef typename Slots::iterator SlotIterator;
+	using Slots = std::list<ConnectedSlot>;
+	using Groups = std::map<Key, Slots>;
+	using GroupIterator = typename Groups::iterator;
+	using SlotIterator = typename Slots::iterator;
 
 	class Body : public Detail::ConnectionBody
 	{
@@ -289,7 +289,6 @@ private:
 	std::shared_ptr<Impl> impl;
 };
 
-} // namespace Signals
-} // namespace RBX
+} // namespace RBX::Signals
 
 #endif // UTIL_SIGNALS_H

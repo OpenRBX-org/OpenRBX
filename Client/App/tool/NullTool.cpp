@@ -16,9 +16,7 @@ char sNullTool[] = "NullTool";
 
 char sNewNullTool[] = "NewNullTool";
 
-NewNullTool::~NewNullTool()
-{
-}
+NewNullTool::~NewNullTool() = default;
 
 void NewNullTool::onMouseIdle(const UIEvent& uiEvent)
 {

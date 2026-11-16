@@ -24,5 +24,5 @@ template class RBX::FactoryProduct<RBX::GameSettings, RBX::GlobalSettings::Item,
 template class RBX::Reflection::Described<
 	RBX::GameSettings,
 	RBX::sGameSettings,
-	RBX::FactoryProduct<RBX::GameSettings, RBX::GlobalSettings::Item, RBX::sGameSettings> >;
+	RBX::FactoryProduct<RBX::GameSettings, RBX::GlobalSettings::Item, RBX::sGameSettings>>;
 template class RBX::DescribedCreatable<RBX::GameSettings, RBX::GlobalSettings::Item, RBX::sGameSettings>;

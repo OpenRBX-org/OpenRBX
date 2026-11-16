@@ -5,8 +5,7 @@
 #include <string>
 #include <windows.h>
 
-namespace RBX {
-namespace Profiling {
+namespace RBX::Profiling {
 
 void init(bool enabled);
 
@@ -130,13 +129,12 @@ inline Mark::~Mark()
 
 		section.log(kernel, user, frameTick);
 
-		if (enclosingSection != NULL && enclosingSection != &section && enclosingSection != section.parent) {
+		if (enclosingSection != nullptr && enclosingSection != &section && enclosingSection != section.parent) {
 			enclosingSection->log(-kernel, -user, false);
 		}
 	}
 }
 
-} // namespace Profiling
-} // namespace RBX
+} // namespace RBX::Profiling
 
 #endif // UTIL_PROFILING_H

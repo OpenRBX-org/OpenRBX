@@ -185,7 +185,7 @@ class CWebService : public IWebService, public ATL::CSoapHandler<CWebService>
 		double expiration;
 	};
 
-	typedef std::map<std::string, Job> Jobs;
+	using Jobs = std::map<std::string, Job>;
 
 	static Jobs jobs;
 	static std::recursive_mutex sync;
@@ -196,10 +196,10 @@ class CWebService : public IWebService, public ATL::CSoapHandler<CWebService>
 
 public:
 	CWebService() {}
-	virtual ~CWebService() {}
+	~CWebService() override = default;
 
 protected:
-	virtual HRESULT GenerateAppError(ATL::IWriteStream* pStream, HRESULT hr);
+	HRESULT GenerateAppError(ATL::IWriteStream* pStream, HRESULT hr) override;
 
 private:
 	Jobs::iterator getJob(wchar_t* jobID);
@@ -210,7 +210,7 @@ private:
 	T* allocate(T*, int count)
 	{
 		if (count == 0) {
-			return NULL;
+			return nullptr;
 		}
 
 		T* items = (T*) GetMemMgr()->Allocate(count * sizeof(T));
@@ -224,39 +224,40 @@ private:
 public:
 	static bool hasOpenEnvironments() { return jobs.size() > 0; }
 
-	HRESULT __stdcall HelloWorld(BSTR* bstrOutput);
-	HRESULT __stdcall GetVersion(BSTR* result);
-	HRESULT __stdcall GetStatus(Status* result);
-	HRESULT __stdcall Update(BSTR url);
-	HRESULT __stdcall OpenJob(BSTR jobID, ScriptExecution script, double timeout, LuaArguments* result);
-	HRESULT __stdcall TouchJob(BSTR jobID, double timeout);
-	HRESULT __stdcall Execute(BSTR jobID, ScriptExecution script, LuaArguments* result);
-	HRESULT __stdcall CloseJob(BSTR jobID);
-	HRESULT __stdcall BatchJob(BSTR jobID, ScriptExecution script, double timeout, LuaArguments* result);
-	HRESULT __stdcall GetTimeout(BSTR jobID, double* timeout);
-	HRESULT __stdcall CloseOrphanedJobs(Strings activeJobs, int* result);
-	HRESULT __stdcall CloseAllJobs();
-	HRESULT __stdcall CloseTimedoutJobs(int* result);
-	HRESULT __stdcall GetAllJobs(Strings* result);
-	HRESULT __stdcall GetStandardOutMessages(int maxCount, StandardOutMessages* result);
+	HRESULT __stdcall HelloWorld(BSTR* bstrOutput) override;
+	HRESULT __stdcall GetVersion(BSTR* result) override;
+	HRESULT __stdcall GetStatus(Status* result) override;
+	HRESULT __stdcall Update(BSTR url) override;
+	HRESULT __stdcall OpenJob(BSTR jobID, ScriptExecution script, double timeout, LuaArguments* result) override;
+	HRESULT __stdcall TouchJob(BSTR jobID, double timeout) override;
+	HRESULT __stdcall Execute(BSTR jobID, ScriptExecution script, LuaArguments* result) override;
+	HRESULT __stdcall CloseJob(BSTR jobID) override;
+	HRESULT __stdcall BatchJob(BSTR jobID, ScriptExecution script, double timeout, LuaArguments* result) override;
+	HRESULT __stdcall GetTimeout(BSTR jobID, double* timeout) override;
+	HRESULT __stdcall CloseOrphanedJobs(Strings activeJobs, int* result) override;
+	HRESULT __stdcall CloseAllJobs() override;
+	HRESULT __stdcall CloseTimedoutJobs(int* result) override;
+	HRESULT __stdcall GetAllJobs(Strings* result) override;
+	HRESULT __stdcall GetStandardOutMessages(int maxCount, StandardOutMessages* result) override;
 
-	const _soapmap** GetFunctionMap() throw();
-	const _soapmap** GetHeaderMap() throw();
-	void* GetHeaderValue() throw();
-	const wchar_t* GetNamespaceUri() throw();
-	const char* GetNamespaceUriA() throw();
-	const char* GetServiceName() throw();
-	HRESULT CallFunction(void* pvParam, const wchar_t* wszLocalName, int cchLocalName, size_t nItem);
+	const _soapmap** GetFunctionMap() noexcept override;
+	const _soapmap** GetHeaderMap() noexcept override;
+	void* GetHeaderValue() noexcept override;
+	const wchar_t* GetNamespaceUri() noexcept override;
+	const char* GetNamespaceUriA() noexcept override;
+	const char* GetServiceName() noexcept override;
+	HRESULT CallFunction(void* pvParam, const wchar_t* wszLocalName, int cchLocalName, size_t nItem) override;
 };
 
+// clang-format off
 __if_not_exists(___Roblox_LuaType_entries)
 {
 	extern __declspec(selectany) const _soapmapentry ___Roblox_LuaType_entries[] = {
-		{0x380E5A7D, "LUA_TTABLE", L"LUA_TTABLE", sizeof("LUA_TTABLE") - 1, 5, SOAPFLAG_FIELD, 0, NULL, NULL, -1},
-		{0x38E50DCC, "LUA_TSTRING", L"LUA_TSTRING", sizeof("LUA_TSTRING") - 1, 4, SOAPFLAG_FIELD, 0, NULL, NULL, -1},
-		{0x2D4A7E5E, "LUA_TNUMBER", L"LUA_TNUMBER", sizeof("LUA_TNUMBER") - 1, 3, SOAPFLAG_FIELD, 0, NULL, NULL, -1},
-		{0x2D0A2835, "LUA_TBOOLEAN", L"LUA_TBOOLEAN", sizeof("LUA_TBOOLEAN") - 1, 1, SOAPFLAG_FIELD, 0, NULL, NULL, -1},
-		{0x51272CF8, "LUA_TNIL", L"LUA_TNIL", sizeof("LUA_TNIL") - 1, 0, SOAPFLAG_FIELD, 0, NULL, NULL, -1},
+		{0x380E5A7D, "LUA_TTABLE", L"LUA_TTABLE", sizeof("LUA_TTABLE") - 1, 5, SOAPFLAG_FIELD, 0, nullptr, nullptr, -1},
+		{0x38E50DCC, "LUA_TSTRING", L"LUA_TSTRING", sizeof("LUA_TSTRING") - 1, 4, SOAPFLAG_FIELD, 0, nullptr, nullptr, -1},
+		{0x2D4A7E5E, "LUA_TNUMBER", L"LUA_TNUMBER", sizeof("LUA_TNUMBER") - 1, 3, SOAPFLAG_FIELD, 0, nullptr, nullptr, -1},
+		{0x2D0A2835, "LUA_TBOOLEAN", L"LUA_TBOOLEAN", sizeof("LUA_TBOOLEAN") - 1, 1, SOAPFLAG_FIELD, 0, nullptr, nullptr, -1},
+		{0x51272CF8, "LUA_TNIL", L"LUA_TNIL", sizeof("LUA_TNIL") - 1, 0, SOAPFLAG_FIELD, 0, nullptr, nullptr, -1},
 		{0x00000000}
 	};
 
@@ -289,8 +290,8 @@ __if_not_exists(___Roblox_MessageType_entries)
 		 3,
 		 SOAPFLAG_FIELD,
 		 0,
-		 NULL,
-		 NULL,
+		 nullptr,
+		 nullptr,
 		 -1},
 		{0x8395775A,
 		 "MESSAGE_WARNING",
@@ -299,10 +300,10 @@ __if_not_exists(___Roblox_MessageType_entries)
 		 2,
 		 SOAPFLAG_FIELD,
 		 0,
-		 NULL,
-		 NULL,
+		 nullptr,
+		 nullptr,
 		 -1},
-		{0xBCE7F070, "MESSAGE_INFO", L"MESSAGE_INFO", sizeof("MESSAGE_INFO") - 1, 1, SOAPFLAG_FIELD, 0, NULL, NULL, -1},
+		{0xBCE7F070, "MESSAGE_INFO", L"MESSAGE_INFO", sizeof("MESSAGE_INFO") - 1, 1, SOAPFLAG_FIELD, 0, nullptr, nullptr, -1},
 		{0xA52B2895,
 		 "MESSAGE_OUTPUT",
 		 L"MESSAGE_OUTPUT",
@@ -310,8 +311,8 @@ __if_not_exists(___Roblox_MessageType_entries)
 		 0,
 		 SOAPFLAG_FIELD,
 		 0,
-		 NULL,
-		 NULL,
+		 nullptr,
+		 nullptr,
 		 -1},
 		{0x00000000}
 	};
@@ -345,8 +346,8 @@ __if_not_exists(___Roblox_Status_entries)
 		 SOAPTYPE_STRING,
 		 SOAPFLAG_FIELD | SOAPFLAG_NULLABLE,
 		 offsetof(::Roblox::Status, version),
-		 NULL,
-		 NULL,
+		 nullptr,
+		 nullptr,
 		 0},
 		{0x2967FF9E,
 		 "environmentCount",
@@ -355,8 +356,8 @@ __if_not_exists(___Roblox_Status_entries)
 		 SOAPTYPE_INT,
 		 SOAPFLAG_FIELD,
 		 offsetof(::Roblox::Status, environmentCount),
-		 NULL,
-		 NULL,
+		 nullptr,
+		 nullptr,
 		 0},
 		{0x00000000}
 	};
@@ -390,7 +391,7 @@ __if_not_exists(___Roblox_LuaValue10_entries)
 		 SOAPTYPE_UNK,
 		 SOAPFLAG_FIELD,
 		 offsetof(::Roblox::LuaValue10, type),
-		 NULL,
+		 nullptr,
 		 &___Roblox_LuaType_map,
 		 0},
 		{0x088E571D,
@@ -400,8 +401,8 @@ __if_not_exists(___Roblox_LuaValue10_entries)
 		 SOAPTYPE_STRING,
 		 SOAPFLAG_FIELD | SOAPFLAG_NULLABLE,
 		 offsetof(::Roblox::LuaValue10, value),
-		 NULL,
-		 NULL,
+		 nullptr,
+		 nullptr,
 		 0},
 		{0x00000000}
 	};
@@ -435,7 +436,7 @@ __if_not_exists(___Roblox_LuaValue9_entries)
 		 SOAPTYPE_UNK,
 		 SOAPFLAG_FIELD,
 		 offsetof(::Roblox::LuaValue9, type),
-		 NULL,
+		 nullptr,
 		 &___Roblox_LuaType_map,
 		 0},
 		{0x088E571D,
@@ -445,8 +446,8 @@ __if_not_exists(___Roblox_LuaValue9_entries)
 		 SOAPTYPE_STRING,
 		 SOAPFLAG_FIELD | SOAPFLAG_NULLABLE,
 		 offsetof(::Roblox::LuaValue9, value),
-		 NULL,
-		 NULL,
+		 nullptr,
+		 nullptr,
 		 0},
 		{0x50CFFA4A,
 		 "tableLength",
@@ -455,8 +456,8 @@ __if_not_exists(___Roblox_LuaValue9_entries)
 		 SOAPTYPE_INT,
 		 SOAPFLAG_FIELD | SOAPFLAG_SIZEIS,
 		 offsetof(::Roblox::LuaValue9, tableLength),
-		 NULL,
-		 NULL,
+		 nullptr,
+		 nullptr,
 		 0},
 		{0x0869FA68,
 		 "table",
@@ -465,7 +466,7 @@ __if_not_exists(___Roblox_LuaValue9_entries)
 		 SOAPTYPE_UNK,
 		 SOAPFLAG_FIELD | SOAPFLAG_DYNARR | SOAPFLAG_NULLABLE,
 		 offsetof(::Roblox::LuaValue9, table),
-		 NULL,
+		 nullptr,
 		 &___Roblox_LuaValue10_map,
 		 2},
 		{0x00000000}
@@ -500,7 +501,7 @@ __if_not_exists(___Roblox_LuaValue8_entries)
 		 SOAPTYPE_UNK,
 		 SOAPFLAG_FIELD,
 		 offsetof(::Roblox::LuaValue8, type),
-		 NULL,
+		 nullptr,
 		 &___Roblox_LuaType_map,
 		 0},
 		{0x088E571D,
@@ -510,8 +511,8 @@ __if_not_exists(___Roblox_LuaValue8_entries)
 		 SOAPTYPE_STRING,
 		 SOAPFLAG_FIELD | SOAPFLAG_NULLABLE,
 		 offsetof(::Roblox::LuaValue8, value),
-		 NULL,
-		 NULL,
+		 nullptr,
+		 nullptr,
 		 0},
 		{0x50CFFA4A,
 		 "tableLength",
@@ -520,8 +521,8 @@ __if_not_exists(___Roblox_LuaValue8_entries)
 		 SOAPTYPE_INT,
 		 SOAPFLAG_FIELD | SOAPFLAG_SIZEIS,
 		 offsetof(::Roblox::LuaValue8, tableLength),
-		 NULL,
-		 NULL,
+		 nullptr,
+		 nullptr,
 		 0},
 		{0x0869FA68,
 		 "table",
@@ -530,7 +531,7 @@ __if_not_exists(___Roblox_LuaValue8_entries)
 		 SOAPTYPE_UNK,
 		 SOAPFLAG_FIELD | SOAPFLAG_DYNARR | SOAPFLAG_NULLABLE,
 		 offsetof(::Roblox::LuaValue8, table),
-		 NULL,
+		 nullptr,
 		 &___Roblox_LuaValue9_map,
 		 2},
 		{0x00000000}
@@ -565,7 +566,7 @@ __if_not_exists(___Roblox_LuaValue7_entries)
 		 SOAPTYPE_UNK,
 		 SOAPFLAG_FIELD,
 		 offsetof(::Roblox::LuaValue7, type),
-		 NULL,
+		 nullptr,
 		 &___Roblox_LuaType_map,
 		 0},
 		{0x088E571D,
@@ -575,8 +576,8 @@ __if_not_exists(___Roblox_LuaValue7_entries)
 		 SOAPTYPE_STRING,
 		 SOAPFLAG_FIELD | SOAPFLAG_NULLABLE,
 		 offsetof(::Roblox::LuaValue7, value),
-		 NULL,
-		 NULL,
+		 nullptr,
+		 nullptr,
 		 0},
 		{0x50CFFA4A,
 		 "tableLength",
@@ -585,8 +586,8 @@ __if_not_exists(___Roblox_LuaValue7_entries)
 		 SOAPTYPE_INT,
 		 SOAPFLAG_FIELD | SOAPFLAG_SIZEIS,
 		 offsetof(::Roblox::LuaValue7, tableLength),
-		 NULL,
-		 NULL,
+		 nullptr,
+		 nullptr,
 		 0},
 		{0x0869FA68,
 		 "table",
@@ -595,7 +596,7 @@ __if_not_exists(___Roblox_LuaValue7_entries)
 		 SOAPTYPE_UNK,
 		 SOAPFLAG_FIELD | SOAPFLAG_DYNARR | SOAPFLAG_NULLABLE,
 		 offsetof(::Roblox::LuaValue7, table),
-		 NULL,
+		 nullptr,
 		 &___Roblox_LuaValue8_map,
 		 2},
 		{0x00000000}
@@ -630,7 +631,7 @@ __if_not_exists(___Roblox_LuaValue6_entries)
 		 SOAPTYPE_UNK,
 		 SOAPFLAG_FIELD,
 		 offsetof(::Roblox::LuaValue6, type),
-		 NULL,
+		 nullptr,
 		 &___Roblox_LuaType_map,
 		 0},
 		{0x088E571D,
@@ -640,8 +641,8 @@ __if_not_exists(___Roblox_LuaValue6_entries)
 		 SOAPTYPE_STRING,
 		 SOAPFLAG_FIELD | SOAPFLAG_NULLABLE,
 		 offsetof(::Roblox::LuaValue6, value),
-		 NULL,
-		 NULL,
+		 nullptr,
+		 nullptr,
 		 0},
 		{0x50CFFA4A,
 		 "tableLength",
@@ -650,8 +651,8 @@ __if_not_exists(___Roblox_LuaValue6_entries)
 		 SOAPTYPE_INT,
 		 SOAPFLAG_FIELD | SOAPFLAG_SIZEIS,
 		 offsetof(::Roblox::LuaValue6, tableLength),
-		 NULL,
-		 NULL,
+		 nullptr,
+		 nullptr,
 		 0},
 		{0x0869FA68,
 		 "table",
@@ -660,7 +661,7 @@ __if_not_exists(___Roblox_LuaValue6_entries)
 		 SOAPTYPE_UNK,
 		 SOAPFLAG_FIELD | SOAPFLAG_DYNARR | SOAPFLAG_NULLABLE,
 		 offsetof(::Roblox::LuaValue6, table),
-		 NULL,
+		 nullptr,
 		 &___Roblox_LuaValue7_map,
 		 2},
 		{0x00000000}
@@ -695,7 +696,7 @@ __if_not_exists(___Roblox_LuaValue5_entries)
 		 SOAPTYPE_UNK,
 		 SOAPFLAG_FIELD,
 		 offsetof(::Roblox::LuaValue5, type),
-		 NULL,
+		 nullptr,
 		 &___Roblox_LuaType_map,
 		 0},
 		{0x088E571D,
@@ -705,8 +706,8 @@ __if_not_exists(___Roblox_LuaValue5_entries)
 		 SOAPTYPE_STRING,
 		 SOAPFLAG_FIELD | SOAPFLAG_NULLABLE,
 		 offsetof(::Roblox::LuaValue5, value),
-		 NULL,
-		 NULL,
+		 nullptr,
+		 nullptr,
 		 0},
 		{0x50CFFA4A,
 		 "tableLength",
@@ -715,8 +716,8 @@ __if_not_exists(___Roblox_LuaValue5_entries)
 		 SOAPTYPE_INT,
 		 SOAPFLAG_FIELD | SOAPFLAG_SIZEIS,
 		 offsetof(::Roblox::LuaValue5, tableLength),
-		 NULL,
-		 NULL,
+		 nullptr,
+		 nullptr,
 		 0},
 		{0x0869FA68,
 		 "table",
@@ -725,7 +726,7 @@ __if_not_exists(___Roblox_LuaValue5_entries)
 		 SOAPTYPE_UNK,
 		 SOAPFLAG_FIELD | SOAPFLAG_DYNARR | SOAPFLAG_NULLABLE,
 		 offsetof(::Roblox::LuaValue5, table),
-		 NULL,
+		 nullptr,
 		 &___Roblox_LuaValue6_map,
 		 2},
 		{0x00000000}
@@ -760,7 +761,7 @@ __if_not_exists(___Roblox_LuaValue4_entries)
 		 SOAPTYPE_UNK,
 		 SOAPFLAG_FIELD,
 		 offsetof(::Roblox::LuaValue4, type),
-		 NULL,
+		 nullptr,
 		 &___Roblox_LuaType_map,
 		 0},
 		{0x088E571D,
@@ -770,8 +771,8 @@ __if_not_exists(___Roblox_LuaValue4_entries)
 		 SOAPTYPE_STRING,
 		 SOAPFLAG_FIELD | SOAPFLAG_NULLABLE,
 		 offsetof(::Roblox::LuaValue4, value),
-		 NULL,
-		 NULL,
+		 nullptr,
+		 nullptr,
 		 0},
 		{0x50CFFA4A,
 		 "tableLength",
@@ -780,8 +781,8 @@ __if_not_exists(___Roblox_LuaValue4_entries)
 		 SOAPTYPE_INT,
 		 SOAPFLAG_FIELD | SOAPFLAG_SIZEIS,
 		 offsetof(::Roblox::LuaValue4, tableLength),
-		 NULL,
-		 NULL,
+		 nullptr,
+		 nullptr,
 		 0},
 		{0x0869FA68,
 		 "table",
@@ -790,7 +791,7 @@ __if_not_exists(___Roblox_LuaValue4_entries)
 		 SOAPTYPE_UNK,
 		 SOAPFLAG_FIELD | SOAPFLAG_DYNARR | SOAPFLAG_NULLABLE,
 		 offsetof(::Roblox::LuaValue4, table),
-		 NULL,
+		 nullptr,
 		 &___Roblox_LuaValue5_map,
 		 2},
 		{0x00000000}
@@ -825,7 +826,7 @@ __if_not_exists(___Roblox_LuaValue3_entries)
 		 SOAPTYPE_UNK,
 		 SOAPFLAG_FIELD,
 		 offsetof(::Roblox::LuaValue3, type),
-		 NULL,
+		 nullptr,
 		 &___Roblox_LuaType_map,
 		 0},
 		{0x088E571D,
@@ -835,8 +836,8 @@ __if_not_exists(___Roblox_LuaValue3_entries)
 		 SOAPTYPE_STRING,
 		 SOAPFLAG_FIELD | SOAPFLAG_NULLABLE,
 		 offsetof(::Roblox::LuaValue3, value),
-		 NULL,
-		 NULL,
+		 nullptr,
+		 nullptr,
 		 0},
 		{0x50CFFA4A,
 		 "tableLength",
@@ -845,8 +846,8 @@ __if_not_exists(___Roblox_LuaValue3_entries)
 		 SOAPTYPE_INT,
 		 SOAPFLAG_FIELD | SOAPFLAG_SIZEIS,
 		 offsetof(::Roblox::LuaValue3, tableLength),
-		 NULL,
-		 NULL,
+		 nullptr,
+		 nullptr,
 		 0},
 		{0x0869FA68,
 		 "table",
@@ -855,7 +856,7 @@ __if_not_exists(___Roblox_LuaValue3_entries)
 		 SOAPTYPE_UNK,
 		 SOAPFLAG_FIELD | SOAPFLAG_DYNARR | SOAPFLAG_NULLABLE,
 		 offsetof(::Roblox::LuaValue3, table),
-		 NULL,
+		 nullptr,
 		 &___Roblox_LuaValue4_map,
 		 2},
 		{0x00000000}
@@ -890,7 +891,7 @@ __if_not_exists(___Roblox_LuaValue2_entries)
 		 SOAPTYPE_UNK,
 		 SOAPFLAG_FIELD,
 		 offsetof(::Roblox::LuaValue2, type),
-		 NULL,
+		 nullptr,
 		 &___Roblox_LuaType_map,
 		 0},
 		{0x088E571D,
@@ -900,8 +901,8 @@ __if_not_exists(___Roblox_LuaValue2_entries)
 		 SOAPTYPE_STRING,
 		 SOAPFLAG_FIELD | SOAPFLAG_NULLABLE,
 		 offsetof(::Roblox::LuaValue2, value),
-		 NULL,
-		 NULL,
+		 nullptr,
+		 nullptr,
 		 0},
 		{0x50CFFA4A,
 		 "tableLength",
@@ -910,8 +911,8 @@ __if_not_exists(___Roblox_LuaValue2_entries)
 		 SOAPTYPE_INT,
 		 SOAPFLAG_FIELD | SOAPFLAG_SIZEIS,
 		 offsetof(::Roblox::LuaValue2, tableLength),
-		 NULL,
-		 NULL,
+		 nullptr,
+		 nullptr,
 		 0},
 		{0x0869FA68,
 		 "table",
@@ -920,7 +921,7 @@ __if_not_exists(___Roblox_LuaValue2_entries)
 		 SOAPTYPE_UNK,
 		 SOAPFLAG_FIELD | SOAPFLAG_DYNARR | SOAPFLAG_NULLABLE,
 		 offsetof(::Roblox::LuaValue2, table),
-		 NULL,
+		 nullptr,
 		 &___Roblox_LuaValue3_map,
 		 2},
 		{0x00000000}
@@ -955,7 +956,7 @@ __if_not_exists(___Roblox_LuaValue1_entries)
 		 SOAPTYPE_UNK,
 		 SOAPFLAG_FIELD,
 		 offsetof(::Roblox::LuaValue1, type),
-		 NULL,
+		 nullptr,
 		 &___Roblox_LuaType_map,
 		 0},
 		{0x088E571D,
@@ -965,8 +966,8 @@ __if_not_exists(___Roblox_LuaValue1_entries)
 		 SOAPTYPE_STRING,
 		 SOAPFLAG_FIELD | SOAPFLAG_NULLABLE,
 		 offsetof(::Roblox::LuaValue1, value),
-		 NULL,
-		 NULL,
+		 nullptr,
+		 nullptr,
 		 0},
 		{0x50CFFA4A,
 		 "tableLength",
@@ -975,8 +976,8 @@ __if_not_exists(___Roblox_LuaValue1_entries)
 		 SOAPTYPE_INT,
 		 SOAPFLAG_FIELD | SOAPFLAG_SIZEIS,
 		 offsetof(::Roblox::LuaValue1, tableLength),
-		 NULL,
-		 NULL,
+		 nullptr,
+		 nullptr,
 		 0},
 		{0x0869FA68,
 		 "table",
@@ -985,7 +986,7 @@ __if_not_exists(___Roblox_LuaValue1_entries)
 		 SOAPTYPE_UNK,
 		 SOAPFLAG_FIELD | SOAPFLAG_DYNARR | SOAPFLAG_NULLABLE,
 		 offsetof(::Roblox::LuaValue1, table),
-		 NULL,
+		 nullptr,
 		 &___Roblox_LuaValue2_map,
 		 2},
 		{0x00000000}
@@ -1020,8 +1021,8 @@ __if_not_exists(___Roblox_LuaArguments_entries)
 		 SOAPTYPE_INT,
 		 SOAPFLAG_FIELD | SOAPFLAG_SIZEIS,
 		 offsetof(::Roblox::LuaArguments, count),
-		 NULL,
-		 NULL,
+		 nullptr,
+		 nullptr,
 		 0},
 		{0x07AD6502,
 		 "items",
@@ -1030,7 +1031,7 @@ __if_not_exists(___Roblox_LuaArguments_entries)
 		 SOAPTYPE_UNK,
 		 SOAPFLAG_FIELD | SOAPFLAG_DYNARR | SOAPFLAG_NULLABLE,
 		 offsetof(::Roblox::LuaArguments, items),
-		 NULL,
+		 nullptr,
 		 &___Roblox_LuaValue1_map,
 		 0},
 		{0x00000000}
@@ -1065,8 +1066,8 @@ __if_not_exists(___Roblox_ScriptExecution_entries)
 		 SOAPTYPE_STRING,
 		 SOAPFLAG_FIELD | SOAPFLAG_NULLABLE,
 		 offsetof(::Roblox::ScriptExecution, name),
-		 NULL,
-		 NULL,
+		 nullptr,
+		 nullptr,
 		 0},
 		{0x13810AF5,
 		 "script",
@@ -1075,8 +1076,8 @@ __if_not_exists(___Roblox_ScriptExecution_entries)
 		 SOAPTYPE_STRING,
 		 SOAPFLAG_FIELD | SOAPFLAG_NULLABLE,
 		 offsetof(::Roblox::ScriptExecution, script),
-		 NULL,
-		 NULL,
+		 nullptr,
+		 nullptr,
 		 0},
 		{0x69FF5556,
 		 "arguments",
@@ -1085,7 +1086,7 @@ __if_not_exists(___Roblox_ScriptExecution_entries)
 		 SOAPTYPE_UNK,
 		 SOAPFLAG_FIELD,
 		 offsetof(::Roblox::ScriptExecution, arguments),
-		 NULL,
+		 nullptr,
 		 &___Roblox_LuaArguments_map,
 		 0},
 		{0x00000000}
@@ -1120,8 +1121,8 @@ __if_not_exists(___Roblox_Strings_entries)
 		 SOAPTYPE_INT,
 		 SOAPFLAG_FIELD | SOAPFLAG_SIZEIS,
 		 offsetof(::Roblox::Strings, count),
-		 NULL,
-		 NULL,
+		 nullptr,
+		 nullptr,
 		 0},
 		{0x07AD6502,
 		 "items",
@@ -1130,8 +1131,8 @@ __if_not_exists(___Roblox_Strings_entries)
 		 SOAPTYPE_STRING,
 		 SOAPFLAG_FIELD | SOAPFLAG_DYNARR | SOAPFLAG_NULLABLE,
 		 offsetof(::Roblox::Strings, items),
-		 NULL,
-		 NULL,
+		 nullptr,
+		 nullptr,
 		 0},
 		{0x00000000}
 	};
@@ -1165,7 +1166,7 @@ __if_not_exists(___Roblox_StandardOutMessage_entries)
 		 SOAPTYPE_UNK,
 		 SOAPFLAG_FIELD,
 		 offsetof(::Roblox::StandardOutMessage, type),
-		 NULL,
+		 nullptr,
 		 &___Roblox_MessageType_map,
 		 0},
 		{0x0041690F,
@@ -1175,8 +1176,8 @@ __if_not_exists(___Roblox_StandardOutMessage_entries)
 		 SOAPTYPE_LONG,
 		 SOAPFLAG_FIELD,
 		 offsetof(::Roblox::StandardOutMessage, time),
-		 NULL,
-		 NULL,
+		 nullptr,
+		 nullptr,
 		 0},
 		{0x00415985,
 		 "text",
@@ -1185,8 +1186,8 @@ __if_not_exists(___Roblox_StandardOutMessage_entries)
 		 SOAPTYPE_STRING,
 		 SOAPFLAG_FIELD | SOAPFLAG_NULLABLE,
 		 offsetof(::Roblox::StandardOutMessage, text),
-		 NULL,
-		 NULL,
+		 nullptr,
+		 nullptr,
 		 0},
 		{0x00000000}
 	};
@@ -1220,8 +1221,8 @@ __if_not_exists(___Roblox_StandardOutMessages_entries)
 		 SOAPTYPE_INT,
 		 SOAPFLAG_FIELD | SOAPFLAG_SIZEIS,
 		 offsetof(::Roblox::StandardOutMessages, count),
-		 NULL,
-		 NULL,
+		 nullptr,
+		 nullptr,
 		 0},
 		{0x07AD6502,
 		 "items",
@@ -1230,7 +1231,7 @@ __if_not_exists(___Roblox_StandardOutMessages_entries)
 		 SOAPTYPE_UNK,
 		 SOAPFLAG_FIELD | SOAPFLAG_DYNARR | SOAPFLAG_NULLABLE,
 		 offsetof(::Roblox::StandardOutMessages, items),
-		 NULL,
+		 nullptr,
 		 &___Roblox_StandardOutMessage_map,
 		 0},
 		{0x00000000}
@@ -1270,8 +1271,8 @@ extern __declspec(selectany) const _soapmapentry ___Roblox_CWebService_HelloWorl
 		SOAPTYPE_STRING,
 		SOAPFLAG_RETVAL | SOAPFLAG_OUT | SOAPFLAG_NULLABLE,
 		offsetof(___Roblox_CWebService_HelloWorld_struct, bstrOutput),
-		NULL,
-		NULL,
+		nullptr,
+		nullptr,
 		-1,
 	},
 
@@ -1331,8 +1332,8 @@ extern __declspec(selectany) const _soapmapentry ___Roblox_CWebService_GetVersio
 		SOAPTYPE_STRING,
 		SOAPFLAG_RETVAL | SOAPFLAG_OUT | SOAPFLAG_NULLABLE,
 		offsetof(___Roblox_CWebService_GetVersion_struct, result),
-		NULL,
-		NULL,
+		nullptr,
+		nullptr,
 		-1,
 	},
 
@@ -1392,7 +1393,7 @@ extern __declspec(selectany) const _soapmapentry ___Roblox_CWebService_GetStatus
 		SOAPTYPE_UNK,
 		SOAPFLAG_RETVAL | SOAPFLAG_OUT,
 		offsetof(___Roblox_CWebService_GetStatus_struct, result),
-		NULL,
+		nullptr,
 		&___Roblox_Status_map,
 		-1,
 	},
@@ -1453,8 +1454,8 @@ extern __declspec(selectany) const _soapmapentry ___Roblox_CWebService_Update_en
 		SOAPTYPE_STRING,
 		SOAPFLAG_NONE | SOAPFLAG_IN | SOAPFLAG_NULLABLE,
 		offsetof(___Roblox_CWebService_Update_struct, url),
-		NULL,
-		NULL,
+		nullptr,
+		nullptr,
 		-1,
 	},
 	{0x00000000}
@@ -1515,7 +1516,7 @@ extern __declspec(selectany) const _soapmapentry ___Roblox_CWebService_OpenJob_e
 		SOAPTYPE_UNK,
 		SOAPFLAG_RETVAL | SOAPFLAG_OUT,
 		offsetof(___Roblox_CWebService_OpenJob_struct, result),
-		NULL,
+		nullptr,
 		&___Roblox_LuaArguments_map,
 		-1,
 	},
@@ -1528,8 +1529,8 @@ extern __declspec(selectany) const _soapmapentry ___Roblox_CWebService_OpenJob_e
 		SOAPTYPE_STRING,
 		SOAPFLAG_NONE | SOAPFLAG_IN | SOAPFLAG_NULLABLE,
 		offsetof(___Roblox_CWebService_OpenJob_struct, jobID),
-		NULL,
-		NULL,
+		nullptr,
+		nullptr,
 		-1,
 	},
 	{
@@ -1540,7 +1541,7 @@ extern __declspec(selectany) const _soapmapentry ___Roblox_CWebService_OpenJob_e
 		SOAPTYPE_UNK,
 		SOAPFLAG_NONE | SOAPFLAG_IN,
 		offsetof(___Roblox_CWebService_OpenJob_struct, script),
-		NULL,
+		nullptr,
 		&___Roblox_ScriptExecution_map,
 		-1,
 	},
@@ -1552,8 +1553,8 @@ extern __declspec(selectany) const _soapmapentry ___Roblox_CWebService_OpenJob_e
 		SOAPTYPE_DOUBLE,
 		SOAPFLAG_NONE | SOAPFLAG_IN,
 		offsetof(___Roblox_CWebService_OpenJob_struct, timeout),
-		NULL,
-		NULL,
+		nullptr,
+		nullptr,
 		-1,
 	},
 	{0x00000000}
@@ -1612,8 +1613,8 @@ extern __declspec(selectany) const _soapmapentry ___Roblox_CWebService_TouchJob_
 		SOAPTYPE_STRING,
 		SOAPFLAG_NONE | SOAPFLAG_IN | SOAPFLAG_NULLABLE,
 		offsetof(___Roblox_CWebService_TouchJob_struct, jobID),
-		NULL,
-		NULL,
+		nullptr,
+		nullptr,
 		-1,
 	},
 	{
@@ -1624,8 +1625,8 @@ extern __declspec(selectany) const _soapmapentry ___Roblox_CWebService_TouchJob_
 		SOAPTYPE_DOUBLE,
 		SOAPFLAG_NONE | SOAPFLAG_IN,
 		offsetof(___Roblox_CWebService_TouchJob_struct, timeout),
-		NULL,
-		NULL,
+		nullptr,
+		nullptr,
 		-1,
 	},
 	{0x00000000}
@@ -1686,7 +1687,7 @@ extern __declspec(selectany) const _soapmapentry ___Roblox_CWebService_Execute_e
 		SOAPTYPE_UNK,
 		SOAPFLAG_RETVAL | SOAPFLAG_OUT,
 		offsetof(___Roblox_CWebService_Execute_struct, result),
-		NULL,
+		nullptr,
 		&___Roblox_LuaArguments_map,
 		-1,
 	},
@@ -1699,8 +1700,8 @@ extern __declspec(selectany) const _soapmapentry ___Roblox_CWebService_Execute_e
 		SOAPTYPE_STRING,
 		SOAPFLAG_NONE | SOAPFLAG_IN | SOAPFLAG_NULLABLE,
 		offsetof(___Roblox_CWebService_Execute_struct, jobID),
-		NULL,
-		NULL,
+		nullptr,
+		nullptr,
 		-1,
 	},
 	{
@@ -1711,7 +1712,7 @@ extern __declspec(selectany) const _soapmapentry ___Roblox_CWebService_Execute_e
 		SOAPTYPE_UNK,
 		SOAPFLAG_NONE | SOAPFLAG_IN,
 		offsetof(___Roblox_CWebService_Execute_struct, script),
-		NULL,
+		nullptr,
 		&___Roblox_ScriptExecution_map,
 		-1,
 	},
@@ -1770,8 +1771,8 @@ extern __declspec(selectany) const _soapmapentry ___Roblox_CWebService_CloseJob_
 		SOAPTYPE_STRING,
 		SOAPFLAG_NONE | SOAPFLAG_IN | SOAPFLAG_NULLABLE,
 		offsetof(___Roblox_CWebService_CloseJob_struct, jobID),
-		NULL,
-		NULL,
+		nullptr,
+		nullptr,
 		-1,
 	},
 	{0x00000000}
@@ -1833,7 +1834,7 @@ extern __declspec(selectany) const _soapmapentry ___Roblox_CWebService_BatchJob_
 		SOAPTYPE_UNK,
 		SOAPFLAG_RETVAL | SOAPFLAG_OUT,
 		offsetof(___Roblox_CWebService_BatchJob_struct, result),
-		NULL,
+		nullptr,
 		&___Roblox_LuaArguments_map,
 		-1,
 	},
@@ -1846,8 +1847,8 @@ extern __declspec(selectany) const _soapmapentry ___Roblox_CWebService_BatchJob_
 		SOAPTYPE_STRING,
 		SOAPFLAG_NONE | SOAPFLAG_IN | SOAPFLAG_NULLABLE,
 		offsetof(___Roblox_CWebService_BatchJob_struct, jobID),
-		NULL,
-		NULL,
+		nullptr,
+		nullptr,
 		-1,
 	},
 	{
@@ -1858,7 +1859,7 @@ extern __declspec(selectany) const _soapmapentry ___Roblox_CWebService_BatchJob_
 		SOAPTYPE_UNK,
 		SOAPFLAG_NONE | SOAPFLAG_IN,
 		offsetof(___Roblox_CWebService_BatchJob_struct, script),
-		NULL,
+		nullptr,
 		&___Roblox_ScriptExecution_map,
 		-1,
 	},
@@ -1870,8 +1871,8 @@ extern __declspec(selectany) const _soapmapentry ___Roblox_CWebService_BatchJob_
 		SOAPTYPE_DOUBLE,
 		SOAPFLAG_NONE | SOAPFLAG_IN,
 		offsetof(___Roblox_CWebService_BatchJob_struct, timeout),
-		NULL,
-		NULL,
+		nullptr,
+		nullptr,
 		-1,
 	},
 	{0x00000000}
@@ -1931,8 +1932,8 @@ extern __declspec(selectany) const _soapmapentry ___Roblox_CWebService_GetTimeou
 		SOAPTYPE_DOUBLE,
 		SOAPFLAG_RETVAL | SOAPFLAG_OUT,
 		offsetof(___Roblox_CWebService_GetTimeout_struct, timeout),
-		NULL,
-		NULL,
+		nullptr,
+		nullptr,
 		-1,
 	},
 
@@ -1944,8 +1945,8 @@ extern __declspec(selectany) const _soapmapentry ___Roblox_CWebService_GetTimeou
 		SOAPTYPE_STRING,
 		SOAPFLAG_NONE | SOAPFLAG_IN | SOAPFLAG_NULLABLE,
 		offsetof(___Roblox_CWebService_GetTimeout_struct, jobID),
-		NULL,
-		NULL,
+		nullptr,
+		nullptr,
 		-1,
 	},
 	{0x00000000}
@@ -2005,8 +2006,8 @@ extern __declspec(selectany) const _soapmapentry ___Roblox_CWebService_CloseOrph
 		SOAPTYPE_INT,
 		SOAPFLAG_RETVAL | SOAPFLAG_OUT,
 		offsetof(___Roblox_CWebService_CloseOrphanedJobs_struct, result),
-		NULL,
-		NULL,
+		nullptr,
+		nullptr,
 		-1,
 	},
 
@@ -2018,7 +2019,7 @@ extern __declspec(selectany) const _soapmapentry ___Roblox_CWebService_CloseOrph
 		SOAPTYPE_UNK,
 		SOAPFLAG_NONE | SOAPFLAG_IN,
 		offsetof(___Roblox_CWebService_CloseOrphanedJobs_struct, activeJobs),
-		NULL,
+		nullptr,
 		&___Roblox_Strings_map,
 		-1,
 	},
@@ -2125,8 +2126,8 @@ extern __declspec(selectany) const _soapmapentry ___Roblox_CWebService_CloseTime
 		SOAPTYPE_INT,
 		SOAPFLAG_RETVAL | SOAPFLAG_OUT,
 		offsetof(___Roblox_CWebService_CloseTimedoutJobs_struct, result),
-		NULL,
-		NULL,
+		nullptr,
+		nullptr,
 		-1,
 	},
 
@@ -2186,7 +2187,7 @@ extern __declspec(selectany) const _soapmapentry ___Roblox_CWebService_GetAllJob
 		SOAPTYPE_UNK,
 		SOAPFLAG_RETVAL | SOAPFLAG_OUT,
 		offsetof(___Roblox_CWebService_GetAllJobs_struct, result),
-		NULL,
+		nullptr,
 		&___Roblox_Strings_map,
 		-1,
 	},
@@ -2248,7 +2249,7 @@ extern __declspec(selectany) const _soapmapentry ___Roblox_CWebService_GetStanda
 		SOAPTYPE_UNK,
 		SOAPFLAG_RETVAL | SOAPFLAG_OUT,
 		offsetof(___Roblox_CWebService_GetStandardOutMessages_struct, result),
-		NULL,
+		nullptr,
 		&___Roblox_StandardOutMessages_map,
 		-1,
 	},
@@ -2261,8 +2262,8 @@ extern __declspec(selectany) const _soapmapentry ___Roblox_CWebService_GetStanda
 		SOAPTYPE_INT,
 		SOAPFLAG_NONE | SOAPFLAG_IN,
 		offsetof(___Roblox_CWebService_GetStandardOutMessages_struct, maxCount),
-		NULL,
-		NULL,
+		nullptr,
+		nullptr,
 		-1,
 	},
 	{0x00000000}
@@ -2322,7 +2323,7 @@ extern __declspec(selectany) const _soapmap* ___Roblox_CWebService_funcs[] = {
 	&___Roblox_CWebService_CloseTimedoutJobs_map,
 	&___Roblox_CWebService_GetAllJobs_map,
 	&___Roblox_CWebService_GetStandardOutMessages_map,
-	NULL
+	nullptr
 };
 
 extern __declspec(selectany) const _soapmap* ___Roblox_CWebService_headers[] = {
@@ -2341,20 +2342,20 @@ extern __declspec(selectany) const _soapmap* ___Roblox_CWebService_headers[] = {
 	&___Roblox_CWebService_CloseTimedoutJobs_atlsoapheader_map,
 	&___Roblox_CWebService_GetAllJobs_atlsoapheader_map,
 	&___Roblox_CWebService_GetStandardOutMessages_atlsoapheader_map,
-	NULL
+	nullptr
 };
 
-ATL_NOINLINE inline const _soapmap** CWebService::GetFunctionMap()
+ATL_NOINLINE inline const _soapmap** CWebService::GetFunctionMap() noexcept
 {
 	return ___Roblox_CWebService_funcs;
 }
 
-ATL_NOINLINE inline const _soapmap** CWebService::GetHeaderMap()
+ATL_NOINLINE inline const _soapmap** CWebService::GetHeaderMap() noexcept
 {
 	return ___Roblox_CWebService_headers;
 }
 
-ATL_NOINLINE inline void* CWebService::GetHeaderValue()
+ATL_NOINLINE inline void* CWebService::GetHeaderValue() noexcept
 {
 	return this;
 }
@@ -2452,17 +2453,17 @@ ATL_NOINLINE inline HRESULT CWebService::CallFunction(
 	return hr;
 }
 
-ATL_NOINLINE inline const wchar_t* CWebService::GetNamespaceUri()
+ATL_NOINLINE inline const wchar_t* CWebService::GetNamespaceUri() noexcept
 {
 	return L"urn:Roblox";
 }
 
-ATL_NOINLINE inline const char* CWebService::GetNamespaceUriA()
+ATL_NOINLINE inline const char* CWebService::GetNamespaceUriA() noexcept
 {
 	return "urn:Roblox";
 }
 
-ATL_NOINLINE inline const char* CWebService::GetServiceName()
+ATL_NOINLINE inline const char* CWebService::GetServiceName() noexcept
 {
 	return "Service";
 }
@@ -2487,5 +2488,6 @@ inline HRESULT __stdcall CWebService::HelloWorld(BSTR* bstrOutput)
 } // namespace Roblox
 
 HANDLER_ENTRY_SDL("Default", CWebService, ::Roblox::CWebService, WSDL)
+// clang-format on
 
 #endif // WEBSERVICE_WEBSERVICE_H

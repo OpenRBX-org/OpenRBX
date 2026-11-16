@@ -20,29 +20,20 @@
 
 // clang-format off
 static bool whitespaces[256] = {
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	1
+	false, false, false, false, false, false, false, false, false, true, true, false, true, true, false, false,
+	false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false,
+	true
 };
 // clang-format on
 
 bool isCloseTag(const std::string& test)
 {
-	if (test.length() >= 2) {
-		return test.substr(0, 2) == "</";
-	}
-
-	return false;
+	return test.starts_with("</");
 }
 
 bool endsWithClose(const std::string& test)
 {
-	size_t length = test.length();
-	if (length >= 2) {
-		return test.substr(length - 2, 2) == "/>";
-	}
-
-	return false;
+	return test.ends_with("/>");
 }
 
 void TextXmlParser::skipWhitespace()
@@ -214,13 +205,13 @@ void TextXmlWriter::writeCloseTag(const XmlElement* element, int depth)
 
 void TextXmlWriter::serialize(const XmlElement* xmlNode, int depth)
 {
-	if (xmlNode != NULL) {
+	if (xmlNode != nullptr) {
 		serializeNode(xmlNode, depth);
 
 		const XmlElement* child = xmlNode->firstChild();
 
-		if (child != NULL) {
-			while (child != NULL) {
+		if (child != nullptr) {
+			while (child != nullptr) {
 				stream << '\n';
 				serialize(child, depth + 1);
 				child = child->nextSibling();
@@ -307,7 +298,7 @@ void TextXmlWriter::writeOpenTag(const XmlElement* element, int depth, const Xml
 
 	stream << '<' << element->getTag().name;
 
-	for (const XmlAttribute* attribute = element->getFirstAttribute(); attribute != NULL;
+	for (const XmlAttribute* attribute = element->getFirstAttribute(); attribute != nullptr;
 		 attribute = element->getNextAttribute(attribute)) {
 		stream << ' ' << attribute->getTag().name << "=\"";
 
@@ -316,7 +307,7 @@ void TextXmlWriter::writeOpenTag(const XmlElement* element, int depth, const Xml
 		stream << '"';
 	}
 
-	if (extraAttribute != NULL) {
+	if (extraAttribute != nullptr) {
 		stream << ' ' << extraAttribute->getTag().name << "=\"";
 
 		encodedWrite(stream, extraAttribute->toString(this));
@@ -334,7 +325,7 @@ XmlParser::XmlParser(std::streambuf* buffer) : buffer(buffer)
 void TextXmlWriter::serializeNode(const XmlElement* xmlNode, int depth)
 {
 	if (xmlNode->isValueType<RBX::ContentId>()) {
-		writeOpenTag(xmlNode, depth, NULL);
+		writeOpenTag(xmlNode, depth, nullptr);
 
 		RBX::ContentId contentId;
 
@@ -350,7 +341,7 @@ void TextXmlWriter::serializeNode(const XmlElement* xmlNode, int depth)
 		}
 	}
 	else {
-		writeOpenTag(xmlNode, depth, NULL);
+		writeOpenTag(xmlNode, depth, nullptr);
 
 		encodedWrite(stream, xmlNode->toString(this));
 	}
@@ -364,7 +355,7 @@ void TextXmlWriterWithEmbeddedContent::serializeNode(const XmlElement* xmlNode, 
 		xmlNode->getValue(contentId);
 
 		if (&contentId.mimeType() == &RBX::Name::getNullName()) {
-			writeOpenTag(xmlNode, depth, NULL);
+			writeOpenTag(xmlNode, depth, nullptr);
 		}
 		else {
 			XmlAttribute mimeType(tag_mimeType, contentId.mimeType().name.c_str());
@@ -372,7 +363,7 @@ void TextXmlWriterWithEmbeddedContent::serializeNode(const XmlElement* xmlNode, 
 			writeOpenTag(xmlNode, depth, &mimeType);
 		}
 
-		if (xmlNode->findAttribute(name_xsinil) == NULL) {
+		if (xmlNode->findAttribute(name_xsinil) == nullptr) {
 			if (contentId.isNull()) {
 				stream << "<null></null>";
 			}
@@ -381,7 +372,7 @@ void TextXmlWriterWithEmbeddedContent::serializeNode(const XmlElement* xmlNode, 
 				TextXmlWriter::encodedWrite(stream, contentId.c_str());
 				stream << "</url>";
 			}
-			else if (embeddedContent.find(contentId) == embeddedContent.end()) {
+			else if (!embeddedContent.contains(contentId)) {
 				embeddedContent.insert(contentId);
 
 				std::unique_ptr<std::istream> contentStream;
@@ -437,7 +428,7 @@ std::unique_ptr<XmlElement> TextXmlParser::parse()
 		if (firstTimeThrough) {
 			firstTimeThrough = false;
 			currentTag = readFirstTag();
-			if (currentTag.substr(0, 2) == "<?") {
+			if (currentTag.starts_with("<?")) {
 				continue;
 			}
 		}
@@ -445,10 +436,10 @@ std::unique_ptr<XmlElement> TextXmlParser::parse()
 			currentTag = readTag();
 		}
 
-		XmlElement* currentElement = elements.empty() ? NULL : elements.top();
+		XmlElement* currentElement = elements.empty() ? nullptr : elements.top();
 
 		if (isCloseTag(currentTag)) {
-			if (currentElement == NULL) {
+			if (currentElement == nullptr) {
 				throw std::runtime_error(
 					G3D::format("TextXmlParser::parse - Got close tag %s without open tag.", currentTag.c_str())
 				);
@@ -467,14 +458,14 @@ std::unique_ptr<XmlElement> TextXmlParser::parse()
 			if (newElement->getTag() == RBX::Reflection::Type::singleton<RBX::ContentId>().tag) {
 				bool nil;
 				XmlAttribute* xsinil = newElement->findAttribute(name_xsinil);
-				if (xsinil != NULL && xsinil->getValue(nil) && nil) {
+				if (xsinil != nullptr && xsinil->getValue(nil) && nil) {
 				}
 				else if (readText(false) != "") {
 				}
 				else {
 					const RBX::Name* mimeType;
 					XmlAttribute* mimeTypeAttribute = newElement->findAttribute(tag_mimeType);
-					if (mimeTypeAttribute != NULL) {
+					if (mimeTypeAttribute != nullptr) {
 						mimeTypeAttribute->getValue(mimeType);
 					}
 					else {
@@ -484,7 +475,7 @@ std::unique_ptr<XmlElement> TextXmlParser::parse()
 					std::string contentChild = readTag();
 					std::string tagName = contentChild.substr(1, contentChild.size() - 2);
 
-					if (tagName.substr(0, 6) == "binary") {
+					if (tagName.starts_with("binary")) {
 						std::stringbuf encoded(readText(false), std::ios_base::in);
 						std::istreambuf_iterator<char> _From(&encoded);
 						std::istreambuf_iterator<char> _To;
@@ -505,12 +496,12 @@ std::unique_ptr<XmlElement> TextXmlParser::parse()
 					}
 					else if (tag_hash == tagName) {
 						std::string hash = readText(false);
-						if (legacyHashes.find(hash) != legacyHashes.end()) {
+						if (legacyHashes.contains(hash)) {
 							hash = legacyHashes[hash];
 						}
 						newElement->setValue(RBX::ContentId(hash.c_str(), *mimeType));
 					}
-					else if (tagName.substr(0, 3) == "url") {
+					else if (tagName.starts_with("url")) {
 						newElement->setValue(RBX::ContentId(readText(true).c_str(), *mimeType));
 					}
 					else if (tag_null == tagName) {
@@ -536,7 +527,7 @@ std::unique_ptr<XmlElement> TextXmlParser::parse()
 				newElement->setValue(readText(true));
 			}
 
-			if (currentElement != NULL) {
+			if (currentElement != nullptr) {
 				currentElement->addChild(newElement);
 			}
 

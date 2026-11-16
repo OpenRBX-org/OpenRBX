@@ -14,7 +14,7 @@ class HealthHud : public GuiItem
 private:
 	std::shared_ptr<Visit> visit;
 
-	virtual void render2d(Adorn* adorn);
+	void render2d(Adorn* adorn) override;
 
 public:
 	HealthHud();

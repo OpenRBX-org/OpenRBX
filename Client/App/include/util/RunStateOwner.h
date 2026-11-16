@@ -8,11 +8,11 @@
 
 #include <atomic>
 #include <condition_variable>
+#include <ctime>
 #include <map>
 #include <memory>
 #include <mutex>
 #include <thread>
-#include <time.h>
 
 namespace RBX {
 
@@ -72,7 +72,7 @@ class RunService : public DescribedCreatable<RunService, Instance, sRunService>,
 				   public Service
 {
 private:
-	typedef std::map<IRunView*, bool> Views;
+	using Views = std::map<IRunView*, bool>;
 
 	RunState runState;
 	std::mutex runMutex;
@@ -96,7 +96,7 @@ public:
 
 	RunService();
 
-	virtual ~RunService();
+	~RunService() override;
 
 	void setRunState(RunState state);
 
@@ -135,7 +135,7 @@ public:
 
 	static Reflection::SignalDesc<RunService, void(float, float)> event_Stepped;
 
-	virtual void onAncestorChanged(const AncestorChanged& event);
+	void onAncestorChanged(const AncestorChanged& event) override;
 
 private:
 	void runProc(std::shared_ptr<DataModel> dataModel);

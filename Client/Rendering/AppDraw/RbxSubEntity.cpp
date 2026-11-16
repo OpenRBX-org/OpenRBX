@@ -65,7 +65,7 @@ void RbxSubEntity::FUN_0067b500(int lodIndex)
 	m_unk0x120 = lodIndex;
 }
 
-const AxisAlignedBox& RbxSubEntity::getLightCapBounds(void) const
+const AxisAlignedBox& RbxSubEntity::getLightCapBounds() const
 {
 	return getWorldBoundingBox();
 }
@@ -75,12 +75,12 @@ Real RbxSubEntity::getPointExtrusionDistance(const Light* l) const
 	return getExtrusionDistance(m_unk0xdc.getTrans(), l);
 }
 
-EdgeData* RbxSubEntity::getEdgeList(void)
+EdgeData* RbxSubEntity::getEdgeList()
 {
 	throw std::exception("RBX RbxSubEntity::getEdgeList(): should not be called");
 }
 
-bool RbxSubEntity::hasEdgeList(void)
+bool RbxSubEntity::hasEdgeList()
 {
 	throw std::exception("RBX RbxSubEntity::hasEdgeList(): should not be called");
 }
@@ -128,8 +128,8 @@ RbxSubEntity::RbxSubEntityShadowRenderable::~RbxSubEntityShadowRenderable()
 {
 	delete mRenderOp.indexData;
 	delete mRenderOp.vertexData;
-	mRenderOp.indexData = NULL;
-	mRenderOp.vertexData = NULL;
+	mRenderOp.indexData = nullptr;
+	mRenderOp.vertexData = nullptr;
 }
 
 void RbxSubEntity::RbxSubEntityShadowRenderable::getWorldTransforms(Matrix4* xform) const
@@ -137,17 +137,17 @@ void RbxSubEntity::RbxSubEntityShadowRenderable::getWorldTransforms(Matrix4* xfo
 	mSubEntity->getWorldTransforms(xform);
 }
 
-const Quaternion& RbxSubEntity::RbxSubEntityShadowRenderable::getWorldOrientation(void) const
+const Quaternion& RbxSubEntity::RbxSubEntityShadowRenderable::getWorldOrientation() const
 {
 	return mSubEntity->getWorldOrientation();
 }
 
-const Vector3& RbxSubEntity::RbxSubEntityShadowRenderable::getWorldPosition(void) const
+const Vector3& RbxSubEntity::RbxSubEntityShadowRenderable::getWorldPosition() const
 {
 	return mSubEntity->getWorldPosition();
 }
 
-bool RbxSubEntity::RbxSubEntityShadowRenderable::isVisible(void) const
+bool RbxSubEntity::RbxSubEntityShadowRenderable::isVisible() const
 {
 	return mSubEntity->isVisible();
 }
@@ -182,13 +182,13 @@ const AxisAlignedBox& RbxSubEntity::getDarkCapBounds(const Light& light, Real di
 	return box;
 }
 
-RbxSubEntity::RbxSubEntity(Entity* parent) : SubEntity(parent, NULL), m_unk0x120(0), m_unk0x128(true)
+RbxSubEntity::RbxSubEntity(Entity* parent) : SubEntity(parent, nullptr), m_unk0x120(0), m_unk0x128(true)
 {
-	m_unk0x12c = NULL;
-	m_unk0x11c[0] = NULL;
+	m_unk0x12c = nullptr;
+	m_unk0x11c[0] = nullptr;
 }
 
-bool RbxSubEntity::getCastShadows(void) const
+bool RbxSubEntity::getCastShadows() const
 {
 	return m_unk0x128;
 }
@@ -198,14 +198,14 @@ void RbxSubEntity::getWorldTransforms(Matrix4* xform) const
 	*xform = m_unk0xdc;
 }
 
-const Quaternion& RbxSubEntity::getWorldOrientation(void) const
+const Quaternion& RbxSubEntity::getWorldOrientation() const
 {
 	LogManager::getSingleton().logMessage("RBX perf warning!", LML_NORMAL, false);
 	static Quaternion orientation = m_unk0xdc.extractQuaternion();
 	return orientation;
 }
 
-const Vector3& RbxSubEntity::getWorldPosition(void) const
+const Vector3& RbxSubEntity::getWorldPosition() const
 {
 	static Vector3 position(m_unk0xdc[0][3], m_unk0xdc[1][3], m_unk0xdc[2][3]);
 	return position;
@@ -222,16 +222,16 @@ Real RbxSubEntity::FUN_0067bcd0() const
 }
 
 RbxSubEntity::RbxSubEntity(Entity* parent, SubMesh* subMesh, int lodIndex)
-	: SubEntity(parent, NULL), m_unk0x120(lodIndex), m_unk0x128(true)
+	: SubEntity(parent, nullptr), m_unk0x120(lodIndex), m_unk0x128(true)
 {
-	m_unk0x11c[0] = NULL;
+	m_unk0x11c[0] = nullptr;
 	if (lodIndex == 0) {
 		mSubMesh = subMesh;
 	}
 	else {
 		m_unk0x11c[m_unk0x120 - 1] = subMesh;
 	}
-	m_unk0x12c = NULL;
+	m_unk0x12c = nullptr;
 }
 
 RbxSubEntity::~RbxSubEntity()
@@ -246,9 +246,9 @@ RbxSubEntity::~RbxSubEntity()
 			throw std::exception("RBX RbxSubEntity dtor(1)");
 		}
 		delete static_cast<Unknown00671c70*>(mSubMesh);
-		mSubMesh = NULL;
+		mSubMesh = nullptr;
 	}
-	mSubMesh = NULL;
+	mSubMesh = nullptr;
 
 	for (int i = 0; i < 1; i++) {
 		if (m_unk0x11c[i]) {
@@ -256,7 +256,7 @@ RbxSubEntity::~RbxSubEntity()
 				throw std::exception("RBX RbxSubEntity dtor (2)");
 			}
 			delete static_cast<Unknown00671c70*>(m_unk0x11c[i]);
-			m_unk0x11c[i] = NULL;
+			m_unk0x11c[i] = nullptr;
 		}
 	}
 }
@@ -299,7 +299,7 @@ ShadowCaster::ShadowRenderableListIterator RbxSubEntity::getShadowVolumeRenderab
 	bool init = m_unk0x130.empty();
 	EdgeData::EdgeGroupList::iterator egi;
 	ShadowRenderableList::iterator si, siend;
-	RbxSubEntityShadowRenderable* esr = NULL;
+	RbxSubEntityShadowRenderable* esr = nullptr;
 	if (init) {
 		m_unk0x130.resize(edgeList->edgeGroups.size());
 	}
@@ -309,7 +309,7 @@ ShadowCaster::ShadowRenderableListIterator RbxSubEntity::getShadowVolumeRenderab
 	for (si = m_unk0x130.begin(); si != siend; ++si, ++egi) {
 		const VertexData* pVertData = egi->vertexData;
 		if (init) {
-			*si = new RbxSubEntityShadowRenderable(NULL, indexBuffer, pVertData, !extrude, this);
+			*si = new RbxSubEntityShadowRenderable(nullptr, indexBuffer, pVertData, !extrude, this);
 		}
 
 		esr = static_cast<RbxSubEntityShadowRenderable*>(*si);

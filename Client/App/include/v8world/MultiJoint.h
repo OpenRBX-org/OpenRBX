@@ -16,10 +16,10 @@ private:
 	void init(int numBreakingConnectors);
 
 protected:
-	virtual void putInKernel(Kernel* _kernel);
-	virtual void removeFromKernel();
+	void putInKernel(Kernel* _kernel) override;
+	void removeFromKernel() override;
 
-	virtual bool isBroken() const;
+	bool isBroken() const override;
 
 	void addToMultiJoint(Point* point0, Point* point1, Connector* connector);
 
@@ -29,7 +29,7 @@ protected:
 
 	float getJointK();
 
-	virtual ~MultiJoint();
+	~MultiJoint() override;
 
 	MultiJoint(int numBreakingConnectors);
 

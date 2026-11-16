@@ -7,8 +7,7 @@
 #include <G3D/ReferenceCount.h>
 #include <G3D/Vector3.h>
 
-namespace RBX {
-namespace View {
+namespace RBX::View {
 
 class FileMesh : public Render::Mesh
 {
@@ -20,7 +19,6 @@ public:
 	static G3D::ReferenceCountedPointer<Render::Mesh> create(const G3D::Vector3& scale, const MeshId meshFile);
 };
 
-} // namespace View
-} // namespace RBX
+} // namespace RBX::View
 
 #endif // RBXVIEW_FILEMESH_H

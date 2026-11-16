@@ -31,13 +31,13 @@ IMPLEMENT_DYNAMIC(CSelectionPropGrid, CPropGrid)
 IMPLEMENT_DYNAMIC(CDataModelPropGrid, CSelectionPropGrid)
 
 template <>
-bool XItem<bool, CXTPPropertyGridItemBool, RBX::Reflection::TypedPropertyDescriptor<bool> >::VTable0xe4()
+bool XItem<bool, CXTPPropertyGridItemBool, RBX::Reflection::TypedPropertyDescriptor<bool>>::VTable0xe4()
 {
 	return GetBool() ? true : false;
 }
 
 template <>
-void XItem<bool, CXTPPropertyGridItemBool, RBX::Reflection::TypedPropertyDescriptor<bool> >::VTable0xe8(
+void XItem<bool, CXTPPropertyGridItemBool, RBX::Reflection::TypedPropertyDescriptor<bool>>::VTable0xe8(
 	const bool& value
 )
 {
@@ -45,9 +45,7 @@ void XItem<bool, CXTPPropertyGridItemBool, RBX::Reflection::TypedPropertyDescrip
 }
 
 template <>
-void XItem<float, CXTPPropertyGridItem, RBX::Reflection::TypedPropertyDescriptor<float> >::VTable0xe8(
-	const float& value
-)
+void XItem<float, CXTPPropertyGridItem, RBX::Reflection::TypedPropertyDescriptor<float>>::VTable0xe8(const float& value)
 {
 	char buffer[32];
 	sprintf(buffer, "%.3g", value);
@@ -55,7 +53,7 @@ void XItem<float, CXTPPropertyGridItem, RBX::Reflection::TypedPropertyDescriptor
 }
 
 template <>
-void XItem<int, CXTPPropertyGridItem, RBX::Reflection::TypedPropertyDescriptor<int> >::VTable0xe8(const int& value)
+void XItem<int, CXTPPropertyGridItem, RBX::Reflection::TypedPropertyDescriptor<int>>::VTable0xe8(const int& value)
 {
 	char buffer[32];
 	sprintf(buffer, "%d", value);
@@ -63,7 +61,7 @@ void XItem<int, CXTPPropertyGridItem, RBX::Reflection::TypedPropertyDescriptor<i
 }
 
 template <>
-G3D::Color3 XItem<G3D::Color3, CXTPPropertyGridItemColor, RBX::Reflection::TypedPropertyDescriptor<G3D::Color3> >::
+G3D::Color3 XItem<G3D::Color3, CXTPPropertyGridItemColor, RBX::Reflection::TypedPropertyDescriptor<G3D::Color3>>::
 	VTable0xe4()
 {
 	COLORREF color = GetColor();
@@ -71,7 +69,7 @@ G3D::Color3 XItem<G3D::Color3, CXTPPropertyGridItemColor, RBX::Reflection::Typed
 }
 
 template <>
-void XItem<G3D::Color3, CXTPPropertyGridItemColor, RBX::Reflection::TypedPropertyDescriptor<G3D::Color3> >::VTable0xe8(
+void XItem<G3D::Color3, CXTPPropertyGridItemColor, RBX::Reflection::TypedPropertyDescriptor<G3D::Color3>>::VTable0xe8(
 	const G3D::Color3& value
 )
 {
@@ -82,7 +80,7 @@ template <>
 RBX::BrickColor XItem<
 	RBX::BrickColor,
 	CPropertyGridItemBrickColor,
-	RBX::Reflection::TypedPropertyDescriptor<RBX::BrickColor> >::VTable0xe4()
+	RBX::Reflection::TypedPropertyDescriptor<RBX::BrickColor>>::VTable0xe4()
 {
 	COLORREF color = GetColor();
 	return RBX::BrickColor::closest(
@@ -91,7 +89,7 @@ RBX::BrickColor XItem<
 }
 
 template <>
-void XItem<RBX::BrickColor, CPropertyGridItemBrickColor, RBX::Reflection::TypedPropertyDescriptor<RBX::BrickColor> >::
+void XItem<RBX::BrickColor, CPropertyGridItemBrickColor, RBX::Reflection::TypedPropertyDescriptor<RBX::BrickColor>>::
 	VTable0xe8(const RBX::BrickColor& value)
 {
 	G3D::Color4uint8 color = value.color4uint8();
@@ -127,7 +125,7 @@ static COLORREF FUN_0043bf30(CString text)
 }
 
 template <>
-void XItem<G3D::Vector3, CXTPPropertyGridItem, RBX::Reflection::TypedPropertyDescriptor<G3D::Vector3> >::VTable0xe8(
+void XItem<G3D::Vector3, CXTPPropertyGridItem, RBX::Reflection::TypedPropertyDescriptor<G3D::Vector3>>::VTable0xe8(
 	const G3D::Vector3& value
 )
 {
@@ -146,14 +144,14 @@ template <>
 void XItem<
 	RBX::Soundscape::SoundId,
 	CXTPPropertyGridItem,
-	RBX::Reflection::TypedPropertyDescriptor<RBX::Soundscape::SoundId> >::
+	RBX::Reflection::TypedPropertyDescriptor<RBX::Soundscape::SoundId>>::
 	VTable0xe8(const RBX::Soundscape::SoundId& value)
 {
 	SetValue(value.c_str());
 }
 
 template <>
-void XItem<RBX::TextureId, CXTPPropertyGridItem, RBX::Reflection::TypedPropertyDescriptor<RBX::TextureId> >::VTable0xe8(
+void XItem<RBX::TextureId, CXTPPropertyGridItem, RBX::Reflection::TypedPropertyDescriptor<RBX::TextureId>>::VTable0xe8(
 	const RBX::TextureId& value
 )
 {
@@ -231,7 +229,7 @@ void CPropertyGridItemBrickColor::OnInplaceButtonDown(CXTPPropertyGridInplaceBut
 	m_pGrid->ClientToScreen(&rect);
 	rect.left = rect.right - 158;
 
-	CXTPPopupToolBar* popup = CXTPPopupToolBar::CreatePopupToolBar(NULL);
+	CXTPPopupToolBar* popup = CXTPPopupToolBar::CreatePopupToolBar(nullptr);
 	CRobloxControlColorSelector* selector = new CRobloxControlColorSelector();
 	popup->GetControls()->Add(selector, 0);
 	if (GetValue() != "") {
@@ -258,13 +256,13 @@ template <>
 RBX::Soundscape::SoundId XItem<
 	RBX::Soundscape::SoundId,
 	CXTPPropertyGridItem,
-	RBX::Reflection::TypedPropertyDescriptor<RBX::Soundscape::SoundId> >::VTable0xe4()
+	RBX::Reflection::TypedPropertyDescriptor<RBX::Soundscape::SoundId>>::VTable0xe4()
 {
 	return (LPCTSTR) GetValue();
 }
 
 template <>
-RBX::TextureId XItem<RBX::TextureId, CXTPPropertyGridItem, RBX::Reflection::TypedPropertyDescriptor<RBX::TextureId> >::
+RBX::TextureId XItem<RBX::TextureId, CXTPPropertyGridItem, RBX::Reflection::TypedPropertyDescriptor<RBX::TextureId>>::
 	VTable0xe4()
 {
 	return (LPCTSTR) GetValue();
@@ -282,7 +280,7 @@ CXTPPropertyGridItem* CPropGrid::FUN_0043cba0(const RBX::Name& category)
 
 void CPropGrid::FUN_0043db00(const RBX::Reflection::ClassDescriptor* classDescriptor)
 {
-	std::lock_guard<std::recursive_mutex> lock(FUN_0043c580());
+	std::scoped_lock lock(FUN_0043c580());
 	std::for_each(
 		classDescriptor->derivedClasses_begin(),
 		classDescriptor->derivedClasses_end(),
@@ -301,7 +299,7 @@ void CPropGrid::FUN_0043db00(const RBX::Reflection::ClassDescriptor* classDescri
 
 void CPropGrid::onEvent(const RBX::Instance* source, RBX::PropertyChanged event)
 {
-	std::lock_guard<std::recursive_mutex> lock(m_unk0x188);
+	std::scoped_lock lock(m_unk0x188);
 	if (!m_unk0x1c1) {
 		std::map<const RBX::Reflection::PropertyDescriptor*, Item*>::const_iterator iter =
 			m_unk0x1a8.find(&event.getDescriptor());
@@ -309,7 +307,7 @@ void CPropGrid::onEvent(const RBX::Instance* source, RBX::PropertyChanged event)
 			m_unk0x1c4.insert(iter->second);
 		}
 
-		std::lock_guard<std::recursive_mutex> lock(m_unk0x188);
+		std::scoped_lock lock(m_unk0x188);
 		if (!m_unk0x1c0) {
 			if (m_hWnd) {
 				::PostMessage(m_hWnd, WM_USER + 101, 0, 0);
@@ -333,7 +331,7 @@ void CPropGrid::Unk0x1d0::FUN_0043e170(RBX::Instance* instance)
 {
 	iterator iter = find(&instance->getDescriptor());
 	if (iter != end()) {
-		std::vector<std::shared_ptr<RBX::Instance> >::iterator found =
+		std::vector<std::shared_ptr<RBX::Instance>>::iterator found =
 			std::find(iter->second.begin(), iter->second.end(), shared_from(instance));
 		if (found != iter->second.end()) {
 			iter->second.erase(found);
@@ -378,7 +376,7 @@ LRESULT CPropGrid::FUN_0043e8a0(WPARAM wParam, LPARAM lParam)
 	std::vector<Item*> items;
 	std::set<Item*> dirty;
 	{
-		std::lock_guard<std::recursive_mutex> lock(m_unk0x188);
+		std::scoped_lock lock(m_unk0x188);
 		if (m_unk0x1c1) {
 			items = m_unk0x198;
 			m_unk0x1c1 = false;
@@ -420,23 +418,23 @@ CPropGrid::Item::Item(const RBX::Reflection::PropertyDescriptor& descriptor, CPr
 
 template <class T, class Base, class Descriptor>
 void XItem<T, Base, Descriptor>::VTable0x00(
-	const std::map<const RBX::Reflection::ClassDescriptor*, std::vector<std::shared_ptr<RBX::Instance> > >& instances
+	const std::map<const RBX::Reflection::ClassDescriptor*, std::vector<std::shared_ptr<RBX::Instance>>>& instances
 )
 {
 	T first;
 	bool hasValue = false;
-	std::map<const RBX::Reflection::ClassDescriptor*, std::vector<std::shared_ptr<RBX::Instance> > >::const_iterator
+	std::map<const RBX::Reflection::ClassDescriptor*, std::vector<std::shared_ptr<RBX::Instance>>>::const_iterator
 		objectsEnd = instances.end();
 	for (std::vector<const RBX::Reflection::ClassDescriptor*>::const_iterator iter = m_unk0x04.begin(),
 																			  end = m_unk0x04.end();
 		 iter != end;
 		 ++iter) {
 		const RBX::Reflection::ClassDescriptor* descriptor = *iter;
-		std::map<const RBX::Reflection::ClassDescriptor*, std::vector<std::shared_ptr<RBX::Instance> > >::const_iterator
+		std::map<const RBX::Reflection::ClassDescriptor*, std::vector<std::shared_ptr<RBX::Instance>>>::const_iterator
 			found = instances.find(descriptor);
 		if (found != objectsEnd) {
-			for (std::vector<std::shared_ptr<RBX::Instance> >::const_iterator instance = found->second.begin(),
-																			  instancesEnd = found->second.end();
+			for (std::vector<std::shared_ptr<RBX::Instance>>::const_iterator instance = found->second.begin(),
+																			 instancesEnd = found->second.end();
 				 instance != instancesEnd;
 				 ++instance) {
 				if (!hasValue) {
@@ -485,18 +483,18 @@ void XItem<T, Base, Descriptor>::FUN_00443670(const T& value)
 		std::unique_ptr<RBX::XmlState> undoState(new RBX::UndoState());
 		std::unique_ptr<RBX::XmlState> redoState(new RBX::RedoState());
 
-		std::map<const RBX::Reflection::ClassDescriptor*, std::vector<std::shared_ptr<RBX::Instance> > >::iterator
+		std::map<const RBX::Reflection::ClassDescriptor*, std::vector<std::shared_ptr<RBX::Instance>>>::iterator
 			objectsEnd = m_unk0x14->m_unk0x1d0.end();
 		std::vector<const RBX::Reflection::ClassDescriptor*>::const_iterator end = m_unk0x04.end();
 		for (std::vector<const RBX::Reflection::ClassDescriptor*>::const_iterator iter = m_unk0x04.begin(); iter != end;
 			 ++iter) {
 			const RBX::Reflection::ClassDescriptor* descriptor = *iter;
 			CPropGrid::Unk0x1d0& objects = m_unk0x14->m_unk0x1d0;
-			std::map<const RBX::Reflection::ClassDescriptor*, std::vector<std::shared_ptr<RBX::Instance> > >::iterator
+			std::map<const RBX::Reflection::ClassDescriptor*, std::vector<std::shared_ptr<RBX::Instance>>>::iterator
 				found = objects.find(descriptor);
 			if (found != objectsEnd) {
-				for (std::vector<std::shared_ptr<RBX::Instance> >::iterator instance = found->second.begin(),
-																			instancesEnd = found->second.end();
+				for (std::vector<std::shared_ptr<RBX::Instance>>::iterator instance = found->second.begin(),
+																		   instancesEnd = found->second.end();
 					 instance != instancesEnd;
 					 ++instance) {
 					undoState->addProperty(RBX::Reflection::Property(*m_unk0x124, instance->get()));
@@ -536,7 +534,7 @@ void XItem<int, CXTPPropertyGridItemEnum, RBX::Reflection::EnumPropertyDescripto
 }
 
 XBoolItem::XBoolItem(const RBX::Reflection::TypedPropertyDescriptor<bool>& descriptor, CPropGrid* grid)
-	: XItem<bool, CXTPPropertyGridItemBool, RBX::Reflection::TypedPropertyDescriptor<bool> >(descriptor, grid)
+	: XItem<bool, CXTPPropertyGridItemBool, RBX::Reflection::TypedPropertyDescriptor<bool>>(descriptor, grid)
 {
 	SetCheckBoxStyle();
 }
@@ -558,7 +556,7 @@ BOOL XBoolItem::OnDrawItemValue(CDC& dc, CRect rcValue)
 		else {
 			state = VTable0xf4() ? CBS_MIXEDNORMAL : (GetBool() ? CBS_CHECKEDNORMAL : CBS_UNCHECKEDNORMAL);
 		}
-		paintManager->m_themeButton.DrawThemeBackground(dc, BP_CHECKBOX, state, rcCheck, 0);
+		paintManager->m_themeButton.DrawThemeBackground(dc, BP_CHECKBOX, state, rcCheck, nullptr);
 	}
 	else {
 		dc.DrawFrameControl(
@@ -572,7 +570,7 @@ BOOL XBoolItem::OnDrawItemValue(CDC& dc, CRect rcValue)
 XBrickColorItem::XBrickColorItem(
 	const RBX::Reflection::TypedPropertyDescriptor<RBX::BrickColor>& descriptor, CPropGrid* grid
 )
-	: XItem<RBX::BrickColor, CPropertyGridItemBrickColor, RBX::Reflection::TypedPropertyDescriptor<RBX::BrickColor> >(
+	: XItem<RBX::BrickColor, CPropertyGridItemBrickColor, RBX::Reflection::TypedPropertyDescriptor<RBX::BrickColor>>(
 		  descriptor, grid
 	  )
 {
@@ -588,11 +586,11 @@ BOOL XBrickColorItem::OnDrawItemValue(CDC& dc, CRect rcValue)
 }
 
 Vector3Item::Vector3Item(const RBX::Reflection::TypedPropertyDescriptor<G3D::Vector3>& descriptor, CPropGrid* grid)
-	: XItem<G3D::Vector3, CXTPPropertyGridItem, RBX::Reflection::TypedPropertyDescriptor<G3D::Vector3> >(
+	: XItem<G3D::Vector3, CXTPPropertyGridItem, RBX::Reflection::TypedPropertyDescriptor<G3D::Vector3>>(
 		  descriptor, grid
 	  )
 {
-	m_unk0x128[0] = m_unk0x128[1] = m_unk0x128[2] = NULL;
+	m_unk0x128[0] = m_unk0x128[1] = m_unk0x128[2] = nullptr;
 }
 
 BOOL Vector3Item::OnAfterEdit(CString& strValue)
@@ -602,10 +600,10 @@ BOOL Vector3Item::OnAfterEdit(CString& strValue)
 }
 
 void Vector3Item::VTable0x00(
-	const std::map<const RBX::Reflection::ClassDescriptor*, std::vector<std::shared_ptr<RBX::Instance> > >& instances
+	const std::map<const RBX::Reflection::ClassDescriptor*, std::vector<std::shared_ptr<RBX::Instance>>>& instances
 )
 {
-	XItem<G3D::Vector3, CXTPPropertyGridItem, RBX::Reflection::TypedPropertyDescriptor<G3D::Vector3> >::VTable0x00(
+	XItem<G3D::Vector3, CXTPPropertyGridItem, RBX::Reflection::TypedPropertyDescriptor<G3D::Vector3>>::VTable0x00(
 		instances
 	);
 	for (int i = 0; i < 3; i++) {
@@ -618,7 +616,7 @@ void Vector3Item::VTable0x00(
 Vector3ComponentItem::Vector3ComponentItem(
 	const RBX::Reflection::TypedPropertyDescriptor<G3D::Vector3>& descriptor, CPropGrid* grid, int component
 )
-	: XItem<G3D::Vector3, CXTPPropertyGridItem, RBX::Reflection::TypedPropertyDescriptor<G3D::Vector3> >(
+	: XItem<G3D::Vector3, CXTPPropertyGridItem, RBX::Reflection::TypedPropertyDescriptor<G3D::Vector3>>(
 		  descriptor, grid
 	  ),
 	  m_unk0x128(component)
@@ -683,23 +681,23 @@ RefItem::RefItem(const RBX::Reflection::RefPropertyDescriptor& descriptor, CProp
 }
 
 void RefItem::VTable0x00(
-	const std::map<const RBX::Reflection::ClassDescriptor*, std::vector<std::shared_ptr<RBX::Instance> > >& instances
+	const std::map<const RBX::Reflection::ClassDescriptor*, std::vector<std::shared_ptr<RBX::Instance>>>& instances
 )
 {
 	RBX::Instance* first;
 	bool hasValue = false;
-	std::map<const RBX::Reflection::ClassDescriptor*, std::vector<std::shared_ptr<RBX::Instance> > >::const_iterator
+	std::map<const RBX::Reflection::ClassDescriptor*, std::vector<std::shared_ptr<RBX::Instance>>>::const_iterator
 		objectsEnd = instances.end();
 	for (std::vector<const RBX::Reflection::ClassDescriptor*>::const_iterator iter = m_unk0x04.begin(),
 																			  end = m_unk0x04.end();
 		 iter != end;
 		 ++iter) {
 		const RBX::Reflection::ClassDescriptor* descriptor = *iter;
-		std::map<const RBX::Reflection::ClassDescriptor*, std::vector<std::shared_ptr<RBX::Instance> > >::const_iterator
+		std::map<const RBX::Reflection::ClassDescriptor*, std::vector<std::shared_ptr<RBX::Instance>>>::const_iterator
 			found = instances.find(descriptor);
 		if (found != objectsEnd) {
-			for (std::vector<std::shared_ptr<RBX::Instance> >::const_iterator instance = found->second.begin(),
-																			  instancesEnd = found->second.end();
+			for (std::vector<std::shared_ptr<RBX::Instance>>::const_iterator instance = found->second.begin(),
+																			 instancesEnd = found->second.end();
 				 instance != instancesEnd;
 				 ++instance) {
 				if (!hasValue) {
@@ -735,7 +733,7 @@ void ScriptItem::OnValueChanged(CString strValue)
 }
 
 void ScriptItem::VTable0x00(
-	const std::map<const RBX::Reflection::ClassDescriptor*, std::vector<std::shared_ptr<RBX::Instance> > >& instances
+	const std::map<const RBX::Reflection::ClassDescriptor*, std::vector<std::shared_ptr<RBX::Instance>>>& instances
 )
 {
 	for (std::vector<const RBX::Reflection::ClassDescriptor*>::const_iterator iter = m_unk0x04.begin(),
@@ -743,7 +741,7 @@ void ScriptItem::VTable0x00(
 		 iter != end;
 		 ++iter) {
 		const RBX::Reflection::ClassDescriptor* descriptor = *iter;
-		std::map<const RBX::Reflection::ClassDescriptor*, std::vector<std::shared_ptr<RBX::Instance> > >::const_iterator
+		std::map<const RBX::Reflection::ClassDescriptor*, std::vector<std::shared_ptr<RBX::Instance>>>::const_iterator
 			found = instances.find(descriptor);
 		if (found != instances.end() && found->second.size() != 0) {
 			SetHidden(FALSE);
@@ -755,7 +753,7 @@ void ScriptItem::VTable0x00(
 
 void ScriptItem::OnInplaceButtonDown(CXTPPropertyGridInplaceButton* pButton)
 {
-	std::map<const RBX::Reflection::ClassDescriptor*, std::vector<std::shared_ptr<RBX::Instance> > >::iterator
+	std::map<const RBX::Reflection::ClassDescriptor*, std::vector<std::shared_ptr<RBX::Instance>>>::iterator
 		objectsEnd = m_unk0x14->m_unk0x1d0.end();
 	for (std::vector<const RBX::Reflection::ClassDescriptor*>::const_iterator iter = m_unk0x04.begin(),
 																			  end = m_unk0x04.end();
@@ -763,11 +761,11 @@ void ScriptItem::OnInplaceButtonDown(CXTPPropertyGridInplaceButton* pButton)
 		 ++iter) {
 		const RBX::Reflection::ClassDescriptor* descriptor = *iter;
 		CPropGrid::Unk0x1d0& objects = m_unk0x14->m_unk0x1d0;
-		std::map<const RBX::Reflection::ClassDescriptor*, std::vector<std::shared_ptr<RBX::Instance> > >::iterator
-			found = objects.find(descriptor);
+		std::map<const RBX::Reflection::ClassDescriptor*, std::vector<std::shared_ptr<RBX::Instance>>>::iterator found =
+			objects.find(descriptor);
 		if (found != objectsEnd) {
-			for (std::vector<std::shared_ptr<RBX::Instance> >::iterator instance = found->second.begin(),
-																		instancesEnd = found->second.end();
+			for (std::vector<std::shared_ptr<RBX::Instance>>::iterator instance = found->second.begin(),
+																	   instancesEnd = found->second.end();
 				 instance != instancesEnd;
 				 ++instance) {
 				if (RBX::Script* script = dynamic_cast<RBX::Script*>(instance->get())) {
@@ -820,22 +818,20 @@ void CPropGrid::FUN_00442e20(
 		const RBX::Reflection::TypedPropertyDescriptor<float>* d =
 			dynamic_cast<const RBX::Reflection::TypedPropertyDescriptor<float>*>(descriptor)
 	) {
-		FUN_0043e6b0(
-			new XItem<float, CXTPPropertyGridItem, RBX::Reflection::TypedPropertyDescriptor<float> >(*d, this)
-		);
+		FUN_0043e6b0(new XItem<float, CXTPPropertyGridItem, RBX::Reflection::TypedPropertyDescriptor<float>>(*d, this));
 	}
 	else if (
 		const RBX::Reflection::TypedPropertyDescriptor<int>* d =
 			dynamic_cast<const RBX::Reflection::TypedPropertyDescriptor<int>*>(descriptor)
 	) {
-		FUN_0043e6b0(new XItem<int, CXTPPropertyGridItem, RBX::Reflection::TypedPropertyDescriptor<int> >(*d, this));
+		FUN_0043e6b0(new XItem<int, CXTPPropertyGridItem, RBX::Reflection::TypedPropertyDescriptor<int>>(*d, this));
 	}
 	else if (
 		const RBX::Reflection::TypedPropertyDescriptor<G3D::Color3>* d =
 			dynamic_cast<const RBX::Reflection::TypedPropertyDescriptor<G3D::Color3>*>(descriptor)
 	) {
 		FUN_0043e6b0(
-			new XItem<G3D::Color3, CXTPPropertyGridItemColor, RBX::Reflection::TypedPropertyDescriptor<G3D::Color3> >(
+			new XItem<G3D::Color3, CXTPPropertyGridItemColor, RBX::Reflection::TypedPropertyDescriptor<G3D::Color3>>(
 				*d, this
 			)
 		);
@@ -906,11 +902,11 @@ void CSelectionPropGrid::onEvent(const RBX::Selection* source, RBX::SelectionCha
 		FUN_0043e7f0(event.removedItem);
 	}
 
-	std::lock_guard<std::recursive_mutex> lock(m_unk0x188);
+	std::scoped_lock lock(m_unk0x188);
 	m_unk0x1c1 = true;
 	m_unk0x1c4.clear();
 
-	std::lock_guard<std::recursive_mutex> lock2(m_unk0x188);
+	std::scoped_lock lock2(m_unk0x188);
 	if (!m_unk0x1c0) {
 		if (m_hWnd) {
 			::PostMessage(m_hWnd, WM_USER + 101, 0, 0);
@@ -921,7 +917,7 @@ void CSelectionPropGrid::onEvent(const RBX::Selection* source, RBX::SelectionCha
 
 void CSelectionPropGrid::FUN_00445580(RBX::Selection* selection)
 {
-	std::lock_guard<std::recursive_mutex> lock(m_unk0x188);
+	std::scoped_lock lock(m_unk0x188);
 
 	if (m_unk0x1e0) {
 		RBX::stopListening<RBX::Selection, RBX::SelectionChanged>(m_unk0x1e0, this);
@@ -943,7 +939,7 @@ void CSelectionPropGrid::FUN_00445580(RBX::Selection* selection)
 
 	m_unk0x1c1 = true;
 
-	std::lock_guard<std::recursive_mutex> lock2(m_unk0x188);
+	std::scoped_lock lock2(m_unk0x188);
 	if (!m_unk0x1c0) {
 		if (m_hWnd) {
 			::PostMessage(m_hWnd, WM_USER + 101, 0, 0);
@@ -958,13 +954,13 @@ void CDataModelPropGrid::VTable0x00(
 {
 	if (m_unk0x194) {
 		RBX::DataModel::Lock lock(m_unk0x194);
-		FUN_00445580(NULL);
+		FUN_00445580(nullptr);
 	}
 
 	m_unk0x194 = newDataModel.get();
 	if (m_unk0x194) {
 		RBX::DataModel::Lock lock(m_unk0x194);
-		FUN_00445580(m_unk0x194 ? m_unk0x194->create<RBX::Selection>() : NULL);
+		FUN_00445580(m_unk0x194 ? m_unk0x194->create<RBX::Selection>() : nullptr);
 	}
 }
 
@@ -972,12 +968,11 @@ void SoundItem::VTable0xf8()
 {
 	CString filter;
 	filter.LoadString(134);
-	CFileDialog dialog(TRUE, NULL, NULL, 0, filter, NULL, 0);
+	CFileDialog dialog(TRUE, nullptr, nullptr, 0, filter, nullptr, 0);
 	if (dialog.DoModal() == IDOK) {
-		RBX::Soundscape::SoundId id = RBX::ContentProvider::singleton().registerContent(
-			std::ifstream((LPCTSTR) dialog.GetPathName(), std::ios::in | std::ios::binary),
-			RBX::Name::declare("audio/x-wav", -1)
-		);
+		std::ifstream stream((LPCTSTR) dialog.GetPathName(), std::ios::in | std::ios::binary);
+		RBX::Soundscape::SoundId id =
+			RBX::ContentProvider::singleton().registerContent(stream, RBX::Name::declare("audio/x-wav", -1));
 		FUN_00443670(id);
 	}
 }
@@ -986,7 +981,7 @@ void TextureItem::VTable0xf8()
 {
 	CString filter;
 	filter.LoadString(132);
-	CFileDialog dialog(TRUE, NULL, NULL, 0, filter, NULL, 0);
+	CFileDialog dialog(TRUE, nullptr, nullptr, 0, filter, nullptr, 0);
 	if (dialog.DoModal() == IDOK) {
 		std::ifstream stream((LPCTSTR) dialog.GetPathName(), std::ios::in | std::ios::binary);
 		RBX::TextureId id =
@@ -998,35 +993,33 @@ void TextureItem::VTable0xf8()
 // clang-format off
 BEGIN_MESSAGE_MAP(CPropGrid, CXTPPropertyGrid)
 	ON_WM_CREATE()
-	ON_MESSAGE(WM_USER + 101, FUN_0043e8a0)
+	ON_MESSAGE(WM_USER + 101, &CPropGrid::FUN_0043e8a0)
 END_MESSAGE_MAP()
 // clang-format on
 
-CPropGrid::~CPropGrid()
-{
-}
+CPropGrid::~CPropGrid() = default;
 
-CPropGrid::CPropGrid() : m_unk0x194(NULL), m_unk0x1c0(false), m_unk0x1c1(false)
+CPropGrid::CPropGrid() : m_unk0x194(nullptr), m_unk0x1c0(false), m_unk0x1c1(false)
 {
 	m_bHelpVisible = FALSE;
 }
 
-template class XItem<float, CXTPPropertyGridItem, RBX::Reflection::TypedPropertyDescriptor<float> >;
-template class XItem<int, CXTPPropertyGridItem, RBX::Reflection::TypedPropertyDescriptor<int> >;
-template class XItem<bool, CXTPPropertyGridItemBool, RBX::Reflection::TypedPropertyDescriptor<bool> >;
-template class XItem<G3D::Color3, CXTPPropertyGridItemColor, RBX::Reflection::TypedPropertyDescriptor<G3D::Color3> >;
-template class XItem<G3D::Vector3, CXTPPropertyGridItem, RBX::Reflection::TypedPropertyDescriptor<G3D::Vector3> >;
+template class XItem<float, CXTPPropertyGridItem, RBX::Reflection::TypedPropertyDescriptor<float>>;
+template class XItem<int, CXTPPropertyGridItem, RBX::Reflection::TypedPropertyDescriptor<int>>;
+template class XItem<bool, CXTPPropertyGridItemBool, RBX::Reflection::TypedPropertyDescriptor<bool>>;
+template class XItem<G3D::Color3, CXTPPropertyGridItemColor, RBX::Reflection::TypedPropertyDescriptor<G3D::Color3>>;
+template class XItem<G3D::Vector3, CXTPPropertyGridItem, RBX::Reflection::TypedPropertyDescriptor<G3D::Vector3>>;
 template class XItem<
 	RBX::BrickColor,
 	CPropertyGridItemBrickColor,
-	RBX::Reflection::TypedPropertyDescriptor<RBX::BrickColor> >;
+	RBX::Reflection::TypedPropertyDescriptor<RBX::BrickColor>>;
 template class XItem<int, CXTPPropertyGridItemEnum, RBX::Reflection::EnumPropertyDescriptor>;
 template class XItem<std::string, CXTPPropertyGridItem, RBX::Reflection::PropertyDescriptor>;
 template class XItem<
 	RBX::Soundscape::SoundId,
 	CXTPPropertyGridItem,
-	RBX::Reflection::TypedPropertyDescriptor<RBX::Soundscape::SoundId> >;
-template class XItem<RBX::TextureId, CXTPPropertyGridItem, RBX::Reflection::TypedPropertyDescriptor<RBX::TextureId> >;
+	RBX::Reflection::TypedPropertyDescriptor<RBX::Soundscape::SoundId>>;
+template class XItem<RBX::TextureId, CXTPPropertyGridItem, RBX::Reflection::TypedPropertyDescriptor<RBX::TextureId>>;
 
 template const RBX::FactoryProduct<RBX::Soundscape::SoundChannel, RBX::Instance, RBX::Soundscape::sSoundChannel>::
 	Creator RBX::FactoryProduct<RBX::Soundscape::SoundChannel, RBX::Instance, RBX::Soundscape::sSoundChannel>::creator;

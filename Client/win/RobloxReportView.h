@@ -37,7 +37,7 @@ public:
 		public:
 			CNameItem(RBX::Stats::Item* item, std::shared_ptr<RBX::DataModel> dataModel);
 
-			virtual CString GetCaption(CXTPReportColumn* pColumn);
+			CString GetCaption(CXTPReportColumn* pColumn) override;
 
 		private:
 			RBX::Stats::Item* m_unk0x84;
@@ -48,18 +48,18 @@ public:
 		public:
 			CValueItem(RBX::Stats::Item* item, std::shared_ptr<RBX::DataModel> dataModel);
 
-			virtual CString GetCaption(CXTPReportColumn* pColumn);
+			CString GetCaption(CXTPReportColumn* pColumn) override;
 
 		private:
 			RBX::Stats::Item* m_unk0x84;
 		};
 
 		CStatsItemRecord(std::shared_ptr<RBX::Stats::Item> item, std::shared_ptr<RBX::DataModel> dataModel);
-		virtual ~CStatsItemRecord();
+		~CStatsItemRecord() override;
 
 	protected:
-		virtual void VTable0x08(const RBX::Instance* source, RBX::ChildRemoved event);
-		virtual void VTable0x08(const RBX::Instance* source, RBX::ChildAdded event);
+		void VTable0x08(const RBX::Instance* source, RBX::ChildRemoved event) override;
+		void VTable0x08(const RBX::Instance* source, RBX::ChildAdded event) override;
 
 	public:
 		std::shared_ptr<RBX::Stats::Item> m_unk0x98;
@@ -69,16 +69,16 @@ protected:
 	CRobloxReportView();
 
 public:
-	virtual ~CRobloxReportView();
+	~CRobloxReportView() override;
 
-	virtual void OnInitialUpdate();
+	void OnInitialUpdate() override;
 
 	void FUN_0045b450();
 	void FUN_0045cc90(std::shared_ptr<RBX::DataModel> dataModel);
 
 protected:
-	virtual void VTable0x08(const RBX::Instance* source, RBX::ChildRemoved event);
-	virtual void VTable0x08(const RBX::Instance* source, RBX::ChildAdded event);
+	void VTable0x08(const RBX::Instance* source, RBX::ChildRemoved event) override;
+	void VTable0x08(const RBX::Instance* source, RBX::ChildAdded event) override;
 
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
@@ -98,7 +98,7 @@ class CRobloxReportDocView : public CRobloxReportView
 protected:
 	CRobloxReportDocView() {}
 
-	virtual void OnActivateView(BOOL bActivate, CView* pActivateView, CView* pDeactiveView);
+	void OnActivateView(BOOL bActivate, CView* pActivateView, CView* pDeactiveView) override;
 };
 
 class CRobloxReportPaneView : public CRobloxReportView, public ActiveDocView
@@ -109,10 +109,12 @@ protected:
 	CRobloxReportPaneView();
 
 public:
-	virtual void OnInitialUpdate();
+	void OnInitialUpdate() override;
 
 protected:
-	virtual void VTable0x00(std::shared_ptr<RBX::DataModel> newDataModel, std::shared_ptr<RBX::DataModel> oldDataModel);
+	void VTable0x00(
+		std::shared_ptr<RBX::DataModel> newDataModel, std::shared_ptr<RBX::DataModel> oldDataModel
+	) override;
 
 	DECLARE_MESSAGE_MAP()
 };

@@ -20,8 +20,8 @@ public:
 	{
 	}
 
-	virtual bool isEnabled() const;
-	virtual void doIt(RBX::IDataState* dataState);
+	bool isEnabled() const override;
+	void doIt(RBX::IDataState* dataState) override;
 
 private:
 	CRobloxDoc* m_unk0x0c;
@@ -35,7 +35,7 @@ public:
 	{
 	}
 
-	virtual void doIt(RBX::IDataState* dataState);
+	void doIt(RBX::IDataState* dataState) override;
 
 private:
 	CRobloxDoc* m_unk0x0c;
@@ -59,22 +59,22 @@ protected:
 	CRobloxDoc();
 
 public:
-	virtual ~CRobloxDoc();
+	~CRobloxDoc() override;
 
 	RBX::VerbContainer* FUN_004558a0();
 	void FUN_00456c50(int id, RBX::Verb* verb);
 	void FUN_00456d30();
 
-	virtual void SetTitle(LPCTSTR lpszTitle);
-	virtual BOOL IsModified();
-	virtual void SetModifiedFlag(BOOL bModified = TRUE);
-	virtual void DeleteContents();
-	virtual BOOL OnNewDocument();
-	virtual BOOL OnOpenDocument(LPCTSTR lpszPathName);
-	virtual BOOL OnSaveDocument(LPCTSTR lpszPathName);
-	virtual void OnCloseDocument();
-	virtual BOOL SaveModified();
-	virtual BOOL DoSave(LPCTSTR lpszPathName, BOOL bReplace = TRUE);
+	void SetTitle(LPCTSTR lpszTitle) override;
+	BOOL IsModified() override;
+	void SetModifiedFlag(BOOL bModified = TRUE) override;
+	void DeleteContents() override;
+	BOOL OnNewDocument() override;
+	BOOL OnOpenDocument(LPCTSTR lpszPathName) override;
+	BOOL OnSaveDocument(LPCTSTR lpszPathName) override;
+	void OnCloseDocument() override;
+	BOOL SaveModified() override;
+	BOOL DoSave(LPCTSTR lpszPathName, BOOL bReplace = TRUE) override;
 	BOOL FUN_00459950(std::string p_unk0x04);
 	void FUN_00459c80();
 	void FUN_00459da0();

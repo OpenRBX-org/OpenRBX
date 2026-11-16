@@ -10,10 +10,10 @@ namespace RBX {
 
 void Body::updatePV() const
 {
-	if (parent != NULL && stateIndex != root->getStateIndex()) {
+	if (parent != nullptr && stateIndex != root->getStateIndex()) {
 		const PV& parentPv = parent->getPV();
 
-		pv = parentPv.pvAtLocalCoord(link != NULL ? link->getChildInParent() : meInParent);
+		pv = parentPv.pvAtLocalCoord(link != nullptr ? link->getChildInParent() : meInParent);
 
 		stateIndex = root->getStateIndex();
 	}
@@ -39,20 +39,20 @@ void Body::advanceStateIndex()
 
 void Body::makeCofmDirty()
 {
-	if (cofm == NULL || !cofm->getIsDirty()) {
+	if (cofm == nullptr || !cofm->getIsDirty()) {
 
-		if (parent != NULL) {
+		if (parent != nullptr) {
 
 			parent->makeCofmDirty();
 		}
 		else {
 
-			if (simBody != NULL) {
+			if (simBody != nullptr) {
 				simBody->makeDirty();
 			}
 		}
 
-		if (cofm != NULL) {
+		if (cofm != nullptr) {
 			cofm->makeDirty();
 		}
 	}
@@ -67,18 +67,18 @@ void Body::step(float dt, bool throttling)
 
 	simBody->step(dt);
 
-	pv = cofm == NULL ? simBody->getPV() : simBody->getOwnerPV();
+	pv = cofm == nullptr ? simBody->getPV() : simBody->getOwnerPV();
 
 	stateIndex = getNextStateIndex();
 }
 
 void Body::setPv(const PV& _pv)
 {
-	if (parent == NULL) {
+	if (parent == nullptr) {
 
 		pv = _pv;
 
-		if (simBody != NULL) {
+		if (simBody != nullptr) {
 			simBody->makeDirty();
 		}
 
@@ -88,11 +88,11 @@ void Body::setPv(const PV& _pv)
 
 void Body::setVelocity(const Velocity& worldVelocity)
 {
-	if (parent == NULL) {
+	if (parent == nullptr) {
 		pv.velocity = worldVelocity;
 		advanceStateIndex();
 
-		if (simBody != NULL) {
+		if (simBody != nullptr) {
 			simBody->makeDirty();
 		}
 	}
@@ -118,13 +118,13 @@ void Body::setMoment(const Matrix3& _momentInBody)
 
 void Body::setMeInParent(const CoordinateFrame& _meInParent)
 {
-	if (link != NULL) {
+	if (link != nullptr) {
 
-		link->setBody(NULL);
-		link = NULL;
+		link->setBody(nullptr);
+		link = nullptr;
 	}
 
-	if (parent != NULL) {
+	if (parent != nullptr) {
 		meInParent = _meInParent;
 		makeCofmDirty();
 		root->advanceStateIndex();
@@ -133,11 +133,11 @@ void Body::setMeInParent(const CoordinateFrame& _meInParent)
 
 void Body::setMeInParent(Link* _link)
 {
-	if (link != NULL && link != _link) {
-		link->setBody(NULL);
+	if (link != nullptr && link != _link) {
+		link->setBody(nullptr);
 	}
 
-	if (parent != NULL) {
+	if (parent != nullptr) {
 		link = _link;
 		_link->setBody(this);
 		makeCofmDirty();
@@ -152,7 +152,7 @@ void Body::setCoordinateFrame(const CoordinateFrame& worldCoord)
 
 Vector3 Body::getBranchCofmPos() const
 {
-	return cofm != NULL ? getPV().position.pointToWorldSpace(cofm->getCofmInBody()) : getPV().position.translation;
+	return cofm != nullptr ? getPV().position.pointToWorldSpace(cofm->getCofmInBody()) : getPV().position.translation;
 }
 
 CoordinateFrame Body::getBranchCofmCoordinateFrame() const
@@ -192,7 +192,7 @@ void Body::onChildRemoved(Body* child)
 
 	if (numChildren() == 0) {
 		delete cofm;
-		cofm = NULL;
+		cofm = nullptr;
 	}
 
 	makeCofmDirty();
@@ -204,7 +204,7 @@ void Body::onChildAdded(Body* child)
 
 	children.fastAppend(child);
 
-	if (cofm == NULL) {
+	if (cofm == nullptr) {
 		cofm = new Cofm(this);
 	}
 }
@@ -213,22 +213,22 @@ void Body::setParent(Body* newParent)
 {
 	if (parent != newParent) {
 
-		if (link != NULL) {
-			link->setBody(NULL);
-			link = NULL;
+		if (link != nullptr) {
+			link->setBody(nullptr);
+			link = nullptr;
 		}
 
-		if (parent != NULL) {
+		if (parent != nullptr) {
 			parent->onChildRemoved(this);
 		}
 		else {
 			delete simBody;
-			simBody = NULL;
+			simBody = nullptr;
 		}
 
 		parent = newParent;
 
-		if (newParent != NULL) {
+		if (newParent != nullptr) {
 			newParent->onChildAdded(this);
 		}
 		else {
@@ -244,7 +244,7 @@ void Body::setParent(Body* newParent)
 }
 
 Body::Body()
-	: root(NULL), parent(NULL), index(-1), cofm(NULL), simBody(NULL), canThrottle(true), link(NULL),
+	: root(nullptr), parent(nullptr), index(-1), cofm(nullptr), simBody(nullptr), canThrottle(true), link(nullptr),
 	  moment(Matrix3::identity()), mass(0.0f), stateIndex(getNextStateIndex())
 {
 	root = this;
@@ -253,12 +253,12 @@ Body::Body()
 
 Body::~Body()
 {
-	if (parent != NULL) {
-		setParent(NULL);
+	if (parent != nullptr) {
+		setParent(nullptr);
 	}
 
 	delete simBody;
-	simBody = NULL;
+	simBody = nullptr;
 }
 
 Body* Body::getWorldBody()

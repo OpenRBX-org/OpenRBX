@@ -9,16 +9,16 @@ template <class Source, class Event, class Source2, class Event2>
 class FilteredListener : public MarshaledListener<Source, Event, Source2, Event2>
 {
 protected:
-	typedef MarshaledListener<Source, Event, Source2, Event2> Base;
+	using Base = MarshaledListener<Source, Event, Source2, Event2>;
 
-	virtual void VTable0x0c(const Source* source, Event event) throw()
+	void VTable0x0c(const Source* source, Event event) noexcept override
 	{
 		for (typename std::vector<typename Base::EventData*>::iterator it = this->m_unk0x04.begin();
 			 it != this->m_unk0x04.end();
 			 ++it) {
 			if (VTable0x10(source, event, (*it)->m_unk0x04.get(), (*it)->m_unk0x10)) {
 				if ((*it)->m_unk0x04.get() != source) {
-					(*it)->FUN_0045b7d0(NULL);
+					(*it)->FUN_0045b7d0(nullptr);
 				}
 				return;
 			}

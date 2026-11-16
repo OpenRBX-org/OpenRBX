@@ -24,11 +24,11 @@ protected:
 public:
 	Message();
 
-	virtual bool shouldRender2d() const { return true; }
+	bool shouldRender2d() const override { return true; }
 
-	virtual void render2d(Adorn* adorn);
+	void render2d(Adorn* adorn) override;
 
-	virtual bool askSetParent(const Instance* instance) const { return true; }
+	bool askSetParent(const Instance* instance) const override { return true; }
 
 	const std::string& getText() const { return text; }
 
@@ -38,7 +38,7 @@ public:
 class Hint : public DescribedCreatable<Hint, Message, sHint>
 {
 private:
-	virtual void render2d(Adorn* adorn);
+	void render2d(Adorn* adorn) override;
 
 public:
 };

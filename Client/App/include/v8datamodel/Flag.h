@@ -37,9 +37,9 @@ private:
 	void doUglyPeriodicCloneHack();
 
 protected:
-	virtual bool canUnequip() { return false; }
+	bool canUnequip() override { return false; }
 
-	virtual bool canBePickedUpByPlayer(Network::Player* p);
+	bool canBePickedUpByPlayer(Network::Player* p) override;
 
 public:
 	BrickColor teamColor;
@@ -48,12 +48,12 @@ public:
 
 	void setTeamColor(BrickColor value);
 
-	virtual void onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider);
+	void onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider) override;
 
 	Flag();
-	virtual ~Flag();
+	~Flag() override;
 
-	virtual void onChildAdded(Instance* child);
+	void onChildAdded(Instance* child) override;
 };
 
 } // namespace RBX

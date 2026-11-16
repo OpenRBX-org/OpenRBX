@@ -25,38 +25,38 @@ private:
 	static const G3D::Array<const Primitive*>* toConstPrimitives(const G3D::Array<Primitive*>*);
 
 public:
-	static bool notJoined(const std::vector<std::weak_ptr<PartInstance> >&);
-	static bool notJoinedToOutsiders(const std::vector<std::weak_ptr<PartInstance> >&);
-	static void unJoinFromOutsiders(const std::vector<std::weak_ptr<PartInstance> >& parts);
-	static void joinToOutsiders(const std::vector<std::weak_ptr<PartInstance> >& parts);
-	static void unJoin(const std::vector<std::weak_ptr<PartInstance> >&);
-	static void join(const std::vector<std::weak_ptr<PartInstance> >& parts);
-	static void unJoinAndSetDragging(const std::vector<std::weak_ptr<PartInstance> >& parts);
-	static void joinAndStopDragging(const std::vector<std::weak_ptr<PartInstance> >& parts);
-	static void clean(const std::vector<std::weak_ptr<PartInstance> >& parts);
+	static bool notJoined(const std::vector<std::weak_ptr<PartInstance>>&);
+	static bool notJoinedToOutsiders(const std::vector<std::weak_ptr<PartInstance>>&);
+	static void unJoinFromOutsiders(const std::vector<std::weak_ptr<PartInstance>>& parts);
+	static void joinToOutsiders(const std::vector<std::weak_ptr<PartInstance>>& parts);
+	static void unJoin(const std::vector<std::weak_ptr<PartInstance>>&);
+	static void join(const std::vector<std::weak_ptr<PartInstance>>& parts);
+	static void unJoinAndSetDragging(const std::vector<std::weak_ptr<PartInstance>>& parts);
+	static void joinAndStopDragging(const std::vector<std::weak_ptr<PartInstance>>& parts);
+	static void clean(const std::vector<std::weak_ptr<PartInstance>>& parts);
 	static void clean(PartInstance* part);
 	static void move(
-		const std::vector<std::weak_ptr<PartInstance> >& parts, G3D::CoordinateFrame start, G3D::CoordinateFrame end
+		const std::vector<std::weak_ptr<PartInstance>>& parts, G3D::CoordinateFrame start, G3D::CoordinateFrame end
 	);
 	static void alignToGrid(PartInstance*);
 	static void moveAndClean(PartInstance* part, const G3D::Vector3& delta);
 	static void pvsToParts(
-		const std::vector<PVInstance*>& pvInstances, std::vector<std::weak_ptr<PartInstance> >& parts
+		const std::vector<PVInstance*>& pvInstances, std::vector<std::weak_ptr<PartInstance>>& parts
 	);
 	static void instancesToParts(
-		const std::vector<Instance*>& instances, std::vector<std::weak_ptr<PartInstance> >& parts
+		const std::vector<Instance*>& instances, std::vector<std::weak_ptr<PartInstance>>& parts
 	);
 	static World* partsToPrimitives(
-		const std::vector<std::weak_ptr<PartInstance> >& parts, G3D::Array<Primitive*>& primitives
+		const std::vector<std::weak_ptr<PartInstance>>& parts, G3D::Array<Primitive*>& primitives
 	);
-	static Extents computeExtents(const std::vector<std::weak_ptr<PartInstance> >& parts);
+	static Extents computeExtents(const std::vector<std::weak_ptr<PartInstance>>& parts);
 	static bool hitObjectOrPlane(
 		const ContactManager& contactManager,
 		const G3D::Ray& unitSearchRay,
 		const G3D::Array<Primitive*>* ignorePrims,
 		G3D::Vector3& hit
 	);
-	static bool anyPartAlive(const std::vector<std::weak_ptr<PartInstance> >& parts);
+	static bool anyPartAlive(const std::vector<std::weak_ptr<PartInstance>>& parts);
 	static void getPrimitives(const Instance*, std::vector<Primitive*>&);
 
 	static void getPrimitives2(std::shared_ptr<Instance> instance, std::vector<Primitive*>& primitives)

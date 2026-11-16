@@ -1,7 +1,6 @@
 #include "renderlib/RenderScene.h"
 
-namespace RBX {
-namespace Render {
+namespace RBX::Render {
 
 static float detailLevel(float x, float lo, float hi)
 {
@@ -187,7 +186,7 @@ void RenderScene::classifyProxies()
 	for (int i = 0; i < proxyArray.size(); i++) {
 		RenderSurface* ptr = &proxyArray[i];
 
-		if (ptr->material != NULL) {
+		if (ptr->material != nullptr) {
 			if (ptr->material->transparent() > 0) {
 				transparentProxyArray.append(ptr);
 			}
@@ -202,9 +201,7 @@ void RenderScene::classifyProxies()
 	}
 }
 
-RenderScene::~RenderScene()
-{
-}
+RenderScene::~RenderScene() = default;
 
 void RenderScene::presetLighting(
 	G3D::ReferenceCountedPointer<G3D::Sky> sky,
@@ -306,7 +303,7 @@ void RenderScene::allocateProxies(G3D::RenderDevice* rd, const G3D::GCamera& cam
 	for (int p = 0; p < chunkArray.size(); p++) {
 		Chunk* chunk = chunkArray[p].getPointer();
 
-		if (chunk == NULL) {
+		if (chunk == nullptr) {
 			continue;
 		}
 
@@ -332,7 +329,7 @@ void RenderScene::allocateProxies(G3D::RenderDevice* rd, const G3D::GCamera& cam
 				shadowProxyArray.resize(shadowProxyArray.size() + 1, false);
 
 				RenderSurface& shadowProxy = shadowProxyArray.last();
-				shadowProxy.material = NULL;
+				shadowProxy.material = nullptr;
 				shadowProxy.cframe = cframe;
 				shadowProxy.mesh = chunk->getMesh()->dropShadowMesh().getPointer();
 				shadowProxy.fullMesh = chunk->getMesh();
@@ -351,7 +348,7 @@ void RenderScene::allocateProxies(G3D::RenderDevice* rd, const G3D::GCamera& cam
 
 			proxy.material = chunk->getMaterial()->detailLevel(lvl);
 
-			if (proxy.material != NULL) {
+			if (proxy.material != nullptr) {
 				proxy.material->baseTexture(rd);
 				proxy.mesh = chunk->getMesh()->detailLevel(lvl).getPointer();
 				proxyArray.append(proxy);
@@ -514,5 +511,4 @@ RenderScene::RenderScene()
 	desiredLighting = lighting = G3D::Lighting::create();
 }
 
-} // namespace Render
-} // namespace RBX
+} // namespace RBX::Render

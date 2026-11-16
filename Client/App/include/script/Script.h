@@ -20,7 +20,7 @@ class Script : public DescribedCreatable<Script, Instance, sScript>
 {
 public:
 	Script();
-	virtual ~Script();
+	~Script() override;
 
 	class Slot
 	{
@@ -46,12 +46,12 @@ public:
 	static const Reflection::PropDescriptor<Script, ContentId> prop_SourceCodeId;
 	static Reflection::BoundProp<bool, 1> prop_Disabled;
 
-	virtual bool askSetParent(const Instance* instance) const { return true; }
+	bool askSetParent(const Instance* instance) const override { return true; }
 	bool isCodeEmbedded() const;
 
 protected:
-	virtual void onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider);
-	virtual void onAncestorChanged(const AncestorChanged& event);
+	void onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider) override;
+	void onAncestorChanged(const AncestorChanged& event) override;
 
 private:
 	std::shared_ptr<const std::string> embeddedSource;
@@ -65,7 +65,7 @@ class LocalScript : public DescribedCreatable<LocalScript, Script, sLocalScript>
 public:
 	LocalScript();
 
-	virtual ~LocalScript() {}
+	~LocalScript() override = default;
 };
 
 class ScriptContext;

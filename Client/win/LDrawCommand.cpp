@@ -4,12 +4,9 @@
 
 #include <cstdlib>
 
-namespace RBX {
-namespace LDraw2Lua {
+namespace RBX::LDraw2Lua {
 
-LuaObjectWriter::~LuaObjectWriter()
-{
-}
+LuaObjectWriter::~LuaObjectWriter() = default;
 
 LDrawCommand::LDrawCommand(LDraw2RobloxMapRoot* p_unk0x04) : m_unk0x04(p_unk0x04)
 {
@@ -31,9 +28,7 @@ LDrawCommand::LDrawCommand(LDraw2RobloxMapRoot* p_unk0x04) : m_unk0x04(p_unk0x04
 	std::string text("");
 }
 
-LDrawCommand::~LDrawCommand()
-{
-}
+LDrawCommand::~LDrawCommand() = default;
 
 bool LDrawCommand::FUN_00473330(std::ostream& stream, const Unknown00473110* p_unk0x08)
 {
@@ -115,5 +110,4 @@ bool LDrawCommand::VTable0x04(std::ostream& stream, std::string p_unk0x08)
 	return false;
 }
 
-} // namespace LDraw2Lua
-} // namespace RBX
+} // namespace RBX::LDraw2Lua

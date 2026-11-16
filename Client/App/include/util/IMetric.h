@@ -9,7 +9,7 @@ class __declspec(novtable) IMetric
 {
 public:
 	IMetric() {}
-	virtual ~IMetric() {}
+	virtual ~IMetric() = default;
 
 	virtual std::string getMetric(const std::string&) const = 0;
 };

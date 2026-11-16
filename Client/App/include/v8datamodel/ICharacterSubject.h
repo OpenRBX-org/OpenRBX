@@ -29,10 +29,10 @@ private:
 		const CoordinateFrame& cameraFocus, const CoordinateFrame& cameraGoal, const float distance
 	);
 
-	virtual bool zoom(const float in, CoordinateFrame& cameraGoal, CoordinateFrame& cameraFocus);
-	virtual void stepGoalAndFocus(
+	bool zoom(const float in, CoordinateFrame& cameraGoal, CoordinateFrame& cameraFocus) override;
+	void stepGoalAndFocus(
 		CoordinateFrame& cameraGoal, CoordinateFrame& cameraFocus, bool cameraExternallyAdjusted
-	);
+	) override;
 
 public:
 	ICharacterSubject();

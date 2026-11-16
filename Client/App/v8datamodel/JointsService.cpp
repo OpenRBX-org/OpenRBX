@@ -20,7 +20,7 @@ void JointsService::onEvent(const World* source, AutoDestroy event)
 {
 	IJointOwner* owner = event.joint->getJointOwner();
 	if (owner) {
-		static_cast<JointInstance*>(owner)->setParent(NULL);
+		static_cast<JointInstance*>(owner)->setParent(nullptr);
 	}
 }
 
@@ -66,11 +66,11 @@ void JointsService::onServiceProvider(const ServiceProvider* oldProvider, const 
 {
 	stopListening<World, AutoJoin>(world, this);
 	stopListening<World, AutoDestroy>(world, this);
-	world = NULL;
+	world = nullptr;
 
 	Instance::onServiceProvider(oldProvider, newProvider);
 
-	Workspace* workspace = newProvider ? newProvider->find<Workspace>() : NULL;
+	Workspace* workspace = newProvider ? newProvider->find<Workspace>() : nullptr;
 	if (workspace) {
 		world = workspace->getWorld();
 	}

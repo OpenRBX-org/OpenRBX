@@ -25,12 +25,12 @@ class EventHandler : public IDispatch
 public:
 	EventHandler(std::function<bool()> handler);
 
-	STDMETHOD(QueryInterface)(REFIID riid, void** ppvObject);
-	virtual ULONG STDMETHODCALLTYPE AddRef();
-	virtual ULONG STDMETHODCALLTYPE Release();
-	STDMETHOD(GetTypeInfoCount)(UINT* pctinfo);
-	STDMETHOD(GetTypeInfo)(UINT iTInfo, LCID lcid, ITypeInfo** ppTInfo);
-	STDMETHOD(GetIDsOfNames)(REFIID riid, LPOLESTR* rgszNames, UINT cNames, LCID lcid, DISPID* rgDispId);
+	STDMETHOD(QueryInterface)(REFIID riid, void** ppvObject) override;
+	ULONG STDMETHODCALLTYPE AddRef() override;
+	ULONG STDMETHODCALLTYPE Release() override;
+	STDMETHOD(GetTypeInfoCount)(UINT* pctinfo) override;
+	STDMETHOD(GetTypeInfo)(UINT iTInfo, LCID lcid, ITypeInfo** ppTInfo) override;
+	STDMETHOD(GetIDsOfNames)(REFIID riid, LPOLESTR* rgszNames, UINT cNames, LCID lcid, DISPID* rgDispId) override;
 	STDMETHOD(Invoke)(
 		DISPID dispIdMember,
 		REFIID riid,
@@ -40,7 +40,7 @@ public:
 		VARIANT* pVarResult,
 		EXCEPINFO* pExcepInfo,
 		UINT* puArgErr
-	);
+	) override;
 
 private:
 	friend class CLuaHtmlView::Binder;
@@ -113,8 +113,8 @@ void CLuaHtmlView::OnDestroy()
 
 	if (m_unk0x104) {
 		RBX::DataModel::Lock lock(m_unk0xfc);
-		m_unk0x104->m_unk0x104 = NULL;
-		m_unk0x104->setParent(NULL);
+		m_unk0x104->m_unk0x104 = nullptr;
+		m_unk0x104->setParent(nullptr);
 	}
 }
 
@@ -128,7 +128,7 @@ bool FUN_0042dd20(IUnknown* p_unk0x04, IUnknown* p_unk0x08)
 		return true;
 	}
 
-	if (p_unk0x04 != NULL && p_unk0x08 != NULL) {
+	if (p_unk0x04 != nullptr && p_unk0x08 != nullptr) {
 		p_unk0x04->QueryInterface(IID_IUnknown, (void**) &unknown1);
 		p_unk0x08->QueryInterface(IID_IUnknown, (void**) &unknown2);
 
@@ -136,9 +136,9 @@ bool FUN_0042dd20(IUnknown* p_unk0x04, IUnknown* p_unk0x08)
 			return true;
 		}
 
-		if (unknown1 != NULL && unknown2 != NULL) {
+		if (unknown1 != nullptr && unknown2 != nullptr) {
 			HRESULT hr = unknown1->QueryInterface(IID_IObjectIdentity, (void**) &identity);
-			if (SUCCEEDED(hr) && identity != NULL) {
+			if (SUCCEEDED(hr) && identity != nullptr) {
 				hr = identity->IsEqualObject(unknown2);
 				if (hr == S_OK) {
 					return true;
@@ -156,7 +156,7 @@ EventHandler::EventHandler(std::function<bool()> handler) : m_unk0x08(handler), 
 
 STDMETHODIMP EventHandler::QueryInterface(REFIID riid, void** ppvObject)
 {
-	*ppvObject = NULL;
+	*ppvObject = nullptr;
 
 	if (IsEqualGUID(riid, IID_IUnknown)) {
 		*ppvObject = this;
@@ -248,8 +248,8 @@ void CLuaHtmlView::Binder::FUN_0042ebf0()
 	m_unk0x18 = false;
 
 	std::string value;
-	std::list<std::shared_ptr<PropBinding> >::const_iterator iter = m_unk0x0c.begin();
-	std::list<std::shared_ptr<PropBinding> >::const_iterator end = m_unk0x0c.end();
+	std::list<std::shared_ptr<PropBinding>>::const_iterator iter = m_unk0x0c.begin();
+	std::list<std::shared_ptr<PropBinding>>::const_iterator end = m_unk0x0c.end();
 	if (iter != end) {
 		value = (*iter)->FUN_0042d810();
 		++iter;
@@ -270,11 +270,11 @@ void CLuaHtmlView::Binder::FUN_0042ebf0()
 HRESULT FUN_0042ef30(CComObjectNoLock<CLuaFunction>** p_unk0x04, void* p_unk0x08)
 {
 	HRESULT result = E_OUTOFMEMORY;
-	CComObjectNoLock<CLuaFunction>* object = NULL;
+	CComObjectNoLock<CLuaFunction>* object = nullptr;
 
 	ATLTRY(object = new CComObjectNoLock<CLuaFunction>(p_unk0x08))
 
-	if (object != NULL) {
+	if (object != nullptr) {
 		object->SetVoid(p_unk0x08);
 		object->InternalFinalConstructAddRef();
 		result = object->FinalConstruct();
@@ -290,7 +290,7 @@ void CLuaHtmlView::FUN_0042f1b0(std::shared_ptr<DHTMLWindow> window)
 	m_unk0x104 = window;
 	m_unk0xfc = RBX::shared_from_dynamic_cast<RBX::DataModel, RBX::Instance>(window->getRootAncestor());
 
-	if (FUN_0042ef30(&m_unk0xf8, NULL)) {
+	if (FUN_0042ef30(&m_unk0xf8, nullptr)) {
 		throw std::runtime_error("CLuaHtmlView failed to create CLuaFunction");
 	}
 
@@ -304,14 +304,12 @@ void CLuaHtmlView::FUN_0042f370()
 	m_unk0x10c.clear();
 }
 
-CLuaHtmlView::CLuaHtmlView() : m_unk0xf8(NULL)
+CLuaHtmlView::CLuaHtmlView() : m_unk0xf8(nullptr)
 {
 	m_unk0xf0 = true;
 }
 
-CLuaHtmlView::~CLuaHtmlView()
-{
-}
+CLuaHtmlView::~CLuaHtmlView() = default;
 
 bool CLuaHtmlView::Binder::FUN_0042f6e0()
 {
@@ -417,9 +415,9 @@ void CLuaHtmlView::FUN_00430c90(
 		throw std::runtime_error(G3D::format("%s is not an input element", name));
 	}
 
-	Binder* binder = NULL;
-	std::list<std::shared_ptr<Binder> >::iterator iter = m_unk0x10c.begin();
-	std::list<std::shared_ptr<Binder> >::iterator end = m_unk0x10c.end();
+	Binder* binder = nullptr;
+	std::list<std::shared_ptr<Binder>>::iterator iter = m_unk0x10c.begin();
+	std::list<std::shared_ptr<Binder>>::iterator end = m_unk0x10c.end();
 	while (iter != end) {
 		if (FUN_0042dd20((*iter)->m_unk0x20.p, input.p)) {
 			binder = (*iter).get();
@@ -428,7 +426,7 @@ void CLuaHtmlView::FUN_00430c90(
 		++iter;
 	}
 
-	if (binder == NULL) {
+	if (binder == nullptr) {
 		RBX::DataModel::Lock lock(m_unk0xfc);
 		binder = new Binder(input);
 		m_unk0x10c.push_back(std::shared_ptr<Binder>(binder));

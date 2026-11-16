@@ -6,8 +6,7 @@
 #include <algorithm>
 #include <vector>
 
-namespace RBX {
-namespace Reflection {
+namespace RBX::Reflection {
 
 class ClassDescriptor;
 class DescribedBase;
@@ -24,18 +23,18 @@ public:
 		return an != bn && an->name < bn->name;
 	}
 
-	typedef std::vector<T*> Collection;
-	typedef typename T::ConstMember ConstMemberType;
-	typedef typename T::Member MemberType;
+	using Collection = std::vector<T*>;
+	using ConstMemberType = typename T::ConstMember;
+	using MemberType = typename T::Member;
 
 	class ConstIterator
 	{
 	public:
-		typedef std::forward_iterator_tag iterator_category;
-		typedef ConstMemberType value_type;
-		typedef void difference_type;
-		typedef ConstMemberType pointer;
-		typedef ConstMemberType& reference;
+		using iterator_category = std::forward_iterator_tag;
+		using value_type = ConstMemberType;
+		using difference_type = void;
+		using pointer = ConstMemberType;
+		using reference = ConstMemberType&;
 
 		ConstIterator(const typename Collection::const_iterator& iter, const DescribedBase* instance)
 			: instance(instance), iter(iter)
@@ -71,11 +70,11 @@ public:
 	class Iterator
 	{
 	public:
-		typedef std::forward_iterator_tag iterator_category;
-		typedef MemberType value_type;
-		typedef void difference_type;
-		typedef MemberType pointer;
-		typedef MemberType& reference;
+		using iterator_category = std::forward_iterator_tag;
+		using value_type = MemberType;
+		using difference_type = void;
+		using pointer = MemberType;
+		using reference = MemberType&;
 
 		Iterator(const typename Collection::const_iterator& iter, DescribedBase* instance)
 			: instance(instance), iter(iter)
@@ -169,7 +168,7 @@ typename MemberDescriptorContainer<T>::Collection::const_iterator MemberDescript
 template <class T>
 void MemberDescriptorContainer<T>::declare(T* descriptor)
 {
-	std::lock_guard<std::recursive_mutex> lock(sync());
+	std::scoped_lock lock(sync());
 
 	typename Collection::iterator where = std::lower_bound(descriptors.begin(), descriptors.end(), descriptor, compare);
 	if (where == descriptors.end() || *where != descriptor) {
@@ -189,7 +188,7 @@ void MemberDescriptorContainer<T>::mergeMembers(const MemberDescriptorContainer*
 		declare(*it);
 	}
 
-	if (source->base != NULL) {
+	if (source->base != nullptr) {
 		mergeMembers(source->base);
 	}
 }
@@ -197,8 +196,8 @@ void MemberDescriptorContainer<T>::mergeMembers(const MemberDescriptorContainer*
 template <class T>
 MemberDescriptorContainer<T>::MemberDescriptorContainer(MemberDescriptorContainer* base) : base(base)
 {
-	if (base != NULL) {
-		std::lock_guard<std::recursive_mutex> lock(sync());
+	if (base != nullptr) {
+		std::scoped_lock lock(sync());
 
 		mergeMembers(base);
 
@@ -221,10 +220,9 @@ protected:
 	{
 	}
 
-	virtual ~MemberDescriptor() {}
+	~MemberDescriptor() override = default;
 };
 
-} // namespace Reflection
-} // namespace RBX
+} // namespace RBX::Reflection
 
 #endif // REFLECTION_MEMBER_H

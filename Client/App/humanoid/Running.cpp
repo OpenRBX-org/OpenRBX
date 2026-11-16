@@ -59,7 +59,7 @@ void Running::onComputeForce(const float dt)
 
 	root->accumulateTorque(G3D::Vector3(0.0f, desiredTorqueY, 0.0f));
 
-	Primitive* floorPrim = floorPart ? floorPart->getPrimitive() : NULL;
+	Primitive* floorPrim = floorPart ? floorPart->getPrimitive() : nullptr;
 
 	float mass = !floorPrim ? root->getBranchMass()
 							: std::min(root->getBranchMass(), floorPrim->getBody()->getRoot()->getBranchMass());
@@ -117,7 +117,7 @@ void Running::onComputeForce(const float dt)
 bool Running::isFacingLadder(bool buffered)
 {
 	Body* body = humanoid->getTorsoBody();
-	if (body == NULL) {
+	if (body == nullptr) {
 		return false;
 	}
 

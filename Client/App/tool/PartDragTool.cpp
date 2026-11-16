@@ -54,12 +54,10 @@ MouseCommand* PartDragTool::onMouseUp(const UIEvent& uiEvent)
 
 	releaseCapture();
 
-	return NULL;
+	return nullptr;
 }
 
-PartDragTool::~PartDragTool()
-{
-}
+PartDragTool::~PartDragTool() = default;
 
 void PartDragTool::onMouseMove(const UIEvent& uiEvent)
 {
@@ -95,7 +93,7 @@ MouseCommand* PartDragTool::onKeyDown(const UIEvent& uiEvent)
 		return this;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 void PartDragTool::render3dAdorn(Adorn* adorn)

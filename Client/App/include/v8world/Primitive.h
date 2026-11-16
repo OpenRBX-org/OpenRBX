@@ -63,7 +63,7 @@ public:
 	};
 
 	Edge(Primitive* prim0, Primitive* prim1);
-	virtual ~Edge() {}
+	~Edge() override = default;
 
 	virtual EdgeType getEdgeType() const = 0;
 	virtual void setPrimitive(int index, Primitive* primitive);
@@ -109,7 +109,7 @@ public:
 	static void insertEdge(Primitive* primitive, Edge* edge, EdgeList& list);
 	static void removeEdge(Primitive* primitive, Edge* edge, EdgeList& list);
 
-	EdgeList() : first(NULL), num(0) {}
+	EdgeList() : first(nullptr), num(0) {}
 
 	Edge* first;
 	int num;
@@ -167,7 +167,7 @@ protected:
 	static Geometry* newGeometry(Geometry::GeometryType geometryType);
 
 public:
-	virtual ~Primitive();
+	~Primitive() override;
 
 	Body* getBody() { return body; }
 	const Body* getBody() const { return body; }
@@ -196,7 +196,7 @@ public:
 	IMoving* getOwner() const { return myOwner; }
 	const bool getCanSleep() const { return canSleep; }
 	Anchor* getAnchorObject() { return anchorObject; }
-	bool getAnchor() const { return anchorObject != NULL; }
+	bool getAnchor() const { return anchorObject != nullptr; }
 
 	bool getDragging() const { return dragging; }
 	const bool getCanCollide() const { return canCollide; }
@@ -272,7 +272,7 @@ public:
 
 	const SurfaceData& getSurfaceData(NormalId normalId) const
 	{
-		return surfaceData[normalId] != NULL ? *surfaceData[normalId] : SurfaceData::empty();
+		return surfaceData[normalId] != nullptr ? *surfaceData[normalId] : SurfaceData::empty();
 	}
 
 	Controller* getController() { return controller; }

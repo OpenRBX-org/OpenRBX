@@ -18,12 +18,12 @@ public:
 	{
 	}
 
-	virtual ~WeldJoint() {}
+	~WeldJoint() override = default;
 
 	static WeldJoint* canBuildJoint(Primitive* prim0, Primitive* prim1, NormalId normalId0, NormalId normalId1);
 
 private:
-	virtual JointType getJointType() const { return WELD_JOINT; }
+	JointType getJointType() const override { return WELD_JOINT; }
 
 	static bool compatibleSurfaces(Primitive* prim0, Primitive* prim1, NormalId normalId0, NormalId normalId1);
 };

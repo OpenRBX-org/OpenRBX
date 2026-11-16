@@ -2,8 +2,7 @@
 
 #include "renderlib/Chunk.h"
 
-namespace RBX {
-namespace Render {
+namespace RBX::Render {
 
 G3D::MeshAlg::Geometry Mesh::visibleGeometry;
 G3D::Array<G3D::Vector2> Mesh::texCoordArray;
@@ -39,21 +38,21 @@ const Mesh::LevelRef Mesh::detailLevel(float meshLOD) const
 
 void Mesh::sendGeometry(const Level* lvl, G3D::RenderDevice* rd)
 {
-	if (lvl != NULL && lvl->indexArray.size() > 0) {
+	if (lvl != nullptr && lvl->indexArray.size() > 0) {
 		rd->sendIndices(lvl->primitive, lvl->indexArray);
 	}
 }
 
 void Mesh::computeAABounds(
-	const std::vector<G3D::ReferenceCountedPointer<Chunk> >& chunkArray, G3D::Vector3& lo, G3D::Vector3& hi
+	const std::vector<G3D::ReferenceCountedPointer<Chunk>>& chunkArray, G3D::Vector3& lo, G3D::Vector3& hi
 )
 {
 	lo = G3D::Vector3::inf();
 	hi = -G3D::Vector3::inf();
 
-	std::vector<G3D::ReferenceCountedPointer<Chunk> >::const_iterator end = chunkArray.end();
+	std::vector<G3D::ReferenceCountedPointer<Chunk>>::const_iterator end = chunkArray.end();
 
-	for (std::vector<G3D::ReferenceCountedPointer<Chunk> >::const_iterator iter = chunkArray.begin(); iter != end;
+	for (std::vector<G3D::ReferenceCountedPointer<Chunk>>::const_iterator iter = chunkArray.begin(); iter != end;
 		 ++iter) {
 		const G3D::ReferenceCountedPointer<Chunk>& chunk = *iter;
 		const G3D::ReferenceCountedPointer<Mesh>& srcMesh = chunk->getMesh();
@@ -113,7 +112,7 @@ unsigned int Mesh::allocVertex(
 
 void Mesh::freeVertex(unsigned int index)
 {
-	if (vertexRefCounts.getCArray() != NULL) {
+	if (vertexRefCounts.getCArray() != nullptr) {
 		int refCount = vertexRefCounts[index];
 		vertexRefCount--;
 
@@ -134,9 +133,7 @@ Mesh::Level::~Level()
 	}
 }
 
-Mesh::~Mesh()
-{
-}
+Mesh::~Mesh() = default;
 
 void Mesh::makeVAR()
 {
@@ -267,14 +264,14 @@ Mesh::Mesh()
 }
 
 G3D::ReferenceCountedPointer<Mesh> Mesh::aggregate(
-	const std::vector<G3D::ReferenceCountedPointer<Chunk> >& chunkArray,
+	const std::vector<G3D::ReferenceCountedPointer<Chunk>>& chunkArray,
 	G3D::CoordinateFrame& outCFrame,
 	float& outBoundingRadius
 )
 {
 	G3D::ReferenceCountedPointer<Mesh> mesh = new Mesh();
 
-	std::vector<G3D::ReferenceCountedPointer<Chunk> >::const_iterator end = chunkArray.end();
+	std::vector<G3D::ReferenceCountedPointer<Chunk>>::const_iterator end = chunkArray.end();
 
 	{
 		G3D::Vector3 lo, hi;
@@ -290,7 +287,7 @@ G3D::ReferenceCountedPointer<Mesh> Mesh::aggregate(
 	{
 		LevelRef dstLevel = mesh->levels.last();
 
-		for (std::vector<G3D::ReferenceCountedPointer<Chunk> >::const_iterator iter = chunkArray.begin(); iter != end;
+		for (std::vector<G3D::ReferenceCountedPointer<Chunk>>::const_iterator iter = chunkArray.begin(); iter != end;
 			 ++iter) {
 			const G3D::ReferenceCountedPointer<Chunk>& chunk = *iter;
 			const G3D::ReferenceCountedPointer<Mesh>& srcMesh = chunk->getMesh();
@@ -323,7 +320,7 @@ G3D::ReferenceCountedPointer<Mesh> Mesh::aggregate(
 	int edgeOffset = 0;
 	int vertexOffset = 0;
 
-	for (std::vector<G3D::ReferenceCountedPointer<Chunk> >::const_iterator iter = chunkArray.begin(); iter != end;
+	for (std::vector<G3D::ReferenceCountedPointer<Chunk>>::const_iterator iter = chunkArray.begin(); iter != end;
 		 ++iter) {
 		const G3D::ReferenceCountedPointer<Chunk>& chunk = *iter;
 		const G3D::ReferenceCountedPointer<Mesh>& srcMesh = chunk->getMesh();
@@ -433,5 +430,4 @@ void Mesh::computeShadowSurface(const LevelRef& level)
 	}
 }
 
-} // namespace Render
-} // namespace RBX
+} // namespace RBX::Render

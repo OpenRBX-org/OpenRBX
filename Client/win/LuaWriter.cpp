@@ -4,8 +4,7 @@
 
 #include <cctype>
 
-namespace RBX {
-namespace LDraw2Lua {
+namespace RBX::LDraw2Lua {
 
 LuaWriter::LuaWriter(const char* p_unk0x04) : m_unk0x04(p_unk0x04)
 {
@@ -45,8 +44,7 @@ void LuaWriter::FUN_00474210(LDrawCommand* p_unk0x04)
 	m_unk0x20.push_back(p_unk0x04);
 }
 
-} // namespace LDraw2Lua
-} // namespace RBX
+} // namespace RBX::LDraw2Lua
 
 int FUN_004742e0(const std::string& p_unk0x04, const std::string& p_unk0x08)
 {

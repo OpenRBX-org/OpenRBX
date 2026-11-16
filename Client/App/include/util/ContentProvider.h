@@ -41,11 +41,11 @@ public:
 
 	bool isNull() const { return id.size() == 0; }
 
-	bool isFile() const { return id.substr(0, 7) == "file://"; }
+	bool isFile() const { return id.starts_with("file://"); }
 
-	bool isAsset() const { return id.substr(0, 11) == "rbxasset://"; }
+	bool isAsset() const { return id.starts_with("rbxasset://"); }
 
-	bool isHttp() const { return id.substr(0, 4) == "http"; }
+	bool isHttp() const { return id.starts_with("http"); }
 
 private:
 	std::string id;
@@ -94,7 +94,7 @@ class ContentProvider
 		std::shared_ptr<const std::string> filename;
 	};
 
-	typedef std::map<ContentId, CachedContent> ContentCache;
+	using ContentCache = std::map<ContentId, CachedContent>;
 
 	ContentCache contentCache;
 	std::string assetFolderPath;
@@ -120,7 +120,7 @@ public:
 
 	bool isUrlBad(const char* url);
 
-	void load(ContentId id, std::vector<std::shared_ptr<Instance> >& instances);
+	void load(ContentId id, std::vector<std::shared_ptr<Instance>>& instances);
 
 	void clearContentCache();
 

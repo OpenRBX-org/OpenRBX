@@ -9,9 +9,7 @@
 
 struct lua_State;
 
-namespace RBX {
-
-namespace Lua {
+namespace RBX::Lua {
 
 template <>
 inline int Bridge<std::shared_ptr<Reflection::DescribedBase>, 0>::on_tostring(
@@ -66,7 +64,6 @@ private:
 	static const luaL_Reg classLibrary[];
 };
 
-} // namespace Lua
-} // namespace RBX
+} // namespace RBX::Lua
 
 #endif // SCRIPT_LUAINSTANCEBRIDGE_H

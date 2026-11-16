@@ -2,15 +2,6 @@
 
 namespace RBX {
 
-Quaternion& Quaternion::operator=(const Quaternion& other)
-{
-	w = other.w;
-	x = other.x;
-	y = other.y;
-	z = other.z;
-	return *this;
-}
-
 Quaternion::Quaternion(const G3D::Matrix3& rot)
 {
 	float trace = rot[0][0] + rot[1][1] + rot[2][2];

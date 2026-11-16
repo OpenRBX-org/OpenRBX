@@ -27,9 +27,9 @@ public:
 	void CompileData();
 
 	std::vector<std::string> statNamesList;
-	std::map<Team*, std::vector<std::string> > playersByTeamList;
-	std::map<std::string, std::map<std::string, int> > statMap;
-	std::map<Team*, std::map<std::string, int> > teamTotals;
+	std::map<Team*, std::vector<std::string>> playersByTeamList;
+	std::map<std::string, std::map<std::string, int>> statMap;
+	std::map<Team*, std::map<std::string, int>> teamTotals;
 
 private:
 	Instance* context;
@@ -42,9 +42,7 @@ void BoardData::AddField(std::string field, int index)
 	fields[index] = field;
 }
 
-ScoreHud::~ScoreHud()
-{
-}
+ScoreHud::~ScoreHud() = default;
 
 void ScoreHud::onEvent(const Instance* source, ChildRemoved event)
 {
@@ -60,15 +58,15 @@ ScoreHud::BoardType ScoreHud::DetermineBoardType()
 	bool hasStats = false;
 	bool hasTeams = false;
 
-	if (players != NULL) {
+	if (players != nullptr) {
 		{
-			std::shared_ptr<const std::vector<std::shared_ptr<Instance> > > list = players->getPlayers();
+			std::shared_ptr<const std::vector<std::shared_ptr<Instance>>> list = players->getPlayers();
 
 			for (unsigned int i = 0; list->size() > i; ++i) {
 				Network::Player* player = static_cast<Network::Player*>((list->begin() + i)->get());
 
 				Instance* stats = player->findFirstChildByName("leaderstats");
-				if (stats != NULL) {
+				if (stats != nullptr) {
 					hasStats = true;
 				}
 
@@ -94,18 +92,18 @@ ScoreHud::BoardType ScoreHud::DetermineBoardType()
 	return boardType;
 }
 
-ScoreHud::ScoreHud(const ServiceProvider* serviceProvider) : runService(NULL), players(NULL)
+ScoreHud::ScoreHud(const ServiceProvider* serviceProvider) : runService(nullptr), players(nullptr)
 {
-	runService = serviceProvider ? serviceProvider->find<RunService>() : NULL;
-	players = serviceProvider ? serviceProvider->find<Network::Players>() : NULL;
+	runService = serviceProvider ? serviceProvider->find<RunService>() : nullptr;
+	players = serviceProvider ? serviceProvider->find<Network::Players>() : nullptr;
 }
 
 void ScoreHud::onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider)
 {
 	Instance::onServiceProvider(oldProvider, newProvider);
 
-	runService = newProvider ? newProvider->find<RunService>() : NULL;
-	players = newProvider ? newProvider->find<Network::Players>() : NULL;
+	runService = newProvider ? newProvider->find<RunService>() : nullptr;
+	players = newProvider ? newProvider->find<Network::Players>() : nullptr;
 }
 
 void BoardData::SetSize(int rows, int columns)
@@ -137,8 +135,8 @@ void LeaderboardData::CompileData()
 {
 	Network::Players* players = ServiceProvider::find<Network::Players>(context);
 	Teams* teams = ServiceProvider::create<Teams>(context);
-	std::shared_ptr<const std::vector<std::shared_ptr<Instance> > > teamList = teams->getTeams();
-	std::shared_ptr<const std::vector<std::shared_ptr<Instance> > > playerList = players->getPlayers();
+	std::shared_ptr<const std::vector<std::shared_ptr<Instance>>> teamList = teams->getTeams();
+	std::shared_ptr<const std::vector<std::shared_ptr<Instance>>> playerList = players->getPlayers();
 
 	for (unsigned int i = 0; playerList->size() > i; ++i) {
 		Network::Player* player = static_cast<Network::Player*>((playerList->begin() + i)->get());
@@ -146,10 +144,10 @@ void LeaderboardData::CompileData()
 		playersByTeamList[team].push_back(player->getName());
 
 		Instance* leaderstats = player->findFirstChildByName("leaderstats");
-		if (leaderstats != NULL) {
+		if (leaderstats != nullptr) {
 			for (unsigned int j = 0; j < leaderstats->numChildren(); ++j) {
 				Value<int, sIntValue>* stat = dynamic_cast<Value<int, sIntValue>*>(leaderstats->getChild(j));
-				if (stat != NULL) {
+				if (stat != nullptr) {
 					AddTuple(
 						player->getName(),
 						teams->getTeamFromPlayer(player),
@@ -161,7 +159,7 @@ void LeaderboardData::CompileData()
 		}
 	}
 
-	if (teams != NULL) {
+	if (teams != nullptr) {
 		for (unsigned int i = 0; i < teams->numChildren(); ++i) {
 			Team* team = dynamic_cast<Team*>(teams->getChild(i));
 
@@ -179,17 +177,17 @@ void LeaderboardData::CompileData()
 
 void ScoreHud::BuildBoardData(BoardData& boardData)
 {
-	if (players == NULL) {
+	if (players == nullptr) {
 		return;
 	}
 
-	std::shared_ptr<const std::vector<std::shared_ptr<Instance> > > list = players->getPlayers();
+	std::shared_ptr<const std::vector<std::shared_ptr<Instance>>> list = players->getPlayers();
 
 	for (unsigned int i = 0; i < list->size(); ++i) {
 		Network::Player* player = static_cast<Network::Player*>((list->begin() + i)->get());
 
 		Instance* leaderstats = player->findFirstChildByName("leaderstats");
-		if (leaderstats != NULL) {
+		if (leaderstats != nullptr) {
 			boardData.SetSize(list->size(), leaderstats->numChildren() + 1);
 			boardData.AddField("Player", 0);
 
@@ -303,7 +301,7 @@ void ScoreHud::renderTeamDeathmatchLeaderboard(Adorn* adorn, BoardType boardType
 	leaderboardData.CompileData();
 
 	Teams* teams = ServiceProvider::find<Teams>(this);
-	if (teams == NULL) {
+	if (teams == nullptr) {
 		return;
 	}
 

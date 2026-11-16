@@ -16,8 +16,7 @@
 #include <string>
 #include <vector>
 
-namespace RBX {
-namespace Network {
+namespace RBX::Network {
 
 void serializeEnum(const Reflection::ConstProperty& property, RakNet::BitStream& bitStream);
 void deserializeEnum(Reflection::Property& property, RakNet::BitStream& bitStream);
@@ -95,7 +94,7 @@ void deserialize<ContentId>(Reflection::Property& property, RakNet::BitStream& b
 
 class StringSender
 {
-	typedef std::map<std::string, unsigned char> Dictionary;
+	using Dictionary = std::map<std::string, unsigned char>;
 
 	Dictionary dictionary;
 	std::string strings[128];
@@ -111,7 +110,7 @@ public:
 
 class StringReceiver
 {
-	typedef std::map<unsigned char, std::string> Dictionary;
+	using Dictionary = std::map<unsigned char, std::string>;
 
 	Dictionary dictionary;
 
@@ -146,7 +145,7 @@ protected:
 		std::shared_ptr<Instance> instance;
 	};
 
-	typedef std::map<Guid::Data, std::vector<WaitItem> > WaitItemMap;
+	using WaitItemMap = std::map<Guid::Data, std::vector<WaitItem>>;
 
 	WaitItemMap waitItems;
 
@@ -165,7 +164,6 @@ public:
 	void deserializeRef(Reflection::Property& property, RakNet::BitStream& bitStream);
 };
 
-} // namespace Network
-} // namespace RBX
+} // namespace RBX::Network
 
 #endif // NETWORK_STREAMING_H

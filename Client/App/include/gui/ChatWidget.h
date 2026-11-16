@@ -30,16 +30,16 @@ public:
 		}
 	}
 
-	virtual void render2dMe(Adorn* p_unk0x04);
+	void render2dMe(Adorn* p_unk0x04) override;
 
 	void setSize(const G3D::Vector2& p_unk0x04) { guiImageDraw.setImageSize(p_unk0x04); }
-	virtual G3D::Vector2 getSize() const { return guiImageDraw.getImageSize(); }
+	G3D::Vector2 getSize() const override { return guiImageDraw.getImageSize(); }
 };
 
 class ChatButton : public UnifiedImageWidget
 {
 private:
-	virtual bool isVisible() const;
+	bool isVisible() const override;
 
 public:
 	ChatButton(Adorn* adorn, const std::string& image) : UnifiedImageWidget(adorn, image) {}
@@ -52,8 +52,8 @@ private:
 
 	std::string code;
 
-	virtual void onMenuStateChanged();
-	virtual GuiResponse process(const GuiEvent& p_unk0x04);
+	void onMenuStateChanged() override;
+	GuiResponse process(const GuiEvent& p_unk0x04) override;
 
 public:
 	ChatWidget(const std::string& p_unk0x04, std::string p_unk0x08);

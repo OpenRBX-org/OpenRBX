@@ -45,7 +45,7 @@ public:
 		NUM_INPUT_TYPES = 14,
 	};
 
-	virtual ~Controller() {}
+	~Controller() override = default;
 
 	virtual float getValue(InputType inputType) const;
 	virtual ControllerType getControllerType() const = 0;
@@ -61,9 +61,9 @@ public:
 class NullController : public Controller
 {
 public:
-	virtual ControllerType getControllerType() const;
-	virtual bool hasIntelligence() const;
-	virtual bool isUserController() const;
+	ControllerType getControllerType() const override;
+	bool hasIntelligence() const override;
+	bool isUserController() const override;
 
 	static NullController* getStaticNullController();
 };

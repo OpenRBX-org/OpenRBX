@@ -2,8 +2,7 @@
 
 #include <algorithm>
 
-namespace RBX {
-namespace Render {
+namespace RBX::Render {
 
 bool materialDepthPtrSortProc(RenderSurface* const& A, RenderSurface* const& B)
 {
@@ -35,5 +34,4 @@ void sortByDepth(G3D::Array<RenderSurface*>& array)
 	std::sort(array.begin(), array.end(), depthPtrSortProc);
 }
 
-} // namespace Render
-} // namespace RBX
+} // namespace RBX::Render

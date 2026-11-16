@@ -3,15 +3,13 @@
 
 #include <afxhtml.h>
 
-namespace RBX {
-namespace Reflection {
+namespace RBX::Reflection {
 class Descriptor;
 
 namespace Metadata {
 class Item;
 }
-} // namespace Reflection
-} // namespace RBX
+} // namespace RBX::Reflection
 
 class CDeclarationView : public CHtmlView
 {
@@ -21,10 +19,10 @@ protected:
 	CDeclarationView();
 
 public:
-	virtual ~CDeclarationView();
+	~CDeclarationView() override;
 
-	virtual void OnInitialUpdate();
-	virtual void OnDocumentComplete(LPCTSTR lpszURL);
+	void OnInitialUpdate() override;
+	void OnDocumentComplete(LPCTSTR lpszURL) override;
 
 	void FUN_00438530(RBX::Reflection::Metadata::Item* metadata, const char* declaration, const char* owner);
 	void FUN_00439c30(const RBX::Reflection::Descriptor* descriptor);

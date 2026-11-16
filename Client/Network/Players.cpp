@@ -28,11 +28,10 @@ protected:
 	PluginInterfaceAdapter(T* c) : c(c) {}
 
 public:
-	virtual PluginReceiveResult OnReceive(RakPeerInterface* peer, Packet* packet);
+	PluginReceiveResult OnReceive(RakPeerInterface* peer, Packet* packet) override;
 };
 
-namespace RBX {
-namespace Network {
+namespace RBX::Network {
 
 char sPlayers[] = "Players";
 
@@ -66,9 +65,9 @@ static Reflection::BoundFuncDesc<Players, void(std::shared_ptr<Instance>, std::s
 	&Players::reportAbuse, "ReportAbuse", "player", "message", Reflection::FunctionDescriptor::NeedTrustedCaller
 );
 
-static Reflection::BoundFuncDesc<Players, std::shared_ptr<const std::vector<std::shared_ptr<Instance> > >(), 0>
+static Reflection::BoundFuncDesc<Players, std::shared_ptr<const std::vector<std::shared_ptr<Instance>>>(), 0>
 	func_players(&Players::getPlayers, "players", Reflection::FunctionDescriptor::AnyCaller);
-static Reflection::BoundFuncDesc<Players, std::shared_ptr<const std::vector<std::shared_ptr<Instance> > >(), 0>
+static Reflection::BoundFuncDesc<Players, std::shared_ptr<const std::vector<std::shared_ptr<Instance>>>(), 0>
 	func_GetPlayers(&Players::getPlayers, "GetPlayers", Reflection::FunctionDescriptor::AnyCaller);
 static Reflection::BoundFuncDesc<Players, std::shared_ptr<Instance>(int), 1> func_createLocalPlayer(
 	&Players::createLocalPlayer, "CreateLocalPlayer", "userId", Reflection::FunctionDescriptor::NeedTrustedCaller
@@ -105,19 +104,19 @@ bool Players::frontendProcessing(const Instance* context, bool testInDatamodel)
 {
 	const ServiceProvider* serviceProvider = ServiceProvider::findServiceProvider(context);
 
-	return serviceProvider != NULL && !Server::serverIsPresent(context, testInDatamodel);
+	return serviceProvider != nullptr && !Server::serverIsPresent(context, testInDatamodel);
 }
 
 bool Players::backendProcessing(const Instance* context, bool testInDatamodel)
 {
 	const ServiceProvider* serviceProvider = ServiceProvider::findServiceProvider(context);
 
-	return serviceProvider != NULL && !Client::clientIsPresent(context, testInDatamodel);
+	return serviceProvider != nullptr && !Client::clientIsPresent(context, testInDatamodel);
 }
 
 bool Players::askAddChild(const Instance* instance) const
 {
-	return dynamic_cast<const Player*>(instance) != NULL;
+	return dynamic_cast<const Player*>(instance) != nullptr;
 }
 
 bool Players::canReportAbuse() const
@@ -148,8 +147,7 @@ bool Players::superSafeOn() const
 	return localPlayer ? Player::prop_SuperSafeChat.getValue(localPlayer.get()) : false;
 }
 
-} // namespace Network
-} // namespace RBX
+} // namespace RBX::Network
 
 static void writeMessage(const RBX::Network::AbuseReport::Message& msg, XmlElement* messages)
 {
@@ -158,13 +156,12 @@ static void writeMessage(const RBX::Network::AbuseReport::Message& msg, XmlEleme
 	message->addAttribute(RBX::Name::declare("userID", -1), msg.userID);
 }
 
-namespace RBX {
-namespace Network {
+namespace RBX::Network {
 
 std::shared_ptr<Instance> Players::getPlayerByID(int userID)
 {
-	std::vector<std::shared_ptr<Instance> >::const_iterator iter = players->begin();
-	std::vector<std::shared_ptr<Instance> >::const_iterator end = players->end();
+	std::vector<std::shared_ptr<Instance>>::const_iterator iter = players->begin();
+	std::vector<std::shared_ptr<Instance>>::const_iterator end = players->end();
 
 	for (; iter != end; ++iter) {
 		if (static_cast<Player*>(iter->get())->getUserID() == userID) {
@@ -177,10 +174,10 @@ std::shared_ptr<Instance> Players::getPlayerByID(int userID)
 
 std::shared_ptr<Instance> Players::playerFromCharacter(std::shared_ptr<Instance> character)
 {
-	std::shared_ptr<const std::vector<std::shared_ptr<Instance> > > myPlayers = getPlayers();
+	std::shared_ptr<const std::vector<std::shared_ptr<Instance>>> myPlayers = getPlayers();
 
-	std::vector<std::shared_ptr<Instance> >::const_iterator iter = myPlayers->begin();
-	std::vector<std::shared_ptr<Instance> >::const_iterator end = myPlayers->end();
+	std::vector<std::shared_ptr<Instance>>::const_iterator iter = myPlayers->begin();
+	std::vector<std::shared_ptr<Instance>>::const_iterator end = myPlayers->end();
 
 	for (; iter != end; ++iter) {
 		if (static_cast<Player*>(iter->get())->getCharacter() == character.get()) {
@@ -207,14 +204,14 @@ void AbuseReport::addMessage(const ChatMessage& cm)
 
 Players::~Players()
 {
-	setConnection(NULL);
+	setConnection(nullptr);
 }
 
 Player* Players::findLocalPlayer(const Instance* context)
 {
 	const Players* players = ServiceProvider::find<Players>(context);
 
-	return players ? players->getLocalPlayer() : NULL;
+	return players ? players->getLocalPlayer() : nullptr;
 }
 
 RBX::ModelInstance* Players::findLocalCharacter(const Instance* context)
@@ -223,7 +220,7 @@ RBX::ModelInstance* Players::findLocalCharacter(const Instance* context)
 		return player->getCharacter();
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 Player* Players::getPlayerFromCharacter(Instance* character)
@@ -233,10 +230,10 @@ Player* Players::getPlayerFromCharacter(Instance* character)
 		return static_cast<Player*>(player.get());
 	}
 
-	return NULL;
+	return nullptr;
 }
 
-Players::Players() : players(std::vector<std::shared_ptr<Instance> >()), peer(NULL), maxPlayers(12)
+Players::Players() : players(std::vector<std::shared_ptr<Instance>>()), peer(nullptr), maxPlayers(12)
 {
 	setName("Players");
 	plugin.reset(new Plugin(this));
@@ -247,7 +244,7 @@ void AbuseReporter::add(AbuseReport& r, const std::list<ChatMessage>& chatHistor
 	std::for_each(chatHistory.begin(), chatHistory.end(), [&r](const ChatMessage& cm) { r.addMessage(cm); });
 
 	{
-		std::lock_guard<std::mutex> lock(_data->requestSync);
+		std::scoped_lock lock(_data->requestSync);
 		_data->queue.push(r);
 	}
 
@@ -260,7 +257,7 @@ worker_thread::work_result AbuseReporter::processRequests(std::shared_ptr<data> 
 		AbuseReport r;
 
 		{
-			std::lock_guard<std::mutex> lock(_data->requestSync);
+			std::scoped_lock lock(_data->requestSync);
 			if (_data->queue.empty()) {
 				return worker_thread::done;
 			}
@@ -296,7 +293,7 @@ worker_thread::work_result AbuseReporter::processRequests(std::shared_ptr<data> 
 	}
 
 	{
-		std::lock_guard<std::mutex> lock(_data->requestSync);
+		std::scoped_lock lock(_data->requestSync);
 		_data->queue.pop();
 	}
 
@@ -411,7 +408,7 @@ bool Players::OnReceive(RakPeerInterface* peer, Packet* packet)
 			id.scope = &Name::lookup(foo);
 			inBitstream >> id.index;
 
-			Instance* player = NULL;
+			Instance* player = nullptr;
 			Instance::lookupByGuid(id, player);
 
 			std::string message;
@@ -479,7 +476,7 @@ bool Players::OnReceive(RakPeerInterface* peer, Packet* packet)
 void Players::onChildRemoving(Instance* child)
 {
 	if (Player* player = dynamic_cast<Player*>(child)) {
-		std::shared_ptr<std::vector<std::shared_ptr<Instance> > >& list = players.write();
+		std::shared_ptr<std::vector<std::shared_ptr<Instance>>>& list = players.write();
 		list->erase(std::find(list->begin(), list->end(), shared_from(child)));
 
 		if (backendProcessing(this, false)) {
@@ -497,11 +494,11 @@ void Players::onChildAdded(Instance* child)
 			std::shared_ptr<Instance> otherPlayer = getPlayerByID(player->getUserID());
 
 			if (otherPlayer) {
-				otherPlayer->setParent(NULL);
+				otherPlayer->setParent(nullptr);
 			}
 		}
 
-		std::shared_ptr<std::vector<std::shared_ptr<Instance> > >& list = players.write();
+		std::shared_ptr<std::vector<std::shared_ptr<Instance>>>& list = players.write();
 		list->push_back(shared_from(child));
 
 		if (backendProcessing(this, true)) {
@@ -517,8 +514,7 @@ void Players::onChildAdded(Instance* child)
 	}
 }
 
-} // namespace Network
-} // namespace RBX
+} // namespace RBX::Network
 
 template <class T>
 PluginReceiveResult PluginInterfaceAdapter<T>::OnReceive(RakPeerInterface* peer, Packet* packet)
@@ -526,8 +522,7 @@ PluginReceiveResult PluginInterfaceAdapter<T>::OnReceive(RakPeerInterface* peer,
 	return c->OnReceive(peer, packet) ? RR_CONTINUE_PROCESSING : RR_STOP_PROCESSING_AND_DEALLOCATE;
 }
 
-namespace RBX {
-namespace Network {
+namespace RBX::Network {
 
 AbuseReporter::AbuseReporter(std::string abuseUrl) : _data(new data())
 {
@@ -546,5 +541,4 @@ void Players::setAbuseReportUrl(std::string value)
 	}
 }
 
-} // namespace Network
-} // namespace RBX
+} // namespace RBX::Network

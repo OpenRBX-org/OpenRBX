@@ -14,16 +14,15 @@
 class CRobloxWnd;
 class ThumbnailGenerator;
 
-namespace RBX {
-namespace Render {
+namespace RBX::Render {
 
 class Chunk;
 
 class Mesh : public G3D::ReferenceCountedObject
 {
 public:
-	typedef unsigned int IndexType;
-	typedef G3D::Array<int> VertexList;
+	using IndexType = unsigned int;
+	using VertexList = G3D::Array<int>;
 
 	class Level : public G3D::ReferenceCountedObject
 	{
@@ -35,10 +34,10 @@ public:
 
 		Level(G3D::RenderDevice::Primitive primitive) : primitive(primitive) {}
 
-		virtual ~Level();
+		~Level() override;
 	};
 
-	typedef G3D::ReferenceCountedPointer<Level> LevelRef;
+	using LevelRef = G3D::ReferenceCountedPointer<Level>;
 
 	class ShadowSurface
 	{
@@ -69,7 +68,7 @@ private:
 	static void makeVAR();
 
 	static void computeAABounds(
-		const std::vector<G3D::ReferenceCountedPointer<Chunk> >& chunkArray, G3D::Vector3& lo, G3D::Vector3& hi
+		const std::vector<G3D::ReferenceCountedPointer<Chunk>>& chunkArray, G3D::Vector3& lo, G3D::Vector3& hi
 	);
 
 	static G3D::Vector3 findScale;
@@ -95,13 +94,13 @@ protected:
 
 public:
 	static G3D::ReferenceCountedPointer<Mesh> aggregate(
-		const std::vector<G3D::ReferenceCountedPointer<Chunk> >& chunkArray,
+		const std::vector<G3D::ReferenceCountedPointer<Chunk>>& chunkArray,
 		G3D::CoordinateFrame& outCFrame,
 		float& outBoundingRadius
 	);
 	static unsigned int findVertex(const G3D::Vector3&, const G3D::Vector3&, const G3D::Vector2&);
 
-	virtual ~Mesh();
+	~Mesh() override;
 
 	float debugBoundingRadius;
 
@@ -134,7 +133,6 @@ public:
 	static void flushVAR();
 };
 
-} // namespace Render
-} // namespace RBX
+} // namespace RBX::Render
 
 #endif // RENDERLIB_MESH_H

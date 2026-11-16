@@ -41,8 +41,8 @@ public:
 		STANDARD = 5,
 	};
 
-	typedef ConstProperty ConstMember;
-	typedef Property Member;
+	using ConstMember = ConstProperty;
+	using Member = Property;
 
 	virtual bool isReadOnly() const = 0;
 	virtual bool equalValues(const DescribedBase* a, const DescribedBase* b) const = 0;
@@ -105,18 +105,18 @@ public:
 
 	void setValue(DescribedBase* instance, const T& value) const { getset->setValue(instance, value); }
 
-	virtual bool isReadOnly() const { return getset->isReadOnly(); }
+	bool isReadOnly() const override { return getset->isReadOnly(); }
 
-	virtual bool equalValues(const DescribedBase* a, const DescribedBase* b) const
+	bool equalValues(const DescribedBase* a, const DescribedBase* b) const override
 	{
 		return getValue(a) == getValue(b);
 	}
 
-	virtual bool hasStringValue() const;
+	bool hasStringValue() const override;
 
-	virtual std::string getStringValue(const DescribedBase* instance) const;
+	std::string getStringValue(const DescribedBase* instance) const override;
 
-	virtual bool setStringValue(DescribedBase* instance, const std::string& value) const;
+	bool setStringValue(DescribedBase* instance, const std::string& value) const override;
 
 protected:
 	TypedPropertyDescriptor(
@@ -143,9 +143,9 @@ protected:
 	}
 
 private:
-	virtual void writeValue(const DescribedBase* instance, XmlElement* element) const;
+	void writeValue(const DescribedBase* instance, XmlElement* element) const override;
 
-	virtual void readValue(DescribedBase* instance, const XmlElement* element, IReferenceBinder& binder) const;
+	void readValue(DescribedBase* instance, const XmlElement* element, IReferenceBinder& binder) const override;
 
 protected:
 	std::unique_ptr<GetSet> getset;
@@ -376,14 +376,14 @@ protected:
 	{
 	}
 
-	virtual bool hasStringValue() const { return false; }
+	bool hasStringValue() const override { return false; }
 
-	virtual std::string getStringValue(const DescribedBase* instance) const
+	std::string getStringValue(const DescribedBase* instance) const override
 	{
 		return PropertyDescriptor::getStringValue(instance);
 	}
 
-	virtual bool setStringValue(DescribedBase* instance, const std::string& value) const
+	bool setStringValue(DescribedBase* instance, const std::string& value) const override
 	{
 		hasStringValue();
 
@@ -401,15 +401,15 @@ public:
 	public:
 		GetSetImpl(Getter get, Setter set) : get(get), set(set) {}
 
-		virtual bool isReadOnly() const { return false; }
+		bool isReadOnly() const override { return false; }
 
-		virtual T getValue(const DescribedBase* object) const
+		T getValue(const DescribedBase* object) const override
 		{
 			const Class* instance = static_cast<const Class*>(object);
 			return (instance->*get)();
 		}
 
-		virtual void setValue(DescribedBase* object, const T& value) const
+		void setValue(DescribedBase* object, const T& value) const override
 		{
 			Class* instance = static_cast<Class*>(object);
 			(instance->*set)(value);
@@ -426,15 +426,15 @@ public:
 	public:
 		GetImpl(Getter get) : get(get) {}
 
-		virtual bool isReadOnly() const { return true; }
+		bool isReadOnly() const override { return true; }
 
-		virtual T getValue(const DescribedBase* object) const
+		T getValue(const DescribedBase* object) const override
 		{
 			const Class* instance = static_cast<const Class*>(object);
 			return (instance->*get)();
 		}
 
-		virtual void setValue(DescribedBase* object, const T& value) const
+		void setValue(DescribedBase* object, const T& value) const override
 		{
 			throw std::runtime_error("can't set value");
 		}
@@ -449,11 +449,11 @@ public:
 	public:
 		SetImpl(Setter set) : set(set) {}
 
-		virtual bool isReadOnly() const { return false; }
+		bool isReadOnly() const override { return false; }
 
-		virtual T getValue(const DescribedBase* object) const { throw std::runtime_error("can't get value"); }
+		T getValue(const DescribedBase* object) const override { throw std::runtime_error("can't get value"); }
 
-		virtual void setValue(DescribedBase* object, const T& value) const
+		void setValue(DescribedBase* object, const T& value) const override
 		{
 			Class* instance = static_cast<Class*>(object);
 			(instance->*set)(value);
@@ -504,7 +504,7 @@ public:
 		BoundProp<T, bound>* desc;
 		T Class::* member;
 
-		typedef void (Class::*ChangedMember)(const PropertyDescriptor&);
+		using ChangedMember = void (Class::*)(const PropertyDescriptor&);
 
 		ChangedMember changed;
 
@@ -514,22 +514,22 @@ public:
 		{
 		}
 
-		virtual bool isReadOnly() const { return false; }
+		bool isReadOnly() const override { return false; }
 
-		virtual T getValue(const DescribedBase* object) const
+		T getValue(const DescribedBase* object) const override
 		{
 			const Class* instance = static_cast<const Class*>(object);
 			return instance->*member;
 		}
 
-		virtual void setValue(DescribedBase* object, const T& value) const
+		void setValue(DescribedBase* object, const T& value) const override
 		{
 			Class* instance = static_cast<Class*>(object);
 
 			if (instance->*member != value) {
 				instance->*member = value;
 
-				if (changed != NULL) {
+				if (changed != nullptr) {
 					(instance->*changed)(*desc);
 				}
 
@@ -553,7 +553,7 @@ public:
 			  flags
 		  )
 	{
-		this->getset.reset(new BoundPropGetSet<Class>(this, member, NULL));
+		this->getset.reset(new BoundPropGetSet<Class>(this, member, nullptr));
 	}
 
 	template <class Class>
@@ -579,7 +579,7 @@ public:
 class ConstProperty
 {
 public:
-	ConstProperty(const ConstProperty& other) : descriptor(other.descriptor), instance(other.instance) {}
+	ConstProperty(const ConstProperty& other) = default;
 	ConstProperty(const PropertyDescriptor& descriptor, const DescribedBase* instance)
 		: descriptor(&descriptor), instance(instance)
 	{
@@ -595,12 +595,7 @@ public:
 
 	const PropertyDescriptor& getDescriptor() const { return *descriptor; }
 
-	ConstProperty& operator=(const ConstProperty& other)
-	{
-		descriptor = other.descriptor;
-		instance = other.instance;
-		return *this;
-	}
+	ConstProperty& operator=(const ConstProperty& other) = default;
 
 	const Name& getName() const { return descriptor->name; }
 	bool hasStringValue() const;
@@ -616,15 +611,11 @@ protected:
 class Property : public ConstProperty
 {
 public:
-	Property(const Property& other) : ConstProperty(other) {}
+	Property(const Property& other) = default;
 
 	Property(const PropertyDescriptor& descriptor, DescribedBase* instance) : ConstProperty(descriptor, instance) {}
 
-	Property& operator=(const Property& other)
-	{
-		ConstProperty::operator=(other);
-		return *this;
-	}
+	Property& operator=(const Property& other) = default;
 
 	bool operator==(const Property& other) const
 	{

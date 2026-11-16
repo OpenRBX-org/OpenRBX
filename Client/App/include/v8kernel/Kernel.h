@@ -32,13 +32,13 @@ private:
 public:
 	Kernel(IStage* upstream);
 
-	virtual ~Kernel();
+	~Kernel() override;
 
-	virtual StageType getStageType() { return KERNEL_STAGE; }
+	StageType getStageType() override { return KERNEL_STAGE; }
 
-	virtual void stepWorld(int worldStepId, int uiStepId, bool throttling);
+	void stepWorld(int worldStepId, int uiStepId, bool throttling) override;
 
-	virtual Kernel* getKernel();
+	Kernel* getKernel() override;
 
 	void insertBody(Body* body);
 	void insertPoint(Point*);

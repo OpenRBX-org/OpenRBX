@@ -13,8 +13,8 @@ IScriptOwner* Backpack::scriptShouldRun(Script* script)
 	if (workspace) {
 		bool isLocalBackpack = getParent() == Network::Players::findLocalPlayer(this);
 		bool isBackendProcessing = Network::Players::backendProcessing(this, true);
-		bool isLocalScript = dynamic_cast<LocalScript*>(script) != NULL;
-		bool inHopperBin = dynamic_cast<HopperBin*>(script->getParent()) != NULL;
+		bool isLocalScript = dynamic_cast<LocalScript*>(script) != nullptr;
+		bool inHopperBin = dynamic_cast<HopperBin*>(script->getParent()) != nullptr;
 
 		if ((!isLocalScript && ((inHopperBin && isLocalBackpack) || isBackendProcessing)) ||
 			(isLocalScript && isLocalBackpack)) {
@@ -22,7 +22,7 @@ IScriptOwner* Backpack::scriptShouldRun(Script* script)
 		}
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 Backpack::Backpack()

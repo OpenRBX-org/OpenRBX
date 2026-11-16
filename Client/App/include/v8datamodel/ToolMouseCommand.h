@@ -25,12 +25,12 @@ public:
 	{
 	}
 
-	virtual ~ToolMouseCommand() {}
+	~ToolMouseCommand() override = default;
 
-	virtual MouseCommand* onMouseDown(const UIEvent& uiEvent);
-	virtual void onMouseHover(const UIEvent& uiEvent);
-	virtual void onMouseIdle(const UIEvent& uiEvent);
-	virtual MouseCommand* onMouseUp(const UIEvent& uiEvent);
+	MouseCommand* onMouseDown(const UIEvent& uiEvent) override;
+	void onMouseHover(const UIEvent& uiEvent) override;
+	void onMouseIdle(const UIEvent& uiEvent) override;
+	MouseCommand* onMouseUp(const UIEvent& uiEvent) override;
 };
 
 } // namespace RBX

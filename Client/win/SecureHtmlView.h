@@ -11,21 +11,21 @@ protected:
 	CSecureHtmlView();
 
 public:
-	virtual ~CSecureHtmlView();
+	~CSecureHtmlView() override;
 
 protected:
-	virtual BOOL OnAmbientProperty(COleControlSite* pSite, DISPID dispid, VARIANT* pvar);
-	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
+	BOOL OnAmbientProperty(COleControlSite* pSite, DISPID dispid, VARIANT* pvar) override;
+	BOOL PreCreateWindow(CREATESTRUCT& cs) override;
 
 public:
-	virtual void OnBeforeNavigate2(
+	void OnBeforeNavigate2(
 		LPCTSTR lpszURL,
 		DWORD nFlags,
 		LPCTSTR lpszTargetFrameName,
 		CByteArray& baPostedData,
 		LPCTSTR lpszHeaders,
 		BOOL* pbCancel
-	);
+	) override;
 
 protected:
 	bool m_unk0xf0;

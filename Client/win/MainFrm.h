@@ -21,7 +21,7 @@ class MyXTPCommandBars : public CXTPCommandBars
 	DECLARE_DYNCREATE(MyXTPCommandBars)
 
 protected:
-	virtual CXTPToolBar* AddCustomBar(LPCTSTR lpcstrCaption, UINT nID, BOOL bTearOffBar = FALSE)
+	CXTPToolBar* AddCustomBar(LPCTSTR lpcstrCaption, UINT nID, BOOL bTearOffBar = FALSE) override
 	{
 		CXTPToolBar* toolBar = CXTPCommandBars::AddCustomBar(lpcstrCaption, nID, bTearOffBar);
 
@@ -40,7 +40,7 @@ class CPatchedControlComboBox : public CXTPControlComboBox
 public:
 	CPatchedControlComboBox() {}
 
-	virtual BOOL Compare(CXTPControl* pOther);
+	BOOL Compare(CXTPControl* pOther) override;
 };
 
 class CWrapperView : public CView
@@ -51,10 +51,10 @@ protected:
 	CWrapperView();
 
 public:
-	virtual BOOL OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo);
-	virtual BOOL OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult);
-	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
-	virtual void OnDraw(CDC* pDC);
+	BOOL OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo) override;
+	BOOL OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT* pResult) override;
+	BOOL PreCreateWindow(CREATESTRUCT& cs) override;
+	void OnDraw(CDC* pDC) override;
 
 private:
 	CSelectionTreeCtrl m_unk0x58;
@@ -66,18 +66,18 @@ class CMainFrame : public CXTPMDIFrameWnd, public RBX::Listener<RBX::FillToolCol
 
 public:
 	CMainFrame();
-	virtual ~CMainFrame();
+	~CMainFrame() override;
 
-	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
-	virtual void ActivateFrame(int nCmdShow = -1);
-	virtual void OnSetPreviewMode(BOOL bPreview, CPrintPreviewState* pState);
+	BOOL PreCreateWindow(CREATESTRUCT& cs) override;
+	void ActivateFrame(int nCmdShow = -1) override;
+	void OnSetPreviewMode(BOOL bPreview, CPrintPreviewState* pState) override;
 
 	bool FUN_00432550(int nCmdShow);
 	void FUN_00434b80();
 	void FUN_00435230(bool p_unk0x04);
 
 protected:
-	virtual void onEvent(const RBX::FillToolColor* source, RBX::BrickColor event);
+	void onEvent(const RBX::FillToolColor* source, RBX::BrickColor event) override;
 
 	void FUN_004325e0(UINT nID, CRect rect, XTPDockingPaneDirection direction);
 	void FUN_00433b20(CXTPPropExchange* pPX, BOOL p_unk0x08);

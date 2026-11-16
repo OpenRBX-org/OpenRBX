@@ -12,29 +12,29 @@
 
 namespace RBX {
 
-class JointsService : public NonFactoryProduct<Instance, static_cast<const char*>(0)>,
+class JointsService : public NonFactoryProduct<Instance, nullptr>,
 					  public Service,
 					  public IRenderableBucket,
 					  public Listener<World, AutoJoin>,
 					  public Listener<World, AutoDestroy>
 {
 private:
-	virtual void onDescendentAdded(Instance* instance);
-	virtual void onDescendentRemoving(const std::shared_ptr<Instance>& instance);
+	void onDescendentAdded(Instance* instance) override;
+	void onDescendentRemoving(const std::shared_ptr<Instance>& instance) override;
 
-	virtual bool askAddChild(const Instance* instance) const
+	bool askAddChild(const Instance* instance) const override
 	{
-		return dynamic_cast<const JointInstance*>(instance) != NULL;
+		return dynamic_cast<const JointInstance*>(instance) != nullptr;
 	}
-	virtual XmlElement* write() { return NULL; }
-	virtual void onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider);
-	virtual void onEvent(const World* source, AutoDestroy event);
-	virtual void onEvent(const World* source, AutoJoin event);
+	XmlElement* write() override { return nullptr; }
+	void onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider) override;
+	void onEvent(const World* source, AutoDestroy event) override;
+	void onEvent(const World* source, AutoJoin event) override;
 
 public:
 	World* world;
 
-	JointsService() : world(NULL) { setName("JointsService"); }
+	JointsService() : world(nullptr) { setName("JointsService"); }
 };
 
 } // namespace RBX

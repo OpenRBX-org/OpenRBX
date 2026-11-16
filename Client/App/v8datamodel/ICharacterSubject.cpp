@@ -78,7 +78,7 @@ bool ICharacterSubject::testOcclusion(
 			G3D::Ray manToCamera = G3D::Ray::fromOriginAndDirection(pointOnMan, cameraGoal.translation - pointOnMan);
 
 			G3D::Vector3 hitPoint;
-			if (contactManager->getHit(manToCamera, &ignorePrims, NULL, hitPoint)) {
+			if (contactManager->getHit(manToCamera, &ignorePrims, nullptr, hitPoint)) {
 				hits++;
 				float thisDistance = (hitPoint - pointOnMan).magnitude();
 				distance = std::min(distance, thisDistance);

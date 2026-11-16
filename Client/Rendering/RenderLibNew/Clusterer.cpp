@@ -4,12 +4,11 @@
 #include <cstdlib>
 #include <functional>
 
-namespace RBX {
-namespace RenderNew {
+namespace RBX::RenderNew {
 
 Clusterer::Cluster* Clusterer::findClosestCluster(Sample* sample)
 {
-	Cluster* bestCluster = NULL;
+	Cluster* bestCluster = nullptr;
 	float bestDistance = G3D::inf();
 
 	Clusters::iterator end = clusters.end();
@@ -120,5 +119,4 @@ Clusterer::Clusterer(unsigned int clusterCount) : sampleSize(0), clusterCount(cl
 {
 }
 
-} // namespace RenderNew
-} // namespace RBX
+} // namespace RBX::RenderNew

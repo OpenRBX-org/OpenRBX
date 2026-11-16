@@ -6,8 +6,7 @@
 #include <ostream>
 #include <string>
 
-namespace RBX {
-namespace LDraw2Lua {
+namespace RBX::LDraw2Lua {
 
 class LDraw2RobloxMapRoot;
 struct Unknown00473110;
@@ -17,8 +16,8 @@ class LDrawCommand : public LuaObjectWriter
 public:
 	LDrawCommand(LDraw2RobloxMapRoot* p_unk0x04);
 
-	virtual ~LDrawCommand();
-	virtual bool VTable0x04(std::ostream& stream, std::string p_unk0x08);
+	~LDrawCommand() override;
+	bool VTable0x04(std::ostream& stream, std::string p_unk0x08) override;
 
 	void setFileName(std::string p_unk0x04) { m_unk0x70 = p_unk0x04; }
 
@@ -34,7 +33,6 @@ public:
 	std::string m_unk0x70;
 };
 
-} // namespace LDraw2Lua
-} // namespace RBX
+} // namespace RBX::LDraw2Lua
 
 #endif // LDRAWCOMMAND_H

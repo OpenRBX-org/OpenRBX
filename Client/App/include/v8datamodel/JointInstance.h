@@ -40,14 +40,14 @@ public:
 	JointInstance() {}
 	JointInstance(Joint* joint);
 
-	virtual ~JointInstance();
+	~JointInstance() override;
 	Joint::JointType getJointType() const;
 
 protected:
 	Joint* joint;
 
-	virtual bool shouldRender3dAdorn() const;
-	virtual void render3dAdorn(Adorn* adorn);
+	bool shouldRender3dAdorn() const override;
+	void render3dAdorn(Adorn* adorn) override;
 };
 
 class AutoJoint : public DescribedNonCreatable<AutoJoint, JointInstance, sAutoJoint>
@@ -59,8 +59,8 @@ private:
 	void setPartNull(int i);
 	void setPrimitiveFromPart(int i);
 
-	virtual bool askSetParent(const Instance* instance) const;
-	virtual void onAncestorChanged(const AncestorChanged& event);
+	bool askSetParent(const Instance* instance) const override;
+	void onAncestorChanged(const AncestorChanged& event) override;
 
 	World* computeWorld();
 
@@ -68,7 +68,7 @@ public:
 	AutoJoint() {}
 	AutoJoint(Joint* _joint);
 
-	virtual ~AutoJoint();
+	~AutoJoint() override;
 
 	PartInstance* getPart0() const;
 	PartInstance* getPart1() const;

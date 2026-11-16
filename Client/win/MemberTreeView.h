@@ -7,13 +7,9 @@
 #include "reflection/property.h"
 #include "reflection/signal.h"
 
-namespace RBX {
-namespace Reflection {
-namespace Metadata {
+namespace RBX::Reflection::Metadata {
 class Item;
 }
-} // namespace Reflection
-} // namespace RBX
 
 class CDeclarationView;
 
@@ -25,9 +21,9 @@ protected:
 	CMemberTreeView();
 
 public:
-	virtual ~CMemberTreeView();
+	~CMemberTreeView() override;
 
-	virtual void OnInitialUpdate();
+	void OnInitialUpdate() override;
 
 	void FUN_004380e0(const RBX::Reflection::EnumDescriptor::Item* item);
 	void FUN_00438130(HTREEITEM item, RBX::Reflection::Metadata::Item* metadata);

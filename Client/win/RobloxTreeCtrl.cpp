@@ -18,9 +18,9 @@ class RootNode : public CRobloxTreeCtrlNode
 public:
 	RootNode(const std::shared_ptr<RBX::Instance>& instance, CRobloxTreeCtrl* tree);
 
-	virtual void VTable0x08();
-	virtual void VTable0x14(NMTVDISPINFO* dispInfo);
-	virtual HTREEITEM VTable0x18();
+	void VTable0x08() override;
+	void VTable0x14(NMTVDISPINFO* dispInfo) override;
+	HTREEITEM VTable0x18() override;
 };
 
 IMPLEMENT_DYNAMIC(CRobloxTreeCtrl, CXTTreeCtrl)
@@ -64,15 +64,15 @@ class CEnabledCmdUI : public CCmdUI
 public:
 	CEnabledCmdUI() : m_unk0x28(FALSE) {}
 
-	virtual void Enable(BOOL bOn = TRUE)
+	void Enable(BOOL bOn = TRUE) override
 	{
 		m_unk0x28 = bOn;
 		m_bEnableChanged = TRUE;
 	}
 
-	virtual void SetCheck(int nCheck = 1) {}
-	virtual void SetRadio(BOOL bOn = TRUE) {}
-	virtual void SetText(LPCTSTR lpszText) {}
+	void SetCheck(int nCheck = 1) override {}
+	void SetRadio(BOOL bOn = TRUE) override {}
+	void SetText(LPCTSTR lpszText) override {}
 
 	BOOL m_unk0x28;
 };
@@ -92,7 +92,7 @@ void CSelectionTreeCtrl::FUN_00422270(CPoint point)
 				continue;
 			}
 
-			AfxGetMainWnd()->OnCmdMsg(state.m_nID, CN_UPDATE_COMMAND_UI, &state, NULL);
+			AfxGetMainWnd()->OnCmdMsg(state.m_nID, CN_UPDATE_COMMAND_UI, &state, nullptr);
 			popup->EnableMenuItem(i, MF_BYPOSITION | (state.m_unk0x28 ? MF_ENABLED : MF_DISABLED));
 		}
 
@@ -161,7 +161,7 @@ void CRobloxTreeCtrl::VTable0x15c()
 		DeleteAllItems();
 		if (m_unk0x94) {
 			delete m_unk0x94;
-			m_unk0x94 = NULL;
+			m_unk0x94 = nullptr;
 		}
 	}
 }
@@ -181,7 +181,7 @@ void CRobloxTreeCtrl::OnDestroy()
 	DeleteAllItems();
 	if (m_unk0x94) {
 		delete m_unk0x94;
-		m_unk0x94 = NULL;
+		m_unk0x94 = nullptr;
 	}
 }
 
@@ -329,7 +329,7 @@ void CSelectionTreeCtrl::FUN_00423630(NMHDR* pNMHDR, LRESULT* pResult)
 		CPoint point = treeView->ptDrag;
 		m_unk0xf0->BeginDrag(0, CPoint(point.x - rect.left + indent, point.y - rect.top));
 		ClientToScreen(&point);
-		CImageList::DragEnter(NULL, point);
+		CImageList::DragEnter(nullptr, point);
 		SetCapture();
 	}
 	*pResult = 0;
@@ -342,7 +342,7 @@ int CSelectionTreeCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	}
 
 	FUN_004204e0();
-	SetTimer(0, 200, NULL);
+	SetTimer(0, 200, nullptr);
 	return 0;
 }
 
@@ -404,7 +404,7 @@ HTREEITEM CSelectionTreeCtrl::FUN_00423cc0(HTREEITEM item)
 			}
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 void CSelectionTreeCtrl::OnMouseMove(UINT nFlags, CPoint point)
@@ -421,7 +421,7 @@ void CSelectionTreeCtrl::OnMouseMove(UINT nFlags, CPoint point)
 				target = FUN_00423cc0(target);
 			}
 			else {
-				target = NULL;
+				target = nullptr;
 			}
 		}
 
@@ -435,7 +435,7 @@ void CSelectionTreeCtrl::OnMouseMove(UINT nFlags, CPoint point)
 void CRobloxTreeCtrlNode::FUN_004248f0(const std::shared_ptr<RBX::Instance>& instance)
 {
 	{
-		std::lock_guard<std::recursive_mutex> lock(m_unk0x30->m_unk0xb0);
+		std::scoped_lock lock(m_unk0x30->m_unk0xb0);
 		m_unk0x38.insert(instance);
 	}
 	m_unk0x30->VTable0x154(this);
@@ -443,7 +443,7 @@ void CRobloxTreeCtrlNode::FUN_004248f0(const std::shared_ptr<RBX::Instance>& ins
 
 void CSelectionTreeCtrl::VTable0x150(RBX::Instance* instance)
 {
-	std::lock_guard<std::recursive_mutex> lock(m_unk0xb0);
+	std::scoped_lock lock(m_unk0xb0);
 
 	std::map<RBX::Instance*, CRobloxTreeCtrlNode*>::iterator it = m_unk0x98.find(instance);
 	if (it != m_unk0x98.end()) {
@@ -453,24 +453,24 @@ void CSelectionTreeCtrl::VTable0x150(RBX::Instance* instance)
 
 void CSelectionTreeCtrl::VTable0x154(CRobloxTreeCtrlNode* node)
 {
-	std::lock_guard<std::recursive_mutex> lock(m_unk0xb0);
+	std::scoped_lock lock(m_unk0xb0);
 	m_unk0xdc.insert(node);
 }
 
 void CSelectionTreeCtrl::VTable0x158(CRobloxTreeCtrlNode* node)
 {
-	std::lock_guard<std::recursive_mutex> lock(m_unk0xb0);
+	std::scoped_lock lock(m_unk0xb0);
 	m_unk0xdc.erase(node);
 }
 
-CRobloxTreeCtrl::CRobloxTreeCtrl() : m_unk0x94(NULL), m_unk0xa4(false)
+CRobloxTreeCtrl::CRobloxTreeCtrl() : m_unk0x94(nullptr), m_unk0xa4(false)
 {
 }
 
 CRobloxTreeCtrlNode::~CRobloxTreeCtrlNode()
 {
 	{
-		std::lock_guard<std::recursive_mutex> lock(m_unk0x30->m_unk0xb0);
+		std::scoped_lock lock(m_unk0x30->m_unk0xb0);
 
 		if (m_unk0x34) {
 			m_unk0x34->m_unk0x14.erase(m_unk0x0c.get());
@@ -558,13 +558,13 @@ void CRobloxTreeCtrlNode::onEvent(const RBX::Instance* source, RBX::PropertyChan
 bool CRobloxTreeCtrlNode::FUN_004255f0()
 {
 	RBX::DataModel::Lock lock(m_unk0x30->VTable0x14c());
-	std::shared_ptr<const std::vector<std::shared_ptr<RBX::Instance> > > children = m_unk0x0c->getChildren().read();
+	std::shared_ptr<const std::vector<std::shared_ptr<RBX::Instance>>> children = m_unk0x0c->getChildren().read();
 	if (!children) {
 		return false;
 	}
 
-	std::vector<std::shared_ptr<RBX::Instance> >::const_iterator end = children->end();
-	for (std::vector<std::shared_ptr<RBX::Instance> >::const_iterator it = children->begin(); it != end; ++it) {
+	std::vector<std::shared_ptr<RBX::Instance>>::const_iterator end = children->end();
+	for (std::vector<std::shared_ptr<RBX::Instance>>::const_iterator it = children->begin(); it != end; ++it) {
 		std::shared_ptr<RBX::Reflection::Metadata::Reflection> reflection =
 			RBX::Reflection::Metadata::Reflection::FUN_004480c0();
 		RBX::Reflection::Metadata::Class* metadata = reflection->FUN_00446220(&(*it)->getDescriptor(), true);
@@ -612,7 +612,7 @@ void CRobloxTreeCtrlNode::VTable0x08()
 void CRobloxTreeCtrlNode::onEvent(const RBX::Instance* source, RBX::ChildAdded event)
 {
 	if (m_unk0x2c_bit1) {
-		std::lock_guard<std::recursive_mutex> lock(m_unk0x30->m_unk0xb0);
+		std::scoped_lock lock(m_unk0x30->m_unk0xb0);
 		m_unk0x38.insert(event.child);
 	}
 
@@ -624,7 +624,7 @@ void CRobloxTreeCtrlNode::FUN_00425c40()
 	std::vector<CRobloxTreeCtrlNode*> nodes;
 
 	{
-		std::lock_guard<std::recursive_mutex> lock(m_unk0x30->m_unk0xb0);
+		std::scoped_lock lock(m_unk0x30->m_unk0xb0);
 		std::copy(m_unk0x20.begin(), m_unk0x20.end(), std::back_inserter(nodes));
 		m_unk0x20.clear();
 	}
@@ -637,7 +637,7 @@ void CRobloxTreeCtrlNode::FUN_00425c40()
 void CRobloxTreeCtrlNode::onEvent(const RBX::Instance* source, RBX::ChildRemoved event)
 {
 	{
-		std::lock_guard<std::recursive_mutex> lock(m_unk0x30->m_unk0xb0);
+		std::scoped_lock lock(m_unk0x30->m_unk0xb0);
 		m_unk0x30->m_unk0x98.erase(event.child.get());
 
 		std::map<RBX::Instance*, CRobloxTreeCtrlNode*>::iterator it = m_unk0x14.find(event.child.get());
@@ -655,7 +655,7 @@ void CSelectionTreeCtrl::onEvent(const RBX::Selection* source, RBX::SelectionCha
 {
 	if (!m_unk0xce) {
 		if (event.addedItem) {
-			std::lock_guard<std::recursive_mutex> lock(m_unk0xb0);
+			std::scoped_lock lock(m_unk0xb0);
 			std::map<RBX::Instance*, CRobloxTreeCtrlNode*>::iterator it = m_unk0x98.find(event.addedItem.get());
 			if (it != m_unk0x98.end()) {
 				VTable0x154(it->second);
@@ -666,7 +666,7 @@ void CSelectionTreeCtrl::onEvent(const RBX::Selection* source, RBX::SelectionCha
 		}
 
 		if (event.removedItem) {
-			std::lock_guard<std::recursive_mutex> lock(m_unk0xb0);
+			std::scoped_lock lock(m_unk0xb0);
 			m_unk0xd0.erase(event.removedItem);
 			std::map<RBX::Instance*, CRobloxTreeCtrlNode*>::iterator it = m_unk0x98.find(event.removedItem.get());
 			if (it != m_unk0x98.end()) {
@@ -690,10 +690,11 @@ CRobloxTreeCtrlNode::CRobloxTreeCtrlNode(
 	CRobloxTreeCtrlNode* parent, std::shared_ptr<RBX::Instance> instance, CRobloxTreeCtrl* tree
 )
 	: m_unk0x0c(instance), m_unk0x2c_bit0(false), m_unk0x2c_bit1(false), m_unk0x2d(false), m_unk0x30(tree),
-	  m_unk0x34(parent), m_unk0x44(NULL), m_unk0x48(FUN_004230c0(instance.get())), m_unk0x4c(&instance->getDescriptor())
+	  m_unk0x34(parent), m_unk0x44(nullptr), m_unk0x48(FUN_004230c0(instance.get())),
+	  m_unk0x4c(&instance->getDescriptor())
 {
 	{
-		std::lock_guard<std::recursive_mutex> lock(tree->m_unk0xb0);
+		std::scoped_lock lock(tree->m_unk0xb0);
 		tree->m_unk0x98[instance.get()] = this;
 
 		if (parent) {
@@ -721,11 +722,11 @@ CRobloxTreeCtrlNode* CRobloxTreeCtrlNode::FUN_004267a0(const std::shared_ptr<RBX
 		RBX::Reflection::Metadata::Reflection::FUN_004480c0();
 	RBX::Reflection::Metadata::Class* metadata = reflection->FUN_00446220(&instance->getDescriptor(), true);
 	if (!metadata || metadata->FUN_00422100() < 0) {
-		return NULL;
+		return nullptr;
 	}
 
 	{
-		std::lock_guard<std::recursive_mutex> lock(m_unk0x30->m_unk0xb0);
+		std::scoped_lock lock(m_unk0x30->m_unk0xb0);
 		std::map<RBX::Instance*, CRobloxTreeCtrlNode*>::iterator it = m_unk0x14.find(instance.get());
 		if (it != m_unk0x14.end()) {
 			return it->second;
@@ -739,7 +740,7 @@ CRobloxTreeCtrlNode* CRobloxTreeCtrlNode::FUN_004267a0(const std::shared_ptr<RBX
 
 void CRobloxTreeCtrlNode::FUN_00426960()
 {
-	std::vector<std::shared_ptr<RBX::Instance> > children;
+	std::vector<std::shared_ptr<RBX::Instance>> children;
 
 	{
 		RBX::DataModel::Lock lock(m_unk0x30->VTable0x14c());
@@ -758,7 +759,7 @@ void CRobloxTreeCtrlNode::FUN_00426b00()
 	for (int i = 0; i < 10; i++) {
 		std::shared_ptr<RBX::Instance> instance;
 		{
-			std::lock_guard<std::recursive_mutex> lock(m_unk0x30->m_unk0xb0);
+			std::scoped_lock lock(m_unk0x30->m_unk0xb0);
 			auto it = m_unk0x38.begin();
 			if (it == m_unk0x38.end()) {
 				return;
@@ -771,7 +772,7 @@ void CRobloxTreeCtrlNode::FUN_00426b00()
 }
 
 RootNode::RootNode(const std::shared_ptr<RBX::Instance>& instance, CRobloxTreeCtrl* tree)
-	: CRobloxTreeCtrlNode(NULL, instance, tree)
+	: CRobloxTreeCtrlNode(nullptr, instance, tree)
 {
 	m_unk0x2c_bit1 = true;
 }
@@ -796,11 +797,11 @@ void CSelectionTreeCtrl::VTable0x15c()
 CRobloxTreeCtrlNode* CRobloxTreeCtrl::FUN_00426e00(const std::shared_ptr<RBX::Instance>& instance)
 {
 	if (!instance) {
-		return NULL;
+		return nullptr;
 	}
 
 	{
-		std::lock_guard<std::recursive_mutex> lock(m_unk0xb0);
+		std::scoped_lock lock(m_unk0xb0);
 		std::map<RBX::Instance*, CRobloxTreeCtrlNode*>::iterator it = m_unk0x98.find(instance.get());
 		if (it != m_unk0x98.end()) {
 			return it->second;
@@ -809,7 +810,7 @@ CRobloxTreeCtrlNode* CRobloxTreeCtrl::FUN_00426e00(const std::shared_ptr<RBX::In
 
 	CRobloxTreeCtrlNode* parent = FUN_00426e00(RBX::shared_from(instance->getParent()));
 	if (!parent) {
-		return NULL;
+		return nullptr;
 	}
 	return parent->FUN_004267a0(instance);
 }
@@ -819,7 +820,7 @@ void CSelectionTreeCtrl::FUN_00426f50()
 	for (int i = 0; i < 10; i++) {
 		std::shared_ptr<RBX::Instance> instance;
 		{
-			std::lock_guard<std::recursive_mutex> lock(m_unk0xb0);
+			std::scoped_lock lock(m_unk0xb0);
 			auto it = m_unk0xd0.begin();
 			if (it == m_unk0xd0.end()) {
 				return;
@@ -833,9 +834,9 @@ void CSelectionTreeCtrl::FUN_00426f50()
 
 void CSelectionTreeCtrl::OnTimer(UINT_PTR nIDEvent)
 {
-	CRobloxTreeCtrlNode* node = NULL;
+	CRobloxTreeCtrlNode* node = nullptr;
 	{
-		std::lock_guard<std::recursive_mutex> lock(m_unk0xb0);
+		std::scoped_lock lock(m_unk0xb0);
 		if (m_unk0xdc.size() > 0) {
 			node = *m_unk0xdc.begin();
 		}
@@ -851,7 +852,7 @@ void CSelectionTreeCtrl::OnTimer(UINT_PTR nIDEvent)
 		}
 		node->FUN_00426b00();
 
-		std::lock_guard<std::recursive_mutex> lock(m_unk0xb0);
+		std::scoped_lock lock(m_unk0xb0);
 		if (node->m_unk0x38.empty()) {
 			VTable0x158(node);
 		}
@@ -863,7 +864,7 @@ void CSelectionTreeCtrl::OnTimer(UINT_PTR nIDEvent)
 
 RBX::Selection* CSelectionTreeCtrl::VTable0x148()
 {
-	return m_unk0xe8 ? m_unk0xe8->create<RBX::Selection>() : NULL;
+	return m_unk0xe8 ? m_unk0xe8->create<RBX::Selection>() : nullptr;
 }
 
 void CSelectionTreeCtrl::FUN_004285a0(std::shared_ptr<RBX::DataModel> dataModel)
@@ -904,7 +905,7 @@ static void FUN_00428770(RBX::Instance* parent, std::shared_ptr<RBX::Instance> c
 	if (workspace) {
 		bool descendent = child->isDescendentOf(workspace);
 		if (!descendent) {
-			std::vector<std::shared_ptr<RBX::Instance> > instances;
+			std::vector<std::shared_ptr<RBX::Instance>> instances;
 			instances.push_back(child);
 			workspace->insertInstances(instances, workspace, RBX::INSERT_TO_TREE, RBX::SUPPRESS_PROMPTS);
 		}
@@ -967,18 +968,18 @@ void CSelectionTreeCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 			}
 		}
 
-		SelectDropTarget(NULL);
+		SelectDropTarget(nullptr);
 	}
 }
 
 // clang-format off
 BEGIN_MESSAGE_MAP(CRobloxTreeCtrl, CXTTreeCtrl)
-	ON_NOTIFY_REFLECT(TVN_GETDISPINFO, FUN_00422210)
-	ON_NOTIFY_REFLECT(TVN_ITEMEXPANDING, FUN_00428720)
-	ON_NOTIFY_REFLECT(TVN_ITEMEXPANDED, FUN_004221f0)
-	ON_NOTIFY_REFLECT(TVN_DELETEITEM, FUN_00422b80)
-	ON_NOTIFY_REFLECT(TVN_BEGINLABELEDIT, FUN_00422de0)
-	ON_NOTIFY_REFLECT(TVN_ENDLABELEDIT, FUN_004234f0)
+	ON_NOTIFY_REFLECT(TVN_GETDISPINFO, &CRobloxTreeCtrl::FUN_00422210)
+	ON_NOTIFY_REFLECT(TVN_ITEMEXPANDING, &CRobloxTreeCtrl::FUN_00428720)
+	ON_NOTIFY_REFLECT(TVN_ITEMEXPANDED, &CRobloxTreeCtrl::FUN_004221f0)
+	ON_NOTIFY_REFLECT(TVN_DELETEITEM, &CRobloxTreeCtrl::FUN_00422b80)
+	ON_NOTIFY_REFLECT(TVN_BEGINLABELEDIT, &CRobloxTreeCtrl::FUN_00422de0)
+	ON_NOTIFY_REFLECT(TVN_ENDLABELEDIT, &CRobloxTreeCtrl::FUN_004234f0)
 	ON_WM_LBUTTONDBLCLK()
 	ON_WM_PAINT()
 	ON_WM_KEYDOWN()
@@ -988,10 +989,10 @@ END_MESSAGE_MAP()
 
 BEGIN_MESSAGE_MAP(CSelectionTreeCtrl, CRobloxTreeCtrl)
 	ON_WM_CONTEXTMENU()
-	ON_NOTIFY_REFLECT(TVN_SELCHANGED, FUN_004232d0)
-	ON_NOTIFY_REFLECT(TVN_SELCHANGING, FUN_00422230)
+	ON_NOTIFY_REFLECT(TVN_SELCHANGED, &CSelectionTreeCtrl::FUN_004232d0)
+	ON_NOTIFY_REFLECT(TVN_SELCHANGING, &CSelectionTreeCtrl::FUN_00422230)
 	ON_WM_RBUTTONDOWN()
-	ON_NOTIFY_REFLECT(TVN_BEGINDRAG, FUN_00423630)
+	ON_NOTIFY_REFLECT(TVN_BEGINDRAG, &CSelectionTreeCtrl::FUN_00423630)
 	ON_WM_MOUSEMOVE()
 	ON_WM_LBUTTONUP()
 	ON_WM_CREATE()

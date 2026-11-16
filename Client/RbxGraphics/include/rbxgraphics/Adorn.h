@@ -43,7 +43,7 @@ public:
 		FIXED_SPACING = 1
 	};
 
-	virtual ~Adorn() {}
+	virtual ~Adorn() = default;
 
 	virtual G3D::ReferenceCountedPointer<TextureProxyBase> createTextureProxy(const std::string& name) = 0;
 	virtual void prepareRenderPass() {}

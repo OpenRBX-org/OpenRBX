@@ -6,8 +6,8 @@
 
 #include <G3D/format.h>
 #include <chrono>
+#include <ctime>
 #include <thread>
-#include <time.h>
 
 namespace RBX {
 
@@ -45,9 +45,7 @@ worker_thread::work_result Visit::ping(std::string url, int interval)
 	return worker_thread::more;
 }
 
-Visit::~Visit()
-{
-}
+Visit::~Visit() = default;
 
 Visit::Visit() : uploadUrl("NoVisit")
 {
@@ -67,5 +65,5 @@ void Visit::setPing(std::string url, int interval)
 
 template class RBX::FactoryProduct<RBX::Visit, RBX::Instance, RBX::sVisit>;
 template class RBX::Reflection::
-	Described<RBX::Visit, RBX::sVisit, RBX::FactoryProduct<RBX::Visit, RBX::Instance, RBX::sVisit> >;
+	Described<RBX::Visit, RBX::sVisit, RBX::FactoryProduct<RBX::Visit, RBX::Instance, RBX::sVisit>>;
 template class RBX::DescribedCreatable<RBX::Visit, RBX::Instance, RBX::sVisit>;

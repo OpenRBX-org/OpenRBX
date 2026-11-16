@@ -8,8 +8,7 @@
 #include <G3D/Vector2.h>
 #include <G3D/Vector3.h>
 
-namespace RBX {
-namespace View {
+namespace RBX::View {
 
 class PBBMesh : public Render::Mesh, public MeshFactory<PBBMesh, 4>
 {
@@ -23,7 +22,6 @@ private:
 	PBBMesh(const G3D::Vector3& size, RenderSurfaceTypes surfaceTypes);
 };
 
-} // namespace View
-} // namespace RBX
+} // namespace RBX::View
 
 #endif // RBXVIEW_PBBMESH_H

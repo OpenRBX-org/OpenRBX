@@ -32,10 +32,10 @@ public:
 
 	GuiTarget* getTarget() { return target; }
 
-	static GuiResponse notUsed() { return GuiResponse(NOT_USED, NULL); }
-	static GuiResponse used() { return GuiResponse(USED, NULL); }
+	static GuiResponse notUsed() { return GuiResponse(NOT_USED, nullptr); }
+	static GuiResponse used() { return GuiResponse(USED, nullptr); }
 	static GuiResponse used(GuiTarget* target) { return GuiResponse(USED, target); }
-	static GuiResponse finished() { return GuiResponse(USED_AND_FINISHED, NULL); }
+	static GuiResponse finished() { return GuiResponse(USED_AND_FINISHED, nullptr); }
 
 private:
 	GuiResponse(ResponseType response, GuiTarget* target) : response(response), target(target) {}

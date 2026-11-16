@@ -58,7 +58,7 @@ std::shared_ptr<RBX::Decal> InsertTexture::VTable0x14()
 
 RBX::Instance* InsertDecal::FUN_0041f500() const
 {
-	RBX::Selection* selection = dataModel ? dataModel->create<RBX::Selection>() : NULL;
+	RBX::Selection* selection = dataModel ? dataModel->create<RBX::Selection>() : nullptr;
 	if (selection->size() == 1) {
 		RBX::Instance* instance = selection->front().get();
 		if (dynamic_cast<RBX::PartInstance*>(instance)) {
@@ -70,7 +70,7 @@ RBX::Instance* InsertDecal::FUN_0041f500() const
 		}
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 void InsertDecal::doIt(RBX::IDataState* dataState)
@@ -78,7 +78,7 @@ void InsertDecal::doIt(RBX::IDataState* dataState)
 	CString filter;
 	filter.LoadString(132);
 
-	CFileDialog dialog(TRUE, NULL, NULL, 0, filter);
+	CFileDialog dialog(TRUE, nullptr, nullptr, 0, filter);
 	if (dialog.DoModal() == IDOK) {
 		RBX::ContentId id = FUN_0041e900(dialog.GetPathName());
 		std::shared_ptr<RBX::Decal> decal = VTable0x14();
@@ -86,7 +86,7 @@ void InsertDecal::doIt(RBX::IDataState* dataState)
 		decal->setName(std::string(dialog.GetFileTitle()));
 		decal->setParent(FUN_0041f500());
 
-		RBX::Selection* selection = dataModel ? dataModel->create<RBX::Selection>() : NULL;
+		RBX::Selection* selection = dataModel ? dataModel->create<RBX::Selection>() : nullptr;
 		selection->setSelection(decal.get());
 
 		dataState->clearStack();
@@ -104,7 +104,7 @@ InsertObject::InsertObject(RBX::DataModel* dataModel) : RBX::RunStateVerb("Inser
 
 RBX::Instance* InsertObject::FUN_0041fb40() const
 {
-	RBX::Selection* selection = dataModel ? dataModel->create<RBX::Selection>() : NULL;
+	RBX::Selection* selection = dataModel ? dataModel->create<RBX::Selection>() : nullptr;
 	size_t count = selection->size();
 	if (count == 1) {
 		return selection->front().get();
@@ -114,7 +114,7 @@ RBX::Instance* InsertObject::FUN_0041fb40() const
 		return dataModel->getWorkspace();
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 void InsertObject::doIt(RBX::IDataState* dataState)
@@ -129,13 +129,13 @@ void InsertObject::doIt(RBX::IDataState* dataState)
 		std::shared_ptr<RBX::Instance> instance = RBX::AbstractFactoryProduct<RBX::Instance>::create(className);
 		if (!instance) {
 			CString message;
-			message.Format(133, dialog.m_unk0x74);
+			message.Format(133, static_cast<LPCTSTR>(dialog.m_unk0x74));
 			AfxMessageBox(message);
 		}
 		else if (dynamic_cast<RBX::Service*>(instance.get())) {
 			if (!RBX::ServiceProvider::create(dataModel, className)) {
 				CString message;
-				message.Format(137, dialog.m_unk0x74);
+				message.Format(137, static_cast<LPCTSTR>(dialog.m_unk0x74));
 				AfxMessageBox(message);
 			}
 		}
@@ -152,7 +152,7 @@ void InsertObject::doIt(RBX::IDataState* dataState)
 
 			instance->setParent(FUN_0041fb40());
 
-			RBX::Selection* selection = dataModel ? dataModel->create<RBX::Selection>() : NULL;
+			RBX::Selection* selection = dataModel ? dataModel->create<RBX::Selection>() : nullptr;
 			selection->setSelection(instance.get());
 
 			dataState->clearStack();
@@ -162,7 +162,7 @@ void InsertObject::doIt(RBX::IDataState* dataState)
 
 bool InsertObject::isEnabled() const
 {
-	return FUN_0041fb40() != NULL;
+	return FUN_0041fb40() != nullptr;
 }
 
 CString CInstanceRecord::CNameItem::GetCaption(CXTPReportColumn* pColumn)
@@ -207,9 +207,7 @@ CInstanceRecord::CInstanceRecord(std::shared_ptr<RBX::Instance> instance) : m_un
 	AddItem(new CXTPReportRecordItemText(instance->getClassName().toString().c_str()));
 }
 
-CInstanceRecord::~CInstanceRecord()
-{
-}
+CInstanceRecord::~CInstanceRecord() = default;
 
 void CInstanceExplorer::VTable0x08(const RBX::Instance* source, RBX::DescendentAdded event)
 {
@@ -241,7 +239,7 @@ void CInstanceExplorer::FUN_004212d0(RBX::Instance* root)
 
 CInstanceExplorer::~CInstanceExplorer()
 {
-	FUN_004212d0(NULL);
+	FUN_004212d0(nullptr);
 }
 
 void CInstanceExplorer::FUN_00421580(NMHDR* pNMHDR, LRESULT* pResult)
@@ -263,7 +261,7 @@ void CInstanceExplorer::FUN_00421580(NMHDR* pNMHDR, LRESULT* pResult)
 // clang-format off
 BEGIN_MESSAGE_MAP(CInstanceExplorer, CXTPReportView)
 	ON_WM_CREATE()
-	ON_NOTIFY(XTP_NM_REPORT_SELCHANGED, 100, FUN_00421580)
+	ON_NOTIFY(XTP_NM_REPORT_SELCHANGED, 100, &CInstanceExplorer::FUN_00421580)
 END_MESSAGE_MAP()
 // clang-format on
 

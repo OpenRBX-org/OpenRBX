@@ -30,7 +30,7 @@ static Reflection::BoundFuncDesc<RunService, void(), 0> resetFunction(
 void RunService::endRunThread(bool join)
 {
 	{
-		std::lock_guard<std::mutex> lock(runMutex);
+		std::scoped_lock lock(runMutex);
 		stopRequested = true;
 	}
 
@@ -43,7 +43,7 @@ void RunService::endRunThread(bool join)
 
 void RunService::onAncestorChanged(const AncestorChanged& event)
 {
-	if (getParent() == NULL) {
+	if (getParent() == nullptr) {
 		endRunThread(false);
 	}
 }
@@ -80,7 +80,7 @@ void RunService::runProc(std::shared_ptr<DataModel> dataModel)
 		const double timeLeft = desiredTime - getRealTime();
 
 		{
-			std::lock_guard<std::recursive_mutex> lock(viewMutex);
+			std::scoped_lock lock(viewMutex);
 
 			for (Views::iterator iter = views.begin(); iter != views.end(); ++iter) {
 				iter->first->AdjustThrottle(timeLeft);
@@ -95,7 +95,7 @@ void RunService::runProc(std::shared_ptr<DataModel> dataModel)
 		bool signalled;
 
 		{
-			std::unique_lock<std::mutex> lock(runMutex);
+			std::unique_lock lock(runMutex);
 
 			signalled = stateChangedCondition.wait_until(lock, wakeTime, [this] { return stopRequested.load(); });
 		}
@@ -104,7 +104,7 @@ void RunService::runProc(std::shared_ptr<DataModel> dataModel)
 			const std::chrono::steady_clock::time_point timeout =
 				std::chrono::steady_clock::now() + std::chrono::seconds(1);
 
-			std::unique_lock<std::mutex> lock(runMutex);
+			std::unique_lock lock(runMutex);
 
 			if (invalidRunViewCount != 0) {
 				runViewsDoneCondition.wait_until(lock, timeout);
@@ -134,7 +134,7 @@ void RunService::runProc(std::shared_ptr<DataModel> dataModel)
 
 void RunService::invalidateRunViews()
 {
-	std::lock_guard<std::recursive_mutex> lock(viewMutex);
+	std::scoped_lock lock(viewMutex);
 
 	if (invalidRunViewCount != 0) {
 		return;
@@ -154,7 +154,7 @@ void RunService::invalidateRunViews()
 
 void RunService::runViewValid(IRunView* runView)
 {
-	std::lock_guard<std::recursive_mutex> lock(viewMutex);
+	std::scoped_lock lock(viewMutex);
 
 	if (invalidRunViewCount == 0) {
 		return;
@@ -181,7 +181,7 @@ RunService::~RunService()
 
 void RunService::removeRunView(IRunView* runView)
 {
-	std::lock_guard<std::recursive_mutex> lock(viewMutex);
+	std::scoped_lock lock(viewMutex);
 
 	runViewValid(runView);
 	views.erase(runView);
@@ -189,7 +189,7 @@ void RunService::removeRunView(IRunView* runView)
 
 void RunService::addRunView(IRunView* runView)
 {
-	std::lock_guard<std::recursive_mutex> lock(viewMutex);
+	std::scoped_lock lock(viewMutex);
 
 	views[runView] = true;
 }
@@ -225,8 +225,6 @@ void RunService::raiseStepped(float time, float step)
 } // namespace RBX
 
 template class RBX::FactoryProduct<RBX::RunService, RBX::Instance, RBX::sRunService>;
-template class RBX::Reflection::Described<
-	RBX::RunService,
-	RBX::sRunService,
-	RBX::FactoryProduct<RBX::RunService, RBX::Instance, RBX::sRunService> >;
+template class RBX::Reflection::
+	Described<RBX::RunService, RBX::sRunService, RBX::FactoryProduct<RBX::RunService, RBX::Instance, RBX::sRunService>>;
 template class RBX::DescribedCreatable<RBX::RunService, RBX::Instance, RBX::sRunService>;

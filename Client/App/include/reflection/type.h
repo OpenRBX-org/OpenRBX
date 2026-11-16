@@ -29,8 +29,8 @@ struct FunctionTraits;
 template <class R, class... Args>
 struct FunctionTraits<R(Args...)>
 {
-	typedef R Result;
-	typedef std::tuple<Args...> Arguments;
+	using Result = R;
+	using Arguments = std::tuple<Args...>;
 
 	static constexpr int arity = sizeof...(Args);
 };
@@ -46,7 +46,7 @@ Target polymorphicCast(Source* source)
 {
 	Target target = dynamic_cast<Target>(source);
 
-	if (target == NULL) {
+	if (target == nullptr) {
 		throw std::bad_cast();
 	}
 
@@ -195,12 +195,12 @@ ContentId& Value::convert<ContentId>();
 template <>
 std::string& Value::convert<std::string>();
 template <>
-std::shared_ptr<const std::vector<std::shared_ptr<Instance> > >& Value::convert<
-	std::shared_ptr<const std::vector<std::shared_ptr<Instance> > > >();
+std::shared_ptr<const std::vector<std::shared_ptr<Instance>>>& Value::convert<
+	std::shared_ptr<const std::vector<std::shared_ptr<Instance>>>>();
 template <>
-std::vector<Value>& Value::convert<std::vector<Value> >();
+std::vector<Value>& Value::convert<std::vector<Value>>();
 template <>
-std::shared_ptr<Instance>& Value::convert<std::shared_ptr<Instance> >();
+std::shared_ptr<Instance>& Value::convert<std::shared_ptr<Instance>>();
 
 class SignatureDescriptor
 {
@@ -212,7 +212,7 @@ public:
 		const Value defaultValue;
 	};
 
-	typedef std::list<Item> Arguments;
+	using Arguments = std::list<Item>;
 
 	SignatureDescriptor();
 

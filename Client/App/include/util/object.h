@@ -3,9 +3,9 @@
 
 #include "util/Name.h"
 
+#include <cstdlib>
 #include <map>
 #include <memory>
-#include <stdlib.h>
 
 namespace RBX {
 
@@ -14,25 +14,25 @@ class Instance;
 class Object
 {
 public:
-	virtual ~Object() {}
+	virtual ~Object() = default;
 };
 
 template <class T>
 std::shared_ptr<T> shared_from(T* r)
 {
-	return r != NULL ? std::static_pointer_cast<T>(r->shared_from_this()) : std::shared_ptr<T>();
+	return r != nullptr ? std::static_pointer_cast<T>(r->shared_from_this()) : std::shared_ptr<T>();
 }
 
 template <class T, class Base>
 std::shared_ptr<T> shared_from_dynamic_cast(std::enable_shared_from_this<Base>* r)
 {
-	return r != NULL ? std::dynamic_pointer_cast<T>(r->shared_from_this()) : std::shared_ptr<T>();
+	return r != nullptr ? std::dynamic_pointer_cast<T>(r->shared_from_this()) : std::shared_ptr<T>();
 }
 
 template <class T, class Base>
 std::shared_ptr<T> shared_from_polymorphic_downcast(std::enable_shared_from_this<Base>* r)
 {
-	return r != NULL ? std::static_pointer_cast<T>(r->shared_from_this()) : std::shared_ptr<T>();
+	return r != nullptr ? std::static_pointer_cast<T>(r->shared_from_this()) : std::shared_ptr<T>();
 }
 
 template <class T>
@@ -93,7 +93,7 @@ public:
 
 protected:
 	Creatable() {}
-	virtual ~Creatable() {}
+	~Creatable() override = default;
 
 	static void* operator new(size_t size) { return malloc(size); }
 
@@ -139,7 +139,7 @@ public:
 	class Creator : public ICreator
 	{
 	public:
-		virtual std::shared_ptr<Object> create() const { return Creatable<Instance>::create<T>(); }
+		std::shared_ptr<Object> create() const override { return Creatable<Instance>::create<T>(); }
 
 		const Name& getClassName() const { return Name::declare<sName>(); }
 
@@ -152,7 +152,7 @@ public:
 
 	static const Name& className() { return Name::declare<sName>(); }
 
-	virtual const Name& getClassName() const { return className(); }
+	const Name& getClassName() const override { return className(); }
 
 protected:
 	FactoryProduct() {}
@@ -162,7 +162,7 @@ protected:
 	{
 	}
 
-	virtual ~FactoryProduct() {}
+	~FactoryProduct() override = default;
 
 private:
 	static const Creator creator;

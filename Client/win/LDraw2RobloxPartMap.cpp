@@ -1,7 +1,6 @@
 #include "LDraw2RobloxPartMap.h"
 
-namespace RBX {
-namespace LDraw2Lua {
+namespace RBX::LDraw2Lua {
 
 const Unknown00473110* LDraw2RobloxPartMap::FUN_00472ae0() const
 {
@@ -9,7 +8,7 @@ const Unknown00473110* LDraw2RobloxPartMap::FUN_00472ae0() const
 		return &m_unk0x5c.at(0);
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 LDraw2RobloxPartMap::LDraw2RobloxPartMap(
@@ -19,9 +18,7 @@ LDraw2RobloxPartMap::LDraw2RobloxPartMap(
 {
 }
 
-LDraw2RobloxPartMap::~LDraw2RobloxPartMap()
-{
-}
+LDraw2RobloxPartMap::~LDraw2RobloxPartMap() = default;
 
 void LDraw2RobloxPartMap::FUN_00473100(const Unknown00473110& p_unk0x04)
 {
@@ -33,5 +30,4 @@ Unknown00473110::Unknown00473110(int p_unk0x04, int p_unk0x08, std::string p_unk
 {
 }
 
-} // namespace LDraw2Lua
-} // namespace RBX
+} // namespace RBX::LDraw2Lua

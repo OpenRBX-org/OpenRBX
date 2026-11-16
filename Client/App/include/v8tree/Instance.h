@@ -30,9 +30,7 @@ struct ChildAdded
 
 	ChildAdded(Instance* child);
 	ChildAdded(const ChildAdded& other);
-
-private:
-	ChildAdded& operator=(const ChildAdded& other);
+	ChildAdded& operator=(const ChildAdded& other) = delete;
 };
 
 struct ChildRemoved
@@ -41,9 +39,7 @@ struct ChildRemoved
 
 	ChildRemoved(Instance* child);
 	ChildRemoved(const ChildRemoved& other);
-
-private:
-	ChildRemoved& operator=(const ChildRemoved& other);
+	ChildRemoved& operator=(const ChildRemoved& other) = delete;
 };
 
 struct DescendentAdded
@@ -84,7 +80,7 @@ struct AncestorChanged
 class PropertyChanged
 {
 public:
-	PropertyChanged(const PropertyChanged& other) : property(other.property) {}
+	PropertyChanged(const PropertyChanged& other) = default;
 
 	const Reflection::Property& getProperty() const { return property; }
 	bool getProperty(Reflection::Property*&);
@@ -118,7 +114,7 @@ protected:
 	Instance();
 	Instance(const char* name);
 
-	virtual ~Instance();
+	~Instance() override;
 
 public:
 	Instance(const Instance&) = delete;
@@ -129,8 +125,8 @@ public:
 protected:
 	virtual bool askAddChild(const Instance* instance) const;
 	virtual bool askSetParent(const Instance* instance) const;
-	virtual void onAddListener(Listener<Instance, DescendentAdded>* listener) const;
-	virtual void onAddListener(Listener<Instance, ChildAdded>* listener) const;
+	void onAddListener(Listener<Instance, DescendentAdded>* listener) const override;
+	void onAddListener(Listener<Instance, ChildAdded>* listener) const override;
 	virtual void onAncestorChanged(const AncestorChanged& event);
 	virtual void onDescendentAdded(Instance* instance);
 	virtual void onDescendentRemoving(const shared_ptr<Instance>& instance);
@@ -177,15 +173,23 @@ public:
 	void setParent2(std::shared_ptr<Instance> instance) { setParent(instance.get()); }
 	void promoteChildren();
 
-	Instance* getRootAncestor() { return parent != NULL ? parent->getRootAncestor() : this; }
+	Instance* getRootAncestor() { return parent != nullptr ? parent->getRootAncestor() : this; }
 	const Instance* getRootAncestor() const;
 	static const Instance* getRootAncestor(const Instance* instance)
 	{
-		return instance != NULL ? (instance->parent != NULL ? instance->parent->getRootAncestor() : instance) : NULL;
+		if (instance == nullptr) {
+			return nullptr;
+		}
+
+		return instance->parent != nullptr ? instance->parent->getRootAncestor() : instance;
 	}
 	static Instance* getRootAncestor(Instance* instance)
 	{
-		return instance != NULL ? (instance->parent != NULL ? instance->parent->getRootAncestor() : instance) : NULL;
+		if (instance == nullptr) {
+			return nullptr;
+		}
+
+		return instance->parent != nullptr ? instance->parent->getRootAncestor() : instance;
 	}
 
 	int findChildIndex(const Instance* instance) const;
@@ -207,17 +211,17 @@ public:
 
 	const std::string& getName() const { return name; }
 
-	const CopyOnWrite<std::vector<shared_ptr<Instance> > >& getChildren() const { return children; }
+	const CopyOnWrite<std::vector<shared_ptr<Instance>>>& getChildren() const { return children; }
 
-	std::shared_ptr<const std::vector<shared_ptr<Instance> > > getChildren2() { return children.read(); }
+	std::shared_ptr<const std::vector<shared_ptr<Instance>>> getChildren2() { return children.read(); }
 
 	template <class Func>
 	void for_eachChild(Func func) const
 	{
 		if (children) {
-			std::shared_ptr<const std::vector<shared_ptr<Instance> > > c = children.read();
-			std::vector<shared_ptr<Instance> >::const_iterator end = c->end();
-			for (std::vector<shared_ptr<Instance> >::const_iterator iter = c->begin(); iter != end; ++iter) {
+			std::shared_ptr<const std::vector<shared_ptr<Instance>>> c = children.read();
+			std::vector<shared_ptr<Instance>>::const_iterator end = c->end();
+			for (std::vector<shared_ptr<Instance>>::const_iterator iter = c->begin(); iter != end; ++iter) {
 				func(iter->get());
 			}
 		}
@@ -227,9 +231,9 @@ public:
 	void visitDescendents(Func func) const
 	{
 		if (children) {
-			std::shared_ptr<const std::vector<shared_ptr<Instance> > > c = children.read();
-			std::vector<shared_ptr<Instance> >::const_iterator end = c->end();
-			for (std::vector<shared_ptr<Instance> >::const_iterator iter = c->begin(); iter != end; ++iter) {
+			std::shared_ptr<const std::vector<shared_ptr<Instance>>> c = children.read();
+			std::vector<shared_ptr<Instance>>::const_iterator end = c->end();
+			for (std::vector<shared_ptr<Instance>>::const_iterator iter = c->begin(); iter != end; ++iter) {
 				func(*iter);
 				(*iter)->visitDescendents(func);
 			}
@@ -240,9 +244,9 @@ public:
 	void visitChildren(Func func) const
 	{
 		if (children) {
-			std::shared_ptr<const std::vector<shared_ptr<Instance> > > c = children.read();
-			std::vector<shared_ptr<Instance> >::const_iterator end = c->end();
-			for (std::vector<shared_ptr<Instance> >::const_iterator iter = c->begin(); iter != end; ++iter) {
+			std::shared_ptr<const std::vector<shared_ptr<Instance>>> c = children.read();
+			std::vector<shared_ptr<Instance>>::const_iterator end = c->end();
+			for (std::vector<shared_ptr<Instance>>::const_iterator iter = c->begin(); iter != end; ++iter) {
 				func(*iter);
 			}
 		}
@@ -281,7 +285,7 @@ public:
 
 		Instance* parent = this->parent;
 
-		if (parent != NULL) {
+		if (parent != nullptr) {
 			parent->onChildChanged(this, event);
 		}
 	}
@@ -314,7 +318,7 @@ public:
 		return false;
 	}
 
-	bool canSetParent(const Instance* instance) const { return instance == NULL || instance->canAddChild(this); }
+	bool canSetParent(const Instance* instance) const { return instance == nullptr || instance->canAddChild(this); }
 
 	template <class T>
 	const T* getTypedRoot() const
@@ -322,7 +326,7 @@ public:
 		const Instance* root = this;
 		const T* typedParent = dynamic_cast<const T*>(parent);
 
-		while (typedParent != NULL) {
+		while (typedParent != nullptr) {
 			root = typedParent;
 			typedParent = dynamic_cast<const T*>(typedParent->parent);
 		}
@@ -332,7 +336,7 @@ public:
 
 	bool isAncestorOf(const Instance* descendent) const
 	{
-		if (descendent == NULL) {
+		if (descendent == nullptr) {
 			return false;
 		}
 
@@ -355,7 +359,7 @@ public:
 			return true;
 		}
 
-		if (parent != NULL) {
+		if (parent != nullptr) {
 			return parent->isDescendentOf(ancestor);
 		}
 
@@ -377,31 +381,31 @@ private:
 
 	Association<Instance> assoc;
 	Instance* parent;
-	CopyOnWrite<std::vector<std::shared_ptr<Instance> > > children;
+	CopyOnWrite<std::vector<std::shared_ptr<Instance>>> children;
 	std::string name;
 	bool archivable;
 };
 
 template <class T, class Base, const char* sName>
-class DescribedNonCreatable : public Reflection::Described<T, sName, NonFactoryProduct<Base, sName> >
+class DescribedNonCreatable : public Reflection::Described<T, sName, NonFactoryProduct<Base, sName>>
 {
 protected:
 	DescribedNonCreatable() {}
 
 	template <class U>
-	DescribedNonCreatable(U arg0) : Reflection::Described<T, sName, NonFactoryProduct<Base, sName> >(arg0)
+	DescribedNonCreatable(U arg0) : Reflection::Described<T, sName, NonFactoryProduct<Base, sName>>(arg0)
 	{
 	}
 };
 
 template <class T, class Base, const char* sName>
-class DescribedCreatable : public Reflection::Described<T, sName, FactoryProduct<T, Base, sName> >
+class DescribedCreatable : public Reflection::Described<T, sName, FactoryProduct<T, Base, sName>>
 {
 protected:
 	DescribedCreatable() {}
 
 	template <class U>
-	DescribedCreatable(U arg0) : Reflection::Described<T, sName, FactoryProduct<T, Base, sName> >(arg0)
+	DescribedCreatable(U arg0) : Reflection::Described<T, sName, FactoryProduct<T, Base, sName>>(arg0)
 	{
 	}
 };
@@ -410,18 +414,18 @@ template <class T>
 T* Instance::findFirstChildOfType() const
 {
 	if (getChildren()) {
-		std::vector<shared_ptr<Instance> >::const_iterator end = getChildren()->end();
+		std::vector<shared_ptr<Instance>>::const_iterator end = getChildren()->end();
 
-		for (std::vector<shared_ptr<Instance> >::const_iterator iter = getChildren()->begin(); iter != end; ++iter) {
+		for (std::vector<shared_ptr<Instance>>::const_iterator iter = getChildren()->begin(); iter != end; ++iter) {
 			T* child = dynamic_cast<T*>(iter->get());
 
-			if (child != NULL) {
+			if (child != nullptr) {
 				return child;
 			}
 		}
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 } // namespace RBX

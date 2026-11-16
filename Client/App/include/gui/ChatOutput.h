@@ -47,14 +47,14 @@ private:
 	bool frontIsOld();
 	bool ParseCommand(Network::ChatMessage p_unk0x04);
 
-	virtual void onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider);
-	virtual void onEvent(const Network::Players* source, Network::ChatMessage event);
-	virtual void onEvent(const RunService* source, Heartbeat event);
-	virtual void render2d(Adorn* adorn);
+	void onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider) override;
+	void onEvent(const Network::Players* source, Network::ChatMessage event) override;
+	void onEvent(const RunService* source, Heartbeat event) override;
+	void render2d(Adorn* adorn) override;
 
 public:
 	ChatOutput();
-	virtual ~ChatOutput();
+	~ChatOutput() override;
 };
 
 } // namespace RBX

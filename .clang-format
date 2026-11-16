@@ -1,5 +1,5 @@
 BasedOnStyle: Microsoft
-Standard: Cpp03
+Standard: Latest
 
 AccessModifierOffset: -4
 AlignAfterOpenBracket: BlockIndent

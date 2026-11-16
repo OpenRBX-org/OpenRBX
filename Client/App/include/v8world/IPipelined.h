@@ -24,15 +24,15 @@ private:
 	IStage* getStage(IStage::StageType stageType) const;
 
 public:
-	IPipelined() : currentStage(0) {}
+	IPipelined() : currentStage(nullptr) {}
 
-	virtual ~IPipelined() {}
+	virtual ~IPipelined() = default;
 
 	void putInPipeline(IStage* stage);
 	void removeFromPipeline(IStage* stage);
 	void putInStage(IStage* stage);
 
-	bool inPipeline() const { return currentStage != NULL; }
+	bool inPipeline() const { return currentStage != nullptr; }
 	bool inStage(IStage* stage) const { return currentStage == stage; }
 	bool inStage(IStage::StageType stageType) const;
 	bool inOrDownstreamOfStage(IStage* stage) const;
@@ -49,8 +49,8 @@ public:
 
 inline World* IPipelined::getWorld()
 {
-	if (currentStage == NULL) {
-		return NULL;
+	if (currentStage == nullptr) {
+		return nullptr;
 	}
 
 	IStage* stage;

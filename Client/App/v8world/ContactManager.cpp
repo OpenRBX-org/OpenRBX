@@ -66,7 +66,7 @@ Primitive* ContactManager::getSlowHit(
 {
 	float bestOffset = maxDistance;
 	float stopOffset = maxDistance;
-	Primitive* bestPrimitive = NULL;
+	Primitive* bestPrimitive = nullptr;
 
 	stopped = false;
 	inside = false;
@@ -76,8 +76,8 @@ Primitive* ContactManager::getSlowHit(
 
 		bool notIgnored;
 
-		if (ignorePrim != NULL) {
-			notIgnored = ignorePrim->find(primitive) == ignorePrim->end();
+		if (ignorePrim != nullptr) {
+			notIgnored = !ignorePrim->contains(primitive);
 		}
 		else {
 			notIgnored = true;
@@ -85,7 +85,7 @@ Primitive* ContactManager::getSlowHit(
 
 		HitTestFilter::Result result;
 
-		if (filter != NULL) {
+		if (filter != nullptr) {
 			result = filter->filterResult(primitive);
 		}
 		else {
@@ -129,7 +129,7 @@ Primitive* ContactManager::getSlowHit(
 		}
 	}
 
-	if (stopped && bestPrimitive != NULL && bestOffset < stopOffset) {
+	if (stopped && bestPrimitive != nullptr && bestOffset < stopOffset) {
 		stopped = false;
 	}
 
@@ -140,10 +140,10 @@ bool ContactManager::intersectingOthers(Primitive* check, const std::set<Primiti
 {
 	Contact* c = check->getFirstContact();
 
-	while (c != NULL) {
+	while (c != nullptr) {
 		Primitive* other = c->otherPrimitive(check);
 
-		if (checkSet.find(other) == checkSet.end() && c->computeIsColliding(overlapIgnored)) {
+		if (!checkSet.contains(other) && c->computeIsColliding(overlapIgnored)) {
 			return true;
 		}
 
@@ -178,7 +178,7 @@ Primitive* ContactManager::getFastHit(
 		Primitive* hit =
 			getSlowHit(primitives, unitRay, ignorePrim, filter, hitPointWorld, maxDistance, inside, stopped);
 
-		if (hit != NULL) {
+		if (hit != nullptr) {
 			Vector3 gridCenter((float) grid.x, (float) grid.y, (float) grid.z);
 			Extents hashGrid = SpatialHash::hashGridToRealExtents(gridCenter);
 
@@ -188,7 +188,7 @@ Primitive* ContactManager::getFastHit(
 		}
 	} while (spatialHash->getNextGrid(grid, unitRay, maxDistance));
 
-	return NULL;
+	return nullptr;
 }
 
 Primitive* ContactManager::getHit(
@@ -205,9 +205,9 @@ Primitive* ContactManager::getHit(
 	Primitive* hit = getFastHit(ray, ignore, filter, hitPoint, hitSurface, blocked);
 
 	if (blocked) {
-		hit = NULL;
+		hit = nullptr;
 	}
-	else if (hit != NULL) {
+	else if (hit != nullptr) {
 		return hit;
 	}
 
@@ -231,13 +231,13 @@ Primitive* ContactManager::getHitLegacy(
 
 	G3D::Array<const Primitive*> ignorePrims;
 
-	if (ignorePrim != NULL) {
+	if (ignorePrim != nullptr) {
 		ignorePrims.append(ignorePrim);
 	}
 
 	Primitive* hit = getHit(worldRay, &ignorePrims, filter, hitPointWorld, ignoreBool);
 
-	distanceToHit = hit != NULL ? (hitPointWorld - worldRay.origin).magnitude() : 0.0f;
+	distanceToHit = hit != nullptr ? (hitPointWorld - worldRay.origin).magnitude() : 0.0f;
 
 	return hit;
 }
@@ -283,7 +283,7 @@ Contact* ContactManager::createContact(Primitive* p0, Primitive* p1)
 		return new BlockBlockContact(p0, p1);
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 void ContactManager::onNewPair(Primitive* p0, Primitive* p1)
@@ -299,7 +299,7 @@ void ContactManager::onPrimitiveGeometryTypeChanged(Primitive* p)
 
 	Contact* c;
 
-	while ((c = p->getFirstContact()) != NULL) {
+	while ((c = p->getFirstContact()) != nullptr) {
 		newContacts.append(createContact(c->getPrimitive(0), c->getPrimitive(1)));
 
 		world->destroyContact(c);

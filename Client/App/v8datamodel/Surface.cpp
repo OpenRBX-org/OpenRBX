@@ -99,7 +99,7 @@ void Surface::readValue(const XmlElement* element, IReferenceBinder& binder)
 
 	const XmlElement* child = element->firstChild();
 	while (child) {
-		const Name* name = NULL;
+		const Name* name = nullptr;
 		if (!child->isXsiNil() && child->findAttributeValue(name_name, name)) {
 			if (name == &desc_LegacyType) {
 				std::string sValue;

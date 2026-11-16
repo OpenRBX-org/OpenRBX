@@ -2,11 +2,10 @@
 
 #include "util/ContentProvider.h"
 
-#include <stdio.h>
+#include <cstdio>
 #include <vector>
 
-namespace RBX {
-namespace View {
+namespace RBX::View {
 
 bool FileMesh::loadFromMeshFile(const G3D::Vector3& scale, const MeshId meshFile)
 {
@@ -62,11 +61,10 @@ G3D::ReferenceCountedPointer<Render::Mesh> FileMesh::create(const G3D::Vector3& 
 	G3D::ReferenceCountedPointer<Render::Mesh> result = mesh;
 
 	if (!mesh->loadFromMeshFile(scale, meshFile)) {
-		return NULL;
+		return nullptr;
 	}
 
 	return result;
 }
 
-} // namespace View
-} // namespace RBX
+} // namespace RBX::View

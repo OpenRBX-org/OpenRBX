@@ -19,9 +19,7 @@ SleepInfo::SleepInfo() : state(Sim::WAKE_PENDING), sleepCount(0)
 {
 }
 
-SleepInfo::~SleepInfo()
-{
-}
+SleepInfo::~SleepInfo() = default;
 
 PrimIterator Assembly::assemblyPrimBegin() const
 {
@@ -47,11 +45,11 @@ Sim::AssemblyState Assembly::getSleepStatus() const
 {
 	const Assembly* root = this;
 
-	while (root->parent != NULL) {
+	while (root->parent != nullptr) {
 		root = root->parent;
 	}
 
-	return root->sleepInfo != NULL ? root->sleepInfo->state : Sim::ANCHORED;
+	return root->sleepInfo != nullptr ? root->sleepInfo->state : Sim::ANCHORED;
 }
 
 bool lessAssembly(const Assembly* a0, const Assembly* a1)
@@ -69,19 +67,19 @@ bool lessAssembly(const Assembly* a0, const Assembly* a1)
 
 Assembly* Assembly::getRootAssembly()
 {
-	return parent != NULL ? parent->getRootAssembly() : this;
+	return parent != nullptr ? parent->getRootAssembly() : this;
 }
 
 const Assembly* Assembly::getRootAssemblyConst() const
 {
-	return parent != NULL ? parent->getRootAssemblyConst() : this;
+	return parent != nullptr ? parent->getRootAssemblyConst() : this;
 }
 
 Joint* Assembly::getJointToParent(Primitive* p)
 {
 	Joint* joint = p->getFirstJoint();
 
-	while (joint != NULL) {
+	while (joint != nullptr) {
 		if (joint->getActive()) {
 			Primitive* other = joint->getPrimitive(0);
 
@@ -89,7 +87,7 @@ Joint* Assembly::getJointToParent(Primitive* p)
 				other = joint->getPrimitive(1);
 			}
 
-			if (other == NULL || p->getBody()->getParent() == other->getBody()) {
+			if (other == nullptr || p->getBody()->getParent() == other->getBody()) {
 				return joint;
 			}
 		}
@@ -97,7 +95,7 @@ Joint* Assembly::getJointToParent(Primitive* p)
 		joint = p->getNextJoint(joint);
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 void Assembly::putInKernel(Kernel* kernel)
@@ -124,7 +122,7 @@ const Primitive* Assembly::getAssemblyPrimitiveConst() const
 
 bool Assembly::getAnchored() const
 {
-	return getRootAssemblyConst()->rootPrimitive->getAnchorObject() != NULL;
+	return getRootAssemblyConst()->rootPrimitive->getAnchorObject() != nullptr;
 }
 
 Mechanism* Assembly::getMechanism()
@@ -134,7 +132,7 @@ Mechanism* Assembly::getMechanism()
 
 bool Assembly::computeCanSleep() const
 {
-	for (PrimIterator it = PrimIterator::begin(rootPrimitive, PrimIterator::IN_ASSEMBLY); *it != NULL; ++it) {
+	for (PrimIterator it = PrimIterator::begin(rootPrimitive, PrimIterator::IN_ASSEMBLY); *it != nullptr; ++it) {
 		if (!(*it)->getCanSleep()) {
 			return false;
 		}
@@ -145,7 +143,7 @@ bool Assembly::computeCanSleep() const
 
 void Assembly::notifyMoved()
 {
-	for (PrimIterator it = PrimIterator::begin(rootPrimitive, PrimIterator::IN_ASSEMBLY); *it != NULL; ++it) {
+	for (PrimIterator it = PrimIterator::begin(rootPrimitive, PrimIterator::IN_ASSEMBLY); *it != nullptr; ++it) {
 		(*it)->getOwner()->notifyMoved();
 	}
 }
@@ -163,7 +161,7 @@ void Assembly::onPrimitivesChanged()
 	maxRadius.setDirty();
 	canSleep.setDirty();
 
-	if (parent != NULL) {
+	if (parent != nullptr) {
 		parent->onPrimitivesChanged();
 	}
 }
@@ -210,12 +208,12 @@ const MotorJoint* Assembly::getMotorImp(unsigned int& motorId) const
 	for (unsigned int i = 0; i < children.size(); i++) {
 		const MotorJoint* motor = children[i]->getMotorImp(motorId);
 
-		if (motor != NULL) {
+		if (motor != nullptr) {
 			return motor;
 		}
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 MotorJoint* Assembly::getMotor(unsigned int index)
@@ -247,7 +245,7 @@ float Assembly::computeMaxRadius() const
 	float answer = 0;
 	Vector3 offsetCenter = rootPrimitive->getBody()->getBranchCofmPos();
 
-	for (PrimIterator it = PrimIterator::begin(rootPrimitive, PrimIterator::IN_ASSEMBLY); *it != NULL; ++it) {
+	for (PrimIterator it = PrimIterator::begin(rootPrimitive, PrimIterator::IN_ASSEMBLY); *it != nullptr; ++it) {
 		Primitive* primitive = *it;
 
 		Vector3 offset = primitive->getBody()->getCoordinateFrame().translation - offsetCenter;
@@ -265,8 +263,8 @@ void Assembly::onPrimitiveCanSleepChanged(Primitive* p)
 }
 
 Assembly::Assembly(Primitive* root)
-	: sleepInfo(NULL), rootPrimitive(root), parent(NULL), mechanism(NULL), maxRadius(this, &Assembly::computeMaxRadius),
-	  canSleep(this, &Assembly::computeCanSleep)
+	: sleepInfo(nullptr), rootPrimitive(root), parent(nullptr), mechanism(nullptr),
+	  maxRadius(this, &Assembly::computeMaxRadius), canSleep(this, &Assembly::computeCanSleep)
 {
 	root->setClump(static_cast<Clump*>(this));
 }
@@ -279,35 +277,35 @@ void Assembly::addChild(Assembly* child)
 
 Assembly::~Assembly()
 {
-	for (PrimIterator it = PrimIterator::begin(rootPrimitive, PrimIterator::IN_CLUMP); *it != NULL; ++it) {
+	for (PrimIterator it = PrimIterator::begin(rootPrimitive, PrimIterator::IN_CLUMP); *it != nullptr; ++it) {
 		Primitive* primitive = *it;
 
-		primitive->setClump(NULL);
+		primitive->setClump(nullptr);
 		primitive->setClumpDepth(-1);
 	}
 
-	if (parent != NULL) {
+	if (parent != nullptr) {
 		fastRemoveShort(parent->children, this);
 	}
 
-	parent = NULL;
+	parent = nullptr;
 
 	for (unsigned int i = 0; i < children.size(); i++) {
-		children[i]->parent = NULL;
+		children[i]->parent = nullptr;
 	}
 }
 
 void Assembly::setParent(Assembly* newParent)
 {
 	if (newParent != parent) {
-		if (parent != NULL) {
+		if (parent != nullptr) {
 			fastRemoveShort(parent->children, this);
 			parent->onPrimitivesChanged();
 		}
 
 		parent = newParent;
 
-		if (parent != NULL) {
+		if (parent != nullptr) {
 			parent->addChild(this);
 		}
 
@@ -330,8 +328,8 @@ void Assembly::addGroundChild(Primitive* p)
 	Clump* clump = p->getClump();
 
 	p->setClumpDepth(1);
-	p->getBody()->setParent(NULL);
-	clump->setParent(NULL);
+	p->getBody()->setParent(nullptr);
+	clump->setParent(nullptr);
 }
 
 } // namespace RBX

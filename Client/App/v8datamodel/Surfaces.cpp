@@ -26,30 +26,30 @@ public:
 	{
 	}
 
-	virtual bool equalValues(const Reflection::DescribedBase* a, const Reflection::DescribedBase* b) const
+	bool equalValues(const Reflection::DescribedBase* a, const Reflection::DescribedBase* b) const override
 	{
 		return false;
 	}
 
-	virtual bool isReadOnly() const { return false; }
+	bool isReadOnly() const override { return false; }
 
-	virtual void readValue(
+	void readValue(
 		Reflection::DescribedBase* instance, const XmlElement* element, IReferenceBinder& binder
-	) const
+	) const override
 	{
 		static_cast<PartInstance*>(instance)->getSurfaces()[static_cast<NormalId>(normalId)].readValue(element, binder);
 	}
 
-	virtual void writeValue(const Reflection::DescribedBase* instance, XmlElement* element) const {}
+	void writeValue(const Reflection::DescribedBase* instance, XmlElement* element) const override {}
 
-	virtual bool hasStringValue() const { return false; }
+	bool hasStringValue() const override { return false; }
 
-	virtual std::string getStringValue(const Reflection::DescribedBase* instance) const
+	std::string getStringValue(const Reflection::DescribedBase* instance) const override
 	{
 		return PropertyDescriptor::getStringValue(instance);
 	}
 
-	virtual bool setStringValue(Reflection::DescribedBase* instance, const std::string& value) const
+	bool setStringValue(Reflection::DescribedBase* instance, const std::string& value) const override
 	{
 		hasStringValue();
 
@@ -63,16 +63,16 @@ class SurfaceGetSet : public Reflection::TypedPropertyDescriptor<T>::GetSet
 public:
 	SurfaceGetSet(Getter get, Setter set) : get(get), set(set) {}
 
-	virtual bool isReadOnly() const { return false; }
+	bool isReadOnly() const override { return false; }
 
-	virtual T getValue(const Reflection::DescribedBase* instance) const
+	T getValue(const Reflection::DescribedBase* instance) const override
 	{
 		const Surfaces& surfaces = static_cast<const PartInstance*>(instance)->getSurfaces();
 
 		return (surfaces[static_cast<NormalId>(normalId)].*get)();
 	}
 
-	virtual void setValue(Reflection::DescribedBase* instance, const T& value) const
+	void setValue(Reflection::DescribedBase* instance, const T& value) const override
 	{
 		Surfaces& surfaces = static_cast<PartInstance*>(instance)->getSurfaces();
 
@@ -130,20 +130,20 @@ public:
 	{
 	}
 
-	virtual bool isReadOnly() const { return getset->isReadOnly(); }
+	bool isReadOnly() const override { return getset->isReadOnly(); }
 
 	T getValue(const Reflection::DescribedBase* instance) const { return getset->getValue(instance); }
 
 	void setValue(Reflection::DescribedBase* instance, const T& value) const { getset->setValue(instance, value); }
 
-	virtual bool equalValues(const Reflection::DescribedBase* a, const Reflection::DescribedBase* b) const
+	bool equalValues(const Reflection::DescribedBase* a, const Reflection::DescribedBase* b) const override
 	{
 		return getValue(a) == getValue(b);
 	}
 
-	virtual int getEnumValue(const Reflection::DescribedBase* instance) const { return getValue(instance); }
+	int getEnumValue(const Reflection::DescribedBase* instance) const override { return getValue(instance); }
 
-	virtual bool setEnumValue(Reflection::DescribedBase* instance, int intValue) const
+	bool setEnumValue(Reflection::DescribedBase* instance, int intValue) const override
 	{
 		if (Reflection::EnumDesc<T>::singleton().isValue(intValue)) {
 			setValue(instance, static_cast<T>(intValue));
@@ -154,12 +154,12 @@ public:
 		}
 	}
 
-	virtual unsigned int getIndexValue(const Reflection::DescribedBase* instance) const
+	unsigned int getIndexValue(const Reflection::DescribedBase* instance) const override
 	{
 		return Reflection::EnumDesc<T>::singleton().convertToIndex(getValue(instance));
 	}
 
-	virtual bool setIndexValue(Reflection::DescribedBase* instance, unsigned int index) const
+	bool setIndexValue(Reflection::DescribedBase* instance, unsigned int index) const override
 	{
 		T value;
 
@@ -172,14 +172,14 @@ public:
 		}
 	}
 
-	virtual bool hasStringValue() const { return true; }
+	bool hasStringValue() const override { return true; }
 
-	virtual std::string getStringValue(const Reflection::DescribedBase* instance) const
+	std::string getStringValue(const Reflection::DescribedBase* instance) const override
 	{
 		return Reflection::EnumDesc<T>::singleton().convertToString(getValue(instance));
 	}
 
-	virtual bool setStringValue(Reflection::DescribedBase* instance, const std::string& text) const
+	bool setStringValue(Reflection::DescribedBase* instance, const std::string& text) const override
 	{
 		T value;
 
@@ -205,9 +205,9 @@ public:
 		}
 	}
 
-	virtual void readValue(
+	void readValue(
 		Reflection::DescribedBase* instance, const XmlElement* element, IReferenceBinder& binder
-	) const
+	) const override
 	{
 		if (!element->isXsiNil()) {
 			if (element->isValueType<std::string>()) {
@@ -231,7 +231,7 @@ public:
 		}
 	}
 
-	virtual void writeValue(const Reflection::DescribedBase* instance, XmlElement* element) const
+	void writeValue(const Reflection::DescribedBase* instance, XmlElement* element) const override
 	{
 		element->setValue(static_cast<int>(getValue(instance)));
 	}

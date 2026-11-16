@@ -20,7 +20,7 @@ class DHTMLWindowService : public RBX::DescribedCreatable<DHTMLWindowService, RB
 public:
 	DHTMLWindowService();
 
-	virtual bool askAddChild(const RBX::Instance* instance) const;
+	bool askAddChild(const RBX::Instance* instance) const override;
 
 	std::shared_ptr<RBX::Instance> FUN_0041cf60(int width, int height);
 };
@@ -30,13 +30,13 @@ class DHTMLWindow : public RBX::DescribedNonCreatable<DHTMLWindow, RBX::Instance
 public:
 	DHTMLWindow();
 
-	void FUN_00413f40() { setParent(NULL); }
+	void FUN_00413f40() { setParent(nullptr); }
 
-	virtual ~DHTMLWindow() {}
+	~DHTMLWindow() override = default;
 
-	virtual bool askSetParent(const RBX::Instance* instance) const
+	bool askSetParent(const RBX::Instance* instance) const override
 	{
-		return dynamic_cast<const DHTMLWindowService*>(instance) != NULL;
+		return dynamic_cast<const DHTMLWindowService*>(instance) != nullptr;
 	}
 
 	void FUN_0041c1d0();
@@ -50,7 +50,7 @@ public:
 	static RBX::Reflection::SignalDesc<DHTMLWindow, void(std::string)> g_unk0x00953120;
 
 protected:
-	virtual void onServiceProvider(const RBX::ServiceProvider* oldProvider, const RBX::ServiceProvider* newProvider);
+	void onServiceProvider(const RBX::ServiceProvider* oldProvider, const RBX::ServiceProvider* newProvider) override;
 
 private:
 	friend class CLuaHtmlView;
@@ -58,7 +58,7 @@ private:
 
 	void FUN_004152c0(std::function<void(CLuaHtmlView*)> function)
 	{
-		std::lock_guard<std::recursive_mutex> lock(m_unk0xf8);
+		std::scoped_lock lock(m_unk0xf8);
 		if (m_unk0x104) {
 			function(m_unk0x104);
 		}
@@ -67,28 +67,28 @@ private:
 	void FUN_004153f0(int width, int height)
 	{
 		CFrameWnd* frame = new CFrameWnd;
-		frame->Create(NULL, NULL, WS_OVERLAPPEDWINDOW, CRect(0, 0, width, height), AfxGetMainWnd());
+		frame->Create(nullptr, nullptr, WS_OVERLAPPEDWINDOW, CRect(0, 0, width, height), AfxGetMainWnd());
 		frame->ModifyStyleEx(WS_EX_CLIENTEDGE, WS_EX_TOOLWINDOW);
 		CLuaHtmlView* view = dynamic_cast<CLuaHtmlView*>(XTFuncCreateView(frame, RUNTIME_CLASS(CLuaHtmlView)));
 		{
-			std::lock_guard<std::recursive_mutex> lock(m_unk0xf8);
+			std::scoped_lock lock(m_unk0xf8);
 			m_unk0x104 = view;
 		}
-		frame->InitialUpdateFrame(NULL, FALSE);
+		frame->InitialUpdateFrame(nullptr, FALSE);
 	}
 
 	void FUN_00415550()
 	{
-		std::lock_guard<std::recursive_mutex> lock(m_unk0xf8);
+		std::scoped_lock lock(m_unk0xf8);
 		if (m_unk0x104) {
-			m_unk0x104->GetParentFrame()->CenterWindow(NULL);
+			m_unk0x104->GetParentFrame()->CenterWindow(nullptr);
 			m_unk0x104->GetParentFrame()->ShowWindow(SW_SHOW);
 		}
 	}
 
 	void FUN_004155f0()
 	{
-		std::lock_guard<std::recursive_mutex> lock(m_unk0xf8);
+		std::scoped_lock lock(m_unk0xf8);
 		if (m_unk0x104) {
 			m_unk0x104->FUN_0042d640();
 		}
@@ -96,15 +96,15 @@ private:
 
 	void FUN_00415670(int x, int y)
 	{
-		std::lock_guard<std::recursive_mutex> lock(m_unk0xf8);
+		std::scoped_lock lock(m_unk0xf8);
 		if (m_unk0x104) {
-			m_unk0x104->GetParentFrame()->SetWindowPos(NULL, 0, 0, x, y, SWP_NOMOVE | SWP_NOZORDER);
+			m_unk0x104->GetParentFrame()->SetWindowPos(nullptr, 0, 0, x, y, SWP_NOMOVE | SWP_NOZORDER);
 		}
 	}
 
 	void FUN_00415710(RBX::Lua::FunctionRef function)
 	{
-		std::lock_guard<std::recursive_mutex> lock(m_unk0xf8);
+		std::scoped_lock lock(m_unk0xf8);
 		if (m_unk0x104) {
 			m_unk0x104->m_unk0xf8->m_unk0x14 = function;
 		}
@@ -112,7 +112,7 @@ private:
 
 	void FUN_004157b0(std::string url)
 	{
-		std::lock_guard<std::recursive_mutex> lock(m_unk0xf8);
+		std::scoped_lock lock(m_unk0xf8);
 		if (m_unk0x104) {
 			m_unk0x104->Navigate(url.c_str());
 		}
@@ -120,7 +120,7 @@ private:
 
 	void FUN_00415860(std::string html)
 	{
-		std::lock_guard<std::recursive_mutex> lock(m_unk0xf8);
+		std::scoped_lock lock(m_unk0xf8);
 		if (m_unk0x104) {
 			m_unk0x104->FUN_0042e330(html.c_str());
 		}
@@ -130,7 +130,7 @@ private:
 		std::shared_ptr<RBX::Instance> instance, const RBX::Reflection::PropertyDescriptor* descriptor, std::string name
 	)
 	{
-		std::lock_guard<std::recursive_mutex> lock(m_unk0xf8);
+		std::scoped_lock lock(m_unk0xf8);
 		if (m_unk0x104) {
 			m_unk0x104->FUN_00430c90(instance, descriptor, name.c_str());
 		}
@@ -138,7 +138,7 @@ private:
 
 	void FUN_00417550()
 	{
-		std::lock_guard<std::recursive_mutex> lock(m_unk0xf8);
+		std::scoped_lock lock(m_unk0xf8);
 		if (m_unk0x104) {
 			m_unk0x104->FUN_0042f1b0(RBX::shared_from(this));
 		}
@@ -150,7 +150,7 @@ private:
 
 inline bool DHTMLWindowService::askAddChild(const RBX::Instance* instance) const
 {
-	return dynamic_cast<const DHTMLWindow*>(instance) != NULL;
+	return dynamic_cast<const DHTMLWindow*>(instance) != nullptr;
 }
 
 void FUN_0041ac10();

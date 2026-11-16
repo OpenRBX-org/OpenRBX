@@ -40,13 +40,13 @@ public:
 class UndoState : public XmlState
 {
 public:
-	virtual void addState(XmlElement* element, Instance& instance);
+	void addState(XmlElement* element, Instance& instance) override;
 };
 
 class RedoState : public XmlState
 {
 public:
-	virtual void addState(XmlElement* element, Instance& instance);
+	void addState(XmlElement* element, Instance& instance) override;
 };
 
 class __declspec(novtable) Verb : public Debugable

@@ -66,7 +66,7 @@ void LocalBackpack::removeBackpackItem(BackpackItem* item)
 		LocalBackpackItem* localItem = static_cast<LocalBackpackItem*>(getChild(i));
 		if (localItem->getItem() == item) {
 			lastRemovedIndex = i;
-			localItem->setParent(NULL);
+			localItem->setParent(nullptr);
 			if (item == pendingClick.get()) {
 				pendingClick.reset();
 			}
@@ -80,9 +80,9 @@ void LocalBackpack::removeBackpackItem(BackpackItem* item)
 void LocalBackpack::onHeartbeat()
 {
 	if (pendingClick.get()) {
-		std::shared_ptr<const std::vector<std::shared_ptr<Instance> > > c = getChildren().read();
+		std::shared_ptr<const std::vector<std::shared_ptr<Instance>>> c = getChildren().read();
 		if (c) {
-			for (std::vector<std::shared_ptr<Instance> >::const_iterator iter = c->begin(); iter != c->end(); ++iter) {
+			for (std::vector<std::shared_ptr<Instance>>::const_iterator iter = c->begin(); iter != c->end(); ++iter) {
 				LocalBackpackItem* item = static_cast<LocalBackpackItem*>(iter->get());
 				if (item->getItem() != pendingClick.get()) {
 					item->getItem()->onLocalOtherClicked();
@@ -235,9 +235,7 @@ void LocalBackpack::onEvent(const Network::Player* source, Network::CharacterAdd
 	onLocalCharacterAdded(event.character.get());
 }
 
-LocalBackpackItem::LocalBackpackItem()
-{
-}
+LocalBackpackItem::LocalBackpackItem() = default;
 
 LocalBackpack::LocalBackpack() : lastRemovedIndex(-1)
 {

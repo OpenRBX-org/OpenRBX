@@ -18,22 +18,20 @@
 
 namespace RBX {
 
-RotateJoint::RotateJoint() : MultiJoint(2), rotateConnector(NULL)
+RotateJoint::RotateJoint() : MultiJoint(2), rotateConnector(nullptr)
 {
 }
 
 RotateJoint::RotateJoint(Primitive* axlePrim, Primitive* holePrim, const CoordinateFrame& c0, const CoordinateFrame& c1)
-	: MultiJoint(axlePrim, holePrim, c0, c1, 2), rotateConnector(NULL)
+	: MultiJoint(axlePrim, holePrim, c0, c1, 2), rotateConnector(nullptr)
 {
 }
 
-RotateJoint::~RotateJoint()
-{
-}
+RotateJoint::~RotateJoint() = default;
 
 void RotateJoint::removeFromKernel()
 {
-	rotateConnector = NULL;
+	rotateConnector = nullptr;
 
 	MultiJoint::removeFromKernel();
 }
@@ -114,7 +112,7 @@ RotateJoint* RotateJoint::surfaceTypeToJoint(
 		return new RotateVJoint(axlePrim, holePrim, c0, c1);
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 RotateJoint* RotateJoint::canBuildJoint(Primitive* p0, Primitive* p1, NormalId nId0, NormalId nId1)
@@ -123,7 +121,7 @@ RotateJoint* RotateJoint::canBuildJoint(Primitive* p0, Primitive* p1, NormalId n
 	SurfaceType t1 = p1->getSurfaceType(nId1);
 
 	if (t0 < ROTATE && t1 < ROTATE) {
-		return NULL;
+		return nullptr;
 	}
 
 	const CoordinateFrame& coord0 = p0->getCoordinateFrame();
@@ -133,18 +131,18 @@ RotateJoint* RotateJoint::canBuildJoint(Primitive* p0, Primitive* p1, NormalId n
 	Vector3 n1 = Math::getWorldNormal(nId1, coord1);
 
 	if (0.025f < Math::angle(n0, -n1)) {
-		return NULL;
+		return nullptr;
 	}
 
 	Face f0 = p0->getFaceInWorld(nId0);
 	Face f1 = p1->getFaceInWorld(nId1);
 
 	if (!Face::hasOverlap(f0, f1, 0.35f)) {
-		return NULL;
+		return nullptr;
 	}
 
 	if (!Face::overlapWithinPlanes(f0, f1, 0.05f)) {
-		return NULL;
+		return nullptr;
 	}
 
 	Vector3 center0 = f0.center();
@@ -157,7 +155,7 @@ RotateJoint* RotateJoint::canBuildJoint(Primitive* p0, Primitive* p1, NormalId n
 	bool axle1 = t1 >= ROTATE && contains1;
 
 	if (!axle0 && !axle1) {
-		return NULL;
+		return nullptr;
 	}
 
 	if (!axle0 || (axle1 && p1->getGeometry()->getGridSize().sum() > p0->getGeometry()->getGridSize().sum())) {
@@ -180,7 +178,7 @@ RotateJoint* RotateJoint::canBuildJoint(Primitive* p0, Primitive* p1, NormalId n
 	Vector3 holePtWorld = p1->getCoordinateFrame().pointToWorldSpace(holeInP1.translation);
 
 	if (Tolerance::pointsUnaligned(axlePtWorld, holePtWorld)) {
-		return NULL;
+		return nullptr;
 	}
 
 	for (int i = 0; i < 2; ++i) {
@@ -189,7 +187,7 @@ RotateJoint* RotateJoint::canBuildJoint(Primitive* p0, Primitive* p1, NormalId n
 		Vector3 ref1 = holePtWorld + n1 * offset;
 
 		if (Tolerance::pointsUnaligned(ref0, ref1)) {
-			return NULL;
+			return nullptr;
 		}
 	}
 
@@ -200,7 +198,7 @@ void RotatePJoint::stepUi(int uiStepId)
 {
 	float value = getChannelValue(uiStepId);
 
-	if (rotateConnector != NULL) {
+	if (rotateConnector != nullptr) {
 		rotateConnector->getKernelInput().setGoal(value);
 	}
 
@@ -216,7 +214,7 @@ void RotateVJoint::stepUi(int uiStepId)
 {
 	float value = getChannelValue(uiStepId);
 
-	if (rotateConnector != NULL) {
+	if (rotateConnector != nullptr) {
 		rotateConnector->getKernelInput().setDelta(value);
 	}
 

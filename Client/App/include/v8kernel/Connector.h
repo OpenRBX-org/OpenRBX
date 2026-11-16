@@ -22,7 +22,7 @@ class Connector : public KernelIndex
 public:
 	Connector() {}
 
-	virtual ~Connector() {}
+	virtual ~Connector() = default;
 
 	virtual void computeForce(float dt, bool throttling) = 0;
 	virtual bool canThrottle() const;
@@ -43,7 +43,7 @@ public:
 
 	KernelInput& getKernelInput() { return kernelInput; }
 
-	virtual void computeForce(float dt, bool throttling);
+	void computeForce(float dt, bool throttling) override;
 
 private:
 	void computeParams(Vector3& normal, float& rotation, float& rotVel);
@@ -66,9 +66,9 @@ public:
 	{
 	}
 
-	virtual void computeForce(float dt, bool throttling);
-	virtual bool getBroken();
-	virtual float potentialEnergy();
+	void computeForce(float dt, bool throttling) override;
+	bool getBroken() override;
+	float potentialEnergy() override;
 
 	void setBroken();
 
@@ -94,7 +94,7 @@ public:
 	{
 	}
 
-	virtual void computeForce(float dt, bool throttling);
+	void computeForce(float dt, bool throttling) override;
 
 private:
 	NormalId normalIdBody0;
@@ -166,8 +166,8 @@ public:
 		return geoPair.match(body0, body1, geoPairType, point0ID, point1ID);
 	}
 
-	virtual void computeForce(float dt, bool throttling);
-	virtual bool canThrottle() const;
+	void computeForce(float dt, bool throttling) override;
+	bool canThrottle() const override;
 
 protected:
 	GeoPair geoPair;

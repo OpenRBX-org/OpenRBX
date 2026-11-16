@@ -45,10 +45,10 @@ private:
 	Signals::ScopedConnection shapePropertyChangedConnection;
 
 public:
-	virtual ~PartChunk();
+	~PartChunk() override;
 
-	virtual bool castsShadows() const;
-	virtual bool cullable() const;
+	bool castsShadows() const override;
+	bool cullable() const override;
 
 protected:
 	std::shared_ptr<PartInstance> partInstance;
@@ -65,8 +65,8 @@ protected:
 
 	virtual void onPropertyChanged(const Reflection::PropertyDescriptor* descriptor);
 
-	virtual G3D::ReferenceCountedPointer<RenderNew::Mesh> getMesh();
-	virtual const G3D::CoordinateFrame& cframe();
+	G3D::ReferenceCountedPointer<RenderNew::Mesh> getMesh() override;
+	const G3D::CoordinateFrame& cframe() override;
 
 private:
 	void onAncestorChanged(std::shared_ptr<Instance> ancestor);
@@ -80,18 +80,18 @@ class Part : public PartChunk, public Listener<PartInstance, CanAggregateChanged
 public:
 	Part(const std::shared_ptr<PartInstance>& partInstance, View* view);
 
-	virtual ~Part();
+	~Part() override;
 
-	virtual G3D::ReferenceCountedPointer<RenderNew::Material> getMaterial();
+	G3D::ReferenceCountedPointer<RenderNew::Material> getMaterial() override;
 
 protected:
-	virtual void onPropertyChanged(const Reflection::PropertyDescriptor* descriptor);
-	virtual void onEvent(const PartInstance* source, CanAggregateChanged event);
+	void onPropertyChanged(const Reflection::PropertyDescriptor* descriptor) override;
+	void onEvent(const PartInstance* source, CanAggregateChanged event) override;
 
 private:
 	bool usesMegaTexture() const;
 
-	virtual void updateMesh();
+	void updateMesh() override;
 };
 
 class Decal : public PartChunk
@@ -104,16 +104,16 @@ private:
 public:
 	Decal(RBX::Decal& decal, PartInstance& parentPart, View* view);
 
-	virtual ~Decal();
+	~Decal() override;
 
-	virtual G3D::ReferenceCountedPointer<RenderNew::Material> getMaterial();
+	G3D::ReferenceCountedPointer<RenderNew::Material> getMaterial() override;
 
 protected:
 	void onDecalPropertyChanged(const Reflection::PropertyDescriptor* descriptor);
 	void onDecalAncestorChanged(std::shared_ptr<Instance> ancestor);
 
 private:
-	virtual void updateMesh();
+	void updateMesh() override;
 };
 
 class Texture : public PartChunk
@@ -126,16 +126,16 @@ private:
 public:
 	Texture(RBX::Texture& texture, PartInstance& parentPart, View* view);
 
-	virtual ~Texture();
+	~Texture() override;
 
-	virtual G3D::ReferenceCountedPointer<RenderNew::Material> getMaterial();
+	G3D::ReferenceCountedPointer<RenderNew::Material> getMaterial() override;
 
 protected:
 	void onTexturePropertyChanged(const Reflection::PropertyDescriptor* descriptor);
 	void onTextureAncestorChanged(std::shared_ptr<Instance> ancestor);
 
 private:
-	virtual void updateMesh();
+	void updateMesh() override;
 };
 
 } // namespace ViewNew

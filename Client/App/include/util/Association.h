@@ -12,7 +12,7 @@ public:
 	class Item
 	{
 	public:
-		virtual ~Item() {}
+		virtual ~Item() = default;
 	};
 
 	template <class U>
@@ -59,7 +59,7 @@ public:
 	template <class U>
 	bool contains() const
 	{
-		return items.size() > index<U>() && items[index<U>()] != NULL;
+		return items.size() > index<U>() && items[index<U>()] != nullptr;
 	}
 
 	template <class U>
@@ -67,7 +67,7 @@ public:
 	{
 		if (items.size() > index<U>()) {
 			delete items[index<U>()];
-			items[index<U>()] = NULL;
+			items[index<U>()] = nullptr;
 		}
 	}
 
@@ -75,7 +75,7 @@ public:
 	U& get()
 	{
 		while (items.size() <= index<U>()) {
-			items.push_back(NULL);
+			items.push_back(nullptr);
 		}
 		Item*& item = items[index<U>()];
 		if (!item) {
@@ -88,7 +88,7 @@ public:
 	U& get(Arg param0)
 	{
 		while (items.size() <= index<U>()) {
-			items.push_back(NULL);
+			items.push_back(nullptr);
 		}
 		Item*& item = items[index<U>()];
 		if (!item) {

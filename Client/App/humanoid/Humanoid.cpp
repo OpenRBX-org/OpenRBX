@@ -102,20 +102,20 @@ SignalDesc<Humanoid, void(bool)> Humanoid::event_Seated("Seated", "active");
 
 PartInstance* Humanoid::getHeadFromCharacter(const ModelInstance* character)
 {
-	return character ? dynamic_cast<PartInstance*>(character->findFirstChildByName("Head")) : NULL;
+	return character ? dynamic_cast<PartInstance*>(character->findFirstChildByName("Head")) : nullptr;
 }
 
 ModelInstance* Humanoid::getCharacterFromHumanoid(Humanoid* humanoid)
 {
-	if (humanoid != NULL) {
+	if (humanoid != nullptr) {
 		Instance* parent = humanoid->getParent();
 		ModelInstance* model = dynamic_cast<ModelInstance*>(parent);
-		if (model != NULL) {
+		if (model != nullptr) {
 			return model;
 		}
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 G3D::CoordinateFrame Humanoid::getTopOfHead() const
@@ -134,11 +134,11 @@ ContactManager* Humanoid::getContactManager()
 {
 	World* world = Workspace::getWorldIfInWorkspace(this);
 
-	if (world != NULL) {
+	if (world != nullptr) {
 		return &world->getContactManager();
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 PartInstance* Humanoid::getLocalHeadFromContext(const Instance* context)
@@ -150,7 +150,7 @@ PartInstance* Humanoid::getLocalHeadFromContext(const Instance* context)
 
 bool Humanoid::hasWalkToPoint(G3D::Vector3& worldPosition) const
 {
-	if (walkToPart != NULL && Workspace::findWorkspace(this) != NULL &&
+	if (walkToPart != nullptr && Workspace::findWorkspace(this) != nullptr &&
 		Workspace::contextInWorkspace(walkToPart.get())) {
 		worldPosition = walkToPart->getCoordinateFrame().pointToWorldSpace(walkToPoint);
 
@@ -171,12 +171,12 @@ G3D::CoordinateFrame Humanoid::getRightArmGrip() const
 
 PartInstance* Humanoid::findRightArm() const
 {
-	return static_cast<PartInstance*>(getParent() ? getParent()->findFirstChildByName("Right Arm") : NULL);
+	return static_cast<PartInstance*>(getParent() ? getParent()->findFirstChildByName("Right Arm") : nullptr);
 }
 
 void Humanoid::computeForce(float dt, bool throttling)
 {
-	if (currentState.get() != NULL) {
+	if (currentState.get() != nullptr) {
 		currentState->onComputeForce(dt);
 	}
 }
@@ -208,9 +208,7 @@ void Humanoid::onAncestorChanged(const AncestorChanged& event)
 	Instance::onAncestorChanged(event);
 }
 
-Humanoid::~Humanoid()
-{
-}
+Humanoid::~Humanoid() = default;
 
 void Humanoid::getCameraIgnorePrimitives(std::vector<const Primitive*>& primitives)
 {
@@ -219,7 +217,7 @@ void Humanoid::getCameraIgnorePrimitives(std::vector<const Primitive*>& primitiv
 
 float Humanoid::getIntendedRotationAboutYAxis()
 {
-	if (currentState.get() != NULL) {
+	if (currentState.get() != nullptr) {
 		return currentState->getIntendedRotationAboutYAxis();
 	}
 
@@ -228,12 +226,12 @@ float Humanoid::getIntendedRotationAboutYAxis()
 
 bool Humanoid::askSetParent(const Instance* instance) const
 {
-	return dynamic_cast<const ModelInstance*>(instance) != NULL;
+	return dynamic_cast<const ModelInstance*>(instance) != nullptr;
 }
 
 Humanoid* Humanoid::modelIsCharacter(const Instance* testModel)
 {
-	return testModel ? testModel->findFirstChildOfType<Humanoid>() : NULL;
+	return testModel ? testModel->findFirstChildOfType<Humanoid>() : nullptr;
 }
 
 Humanoid* Humanoid::getLocalHumanoidFromContext(const Instance* context)
@@ -273,7 +271,7 @@ void Humanoid::render3dAdorn(Adorn* adorn)
 
 PartInstance* Humanoid::getHead() const
 {
-	if (head == NULL && getParent() != NULL) {
+	if (head == nullptr && getParent() != nullptr) {
 		head = shared_from_dynamic_cast<PartInstance>(getParent()->findFirstChildByName("Head"));
 	}
 
@@ -282,7 +280,7 @@ PartInstance* Humanoid::getHead() const
 
 PartInstance* Humanoid::getTorso() const
 {
-	if (torso == NULL && getParent() != NULL) {
+	if (torso == nullptr && getParent() != nullptr) {
 		torso = shared_from_dynamic_cast<PartInstance>(getParent()->findFirstChildByName("Torso"));
 	}
 
@@ -291,7 +289,7 @@ PartInstance* Humanoid::getTorso() const
 
 PartInstance* Humanoid::getLeftLeg() const
 {
-	if (leftLeg == NULL && getParent() != NULL) {
+	if (leftLeg == nullptr && getParent() != nullptr) {
 		leftLeg = shared_from_dynamic_cast<PartInstance>(getParent()->findFirstChildByName("Left Leg"));
 	}
 
@@ -300,7 +298,7 @@ PartInstance* Humanoid::getLeftLeg() const
 
 PartInstance* Humanoid::getRightLeg() const
 {
-	if (rightLeg == NULL && getParent() != NULL) {
+	if (rightLeg == nullptr && getParent() != nullptr) {
 		rightLeg = shared_from_dynamic_cast<PartInstance>(getParent()->findFirstChildByName("Right Leg"));
 	}
 
@@ -309,7 +307,7 @@ PartInstance* Humanoid::getRightLeg() const
 
 PartInstance* Humanoid::getLeftArm() const
 {
-	if (leftArm == NULL && getParent() != NULL) {
+	if (leftArm == nullptr && getParent() != nullptr) {
 		leftArm = shared_from_dynamic_cast<PartInstance>(getParent()->findFirstChildByName("Left Arm"));
 	}
 
@@ -318,7 +316,7 @@ PartInstance* Humanoid::getLeftArm() const
 
 PartInstance* Humanoid::getRightArm() const
 {
-	if (rightArm == NULL && getParent() != NULL) {
+	if (rightArm == nullptr && getParent() != nullptr) {
 		rightArm = shared_from_dynamic_cast<PartInstance>(getParent()->findFirstChildByName("Right Arm"));
 	}
 
@@ -328,49 +326,49 @@ PartInstance* Humanoid::getRightArm() const
 JointInstance* Humanoid::findRightShoulder() const
 {
 	PartInstance* torso = getTorso();
-	return static_cast<JointInstance*>(torso ? torso->findFirstChildByName("Right Shoulder") : NULL);
+	return static_cast<JointInstance*>(torso ? torso->findFirstChildByName("Right Shoulder") : nullptr);
 }
 
 Primitive* Humanoid::getTorsoPrimitive() const
 {
 	PartInstance* part = getTorso();
 
-	return part != NULL ? part->getPrimitive() : NULL;
+	return part != nullptr ? part->getPrimitive() : nullptr;
 }
 
 Primitive* Humanoid::getLeftLegPrimitive()
 {
 	PartInstance* part = getLeftLeg();
 
-	return part != NULL ? part->getPrimitive() : NULL;
+	return part != nullptr ? part->getPrimitive() : nullptr;
 }
 
 Primitive* Humanoid::getRightLegPrimitive()
 {
 	PartInstance* part = getRightLeg();
 
-	return part != NULL ? part->getPrimitive() : NULL;
+	return part != nullptr ? part->getPrimitive() : nullptr;
 }
 
 Body* Humanoid::getTorsoBody()
 {
 	PartInstance* part = getTorso();
 
-	return part != NULL ? part->getPrimitive()->getBody() : NULL;
+	return part != nullptr ? part->getPrimitive()->getBody() : nullptr;
 }
 
 Body* Humanoid::getRootBody()
 {
 	Body* body = getTorsoBody();
 
-	return body != NULL ? body->getRoot() : NULL;
+	return body != nullptr ? body->getRoot() : nullptr;
 }
 
 float Humanoid::getTorsoHeading() const
 {
 	Primitive* torso = getTorsoPrimitive();
 
-	if (torso != NULL) {
+	if (torso != nullptr) {
 		return Math::getHeading(torso->getCoordinateFrame().lookVector());
 	}
 
@@ -379,7 +377,7 @@ float Humanoid::getTorsoHeading() const
 
 const CoordinateFrame Humanoid::getLocation() const
 {
-	return getHead() != NULL ? getHead()->getCoordinateFrame() : CoordinateFrame();
+	return getHead() != nullptr ? getHead()->getCoordinateFrame() : CoordinateFrame();
 }
 
 void Humanoid::buildJoints()
@@ -474,7 +472,7 @@ G3D::Vector3 Humanoid::getIntendedMovementVector(bool setWalkMode)
 		PartInstance* torso = getTorso();
 		G3D::Vector3 worldPosition;
 
-		if (torso != NULL && hasWalkToPoint(worldPosition)) {
+		if (torso != nullptr && hasWalkToPoint(worldPosition)) {
 			const G3D::Vector3& translation = torso->getCoordinateFrame().translation;
 
 			G3D::Vector3 delta = worldPosition - translation;
@@ -551,7 +549,7 @@ void Humanoid::tellCameraNear(float distance)
 
 Humanoid::Humanoid()
 	: health(100), maxHealth(100), walkRotationalVelocity(0), walkTimer(0), walkMode(DIRECTION_MOVE), jump(false),
-	  imDead(false), hadHeadJoint(false), sit(false), world(NULL)
+	  imDead(false), hadHeadJoint(false), sit(false), world(nullptr)
 {
 	setName("Humanoid");
 }
@@ -592,11 +590,11 @@ void Humanoid::onLocalHumanoidEnteringWorkspace()
 
 void Humanoid::onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider)
 {
-	stopListening(oldProvider ? oldProvider->create<RunService>() : NULL, this);
+	stopListening(oldProvider ? oldProvider->create<RunService>() : nullptr, this);
 
 	Instance::onServiceProvider(oldProvider, newProvider);
 
-	startListening(newProvider ? newProvider->create<RunService>() : NULL, this);
+	startListening(newProvider ? newProvider->create<RunService>() : nullptr, this);
 
 	if (newProvider && !oldProvider) {
 		onLocalHumanoidEnteringWorkspace();
@@ -654,7 +652,7 @@ void Humanoid::render2d(Adorn* adorn)
 {
 	Humanoid* self = this;
 	ModelInstance* character = Network::Players::findLocalCharacter(self);
-	Humanoid* localHumanoid = character != NULL ? character->findFirstChildOfType<Humanoid>() : NULL;
+	Humanoid* localHumanoid = character != nullptr ? character->findFirstChildOfType<Humanoid>() : nullptr;
 
 	if (this == localHumanoid) {
 		return;
@@ -662,7 +660,7 @@ void Humanoid::render2d(Adorn* adorn)
 
 	Workspace* workspace = Workspace::findWorkspace(self);
 
-	if (workspace != NULL) {
+	if (workspace != nullptr) {
 		renderMultiplayer(adorn, workspace->getGCamera());
 	}
 }
@@ -677,7 +675,7 @@ void Humanoid::getIgnorePrims(std::vector<const Primitive*>& ignore)
 		});
 	}
 
-	ServiceClient<FilteredSelection<PartInstance> > pvSelection(this);
+	ServiceClient<FilteredSelection<PartInstance>> pvSelection(this);
 	if (pvSelection) {
 		for (std::vector<PartInstance*>::const_iterator iter = pvSelection->begin(); iter != pvSelection->end();
 			 ++iter) {
@@ -925,5 +923,5 @@ bool Humanoid::shouldRender3dAdorn() const
 
 template class RBX::FactoryProduct<RBX::Humanoid, RBX::Instance, RBX::sHumanoid>;
 template class RBX::Reflection::
-	Described<RBX::Humanoid, RBX::sHumanoid, RBX::FactoryProduct<RBX::Humanoid, RBX::Instance, RBX::sHumanoid> >;
+	Described<RBX::Humanoid, RBX::sHumanoid, RBX::FactoryProduct<RBX::Humanoid, RBX::Instance, RBX::sHumanoid>>;
 template class RBX::DescribedCreatable<RBX::Humanoid, RBX::Instance, RBX::sHumanoid>;

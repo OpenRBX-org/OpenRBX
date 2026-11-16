@@ -12,8 +12,7 @@
 
 struct lua_State;
 
-namespace RBX {
-namespace Lua {
+namespace RBX::Lua {
 
 template <class T, int Tag>
 class Bridge
@@ -113,7 +112,7 @@ bool Bridge<T, Tag>::getValue(lua_State* L, unsigned int index, U& value)
 {
 	const void* userdata = lua_touserdata(L, index);
 
-	if (userdata != NULL) {
+	if (userdata != nullptr) {
 		if (lua_getmetatable(L, index)) {
 			lua_getfield(L, LUA_REGISTRYINDEX, className);
 
@@ -213,7 +212,7 @@ bool SharedPtrBridge<T>::getPtr(lua_State* L, unsigned int index, U& value)
 template <class T>
 void SharedPtrBridge<T>::push(lua_State* L, std::shared_ptr<T> instance)
 {
-	if (instance.get() == NULL) {
+	if (instance.get() == nullptr) {
 		lua_pushnil(L);
 	}
 	else {
@@ -249,7 +248,6 @@ std::shared_ptr<T> SharedPtrBridge<T>::getPtr(lua_State* L, unsigned int index)
 	return Bridge<std::shared_ptr<T>, 0>::getObject(L, index);
 }
 
-} // namespace Lua
-} // namespace RBX
+} // namespace RBX::Lua
 
 #endif // LUA_LUABRIDGE_H

@@ -21,8 +21,8 @@ protected:
 	CNullDoc() {}
 
 public:
-	virtual BOOL IsModified() { return FALSE; }
-	virtual BOOL SaveModified() { return TRUE; }
+	BOOL IsModified() override { return FALSE; }
+	BOOL SaveModified() override { return TRUE; }
 
 protected:
 	afx_msg void FUN_004374b0(CCmdUI* pCmdUI);

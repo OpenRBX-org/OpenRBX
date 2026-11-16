@@ -61,11 +61,11 @@ STDMETHODIMP CApp::ClearFileCache()
 HRESULT FUN_00407ca0(CComObject<CWorkspace>** p_unk0x04, void* p_unk0x08)
 {
 	HRESULT result = E_OUTOFMEMORY;
-	CComObject<CWorkspace>* object = NULL;
+	CComObject<CWorkspace>* object = nullptr;
 
 	ATLTRY(object = new CComObject<CWorkspace>(p_unk0x08))
 
-	if (object != NULL) {
+	if (object != nullptr) {
 		object->SetVoid(p_unk0x08);
 		object->InternalFinalConstructAddRef();
 		result = object->FinalConstruct();
@@ -73,7 +73,7 @@ HRESULT FUN_00407ca0(CComObject<CWorkspace>** p_unk0x04, void* p_unk0x08)
 
 		if (result != S_OK) {
 			delete object;
-			object = NULL;
+			object = nullptr;
 		}
 	}
 
@@ -115,7 +115,7 @@ STDMETHODIMP CApp::CreateGame(WINDOW_TYPE WindowType, IWorkspace** result)
 {
 	AFX_MANAGE_STATE(AfxGetAppModuleState());
 
-	CRobloxDoc* doc = NULL;
+	CRobloxDoc* doc = nullptr;
 	try {
 		HRESULT hr = FUN_004085e0();
 		if (hr != S_OK) {
@@ -126,7 +126,7 @@ STDMETHODIMP CApp::CreateGame(WINDOW_TYPE WindowType, IWorkspace** result)
 		CComObject<CWorkspace>* workspace;
 		switch (WindowType) {
 		case NoWindowType:
-			hr = FUN_00407ca0(&workspace, NULL);
+			hr = FUN_00407ca0(&workspace, nullptr);
 			if (hr != S_OK) {
 				return LogManager::ReportCOMError(CLSID_App, "Couldn't create workspace", hr);
 			}

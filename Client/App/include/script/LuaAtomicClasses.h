@@ -8,8 +8,7 @@
 #include <G3D/CoordinateFrame.h>
 #include <G3D/Vector3.h>
 
-namespace RBX {
-namespace Lua {
+namespace RBX::Lua {
 
 #ifdef __clang__
 template <>
@@ -206,7 +205,6 @@ inline void Bridge<G3D::CoordinateFrame, 1>::registerClass(lua_State* L)
 	lua_pop(L, 1);
 }
 
-} // namespace Lua
-} // namespace RBX
+} // namespace RBX::Lua
 
 #endif // SCRIPT_LUAATOMICCLASSES_H

@@ -38,12 +38,7 @@ public:
 	bool operator==(const Extents&) const;
 	bool operator!=(const Extents&) const;
 
-	Extents& operator=(const Extents& other)
-	{
-		low = other.low;
-		high = other.high;
-		return *this;
-	}
+	Extents& operator=(const Extents& other) = default;
 
 	static Extents vv(const Vector3& v0, const Vector3& v1);
 

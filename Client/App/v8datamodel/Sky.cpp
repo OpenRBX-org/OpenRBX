@@ -65,7 +65,7 @@ G3D::SkyRef Sky::getG3DSky(Sky* sky)
 			}
 
 			std::string directory = ContentProvider::singleton().assetFolder() + "Sky\\";
-			G3D::SkyRef g3dSky = G3D::Sky::fromFile(NULL, directory, filenames, sky->drawCelestialBodies, 1.0);
+			G3D::SkyRef g3dSky = G3D::Sky::fromFile(nullptr, directory, filenames, sky->drawCelestialBodies, 1.0);
 
 			if (g3dSky.notNull()) {
 				g3dSky->setNumStars(sky->numStars);
@@ -81,7 +81,7 @@ G3D::SkyRef Sky::getG3DSky(Sky* sky)
 		}
 	}
 
-	return G3D::Sky::fromFile(NULL, ContentProvider::singleton().assetFolder() + "Sky\\", "null_plainsky512_*.jpg");
+	return G3D::Sky::fromFile(nullptr, ContentProvider::singleton().assetFolder() + "Sky\\", "null_plainsky512_*.jpg");
 }
 
 Sky::Sky() : drawCelestialBodies(true), numStars(3000)

@@ -20,7 +20,7 @@ public:
 		Adorn* adorn, const std::string& image, SDLKey key, Controller::ControllerType controller, DataModel* dataModel
 	);
 
-	virtual bool isEnabled();
+	bool isEnabled() override;
 };
 
 G3D::Vector2 ArrowPanel::getSize() const

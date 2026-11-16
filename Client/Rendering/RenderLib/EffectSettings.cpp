@@ -4,8 +4,7 @@
 #include <algorithm>
 #include <memory>
 
-namespace RBX {
-namespace Render {
+namespace RBX::Render {
 
 inline static bool brighter(const G3D::GLight& A, const G3D::GLight& B)
 {
@@ -123,5 +122,4 @@ G3D::ReferenceCountedPointer<G3D::Lighting> EffectSettings::update(
 	return lighting;
 }
 
-} // namespace Render
-} // namespace RBX
+} // namespace RBX::Render

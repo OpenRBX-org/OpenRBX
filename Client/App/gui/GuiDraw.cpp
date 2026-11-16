@@ -31,10 +31,10 @@ bool GuiDrawImage::setImage(Adorn* adorn, const TextureId& textureId)
 	if (textureId != currentTexture) {
 		currentTexture = textureId;
 
-		normal = NULL;
-		hover = NULL;
-		down = NULL;
-		disable = NULL;
+		normal = nullptr;
+		hover = nullptr;
+		down = nullptr;
+		disable = nullptr;
 		size = G3D::Vector2(0.0f, 0.0f);
 
 		normal = silentGetTextureProxyBase(adorn, currentTexture);
@@ -74,7 +74,7 @@ void GuiDrawImage::draw(
 	if (texture.notNull()) {
 		adorn->setTexture(0, texture);
 		adorn->rect2d(rect2D, G3D::Color4(1.0f, 1.0f, 1.0f, 1.0f));
-		adorn->setTexture(0, NULL);
+		adorn->setTexture(0, nullptr);
 	}
 	else if (normal.notNull()) {
 		adorn->rect2d(rect2D, behind);

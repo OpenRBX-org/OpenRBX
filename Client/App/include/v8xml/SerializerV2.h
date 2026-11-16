@@ -37,11 +37,11 @@ public:
 		return true;
 	}
 
-	virtual void announceID(const XmlNameValuePair* valueID, Instance* target) { processID(valueID, target); }
+	void announceID(const XmlNameValuePair* valueID, Instance* target) override { processID(valueID, target); }
 
-	virtual void announceIDREF(
+	void announceIDREF(
 		const XmlNameValuePair* valueIDREF, Reflection::DescribedBase* propertyOwner, const IIDREF* idref
-	)
+	) override
 	{
 		processIDREF(valueIDREF, propertyOwner, idref);
 	}
@@ -106,7 +106,7 @@ public:
 
 	void merge(const XmlElement* root, RBX::DataModel* dataModel);
 
-	void loadInstances(XmlElement* root, std::vector<std::shared_ptr<RBX::Instance> >& instances);
+	void loadInstances(XmlElement* root, std::vector<std::shared_ptr<RBX::Instance>>& instances);
 
 	static void load(XmlElement* root, RBX::DataModel* dataModel);
 	void load(std::istream& stream, RBX::DataModel* dataModel);

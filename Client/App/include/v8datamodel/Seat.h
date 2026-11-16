@@ -33,7 +33,7 @@ private:
 public:
 	Seat();
 
-	virtual void onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider);
+	void onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider) override;
 };
 
 } // namespace RBX

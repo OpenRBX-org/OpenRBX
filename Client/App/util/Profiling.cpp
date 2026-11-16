@@ -5,8 +5,7 @@
 #include <G3D/System.h>
 #include <algorithm>
 
-namespace RBX {
-namespace Profiling {
+namespace RBX::Profiling {
 
 DWORD Mark::markTlsIndex = 0;
 
@@ -101,7 +100,7 @@ Profiler::Profiler(const char* name)
 {
 }
 
-CodeProfiler::CodeProfiler(const char* name) : Profiler(name), parent(NULL)
+CodeProfiler::CodeProfiler(const char* name) : Profiler(name), parent(nullptr)
 {
 }
 
@@ -137,5 +136,4 @@ double Bucket::getNominalFPS() const
 	return frames / getTotalTime();
 }
 
-} // namespace Profiling
-} // namespace RBX
+} // namespace RBX::Profiling

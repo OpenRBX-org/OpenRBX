@@ -126,7 +126,7 @@ const PartInstance* Accoutrement::getHandleConst() const
 
 void Accoutrement::readProperty(const XmlElement* propertyElement, IReferenceBinder& binder)
 {
-	const Name* name = NULL;
+	const Name* name = nullptr;
 	const XmlAttribute* nameAttribute = propertyElement->findAttribute(name_name);
 
 	if (nameAttribute && nameAttribute->getValue(name) && name->name == "BackendAccoutrementState") {
@@ -169,16 +169,14 @@ const CoordinateFrame Accoutrement::getLocation() const
 	return handle ? handle->getCoordinateFrame() : CoordinateFrame();
 }
 
-Accoutrement::~Accoutrement()
-{
-}
+Accoutrement::~Accoutrement() = default;
 
 void Accoutrement::onCameraNear(float distance)
 {
 	for (unsigned int i = 0; i < numChildren(); i++) {
 		ICameraSubject* subject = dynamic_cast<ICameraSubject*>(getChild(i));
 
-		if (subject != NULL) {
+		if (subject != nullptr) {
 			subject->onCameraNear(distance);
 		}
 	}
@@ -189,7 +187,7 @@ void Accoutrement::render3dSelect(Adorn* adorn, SelectState selectState)
 	for (unsigned int i = 0; i < numChildren(); i++) {
 		IRenderable* renderable = dynamic_cast<IRenderable*>(getChild(i));
 
-		if (renderable != NULL) {
+		if (renderable != nullptr) {
 			renderable->render3dSelect(adorn, selectState);
 		}
 	}
@@ -255,14 +253,14 @@ void Accoutrement::onEvent_HandleTouched(std::shared_ptr<Instance> other)
 
 void Accoutrement::dropAll(ModelInstance* model)
 {
-	dropAllOthers(model, NULL);
+	dropAllOthers(model, nullptr);
 }
 
 void Accoutrement::upTo_Equipped()
 {
 	handleTouched.disconnect();
 
-	std::vector<std::weak_ptr<PartInstance> > parts;
+	std::vector<std::weak_ptr<PartInstance>> parts;
 	PartInstance::findParts(this, parts);
 	DragUtilities::unJoinFromOutsiders(parts);
 
@@ -298,14 +296,14 @@ void Accoutrement::upTo_InCharacter()
 
 void Accoutrement::downFrom_Equipped()
 {
-	ModelInstance* character = NULL;
+	ModelInstance* character = nullptr;
 
 	if (weld) {
 		if (PartInstance* part0 = weld->getPart0()) {
 			character = dynamic_cast<ModelInstance*>(part0->getParent());
 		}
 
-		weld->setParent(NULL);
+		weld->setParent(nullptr);
 		weld.reset();
 	}
 
@@ -485,10 +483,10 @@ template class RBX::FactoryProduct<RBX::Accoutrement, RBX::Instance, RBX::sAccou
 template class RBX::Reflection::Described<
 	RBX::Accoutrement,
 	RBX::sAccoutrement,
-	RBX::FactoryProduct<RBX::Accoutrement, RBX::Instance, RBX::sAccoutrement> >;
+	RBX::FactoryProduct<RBX::Accoutrement, RBX::Instance, RBX::sAccoutrement>>;
 template class RBX::DescribedCreatable<RBX::Accoutrement, RBX::Instance, RBX::sAccoutrement>;
 
 template class RBX::FactoryProduct<RBX::Hat, RBX::Accoutrement, RBX::sHat>;
 template class RBX::Reflection::
-	Described<RBX::Hat, RBX::sHat, RBX::FactoryProduct<RBX::Hat, RBX::Accoutrement, RBX::sHat> >;
+	Described<RBX::Hat, RBX::sHat, RBX::FactoryProduct<RBX::Hat, RBX::Accoutrement, RBX::sHat>>;
 template class RBX::DescribedCreatable<RBX::Hat, RBX::Accoutrement, RBX::sHat>;

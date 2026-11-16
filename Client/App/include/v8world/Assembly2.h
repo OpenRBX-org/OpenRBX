@@ -55,8 +55,8 @@ private:
 
 class Assembly : public IPipelined
 {
-	typedef RBX::PrimIterator PrimIterator;
-	typedef RBX::EdgeIterator EdgeIterator;
+	using PrimIterator = RBX::PrimIterator;
+	using EdgeIterator = RBX::EdgeIterator;
 
 private:
 	SleepInfo* sleepInfo;
@@ -86,7 +86,7 @@ public:
 	Assembly& operator=(const Assembly&) = delete;
 
 	Assembly(Primitive* root);
-	virtual ~Assembly();
+	~Assembly() override;
 
 	void setParent(Assembly* value);
 
@@ -110,8 +110,8 @@ public:
 
 	int getDof() const;
 
-	virtual void putInKernel(Kernel* kernel);
-	virtual void removeFromKernel();
+	void putInKernel(Kernel* kernel) override;
+	void removeFromKernel() override;
 
 	void setMechanism(Mechanism* value) { mechanism = value; }
 	Mechanism* getMechanism();

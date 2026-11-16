@@ -14,8 +14,8 @@ class InsertDecal : public RBX::EditSelectionVerb
 public:
 	InsertDecal(RBX::DataModel* dataModel, const char* name);
 
-	virtual bool isEnabled() const;
-	virtual void doIt(RBX::IDataState* dataState);
+	bool isEnabled() const override;
+	void doIt(RBX::IDataState* dataState) override;
 	virtual std::shared_ptr<RBX::Decal> VTable0x14();
 
 private:
@@ -27,7 +27,7 @@ class InsertTexture : public InsertDecal
 public:
 	InsertTexture(RBX::DataModel* dataModel) : InsertDecal(dataModel, "InsertTexture") {}
 
-	virtual std::shared_ptr<RBX::Decal> VTable0x14();
+	std::shared_ptr<RBX::Decal> VTable0x14() override;
 };
 
 class InsertObject : public RBX::RunStateVerb
@@ -35,8 +35,8 @@ class InsertObject : public RBX::RunStateVerb
 public:
 	InsertObject(RBX::DataModel* dataModel);
 
-	virtual bool isEnabled() const;
-	virtual void doIt(RBX::IDataState* dataState);
+	bool isEnabled() const override;
+	void doIt(RBX::IDataState* dataState) override;
 
 private:
 	RBX::Instance* FUN_0041fb40() const;
@@ -50,14 +50,14 @@ public:
 	public:
 		CNameItem(RBX::Instance* instance) : m_unk0x7c(instance) {}
 
-		virtual CString GetCaption(CXTPReportColumn* pColumn);
+		CString GetCaption(CXTPReportColumn* pColumn) override;
 
 	private:
 		RBX::Instance* m_unk0x7c;
 	};
 
 	CInstanceRecord(std::shared_ptr<RBX::Instance> instance);
-	virtual ~CInstanceRecord();
+	~CInstanceRecord() override;
 
 	std::shared_ptr<RBX::Instance> m_unk0x54;
 };
@@ -73,13 +73,13 @@ protected:
 	CInstanceExplorer();
 
 public:
-	virtual ~CInstanceExplorer();
+	~CInstanceExplorer() override;
 
 	void FUN_004212d0(RBX::Instance* root);
 
 protected:
-	virtual void VTable0x08(const RBX::Instance* source, RBX::DescendentRemoving event);
-	virtual void VTable0x08(const RBX::Instance* source, RBX::DescendentAdded event);
+	void VTable0x08(const RBX::Instance* source, RBX::DescendentRemoving event) override;
+	void VTable0x08(const RBX::Instance* source, RBX::DescendentAdded event) override;
 
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void FUN_00421580(NMHDR* pNMHDR, LRESULT* pResult);

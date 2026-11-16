@@ -1,7 +1,6 @@
 #include "reflection/type.h"
 
-namespace RBX {
-namespace Reflection {
+namespace RBX::Reflection {
 
 template <>
 const Type& Type::singleton<void>()
@@ -26,5 +25,4 @@ SignatureDescriptor::SignatureDescriptor() : resultType(&Type::singleton<void>()
 {
 }
 
-} // namespace Reflection
-} // namespace RBX
+} // namespace RBX::Reflection

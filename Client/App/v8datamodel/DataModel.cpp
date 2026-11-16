@@ -46,7 +46,7 @@ namespace RBX {
 
 const char sDataModel[] = "DataModel";
 
-typedef std::shared_ptr<const std::vector<std::shared_ptr<Instance> > > Instances;
+using Instances = std::shared_ptr<const std::vector<std::shared_ptr<Instance>>>;
 
 static Reflection::BoundFuncDesc<DataModel, Instances(ContentId), 1> getContentFunctionOld(
 	&DataModel::get, "get", "url", Reflection::FunctionDescriptor::AnyCaller
@@ -121,7 +121,7 @@ void DataModel::close()
 	if (!verb) {
 		throw std::runtime_error("Couldn't find Exit Verb");
 	}
-	verb->doIt(NULL);
+	verb->doIt(nullptr);
 }
 
 static std::string report(const G3D::Stopwatch& timer)
@@ -149,7 +149,7 @@ void DataModel::onChildAdded(Instance* child)
 	if (child->getClassName() == "NetworkClient") {
 		Verb* verb = getVerb("LockPlayMode");
 		if (verb) {
-			verb->doIt(NULL);
+			verb->doIt(nullptr);
 		}
 
 		workspace->setNullMouseCommand();
@@ -217,7 +217,7 @@ bool DataModel::canDelaySwapBuffer() const
 
 GuiResponse DataModel::processAccelerators(const GuiEvent& event)
 {
-	Verb* verb = NULL;
+	Verb* verb = nullptr;
 
 	switch (event.eventType) {
 	case UIEvent::MOUSE_WHEEL_FORWARD:
@@ -440,7 +440,7 @@ void DataModel::Lock::doLock(const DataModel* dataModel)
 {
 	if (dataModel) {
 		mutex = dataModel->mutex;
-		lock = std::unique_lock<std::recursive_mutex>(*mutex);
+		lock = std::unique_lock(*mutex);
 	}
 }
 
@@ -502,10 +502,10 @@ void DataModel::renderPass3dAdorn(Adorn* adorn)
 
 void DataModel::clearContents()
 {
-	workspace->setMouseCommand(NULL);
+	workspace->setMouseCommand(nullptr);
 
 	workspace->removeAllChildren();
-	workspace->setCamera(NULL);
+	workspace->setCamera(nullptr);
 
 	starterPackService->removeAllChildren();
 
@@ -543,13 +543,13 @@ void DataModel::save(ContentId contentId)
 	Http(contentId.toString()).post(stream, true, response);
 }
 
-std::shared_ptr<const std::vector<std::shared_ptr<Instance> > > DataModel::get(ContentId contentId)
+std::shared_ptr<const std::vector<std::shared_ptr<Instance>>> DataModel::get(ContentId contentId)
 {
 	std::unique_ptr<std::istream> stream = ContentProvider::singleton().getContent(contentId);
 	TextXmlParser machine(stream->rdbuf());
 	std::unique_ptr<XmlElement> root = machine.parse();
 
-	std::shared_ptr<std::vector<std::shared_ptr<Instance> > > result(new std::vector<std::shared_ptr<Instance> >());
+	std::shared_ptr<std::vector<std::shared_ptr<Instance>>> result(new std::vector<std::shared_ptr<Instance>>());
 
 	Serializer serializer;
 	serializer.loadInstances(root.get(), *result);
@@ -622,7 +622,7 @@ void DataModel::renderPass2d(Adorn* adorn, IMetric* metric)
 			userInput->renderGameCursor(adorn);
 		}
 
-		tempMetric = NULL;
+		tempMetric = nullptr;
 	}
 }
 
@@ -661,9 +661,9 @@ void DataModel::closeDataModel(std::shared_ptr<DataModel> dataModel, bool joinRu
 }
 
 DataModel::DataModel()
-	: VerbContainer(NULL), workspace(Creatable<Instance>::create<Workspace>(this)),
+	: VerbContainer(nullptr), workspace(Creatable<Instance>::create<Workspace>(this)),
 	  guiRoot(Creatable<Instance>::create<GuiRoot>()), guiHooks(Creatable<Instance>::create<GuiRoot>()),
-	  guiTarget(NULL), forceArrowCursor(true), drawId(0), dirty(false), isInitialized(false),
+	  guiTarget(nullptr), forceArrowCursor(true), drawId(0), dirty(false), isInitialized(false),
 	  mutex(new std::recursive_mutex()), timeState(new TimeState())
 {
 	setName("Level");

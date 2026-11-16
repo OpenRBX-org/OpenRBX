@@ -62,7 +62,7 @@ void Message::render2d(Adorn* adorn)
 	if (text.size() > 0) {
 		Instance* parent = getParent();
 		Network::Player* player = dynamic_cast<Network::Player*>(parent);
-		if (player == NULL) {
+		if (player == nullptr) {
 			renderFullScreen(adorn);
 		}
 		else {
@@ -111,5 +111,5 @@ template class RBX::DescribedCreatable<RBX::Hint, RBX::Message, RBX::sHint>;
 
 template class RBX::FactoryProduct<RBX::Message, RBX::Instance, RBX::sMessage>;
 template class RBX::Reflection::
-	Described<RBX::Message, RBX::sMessage, RBX::FactoryProduct<RBX::Message, RBX::Instance, RBX::sMessage> >;
+	Described<RBX::Message, RBX::sMessage, RBX::FactoryProduct<RBX::Message, RBX::Instance, RBX::sMessage>>;
 template class RBX::DescribedCreatable<RBX::Message, RBX::Instance, RBX::sMessage>;

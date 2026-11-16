@@ -18,7 +18,7 @@ MouseCommand* DragTool::onMouseDown(
 	Workspace* workspace
 )
 {
-	std::vector<std::weak_ptr<PartInstance> > partArray;
+	std::vector<std::weak_ptr<PartInstance>> partArray;
 	DragUtilities::instancesToParts(dragInstances, partArray);
 
 	MouseCommand* dragger;

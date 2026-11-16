@@ -4,8 +4,7 @@
 
 #include <lua.h>
 
-namespace RBX {
-namespace Lua {
+namespace RBX::Lua {
 
 float lua_tofloat(lua_State* L, int index);
 
@@ -32,7 +31,6 @@ public:
 	~ScopedPopper() { lua_pop(thread, popCount); }
 };
 
-} // namespace Lua
-} // namespace RBX
+} // namespace RBX::Lua
 
 #endif // LUA_LUA_HPP

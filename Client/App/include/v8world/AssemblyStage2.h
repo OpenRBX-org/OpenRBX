@@ -16,12 +16,12 @@ class AssemblyStage : public IWorldStage
 public:
 	AssemblyStage(IStage* upstream, World* world);
 
-	virtual ~AssemblyStage();
+	~AssemblyStage() override;
 
-	virtual StageType getStageType();
+	StageType getStageType() override;
 
-	virtual void onEdgeAdded(Edge* edge);
-	virtual void onEdgeRemoving(Edge* edge);
+	void onEdgeAdded(Edge* edge) override;
+	void onEdgeRemoving(Edge* edge) override;
 
 	void onAssemblyAdded(Assembly* assembly);
 	void onAssemblyRemoving(Assembly* assembly);

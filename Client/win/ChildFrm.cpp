@@ -11,13 +11,9 @@ BEGIN_MESSAGE_MAP(CChildFrame, CMDIChildWnd)
 END_MESSAGE_MAP()
 // clang-format on
 
-CChildFrame::CChildFrame()
-{
-}
+CChildFrame::CChildFrame() = default;
 
-CChildFrame::~CChildFrame()
-{
-}
+CChildFrame::~CChildFrame() = default;
 
 BOOL CChildFrame::PreCreateWindow(CREATESTRUCT& cs)
 {
@@ -57,7 +53,7 @@ int CChildFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		return -1;
 	}
 
-	m_hMenuShared = NULL;
+	m_hMenuShared = nullptr;
 
 	CMenu* menu = GetSystemMenu(FALSE);
 	menu->RemoveMenu(SC_RESTORE, MF_BYCOMMAND);

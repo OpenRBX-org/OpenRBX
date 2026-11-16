@@ -14,7 +14,7 @@ public:
 
 	TextureProxyBase() {}
 
-	virtual ~TextureProxyBase() {}
+	~TextureProxyBase() override = default;
 
 	virtual G3D::Vector2 getSize() = 0;
 };

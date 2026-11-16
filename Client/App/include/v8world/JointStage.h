@@ -15,16 +15,16 @@ class Primitive;
 class JointStage : public IWorldStage
 {
 public:
-	typedef std::multimap<Primitive*, Joint*> JointMap;
+	using JointMap = std::multimap<Primitive*, Joint*>;
 
 	JointStage(IStage* upstream, World* world);
 
-	virtual ~JointStage() {}
+	~JointStage() override = default;
 
-	virtual StageType getStageType() { return JOINT_STAGE; }
+	StageType getStageType() override { return JOINT_STAGE; }
 
-	virtual void onEdgeAdded(Edge* edge);
-	virtual void onEdgeRemoving(Edge* edge);
+	void onEdgeAdded(Edge* edge) override;
+	void onEdgeRemoving(Edge* edge) override;
 
 	void onPrimitiveAdded(Primitive* p);
 	void onPrimitiveRemoving(Primitive* p);

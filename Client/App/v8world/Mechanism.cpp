@@ -15,15 +15,15 @@ Mechanism* MechanismTracker::getMechanism()
 
 Mechanism* Mechanism::getMechanismFromPrimitive(const Primitive* primitive)
 {
-	if (primitive != NULL) {
+	if (primitive != nullptr) {
 		Assembly* assembly = primitive->getAssembly();
 
-		if (assembly != NULL) {
+		if (assembly != nullptr) {
 			return assembly->getMechanism();
 		}
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 bool MechanismTracker::tracking()
@@ -51,7 +51,7 @@ void Mechanism::removeAssembly(Assembly* a)
 {
 	assemblies.erase(a);
 
-	a->setMechanism(NULL);
+	a->setMechanism(nullptr);
 }
 
 void Mechanism::absorb(Mechanism* smaller)
@@ -67,10 +67,10 @@ void Mechanism::absorb(Mechanism* smaller)
 
 void MechanismTracker::stopTracking()
 {
-	if (mechanism != NULL) {
+	if (mechanism != nullptr) {
 		fastRemoveShort(mechanism->trackers, this);
 
-		mechanism = NULL;
+		mechanism = nullptr;
 	}
 }
 
@@ -78,7 +78,7 @@ void MechanismTracker::setMechanism(Mechanism* m)
 {
 	stopTracking();
 
-	if (m != NULL) {
+	if (m != nullptr) {
 		m->trackers.push_back(this);
 
 		mechanism = m;

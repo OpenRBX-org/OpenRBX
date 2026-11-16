@@ -13,7 +13,7 @@ class CMultiPlayerPane : public CWnd
 
 public:
 	CMultiPlayerPane();
-	virtual ~CMultiPlayerPane();
+	~CMultiPlayerPane() override;
 
 	BOOL FUN_00436ff0(CWnd* parent, RBX::DataModel* dataModel);
 

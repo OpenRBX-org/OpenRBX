@@ -42,7 +42,7 @@ protected:
 	CScriptEditor();
 
 public:
-	virtual ~CScriptEditor();
+	~CScriptEditor() override;
 
 	void FUN_00468aa0();
 	void FUN_00468db0();
@@ -50,19 +50,19 @@ public:
 	void FUN_00469b30(std::shared_ptr<RBX::Script> script);
 
 protected:
-	virtual void onEvent(const RBX::Instance* source, RBX::AncestorChanged event);
-	virtual void VTable0x08(const RBX::RunService* source, RBX::RunState event);
-	virtual void VTable0x08(const RBX::Instance* source, RBX::PropertyChanged event);
-	virtual void VTable0x0c(const RBX::Instance* source, RBX::PropertyChanged event) throw();
+	void onEvent(const RBX::Instance* source, RBX::AncestorChanged event) override;
+	void VTable0x08(const RBX::RunService* source, RBX::RunState event) override;
+	void VTable0x08(const RBX::Instance* source, RBX::PropertyChanged event) override;
+	void VTable0x0c(const RBX::Instance* source, RBX::PropertyChanged event) noexcept override;
 
-	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
-	virtual void PostNcDestroy();
-	virtual void OnInitialUpdate();
-	virtual void OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint);
-	virtual void OnCharAdded(Scintilla::SCNotification* pSCNotification);
-	virtual void OnDwellStart(Scintilla::SCNotification* pSCNotification);
-	virtual void OnDwellEnd(Scintilla::SCNotification* pSCNotification);
-	virtual void OnKillFocus();
+	BOOL PreCreateWindow(CREATESTRUCT& cs) override;
+	void PostNcDestroy() override;
+	void OnInitialUpdate() override;
+	void OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint) override;
+	void OnCharAdded(Scintilla::SCNotification* pSCNotification) override;
+	void OnDwellStart(Scintilla::SCNotification* pSCNotification) override;
+	void OnDwellEnd(Scintilla::SCNotification* pSCNotification) override;
+	void OnKillFocus() override;
 
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnActivate(UINT nState, CWnd* pWndOther, BOOL bMinimized);
@@ -87,7 +87,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 	void SetAStyle(
-		int style, COLORREF fore, COLORREF back = RGB(0xff, 0xff, 0xff), int size = -1, const char* face = NULL
+		int style, COLORREF fore, COLORREF back = RGB(0xff, 0xff, 0xff), int size = -1, const char* face = nullptr
 	);
 	void DefineMarker(int marker, int markerType, COLORREF fore, COLORREF back);
 

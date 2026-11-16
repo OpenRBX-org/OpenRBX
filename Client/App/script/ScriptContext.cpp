@@ -19,8 +19,8 @@
 
 #include <G3D/System.h>
 #include <algorithm>
+#include <cstdio>
 #include <lualib.h>
-#include <stdio.h>
 
 static int contextCount;
 
@@ -99,8 +99,8 @@ void ScriptContext::onEvent(const RunService* source, RunTransition event)
 
 static std::string getFullName(RBX::Instance* instance)
 {
-	if (instance->getParent() != NULL) {
-		if (instance->getParent()->getParent() != NULL) {
+	if (instance->getParent() != nullptr) {
+		if (instance->getParent()->getParent() != nullptr) {
 			return getFullName(instance->getParent()) + "." + instance->getName();
 		}
 
@@ -177,7 +177,7 @@ int ScriptContext::print(lua_State* L)
 		lua_pushvalue(L, i);
 		lua_call(L, 1, 1);
 		const char* s = lua_tostring(L, -1);
-		if (s == NULL) {
+		if (s == nullptr) {
 			throw std::runtime_error("'tostring' must return a string to 'print'");
 		}
 		message += s;
@@ -201,7 +201,7 @@ static int panic(lua_State* L)
 		RBX::MESSAGE_ERROR, "Unprotected error in call to Lua API (%s)\n", error.c_str()
 	);
 
-	int* crash = NULL;
+	int* crash = nullptr;
 	*crash = crash[1];
 
 	return 0;
@@ -252,9 +252,9 @@ void ScriptContext::reportError(lua_State* thread)
 
 void ScriptContext::disassociateState(Script* script)
 {
-	if (script->association().contains<std::shared_ptr<Lua::ThreadRef::Node> >()) {
-		script->association().get<std::shared_ptr<Lua::ThreadRef::Node> >()->eraseAllRefs();
-		script->association().remove<std::shared_ptr<Lua::ThreadRef::Node> >();
+	if (script->association().contains<std::shared_ptr<Lua::ThreadRef::Node>>()) {
+		script->association().get<std::shared_ptr<Lua::ThreadRef::Node>>()->eraseAllRefs();
+		script->association().remove<std::shared_ptr<Lua::ThreadRef::Node>>();
 	}
 }
 
@@ -263,7 +263,7 @@ void ScriptContext::removeScript(Script* script)
 	if (scripts.erase(script)) {
 		disassociateState(script);
 
-		std::vector<std::shared_ptr<Script> >::iterator iter =
+		std::vector<std::shared_ptr<Script>>::iterator iter =
 			std::find(pendingScripts.begin(), pendingScripts.end(), shared_from(script));
 		if (iter != pendingScripts.end()) {
 			pendingScripts.erase(iter);
@@ -274,7 +274,7 @@ void ScriptContext::removeScript(Script* script)
 } // namespace RBX
 
 static void readResults(
-	std::unique_ptr<std::vector<RBX::Reflection::Value> >& result, lua_State* thread, unsigned int returnCount
+	std::unique_ptr<std::vector<RBX::Reflection::Value>>& result, lua_State* thread, unsigned int returnCount
 )
 {
 	result.reset(new std::vector<RBX::Reflection::Value>(returnCount));
@@ -328,19 +328,18 @@ void ScriptContext::closeState()
 		}
 	}
 
-	globalState = NULL;
+	globalState = nullptr;
 }
 
 ScriptContext::ScriptContext()
-	: globalState(NULL), nextPendingScripts(std::chrono::floor<std::chrono::seconds>(std::chrono::steady_clock::now())),
+	: globalState(nullptr),
+	  nextPendingScripts(std::chrono::floor<std::chrono::seconds>(std::chrono::steady_clock::now())),
 	  scriptsDisabled(false)
 {
 	setName("Script Context");
 }
 
-ScriptContext::~ScriptContext()
-{
-}
+ScriptContext::~ScriptContext() = default;
 
 ScriptContext::ScriptImpersonator::ScriptImpersonator(lua_State* thread) : Impersonator(getThreadIdentity(thread))
 {
@@ -348,7 +347,7 @@ ScriptContext::ScriptImpersonator::ScriptImpersonator(lua_State* thread) : Imper
 
 int ScriptContext::settings(lua_State* thread)
 {
-	Security::Context::current().requirePermission(Security::Administrator, NULL);
+	Security::Context::current().requirePermission(Security::Administrator, nullptr);
 
 	Lua::SharedPtrBridge<Reflection::DescribedBase>::push(thread, GlobalSettings::singleton());
 
@@ -400,7 +399,7 @@ int ScriptContext::dofile(lua_State* L)
 {
 	Security::Context::current().requirePermission(Security::Administrator, "dofile");
 
-	const char* fname = luaL_optstring(L, 1, NULL);
+	const char* fname = luaL_optstring(L, 1, nullptr);
 	int n = lua_gettop(L);
 
 	ContentId contentId(fname);
@@ -425,13 +424,13 @@ void ScriptContext::onServiceProvider(const ServiceProvider* oldProvider, const 
 	}
 
 	if (statsItem) {
-		statsItem->setParent(NULL);
+		statsItem->setParent(nullptr);
 		statsItem.reset();
 	}
 
 	Instance::onServiceProvider(oldProvider, newProvider);
 
-	Stats::StatsService* stats = newProvider ? newProvider->create<Stats::StatsService>() : NULL;
+	Stats::StatsService* stats = newProvider ? newProvider->create<Stats::StatsService>() : nullptr;
 	if (stats) {
 		statsItem = Creatable<Instance>::create<Stats::Item>("Lua");
 		statsItem->setParent(stats);
@@ -439,7 +438,7 @@ void ScriptContext::onServiceProvider(const ServiceProvider* oldProvider, const 
 		statsItem->createChildItem<int>("threads", [this] { return getThreadCount(); });
 	}
 
-	runService = shared_from(newProvider ? newProvider->create<RunService>() : NULL);
+	runService = shared_from(newProvider ? newProvider->create<RunService>() : nullptr);
 
 	startListening<RunService, RunTransition>(runService, this);
 	startListening<RunService, Heartbeat>(runService, this);
@@ -474,16 +473,16 @@ void ScriptContext::openState()
 {
 	if (!globalState) {
 		if (vvvvv) {
-			lua_getstack(NULL, 0, NULL);
-			lua_getinfo(NULL, NULL, NULL);
-			lua_getlocal(NULL, NULL, 0);
-			lua_setlocal(NULL, NULL, 0);
-			lua_getupvalue(NULL, 0, 0);
-			lua_setupvalue(NULL, 0, 0);
-			lua_sethook(NULL, NULL, 0, 0);
-			lua_gethook(NULL);
-			lua_gethookmask(NULL);
-			lua_gethookcount(NULL);
+			lua_getstack(nullptr, 0, nullptr);
+			lua_getinfo(nullptr, nullptr, nullptr);
+			lua_getlocal(nullptr, nullptr, 0);
+			lua_setlocal(nullptr, nullptr, 0);
+			lua_getupvalue(nullptr, 0, 0);
+			lua_setupvalue(nullptr, 0, 0);
+			lua_sethook(nullptr, nullptr, 0, 0);
+			lua_gethook(nullptr);
+			lua_gethookmask(nullptr);
+			lua_gethookcount(nullptr);
 		}
 
 		allocator.reset(new LuaAllocator());
@@ -656,7 +655,7 @@ void ScriptContext::startScript(std::shared_ptr<Script> script)
 
 	setThreadIdentity(thread, Security::GameScript);
 
-	script->association().get<std::shared_ptr<Lua::ThreadRef::Node> >() = Lua::ThreadRef::Node::create(thread);
+	script->association().get<std::shared_ptr<Lua::ThreadRef::Node>>() = Lua::ThreadRef::Node::create(thread);
 
 	Lua::SharedPtrBridge<Reflection::DescribedBase>::push(thread, script);
 	lua_setfield(thread, LUA_GLOBALSINDEX, "script");
@@ -750,7 +749,7 @@ void ScriptContext::call(
 void ScriptContext::startPendingScripts()
 {
 	if (!scriptsDisabled) {
-		std::vector<std::shared_ptr<Script> > copy(pendingScripts);
+		std::vector<std::shared_ptr<Script>> copy(pendingScripts);
 		pendingScripts.clear();
 
 		std::for_each(copy.begin(), copy.end(), [this](const std::shared_ptr<Script>& script) { startScript(script); });
@@ -787,11 +786,11 @@ void ScriptContext::executeInNewThread(Security::Identities identity, const char
 	executeInNewThread(identity, script, name, FUN_00407390, FUN_00751160);
 }
 
-std::unique_ptr<std::vector<Reflection::Value> > ScriptContext::call(
+std::unique_ptr<std::vector<Reflection::Value>> ScriptContext::call(
 	const Lua::FunctionRef& function, const std::vector<Reflection::Value>& arguments
 )
 {
-	std::unique_ptr<std::vector<Reflection::Value> > result;
+	std::unique_ptr<std::vector<Reflection::Value>> result;
 
 	call(
 		function,
@@ -802,11 +801,11 @@ std::unique_ptr<std::vector<Reflection::Value> > ScriptContext::call(
 	return result;
 }
 
-std::unique_ptr<std::vector<Reflection::Value> > ScriptContext::executeInNewThread(
+std::unique_ptr<std::vector<Reflection::Value>> ScriptContext::executeInNewThread(
 	Security::Identities identity, const char* script, const char* name, const std::vector<Reflection::Value>& arguments
 )
 {
-	std::unique_ptr<std::vector<Reflection::Value> > result;
+	std::unique_ptr<std::vector<Reflection::Value>> result;
 
 	executeInNewThread(
 		identity,
@@ -860,5 +859,5 @@ template class RBX::FactoryProduct<RBX::ScriptContext, RBX::Instance, RBX::sScri
 template class RBX::Reflection::Described<
 	RBX::ScriptContext,
 	RBX::sScriptContext,
-	RBX::FactoryProduct<RBX::ScriptContext, RBX::Instance, RBX::sScriptContext> >;
+	RBX::FactoryProduct<RBX::ScriptContext, RBX::Instance, RBX::sScriptContext>>;
 template class RBX::DescribedCreatable<RBX::ScriptContext, RBX::Instance, RBX::sScriptContext>;

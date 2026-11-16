@@ -26,7 +26,7 @@ void UserInputBase::init(Adorn* adorn)
 	setCursorId(adorn, ContentId::fromAssets("Textures\\ArrowCursor.png"));
 }
 
-UserInputBase::UserInputBase() : currentCursor(NULL)
+UserInputBase::UserInputBase() : currentCursor(nullptr)
 {
 }
 
@@ -56,7 +56,7 @@ void UserInputBase::renderGameCursor(Adorn* adorn)
 
 		adorn->setTexture(0, cursor);
 		adorn->rect2d(rect, G3D::Color4(1.0f, 1.0f, 1.0f, 1.0f));
-		adorn->setTexture(0, NULL);
+		adorn->setTexture(0, nullptr);
 	}
 }
 

@@ -111,7 +111,7 @@ class Replicator : public DescribedNonCreatable<Replicator, IdSerializer, sRepli
 	double lastCharacterSendTime;
 	std::shared_ptr<ReplicatorStatsItem> statsItem;
 
-	typedef std::map<const Reflection::PropertyDescriptor*, std::shared_ptr<SharedStringDictionary> > Strings;
+	using Strings = std::map<const Reflection::PropertyDescriptor*, std::shared_ptr<SharedStringDictionary>>;
 
 	Strings strings;
 	SharedStringDictionary classNames;
@@ -126,29 +126,29 @@ protected:
 		bool deleteOnDisconnect;
 	};
 
-	typedef std::map<const Instance*, ReplicationData> RepConts;
+	using RepConts = std::map<const Instance*, ReplicationData>;
 
 	RepConts replicationContainers;
 
-	typedef std::vector<Instance*> TopReplConts;
+	using TopReplConts = std::vector<Instance*>;
 
 	TopReplConts topReplicationContainers;
 	Players* players;
 
-	typedef std::list<std::shared_ptr<Item> > ItemQueue;
+	using ItemQueue = std::list<std::shared_ptr<Item>>;
 
 	ItemQueue pendingItems;
 
-	typedef std::set<const Instance*> PendingInstances;
+	using PendingInstances = std::set<const Instance*>;
 
 	PendingInstances pendingNewInstances;
 	PendingInstances pendingDeleteInstances;
 	bool sendPhysicsEnabled;
 	const Reflection::Property* deserializingProperty;
 	Instance* removingInstance;
-	std::queue<std::shared_ptr<Marker> > incomingMarkers;
+	std::queue<std::shared_ptr<Marker>> incomingMarkers;
 
-	typedef std::map<const Name*, std::shared_ptr<Instance> > DefaultObjects;
+	using DefaultObjects = std::map<const Name*, std::shared_ptr<Instance>>;
 
 	DefaultObjects defaultObjects;
 	std::unique_ptr<Profiling::CodeProfiler> profileReplication;
@@ -171,19 +171,19 @@ public:
 	const SystemAddress remotePlayerId;
 
 	Replicator(SystemAddress remotePlayerId, RakPeerInterface* peer);
-	virtual ~Replicator();
+	~Replicator() override;
 
 	std::shared_ptr<Instance> getPlayer();
 
 	static Reflection::BoundProp<int, 1> prop_maxDataModelSendBuffer;
 	static Reflection::SignalDesc<Replicator, void(std::string, bool)> event_Disconnection;
 
-	virtual void Update(RakPeerInterface* peer);
-	virtual PluginReceiveResult OnReceive(RakPeerInterface* peer, Packet* packet);
+	void Update(RakPeerInterface* peer) override;
+	PluginReceiveResult OnReceive(RakPeerInterface* peer, Packet* packet) override;
 
-	virtual const Name& getClassName() const { return Name::getNullName(); }
+	const Name& getClassName() const override { return Name::getNullName(); }
 
-	virtual XmlElement* write() { return NULL; }
+	XmlElement* write() override { return nullptr; }
 
 	std::shared_ptr<Reflection::DescribedBase> sendMarker();
 	bool isSerializePending(const Instance* instance) const;
@@ -194,7 +194,7 @@ public:
 protected:
 	static void closeReplicationItem(const std::pair<const Instance* const, ReplicationData>& pair);
 	bool disconnectReplicationData(std::shared_ptr<Instance> instance);
-	virtual void onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider);
+	void onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider) override;
 	void onChildAdded(std::shared_ptr<Instance> child);
 	void onParentChanged(std::shared_ptr<Instance> instance);
 	void onPropertyChanged(std::shared_ptr<Instance> instance, const Reflection::PropertyDescriptor* descriptor);
@@ -250,11 +250,11 @@ protected:
 	const std::unique_ptr<RakPeer> rakPeer;
 
 	Peer();
-	virtual ~Peer();
+	~Peer() override;
 
-	virtual bool askAddChild(const Instance* instance) const
+	bool askAddChild(const Instance* instance) const override
 	{
-		return dynamic_cast<const Replicator*>(instance) != NULL;
+		return dynamic_cast<const Replicator*>(instance) != nullptr;
 	}
 
 	RakPeerInterface* peerInterface();
@@ -262,9 +262,9 @@ protected:
 	void updateLogger();
 	void updateNetworkSimulator();
 
-	virtual void onEvent(const RunService* source, Heartbeat event);
-	virtual void Update(RakPeerInterface* peer);
-	virtual void onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider);
+	void onEvent(const RunService* source, Heartbeat event) override;
+	void Update(RakPeerInterface* peer) override;
+	void onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider) override;
 
 public:
 };

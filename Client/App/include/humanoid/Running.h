@@ -43,27 +43,27 @@ private:
 	bool isFacingLadder(bool buffered);
 	void updateGoals(Controller& controller);
 
-	virtual void onComputeForce(const float dt);
-	virtual State* onStep(const float stepDt, Controller& controller);
+	void onComputeForce(const float dt) override;
+	State* onStep(const float stepDt, Controller& controller) override;
 
-	virtual float getIntendedRotationAboutYAxis() const { return intendedYRotation; }
+	float getIntendedRotationAboutYAxis() const override { return intendedYRotation; }
 
 public:
 	Running(Humanoid* humanoid);
 
-	virtual ~Running();
+	~Running() override;
 
-	virtual bool shouldRender2d() const // IRenderable vtable+0x00
+	bool shouldRender2d() const override // IRenderable vtable+0x00
 	{
 		return false;
 	}
 
-	virtual bool shouldRender3dAdorn() const // IRenderable vtable+0x04
+	bool shouldRender3dAdorn() const override // IRenderable vtable+0x04
 	{
 		return true;
 	}
 
-	virtual void render3dAdorn(Adorn* adorn); // IRenderable vtable+0x0c
+	void render3dAdorn(Adorn* adorn) override; // IRenderable vtable+0x0c
 };
 
 } // namespace RBX

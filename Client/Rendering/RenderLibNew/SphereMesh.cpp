@@ -4,8 +4,7 @@
 
 #include <G3D/Vector2int16.h>
 
-namespace RBX {
-namespace ViewNew {
+namespace RBX::ViewNew {
 
 static void SphereTransform(
 	G3D::Vector3& vertex,
@@ -36,23 +35,23 @@ public:
 	}
 
 protected:
-	virtual void buildRight(Purpose purpose) { buildFace<RBX::NORM_X>(SphereTransform, elements, elements, purpose); }
+	void buildRight(Purpose purpose) override { buildFace<RBX::NORM_X>(SphereTransform, elements, elements, purpose); }
 
-	virtual void buildTop(Purpose purpose) { buildFace<RBX::NORM_Y>(SphereTransform, elements, elements, purpose); }
+	void buildTop(Purpose purpose) override { buildFace<RBX::NORM_Y>(SphereTransform, elements, elements, purpose); }
 
-	virtual void buildBack(Purpose purpose) { buildFace<RBX::NORM_Z>(SphereTransform, elements, elements, purpose); }
+	void buildBack(Purpose purpose) override { buildFace<RBX::NORM_Z>(SphereTransform, elements, elements, purpose); }
 
-	virtual void buildLeft(Purpose purpose)
+	void buildLeft(Purpose purpose) override
 	{
 		buildFace<RBX::NORM_X_NEG>(SphereTransform, elements, elements, purpose);
 	}
 
-	virtual void buildBottom(Purpose purpose)
+	void buildBottom(Purpose purpose) override
 	{
 		buildFace<RBX::NORM_Y_NEG>(SphereTransform, elements, elements, purpose);
 	}
 
-	virtual void buildFront(Purpose purpose)
+	void buildFront(Purpose purpose) override
 	{
 		buildFace<RBX::NORM_Z_NEG>(SphereTransform, elements, elements, purpose);
 	}
@@ -108,5 +107,4 @@ template SphereMesh* MeshFactory<SphereMesh, 1>::createDecal(const G3D::Vector3&
 
 template SphereMesh* MeshFactory<SphereMesh, 1>::createTexture(const G3D::Vector3&, NormalId, const G3D::Vector2&);
 
-} // namespace ViewNew
-} // namespace RBX
+} // namespace RBX::ViewNew

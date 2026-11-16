@@ -4,9 +4,7 @@ CInsertObjectDialog::CInsertObjectDialog(CWnd* pParent) : CDialog(107, pParent),
 {
 }
 
-CInsertObjectDialog::~CInsertObjectDialog()
-{
-}
+CInsertObjectDialog::~CInsertObjectDialog() = default;
 
 void CInsertObjectDialog::DoDataExchange(CDataExchange* pDX)
 {

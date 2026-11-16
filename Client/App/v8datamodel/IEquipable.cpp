@@ -7,11 +7,9 @@
 
 namespace RBX {
 
-IEquipable::~IEquipable()
-{
-}
+IEquipable::~IEquipable() = default;
 
-IEquipable::IEquipable() : workspace(NULL)
+IEquipable::IEquipable() : workspace(nullptr)
 {
 }
 

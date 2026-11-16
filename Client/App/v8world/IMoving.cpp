@@ -4,7 +4,7 @@
 
 namespace RBX {
 
-IMoving::IMoving() : iMovingManager(NULL), stepsToSleep(0)
+IMoving::IMoving() : iMovingManager(nullptr), stepsToSleep(0)
 {
 }
 
@@ -24,14 +24,12 @@ bool IMoving::checkSleep()
 
 void IMoving::makeMoving()
 {
-	if (iMovingManager != NULL) {
+	if (iMovingManager != nullptr) {
 		iMovingManager->moved(this);
 	}
 }
 
-IMovingManager::~IMovingManager()
-{
-}
+IMovingManager::~IMovingManager() = default;
 
 void IMovingManager::remove(IMoving* iMoving)
 {
@@ -59,13 +57,13 @@ void IMovingManager::onMovingHeartbeat()
 
 void IMoving::setMovingManager(IMovingManager* _iMovingManager)
 {
-	if (iMovingManager != NULL) {
+	if (iMovingManager != nullptr) {
 		iMovingManager->remove(this);
 	}
 
 	iMovingManager = _iMovingManager;
 
-	if (_iMovingManager != NULL && stepsToSleep > 0) {
+	if (_iMovingManager != nullptr && stepsToSleep > 0) {
 		onCanAggregateChanged(false);
 		makeMoving();
 	}

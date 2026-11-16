@@ -91,47 +91,48 @@ bool XmlNameValuePair::getValue(std::string& value) const
 
 const XmlElement* XmlElement::findFirstChildByTag(const RBX::Name& _tag) const
 {
-	for (const XmlElement* child = firstChild(); child != NULL; child = child->nextSibling()) {
+	for (const XmlElement* child = firstChild(); child != nullptr; child = child->nextSibling()) {
 		if (&child->getTag() == &_tag) {
 			return child;
 		}
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 const XmlElement* XmlElement::findNextChildWithSameTag(const XmlElement* node) const
 {
-	for (const XmlElement* next = node->nextSibling(); next != NULL; next = next->nextSibling()) {
+	for (const XmlElement* next = node->nextSibling(); next != nullptr; next = next->nextSibling()) {
 		if (&next->getTag() == &node->getTag()) {
 			return next;
 		}
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 const XmlAttribute* XmlElement::findAttribute(const RBX::Name& name) const
 {
-	for (const XmlAttribute* attribute = attributes.firstChild(); attribute != NULL;
+	for (const XmlAttribute* attribute = attributes.firstChild(); attribute != nullptr;
 		 attribute = attribute->nextSibling()) {
 		if (&attribute->getTag() == &name) {
 			return attribute;
 		}
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 XmlAttribute* XmlElement::findAttribute(const RBX::Name& name)
 {
-	for (XmlAttribute* attribute = attributes.firstChild(); attribute != NULL; attribute = attribute->nextSibling()) {
+	for (XmlAttribute* attribute = attributes.firstChild(); attribute != nullptr;
+		 attribute = attribute->nextSibling()) {
 		if (&attribute->getTag() == &name) {
 			return attribute;
 		}
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 void XmlNameValuePair::clearValue() const
@@ -317,19 +318,19 @@ bool XmlNameValuePair::getValue(RBX::InstanceHandle& value) const
 	if (valueType == NAME && nameValue == &value_IDREF_null) {
 		self->clearValue();
 
-		self->handleValue = new RBX::InstanceHandle(NULL);
+		self->handleValue = new RBX::InstanceHandle(nullptr);
 		self->valueType = HANDLE;
 	}
 	else if (valueType == STRING && value_IDREF_null.name.compare(*stringValue) == 0) {
 		self->clearValue();
 
-		self->handleValue = new RBX::InstanceHandle(NULL);
+		self->handleValue = new RBX::InstanceHandle(nullptr);
 		self->valueType = HANDLE;
 	}
 	else if (valueType == STRING && *stringValue == "") {
 		self->clearValue();
 
-		self->handleValue = new RBX::InstanceHandle(NULL);
+		self->handleValue = new RBX::InstanceHandle(nullptr);
 		self->valueType = HANDLE;
 	}
 
@@ -347,7 +348,7 @@ bool XmlElement::isXsiNil() const
 
 	bool isNil;
 
-	return attribute != NULL && attribute->getValue(isNil) && isNil;
+	return attribute != nullptr && attribute->getValue(isNil) && isNil;
 }
 
 std::string XmlNameValuePair::toString(XmlWriter* writer) const

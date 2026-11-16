@@ -49,9 +49,9 @@ void RootInstance::moveSafe(MegaDragger& megaDragger, G3D::Vector3 move, MoveTyp
 	megaDragger.finishDragging();
 }
 
-void RootInstance::moveSafe(std::vector<std::weak_ptr<PartInstance> >& partArray, G3D::Vector3 move, MoveType moveType)
+void RootInstance::moveSafe(std::vector<std::weak_ptr<PartInstance>>& partArray, G3D::Vector3 move, MoveType moveType)
 {
-	MegaDragger megaDragger(NULL, partArray, this);
+	MegaDragger megaDragger(nullptr, partArray, this);
 
 	moveSafe(megaDragger, move, moveType);
 }
@@ -80,7 +80,7 @@ G3D::Vector3 RootInstance::computeIdeInsertPoint() const
 	return insertPoint;
 }
 
-void RootInstance::moveToIdeInsertPoint(std::vector<std::weak_ptr<PartInstance> >& partArray)
+void RootInstance::moveToIdeInsertPoint(std::vector<std::weak_ptr<PartInstance>>& partArray)
 {
 	if (!partArray.empty()) {
 		Extents extents = DragUtilities::computeExtents(partArray);
@@ -102,7 +102,7 @@ ControllerTypeArray RootInstance::computeControllersUsed() const
 	for (unsigned int i = 0; i < numChildren(); i++) {
 		const PVInstance* pv = dynamic_cast<const PVInstance*>(getChild(i));
 
-		if (pv != NULL && pv->isControllable()) {
+		if (pv != nullptr && pv->isControllable()) {
 			result.setController(pv->getControllerType(), true);
 		}
 	}
@@ -111,9 +111,9 @@ ControllerTypeArray RootInstance::computeControllersUsed() const
 }
 
 void RootInstance::insertRaw(
-	const std::vector<std::shared_ptr<Instance> >& instances,
+	const std::vector<std::shared_ptr<Instance>>& instances,
 	Instance* requestedParent,
-	std::vector<std::weak_ptr<PartInstance> >& partArray
+	std::vector<std::weak_ptr<PartInstance>>& partArray
 )
 {
 	std::for_each(instances.begin(), instances.end(), [requestedParent](const std::shared_ptr<Instance>& instance) {
@@ -127,9 +127,7 @@ void RootInstance::insertRaw(
 	DragUtilities::join(partArray);
 }
 
-RootInstance::~RootInstance()
-{
-}
+RootInstance::~RootInstance() = default;
 
 G3D::Vector3 RootInstance::computeCharacterInsertPoint(const Extents& extents) const
 {
@@ -144,7 +142,7 @@ G3D::Vector3 RootInstance::computeCharacterInsertPoint(const Extents& extents) c
 		G3D::Vector3 halfSize = extents.size() * 0.5f;
 		halfSize.y = 0.0f;
 
-		std::vector<std::weak_ptr<PartInstance> > partArray;
+		std::vector<std::weak_ptr<PartInstance>> partArray;
 		PartInstance::findParts(character, partArray);
 		Extents modelExtents = DragUtilities::computeExtents(partArray);
 
@@ -172,7 +170,7 @@ void RootInstance::moveToPoint(PVInstance* pv, G3D::Vector3 point)
 	}
 }
 
-void RootInstance::moveToCharacterInsertPoint(std::vector<std::weak_ptr<PartInstance> >& partArray)
+void RootInstance::moveToCharacterInsertPoint(std::vector<std::weak_ptr<PartInstance>>& partArray)
 {
 	if (!partArray.empty()) {
 		Extents extents = DragUtilities::computeExtents(partArray);
@@ -187,9 +185,9 @@ void RootInstance::moveToCharacterInsertPoint(std::vector<std::weak_ptr<PartInst
 	}
 }
 
-void RootInstance::insertToTree(const std::vector<std::shared_ptr<Instance> >& instances, Instance* requestedParent)
+void RootInstance::insertToTree(const std::vector<std::shared_ptr<Instance>>& instances, Instance* requestedParent)
 {
-	std::vector<std::weak_ptr<PartInstance> > partArray;
+	std::vector<std::weak_ptr<PartInstance>> partArray;
 	insertRaw(instances, requestedParent, partArray);
 
 	if (!partArray.empty()) {
@@ -198,7 +196,7 @@ void RootInstance::insertToTree(const std::vector<std::shared_ptr<Instance> >& i
 }
 
 void RootInstance::insertCharacterView(
-	const std::vector<std::shared_ptr<Instance> >& instances, std::vector<std::weak_ptr<PartInstance> >& partArray
+	const std::vector<std::shared_ptr<Instance>>& instances, std::vector<std::weak_ptr<PartInstance>>& partArray
 )
 {
 	if (instances.size() == 1) {
@@ -220,8 +218,8 @@ void RootInstance::insertCharacterView(
 }
 
 void RootInstance::insertIdeView(
-	const std::vector<std::shared_ptr<Instance> >& instances,
-	std::vector<std::weak_ptr<PartInstance> >& partArray,
+	const std::vector<std::shared_ptr<Instance>>& instances,
+	std::vector<std::weak_ptr<PartInstance>>& partArray,
 	PromptMode promptMode
 )
 {
@@ -235,7 +233,7 @@ void RootInstance::insertIdeView(
 
 		if (dynamic_cast<Tool*>(instance) && promptMode == ALLOW_PROMPTS) {
 			if (MessageBox(
-					NULL,
+					nullptr,
 					"Put this tool into the starter pack (otherwise drop into the 3d view)?",
 					"Inserting Tool",
 					MB_YESNO
@@ -257,9 +255,9 @@ void RootInstance::insertIdeView(
 	}
 }
 
-void RootInstance::insert3dView(const std::vector<std::shared_ptr<Instance> >& instances, PromptMode promptMode)
+void RootInstance::insert3dView(const std::vector<std::shared_ptr<Instance>>& instances, PromptMode promptMode)
 {
-	std::vector<std::weak_ptr<PartInstance> > partArray;
+	std::vector<std::weak_ptr<PartInstance>> partArray;
 
 	if (Network::Players::findLocalCharacter(this)) {
 		insertCharacterView(instances, partArray);
@@ -290,13 +288,13 @@ void RootInstance::insertSpawnLocation(SpawnLocation* s)
 }
 
 void RootInstance::insertInstances(
-	const std::vector<std::shared_ptr<Instance> >& instances,
+	const std::vector<std::shared_ptr<Instance>>& instances,
 	Instance* requestedParent,
 	InsertMode insertMode,
 	PromptMode promptMode
 )
 {
-	std::vector<std::shared_ptr<Instance> > remaining;
+	std::vector<std::shared_ptr<Instance>> remaining;
 
 	for (unsigned int i = 0; i < instances.size(); ++i) {
 		Instance* instance = instances[i].get();
@@ -341,7 +339,7 @@ void RootInstance::insertInstances(
 
 		switch (insertMode) {
 		case INSERT_RAW: {
-			std::vector<std::weak_ptr<PartInstance> > partArray;
+			std::vector<std::weak_ptr<PartInstance>> partArray;
 			insertRaw(remaining, requestedParent, partArray);
 			return;
 		}

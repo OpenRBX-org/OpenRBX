@@ -11,12 +11,10 @@ namespace RBX {
 bool WordList::ContainsProfanity(std::string p_unk0x04)
 {
 	toLower(p_unk0x04);
-	return blacklist.find(p_unk0x04) != blacklist.end();
+	return blacklist.contains(p_unk0x04);
 }
 
-WordList::~WordList()
-{
-}
+WordList::~WordList() = default;
 
 WordList::WordList()
 {
@@ -33,9 +31,7 @@ WordList::WordList()
 	file.close();
 }
 
-ProfanityFilter::ProfanityFilter()
-{
-}
+ProfanityFilter::ProfanityFilter() = default;
 
 bool ProfanityFilter::ContainsProfanity(std::string p_unk0x04)
 {
@@ -52,8 +48,6 @@ bool ProfanityFilter::ContainsProfanity(std::string p_unk0x04)
 	return false;
 }
 
-ProfanityFilter::~ProfanityFilter()
-{
-}
+ProfanityFilter::~ProfanityFilter() = default;
 
 } // namespace RBX

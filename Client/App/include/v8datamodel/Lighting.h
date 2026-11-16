@@ -73,10 +73,10 @@ public:
 	void setClearColor3(G3D::Color3 value) { setClearColor(G3D::Color4(value, 1.0f)); }
 
 protected:
-	virtual void onChildAdded(Instance* child);
-	virtual void onChildRemoving(Instance* child);
-	virtual void onChildChanged(Instance* instance, const PropertyChanged& event);
-	virtual bool askAddChild(const Instance* instance) const;
+	void onChildAdded(Instance* child) override;
+	void onChildRemoving(Instance* child) override;
+	void onChildChanged(Instance* instance, const PropertyChanged& event) override;
+	bool askAddChild(const Instance* instance) const override;
 
 private:
 	void fireLightingChanged(bool skyChanged);

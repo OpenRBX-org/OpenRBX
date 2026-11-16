@@ -34,13 +34,13 @@ protected:
 	Joint(Primitive* prim0, Primitive* prim1, const CoordinateFrame& coord0, const CoordinateFrame& coord1);
 
 public:
-	virtual ~Joint();
+	~Joint() override;
 
 protected:
-	virtual EdgeType getEdgeType() const { return JOINT; }
+	EdgeType getEdgeType() const override { return JOINT; }
 
 public:
-	virtual void setPrimitive(int index, Primitive* primitive);
+	void setPrimitive(int index, Primitive* primitive) override;
 
 	static bool isJoint(Edge* edge) { return edge->getEdgeType() == JOINT; }
 
@@ -109,23 +109,23 @@ protected:
 class AnchorJoint : public Joint
 {
 public:
-	AnchorJoint(Primitive* p) : Joint(p, NULL, CoordinateFrame(), CoordinateFrame()) {}
+	AnchorJoint(Primitive* p) : Joint(p, nullptr, CoordinateFrame(), CoordinateFrame()) {}
 
 	static bool isAnchorJoint(const Joint* joint) { return joint->getJointType() == ANCHOR_JOINT; }
 
 private:
-	virtual JointType getJointType() const { return ANCHOR_JOINT; }
+	JointType getJointType() const override { return ANCHOR_JOINT; }
 };
 
 class FreeJoint : public Joint
 {
 public:
-	FreeJoint(Primitive* p) : Joint(p, NULL, CoordinateFrame(), CoordinateFrame()) {}
+	FreeJoint(Primitive* p) : Joint(p, nullptr, CoordinateFrame(), CoordinateFrame()) {}
 
 	static bool isFreeJoint(const Joint* joint) { return joint->getJointType() == FREE_JOINT; }
 
 private:
-	virtual JointType getJointType() const { return FREE_JOINT; }
+	JointType getJointType() const override { return FREE_JOINT; }
 };
 
 } // namespace RBX

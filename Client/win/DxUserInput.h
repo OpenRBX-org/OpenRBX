@@ -62,21 +62,21 @@ private:
 	G3D::Vector2 getPendingCursorPosition();
 
 protected:
-	virtual G3D::Vector2 getCursorPosition();
-	virtual G3D::ReferenceCountedPointer<RBX::TextureProxyBase> getGameCursor(RBX::Adorn* adorn);
+	G3D::Vector2 getCursorPosition() override;
+	G3D::ReferenceCountedPointer<RBX::TextureProxyBase> getGameCursor(RBX::Adorn* adorn) override;
 
-	virtual void onEvent(const RBX::RunService* source, RBX::Heartbeat event);
-	virtual void onEvent(const RBX::RunService* source, RBX::RunTransition event);
+	void onEvent(const RBX::RunService* source, RBX::Heartbeat event) override;
+	void onEvent(const RBX::RunService* source, RBX::RunTransition event) override;
 
 public:
 	DxUserInput(CWnd* wnd, RBX::DataModel* dataModel);
-	virtual ~DxUserInput();
+	~DxUserInput() override;
 
-	virtual void setWrapMode(WrapMode wrapMode);
-	virtual WrapMode getWrapMode() const { return m_unk0x6c; }
-	virtual void centerCursor();
-	virtual bool keyDown(SDLKey key) const;
-	virtual void setKeyState(SDLKey key, bool down);
+	void setWrapMode(WrapMode wrapMode) override;
+	WrapMode getWrapMode() const override { return m_unk0x6c; }
+	void centerCursor() override;
+	bool keyDown(SDLKey key) const override;
+	void setKeyState(SDLKey key, bool down) override;
 
 	void FUN_0046be50(bool p_unk0x78);
 	void FUN_0046ca90();

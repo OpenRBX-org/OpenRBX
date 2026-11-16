@@ -13,18 +13,18 @@ class RbxSceneNode : public SceneNode
 public:
 	RbxSceneNode(SceneManager* creator, const String& name) : SceneNode(creator, name) {}
 
-	virtual ~RbxSceneNode();
+	~RbxSceneNode() override;
 
-	virtual void _update(bool updateChildren, bool parentHasChanged);
-	virtual void _updateBounds(void);
-	virtual void _findVisibleObjects(
+	void _update(bool updateChildren, bool parentHasChanged) override;
+	void _updateBounds() override;
+	void _findVisibleObjects(
 		Camera* cam,
 		RenderQueue* queue,
 		VisibleObjectsBoundsInfo* visibleBounds,
 		bool includeChildren = true,
 		bool displayNodes = false,
 		bool onlyShadowCasters = false
-	);
+	) override;
 
 	virtual void FUN_0067aeb0(SubMesh* subMesh, const Matrix4& transform);
 	virtual const Matrix4& FUN_0067ac90(SubMesh* subMesh);

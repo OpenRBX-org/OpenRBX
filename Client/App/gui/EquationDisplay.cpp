@@ -7,7 +7,7 @@ namespace RBX {
 std::string EquationDisplay::getLabel() const
 {
 	const Evaluator* evaluator = dynamic_cast<const Evaluator*>(Instance::getRootAncestor(this));
-	if (evaluator != NULL) {
+	if (evaluator != nullptr) {
 		std::string value = evaluator->evaluate(equation);
 		return label + " " + value;
 	}

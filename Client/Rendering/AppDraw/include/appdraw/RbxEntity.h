@@ -7,11 +7,9 @@
 #include <OgreEntity.h>
 #include <vector>
 
-namespace RBX {
-namespace RenderNew {
+namespace RBX::RenderNew {
 class RenderScene;
-} // namespace RenderNew
-} // namespace RBX
+} // namespace RBX::RenderNew
 
 namespace Ogre {
 
@@ -29,10 +27,10 @@ public:
 	};
 
 	RbxEntity();
-	virtual ~RbxEntity();
+	~RbxEntity() override;
 
-	virtual void _notifyCurrentCamera(Camera* cam);
-	virtual void _updateRenderQueue(RenderQueue* queue);
+	void _notifyCurrentCamera(Camera* cam) override;
+	void _updateRenderQueue(RenderQueue* queue) override;
 
 	void FUN_0052c8b0(AxisAlignedBox box) { m_unk0x248 = box; }
 

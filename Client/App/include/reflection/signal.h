@@ -13,8 +13,7 @@
 #include <memory>
 #include <vector>
 
-namespace RBX {
-namespace Reflection {
+namespace RBX::Reflection {
 
 class Signal;
 class SignalDescriptor;
@@ -46,7 +45,7 @@ public:
 class __declspec(novtable) SignalSource
 {
 public:
-	typedef std::map<const SignalDescriptor*, std::shared_ptr<SignalInstance> > SignalMap;
+	using SignalMap = std::map<const SignalDescriptor*, std::shared_ptr<SignalInstance>>;
 
 	virtual ~SignalSource();
 
@@ -75,7 +74,7 @@ class TGenericSlotWrapper : public GenericSlotWrapper
 	friend class GenericSlotWrapper;
 
 public:
-	virtual void execute(const std::vector<std::any>& arguments);
+	void execute(const std::vector<std::any>& arguments) override;
 
 private:
 	TGenericSlotWrapper(const Slot& slot) : slot(slot) {}
@@ -103,8 +102,8 @@ GenericSlotWrapper* GenericSlotWrapper::create(Slot slot)
 class __declspec(novtable) SignalDescriptor : public MemberDescriptor
 {
 public:
-	typedef Signal ConstMember;
-	typedef Signal Member;
+	using ConstMember = Signal;
+	using Member = Signal;
 
 	void (*signalCreatedHook)(SignalSource*);
 
@@ -133,7 +132,7 @@ protected:
 class Signal
 {
 public:
-	Signal(const Signal& other) : descriptor(other.descriptor), instance(other.instance) {}
+	Signal(const Signal& other) = default;
 	Signal(const SignalDescriptor& descriptor, DescribedBase* instance) : descriptor(&descriptor), instance(instance) {}
 
 	const Name& getName() const { return descriptor->name; }
@@ -169,7 +168,7 @@ protected:
 	TSignalDesc(ClassDescriptor& classDescriptor, const char* name) : SignalDescriptor(classDescriptor, name) {}
 
 private:
-	virtual SignalInstance* newSignalInstance(SignalSource& source) const
+	SignalInstance* newSignalInstance(SignalSource& source) const override
 	{
 		return new TSignalInstance(&source, *this);
 	}
@@ -188,7 +187,7 @@ protected:
 public:
 	Signals::Connection connect(SignalSource* source, typename TSignalInstance::Function slot, int group)
 	{
-		if (source != NULL) {
+		if (source != nullptr) {
 			return sig(*source).connect(group, std::move(slot), Signals::at_back);
 		}
 
@@ -199,7 +198,7 @@ public:
 	{
 		const TSignalInstance* instance = findSig(source);
 
-		return instance == NULL || instance->empty();
+		return instance == nullptr || instance->empty();
 	}
 };
 
@@ -218,9 +217,9 @@ protected:
 		std::shared_ptr<GenericSlotWrapper> wrapper;
 	};
 
-	virtual Signals::Connection connectGeneric(
+	Signals::Connection connectGeneric(
 		SignalInstance* si, GenericSlotWrapper* wrapper, Signals::ConnectPosition pos
-	) const
+	) const override
 	{
 		return static_cast<typename TSignalDesc<Signature>::TSignalInstance*>(si)->connect(
 			GenericSlotAdapter(wrapper), pos
@@ -236,7 +235,7 @@ public:
 	{
 		typename TSignalDesc<Signature>::TSignalInstance* instance = this->findSig(source);
 
-		if (instance != NULL) {
+		if (instance != nullptr) {
 			(*instance)();
 		}
 	}
@@ -250,7 +249,7 @@ public:
 	{
 		typename TSignalDesc<Signature>::TSignalInstance* instance = this->findSig(source);
 
-		if (instance != NULL) {
+		if (instance != nullptr) {
 			(*instance)(arg1);
 		}
 	}
@@ -274,9 +273,9 @@ protected:
 		std::shared_ptr<GenericSlotWrapper> wrapper;
 	};
 
-	virtual Signals::Connection connectGeneric(
+	Signals::Connection connectGeneric(
 		SignalInstance* si, GenericSlotWrapper* wrapper, Signals::ConnectPosition pos
-	) const
+	) const override
 	{
 		return static_cast<typename TSignalDesc<Signature>::TSignalInstance*>(si)->connect(
 			GenericSlotAdapter(wrapper), pos
@@ -296,7 +295,7 @@ public:
 	{
 		typename TSignalDesc<Signature>::TSignalInstance* instance = this->findSig(source);
 
-		if (instance != NULL) {
+		if (instance != nullptr) {
 			(*instance)(arg1, arg2);
 		}
 	}
@@ -321,9 +320,9 @@ protected:
 		std::shared_ptr<GenericSlotWrapper> wrapper;
 	};
 
-	virtual Signals::Connection connectGeneric(
+	Signals::Connection connectGeneric(
 		SignalInstance* si, GenericSlotWrapper* wrapper, Signals::ConnectPosition pos
-	) const
+	) const override
 	{
 		return static_cast<typename TSignalDesc<Signature>::TSignalInstance*>(si)->connect(
 			GenericSlotAdapter(wrapper), pos
@@ -348,7 +347,7 @@ public:
 		: SignalDescImpl<FunctionTraits<Signature>::arity, Signature>(Class::classDescriptor(), name)
 	{
 		SignatureDescriptor::Item arg1 = {
-			&Name::declare(arg1name, -1), &Type::singleton<ArgumentType<Signature, 0> >(), Value()
+			&Name::declare(arg1name, -1), &Type::singleton<ArgumentType<Signature, 0>>(), Value()
 		};
 
 		this->signature.arguments.push_back(arg1);
@@ -358,20 +357,19 @@ public:
 		: SignalDescImpl<FunctionTraits<Signature>::arity, Signature>(Class::classDescriptor(), name)
 	{
 		SignatureDescriptor::Item arg1 = {
-			&Name::declare(arg1name, -1), &Type::singleton<ArgumentType<Signature, 0> >(), Value()
+			&Name::declare(arg1name, -1), &Type::singleton<ArgumentType<Signature, 0>>(), Value()
 		};
 
 		this->signature.arguments.push_back(arg1);
 
 		SignatureDescriptor::Item arg2 = {
-			&Name::declare(arg2name, -1), &Type::singleton<ArgumentType<Signature, 1> >(), Value()
+			&Name::declare(arg2name, -1), &Type::singleton<ArgumentType<Signature, 1>>(), Value()
 		};
 
 		this->signature.arguments.push_back(arg2);
 	}
 };
 
-} // namespace Reflection
-} // namespace RBX
+} // namespace RBX::Reflection
 
 #endif // REFLECTION_SIGNAL_H

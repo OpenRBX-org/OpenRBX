@@ -78,14 +78,14 @@ public:
 	static void closeDataModel(std::shared_ptr<DataModel> dataModel, bool joinRunThread);
 
 	DataModel();
-	virtual ~DataModel();
+	~DataModel() override;
 
 	void loadContent(ContentId contentId);
 	void save(ContentId contentId);
 	std::string httpGet(std::string url, bool synchronous);
 	std::string httpPost(std::string url, std::string data, bool synchronous);
 	void close();
-	std::shared_ptr<const std::vector<std::shared_ptr<Instance> > > get(ContentId contentId);
+	std::shared_ptr<const std::vector<std::shared_ptr<Instance>>> get(ContentId contentId);
 	void raiseClose();
 	int numChatOptions();
 	void buildGui(Adorn*);
@@ -109,17 +109,17 @@ public:
 		return dataModel->getMutex();
 	}
 
-	virtual void setDirty(bool dirty) { this->dirty = dirty; }
-	virtual bool isDirty() const { return dirty; }
+	void setDirty(bool dirty) override { this->dirty = dirty; }
+	bool isDirty() const override { return dirty; }
 
-	virtual bool isStackTooBig() const { return getStackSize() > 10; }
+	bool isStackTooBig() const override { return getStackSize() > 10; }
 
 	Workspace* getWorkspace() const { return workspace.get(); }
 	float step(float timeInterval);
 	float getSimTime() const;
 	TimeState* getTimeState();
 
-	virtual std::string evaluate(const std::string& valueName) const;
+	std::string evaluate(const std::string& valueName) const override;
 	void renderPass2d(Adorn*, IMetric*);
 	void renderPass3dAdorn(Adorn*);
 
@@ -131,27 +131,27 @@ public:
 	bool canDelaySwapBuffer() const;
 
 protected:
-	virtual void onChildAdded(Instance* child);
+	void onChildAdded(Instance* child) override;
 
-	virtual void onChildChanged(Instance* instance, const PropertyChanged& event)
+	void onChildChanged(Instance* instance, const PropertyChanged& event) override
 	{
 		ServiceProvider::onChildChanged(instance, event);
 		setDirty(true);
 	}
 
-	virtual void onDescendentAdded(Instance* instance)
+	void onDescendentAdded(Instance* instance) override
 	{
 		ServiceProvider::onDescendentAdded(instance);
 		setDirty(true);
 	}
 
-	virtual void onDescendentRemoving(const std::shared_ptr<Instance>& instance)
+	void onDescendentRemoving(const std::shared_ptr<Instance>& instance) override
 	{
 		ServiceProvider::onDescendentRemoving(instance);
 		setDirty(true);
 	}
 
-	virtual void onEvent(const RunService* source, RunTransition event);
+	void onEvent(const RunService* source, RunTransition event) override;
 
 private:
 	static std::string doHttpGet(std::string url);

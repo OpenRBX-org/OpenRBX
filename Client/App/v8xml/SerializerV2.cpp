@@ -28,15 +28,15 @@ public:
 		const RBX::IIDREF* idref;
 	};
 
-	virtual bool processID(const XmlNameValuePair* valueID, RBX::Instance* source);
+	bool processID(const XmlNameValuePair* valueID, RBX::Instance* source) override;
 
-	virtual bool processIDREF(
+	bool processIDREF(
 		const XmlNameValuePair* valueIDREF, RBX::Reflection::DescribedBase* propertyOwner, const RBX::IIDREF* idref
-	);
+	) override;
 
 	bool resolveIDREF(IDREFBinding binding);
 
-	virtual bool resolveRefs();
+	bool resolveRefs() override;
 
 private:
 	std::map<std::string, RBX::InstanceHandle> idMap;
@@ -76,12 +76,12 @@ static void isolate(XmlElement* element, const std::map<RBX::Instance*, RBX::Ins
 {
 	element->replaceHandles(isolationMap);
 
-	for (XmlAttribute* attribute = element->getFirstAttribute(); attribute != NULL;
+	for (XmlAttribute* attribute = element->getFirstAttribute(); attribute != nullptr;
 		 attribute = element->getNextAttribute(attribute)) {
 		attribute->replaceHandles(isolationMap);
 	}
 
-	for (XmlElement* child = element->firstChild(); child != NULL; child = child->nextSibling()) {
+	for (XmlElement* child = element->firstChild(); child != nullptr; child = child->nextSibling()) {
 		isolate(child, isolationMap);
 	}
 }
@@ -101,7 +101,7 @@ bool ArchiveBinder::resolveIDREF(IDREFBinding binding)
 		return true;
 	}
 
-	binding.idref->assignIDREF(binding.propertyOwner, RBX::InstanceHandle(NULL));
+	binding.idref->assignIDREF(binding.propertyOwner, RBX::InstanceHandle(nullptr));
 
 	return false;
 }
@@ -120,7 +120,7 @@ static void buildIsolationMap(XmlElement* element, std::map<RBX::Instance*, RBX:
 {
 	const XmlAttribute* referent = element->findAttribute(name_referent);
 
-	if (referent != NULL) {
+	if (referent != nullptr) {
 		RBX::InstanceHandle h;
 
 		referent->getValue(h);
@@ -128,7 +128,7 @@ static void buildIsolationMap(XmlElement* element, std::map<RBX::Instance*, RBX:
 		isolationMap[h.getTarget().get()] = RBX::InstanceHandle();
 	}
 
-	for (XmlElement* child = element->firstChild(); child != NULL; child = child->nextSibling()) {
+	for (XmlElement* child = element->firstChild(); child != nullptr; child = child->nextSibling()) {
 		buildIsolationMap(child, isolationMap);
 	}
 }
@@ -138,7 +138,7 @@ void SerializerV2::merge(const XmlElement* root, RBX::DataModel* dataModel)
 	RBX::MergeBinder binder;
 
 	const XmlElement* child = root->firstChild();
-	while (child != NULL) {
+	while (child != nullptr) {
 		const XmlAttribute* referent = child->findAttribute(name_referent);
 		RBX::InstanceHandle h;
 		referent->getValue(h);
@@ -187,7 +187,7 @@ bool ArchiveBinder::processIDREF(
 	return true;
 }
 
-void SerializerV2::loadInstances(XmlElement* root, std::vector<std::shared_ptr<RBX::Instance> >& instances)
+void SerializerV2::loadInstances(XmlElement* root, std::vector<std::shared_ptr<RBX::Instance>>& instances)
 {
 	if (root->getTag() == tag_roblox) {
 		const XmlAttribute* version = root->findAttribute(tag_version);
@@ -195,7 +195,7 @@ void SerializerV2::loadInstances(XmlElement* root, std::vector<std::shared_ptr<R
 			ArchiveBinder binder;
 			const XmlElement* itemElement = root->findFirstChildByTag(tag_Item);
 			while (itemElement) {
-				const RBX::Name* className = NULL;
+				const RBX::Name* className = nullptr;
 				if (itemElement->findAttributeValue(tag_class, className)) {
 					std::shared_ptr<RBX::Instance> instance =
 						RBX::AbstractFactoryProduct<RBX::Instance>::create(*className);

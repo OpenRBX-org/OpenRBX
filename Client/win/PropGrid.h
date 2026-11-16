@@ -20,7 +20,7 @@ class CPropGrid : public CXTPPropertyGrid, public RBX::Listener<RBX::Instance, R
 
 public:
 	CPropGrid();
-	virtual ~CPropGrid();
+	~CPropGrid() override;
 
 	class Item
 	{
@@ -28,7 +28,7 @@ public:
 		Item(const RBX::Reflection::PropertyDescriptor& descriptor, CPropGrid* grid);
 
 		virtual void VTable0x00(
-			const std::map<const RBX::Reflection::ClassDescriptor*, std::vector<std::shared_ptr<RBX::Instance> > >&
+			const std::map<const RBX::Reflection::ClassDescriptor*, std::vector<std::shared_ptr<RBX::Instance>>>&
 				instances
 		) = 0;
 
@@ -40,7 +40,7 @@ public:
 	};
 
 	class Unk0x1d0
-		: public std::map<const RBX::Reflection::ClassDescriptor*, std::vector<std::shared_ptr<RBX::Instance> > >
+		: public std::map<const RBX::Reflection::ClassDescriptor*, std::vector<std::shared_ptr<RBX::Instance>>>
 	{
 	public:
 		void FUN_0043e170(RBX::Instance* instance);
@@ -53,7 +53,7 @@ public:
 	virtual RBX::Selection* VTable0x164() = 0;
 
 protected:
-	virtual void onEvent(const RBX::Instance* source, RBX::PropertyChanged event);
+	void onEvent(const RBX::Instance* source, RBX::PropertyChanged event) override;
 
 	void FUN_0043db00(const RBX::Reflection::ClassDescriptor* classDescriptor);
 	void FUN_0043e7f0(std::shared_ptr<RBX::Instance> instance);
@@ -91,11 +91,11 @@ class CPropertyGridItemBrickColor : public CXTPPropertyGridItemColor
 public:
 	CPropertyGridItemBrickColor(CString strCaption, COLORREF clr = 0);
 
-	virtual void SetValue(CString strValue);
-	virtual void SetColor(COLORREF clr);
+	void SetValue(CString strValue) override;
+	void SetColor(COLORREF clr) override;
 
 protected:
-	virtual void OnInplaceButtonDown(CXTPPropertyGridInplaceButton* pButton);
+	void OnInplaceButtonDown(CXTPPropertyGridInplaceButton* pButton) override;
 };
 
 template <class T, class Base, class Descriptor>
@@ -109,16 +109,15 @@ public:
 		SetReadOnly(descriptor.isReadOnly());
 	}
 
-	virtual void OnValueChanged(CString strValue)
+	void OnValueChanged(CString strValue) override
 	{
 		Base::OnValueChanged(strValue);
 		FUN_00443670(VTable0xe4());
 	}
 
-	virtual void VTable0x00(
-		const std::map<const RBX::Reflection::ClassDescriptor*, std::vector<std::shared_ptr<RBX::Instance> > >&
-			instances
-	);
+	void VTable0x00(
+		const std::map<const RBX::Reflection::ClassDescriptor*, std::vector<std::shared_ptr<RBX::Instance>>>& instances
+	) override;
 
 	virtual T VTable0xe4()
 	{
@@ -167,37 +166,37 @@ void XItem<int, CXTPPropertyGridItemEnum, RBX::Reflection::EnumPropertyDescripto
 	RBX::Instance* instance, const int& value
 );
 
-class XBoolItem : public XItem<bool, CXTPPropertyGridItemBool, RBX::Reflection::TypedPropertyDescriptor<bool> >
+class XBoolItem : public XItem<bool, CXTPPropertyGridItemBool, RBX::Reflection::TypedPropertyDescriptor<bool>>
 {
 public:
 	XBoolItem(const RBX::Reflection::TypedPropertyDescriptor<bool>& descriptor, CPropGrid* grid);
 
-	virtual BOOL OnDrawItemValue(CDC& dc, CRect rcValue);
+	BOOL OnDrawItemValue(CDC& dc, CRect rcValue) override;
 };
 
 class XBrickColorItem : public XItem<
 							RBX::BrickColor,
 							CPropertyGridItemBrickColor,
-							RBX::Reflection::TypedPropertyDescriptor<RBX::BrickColor> >
+							RBX::Reflection::TypedPropertyDescriptor<RBX::BrickColor>>
 {
 public:
 	XBrickColorItem(const RBX::Reflection::TypedPropertyDescriptor<RBX::BrickColor>& descriptor, CPropGrid* grid);
 
-	virtual BOOL OnDrawItemValue(CDC& dc, CRect rcValue);
+	BOOL OnDrawItemValue(CDC& dc, CRect rcValue) override;
 };
 
 class Vector3ComponentItem
-	: public XItem<G3D::Vector3, CXTPPropertyGridItem, RBX::Reflection::TypedPropertyDescriptor<G3D::Vector3> >
+	: public XItem<G3D::Vector3, CXTPPropertyGridItem, RBX::Reflection::TypedPropertyDescriptor<G3D::Vector3>>
 {
 public:
 	Vector3ComponentItem(
 		const RBX::Reflection::TypedPropertyDescriptor<G3D::Vector3>& descriptor, CPropGrid* grid, int component
 	);
 
-	virtual G3D::Vector3 VTable0xe4();
-	virtual void VTable0xe8(const G3D::Vector3& value);
-	virtual bool VTable0xec(const G3D::Vector3& first, const G3D::Vector3& second);
-	virtual void VTable0xf0(RBX::Instance* instance, const G3D::Vector3& value);
+	G3D::Vector3 VTable0xe4() override;
+	void VTable0xe8(const G3D::Vector3& value) override;
+	bool VTable0xec(const G3D::Vector3& first, const G3D::Vector3& second) override;
+	void VTable0xf0(RBX::Instance* instance, const G3D::Vector3& value) override;
 
 private:
 	int m_unk0x128;
@@ -205,19 +204,18 @@ private:
 };
 
 class Vector3Item
-	: public XItem<G3D::Vector3, CXTPPropertyGridItem, RBX::Reflection::TypedPropertyDescriptor<G3D::Vector3> >
+	: public XItem<G3D::Vector3, CXTPPropertyGridItem, RBX::Reflection::TypedPropertyDescriptor<G3D::Vector3>>
 {
 public:
 	Vector3Item(const RBX::Reflection::TypedPropertyDescriptor<G3D::Vector3>& descriptor, CPropGrid* grid);
 
-	virtual BOOL OnAfterEdit(CString& strValue);
-	virtual void VTable0x00(
-		const std::map<const RBX::Reflection::ClassDescriptor*, std::vector<std::shared_ptr<RBX::Instance> > >&
-			instances
-	);
+	BOOL OnAfterEdit(CString& strValue) override;
+	void VTable0x00(
+		const std::map<const RBX::Reflection::ClassDescriptor*, std::vector<std::shared_ptr<RBX::Instance>>>& instances
+	) override;
 
 protected:
-	virtual void OnAddChildItem();
+	void OnAddChildItem() override;
 
 private:
 	Vector3ComponentItem* m_unk0x128[3];
@@ -228,11 +226,10 @@ class RefItem : public XItem<std::string, CXTPPropertyGridItem, RBX::Reflection:
 public:
 	RefItem(const RBX::Reflection::RefPropertyDescriptor& descriptor, CPropGrid* grid);
 
-	virtual void OnValueChanged(CString strValue);
-	virtual void VTable0x00(
-		const std::map<const RBX::Reflection::ClassDescriptor*, std::vector<std::shared_ptr<RBX::Instance> > >&
-			instances
-	);
+	void OnValueChanged(CString strValue) override;
+	void VTable0x00(
+		const std::map<const RBX::Reflection::ClassDescriptor*, std::vector<std::shared_ptr<RBX::Instance>>>& instances
+	) override;
 
 private:
 	const RBX::Reflection::RefPropertyDescriptor* m_unk0x128;
@@ -243,14 +240,13 @@ class ScriptItem : public XItem<std::string, CXTPPropertyGridItem, RBX::Reflecti
 public:
 	ScriptItem(const RBX::Reflection::PropertyDescriptor& descriptor, CPropGrid* grid);
 
-	virtual void OnValueChanged(CString strValue);
-	virtual void VTable0x00(
-		const std::map<const RBX::Reflection::ClassDescriptor*, std::vector<std::shared_ptr<RBX::Instance> > >&
-			instances
-	);
+	void OnValueChanged(CString strValue) override;
+	void VTable0x00(
+		const std::map<const RBX::Reflection::ClassDescriptor*, std::vector<std::shared_ptr<RBX::Instance>>>& instances
+	) override;
 
 protected:
-	virtual void OnInplaceButtonDown(CXTPPropertyGridInplaceButton* pButton);
+	void OnInplaceButtonDown(CXTPPropertyGridInplaceButton* pButton) override;
 };
 
 class EnumItem : public XItem<int, CXTPPropertyGridItemEnum, RBX::Reflection::EnumPropertyDescriptor>
@@ -260,18 +256,18 @@ public:
 };
 
 template <class T>
-class ContentItem : public XItem<T, CXTPPropertyGridItem, RBX::Reflection::TypedPropertyDescriptor<T> >
+class ContentItem : public XItem<T, CXTPPropertyGridItem, RBX::Reflection::TypedPropertyDescriptor<T>>
 {
 public:
 	ContentItem(const RBX::Reflection::TypedPropertyDescriptor<T>& descriptor, CPropGrid* grid)
-		: XItem<T, CXTPPropertyGridItem, RBX::Reflection::TypedPropertyDescriptor<T> >(descriptor, grid)
+		: XItem<T, CXTPPropertyGridItem, RBX::Reflection::TypedPropertyDescriptor<T>>(descriptor, grid)
 	{
 		this->SetFlags(this->GetFlags() | xtpGridItemHasComboButton);
 		this->GetConstraints()->AddConstraint("Browse...", 0, ID_FILE_OPEN);
 		this->GetConstraints()->AddConstraint("Clear", 1, ID_EDIT_CLEAR);
 	}
 
-	virtual void OnValueChanged(CString strValue)
+	void OnValueChanged(CString strValue) override
 	{
 		switch (this->GetConstraints()->GetCurrent()) {
 		case 0:
@@ -294,7 +290,7 @@ class SoundItem : public ContentItem<RBX::Soundscape::SoundId>
 public:
 	SoundItem(const RBX::Reflection::TypedPropertyDescriptor<RBX::Soundscape::SoundId>& descriptor, CPropGrid* grid);
 
-	virtual void VTable0xf8();
+	void VTable0xf8() override;
 };
 
 class TextureItem : public ContentItem<RBX::TextureId>
@@ -302,7 +298,7 @@ class TextureItem : public ContentItem<RBX::TextureId>
 public:
 	TextureItem(const RBX::Reflection::TypedPropertyDescriptor<RBX::TextureId>& descriptor, CPropGrid* grid);
 
-	virtual void VTable0xf8();
+	void VTable0xf8() override;
 };
 
 class CSelectionPropGrid : public CPropGrid, public RBX::Listener<RBX::Selection, RBX::SelectionChanged>
@@ -312,14 +308,14 @@ class CSelectionPropGrid : public CPropGrid, public RBX::Listener<RBX::Selection
 public:
 	CSelectionPropGrid() {}
 
-	virtual ~CSelectionPropGrid() { FUN_00445580(NULL); }
+	~CSelectionPropGrid() override { FUN_00445580(nullptr); }
 
-	virtual RBX::Selection* VTable0x164() { return m_unk0x1e0.get(); }
+	RBX::Selection* VTable0x164() override { return m_unk0x1e0.get(); }
 
 	void FUN_00445580(RBX::Selection* selection);
 
 protected:
-	virtual void onEvent(const RBX::Selection* source, RBX::SelectionChanged event);
+	void onEvent(const RBX::Selection* source, RBX::SelectionChanged event) override;
 
 private:
 	std::shared_ptr<RBX::Selection> m_unk0x1e0;
@@ -333,7 +329,9 @@ public:
 	CDataModelPropGrid() {}
 
 protected:
-	virtual void VTable0x00(std::shared_ptr<RBX::DataModel> newDataModel, std::shared_ptr<RBX::DataModel> oldDataModel);
+	void VTable0x00(
+		std::shared_ptr<RBX::DataModel> newDataModel, std::shared_ptr<RBX::DataModel> oldDataModel
+	) override;
 };
 
 #endif // PROPGRID_H

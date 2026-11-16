@@ -2,16 +2,14 @@
 
 #include <exdispid.h>
 
-CSaveToRobloxDialog::~CSaveToRobloxDialog()
-{
-}
+CSaveToRobloxDialog::~CSaveToRobloxDialog() = default;
 
 // clang-format off
 BEGIN_DHTML_EVENT_MAP(CSaveToRobloxDialog)
 END_DHTML_EVENT_MAP()
 
 BEGIN_EVENTSINK_MAP(CSaveToRobloxDialog, CRobloxDHtmlDialog)
-ON_EVENT(CSaveToRobloxDialog, AFX_IDC_BROWSER, DISPID_WINDOWCLOSING, OnWindowClosing, VTS_BOOL VTS_PBOOL)
+ON_EVENT(CSaveToRobloxDialog, AFX_IDC_BROWSER, DISPID_WINDOWCLOSING, CSaveToRobloxDialog::OnWindowClosing, VTS_BOOL VTS_PBOOL)
 END_EVENTSINK_MAP()
 
 BEGIN_MESSAGE_MAP(CSaveToRobloxDialog, CRobloxDHtmlDialog)

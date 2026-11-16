@@ -30,7 +30,7 @@ static Reflection::PropDescriptor<Mouse, TextureId> desc_Mouse_Icon("Icon", "Dat
 PartInstance* Mouse::getTarget() const
 {
 	checkActive();
-	return command ? command->getPart(lastEvent) : NULL;
+	return command ? command->getPart(lastEvent) : nullptr;
 }
 
 G3D::CoordinateFrame Mouse::getOrigin() const

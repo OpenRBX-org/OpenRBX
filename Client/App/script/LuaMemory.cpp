@@ -3,10 +3,10 @@
 #define NOMINMAX
 
 #include <algorithm>
+#include <cstdlib>
+#include <cstring>
 #include <mutex>
 #include <new>
-#include <stdlib.h>
-#include <string.h>
 
 template <size_t chunkSize>
 class ChunkPool
@@ -15,10 +15,10 @@ public:
 	static void* malloc()
 	{
 		ChunkPool& pool = instance();
-		std::lock_guard<std::mutex> lock(pool.mutex);
+		std::scoped_lock lock(pool.mutex);
 
-		if (pool.freeList == NULL && !pool.grow()) {
-			return NULL;
+		if (pool.freeList == nullptr && !pool.grow()) {
+			return nullptr;
 		}
 
 		void* chunk = pool.freeList;
@@ -29,7 +29,7 @@ public:
 	static void free(void* chunk)
 	{
 		ChunkPool& pool = instance();
-		std::lock_guard<std::mutex> lock(pool.mutex);
+		std::scoped_lock lock(pool.mutex);
 
 		*static_cast<void**>(chunk) = pool.freeList;
 		pool.freeList = chunk;
@@ -39,7 +39,7 @@ private:
 	static_assert(chunkSize % sizeof(void*) == 0, "chunks must hold and align a free-list pointer");
 
 	std::mutex mutex;
-	void* freeList = NULL;
+	void* freeList = nullptr;
 	size_t nextSize = 32;
 
 	static ChunkPool& instance()
@@ -52,7 +52,7 @@ private:
 	{
 		char* block = new (std::nothrow) char[nextSize * chunkSize];
 
-		if (block == NULL) {
+		if (block == nullptr) {
 			return false;
 		}
 
@@ -158,7 +158,7 @@ void* bucketRealloc(void* ptr, size_t osize, size_t nsize)
 		else if (osize > 0) {
 			ChunkPool<smallSize>::free(ptr);
 		}
-		result = NULL;
+		result = nullptr;
 	}
 
 	return result;

@@ -24,7 +24,7 @@ static void cleanup(std::weak_ptr<Instance> item)
 	try {
 		std::shared_ptr<Instance> i = item.lock();
 		if (i) {
-			i->setParent(NULL);
+			i->setParent(nullptr);
 		}
 	}
 	catch (std::exception& e) {
@@ -41,7 +41,7 @@ void DebrisService::cleanup()
 }
 
 DebrisService::DebrisService()
-	: DescribedCreatable<DebrisService, Instance, sDebrisService>(sDebrisService), maxItems(300), timer(NULL)
+	: DescribedCreatable<DebrisService, Instance, sDebrisService>(sDebrisService), maxItems(300), timer(nullptr)
 {
 }
 
@@ -64,7 +64,7 @@ void DebrisService::onServiceProvider(const ServiceProvider* oldProvider, const 
 
 	DescribedCreatable<DebrisService, Instance, sDebrisService>::onServiceProvider(oldProvider, newProvider);
 
-	timer = newProvider ? newProvider->create<TimerService>() : NULL;
+	timer = newProvider ? newProvider->create<TimerService>() : nullptr;
 }
 
 void DebrisService::setMaxItems(int value)
@@ -86,5 +86,5 @@ template class RBX::FactoryProduct<RBX::DebrisService, RBX::Instance, RBX::sDebr
 template class RBX::Reflection::Described<
 	RBX::DebrisService,
 	RBX::sDebrisService,
-	RBX::FactoryProduct<RBX::DebrisService, RBX::Instance, RBX::sDebrisService> >;
+	RBX::FactoryProduct<RBX::DebrisService, RBX::Instance, RBX::sDebrisService>>;
 template class RBX::DescribedCreatable<RBX::DebrisService, RBX::Instance, RBX::sDebrisService>;

@@ -22,10 +22,10 @@ public:
 	ICameraOwner() {}
 
 private:
-	std::vector<std::weak_ptr<PartInstance> > cameraIgnoreParts;
+	std::vector<std::weak_ptr<PartInstance>> cameraIgnoreParts;
 
 public:
-	virtual ~ICameraOwner() {}
+	virtual ~ICameraOwner() = default;
 
 	virtual Camera* getCamera() const = 0;
 	virtual const G3D::GCamera& getGCamera() const = 0;

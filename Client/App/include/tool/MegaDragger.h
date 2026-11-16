@@ -18,7 +18,7 @@ class MegaDragger
 {
 private:
 	std::weak_ptr<PartInstance> mousePart;
-	std::vector<std::weak_ptr<PartInstance> > dragParts;
+	std::vector<std::weak_ptr<PartInstance>> dragParts;
 	bool joined;
 	RootInstance* rootInstance;
 	ContactManager* contactManager;
@@ -27,7 +27,7 @@ public:
 	MegaDragger(PartInstance* mousePartPtr, const std::vector<PVInstance*>& pvInstances, RootInstance* rootInstance);
 	MegaDragger(
 		PartInstance* mousePartPtr,
-		const std::vector<std::weak_ptr<PartInstance> >& partArray,
+		const std::vector<std::weak_ptr<PartInstance>>& partArray,
 		RootInstance* rootInstance
 	);
 	~MegaDragger();

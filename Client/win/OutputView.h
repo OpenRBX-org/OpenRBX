@@ -16,17 +16,17 @@ protected:
 	COutputView() {}
 
 public:
-	virtual ~COutputView() {}
+	~COutputView() override = default;
 
-	virtual void OnInitialUpdate();
-	virtual void OnDocumentComplete(LPCTSTR lpszURL);
+	void OnInitialUpdate() override;
+	void OnDocumentComplete(LPCTSTR lpszURL) override;
 
 protected:
 	void FUN_0043b300(IHTMLElement* element);
 	void FUN_0043b490(RBX::MessageType type, const char* text, __time64_t time);
 
 private:
-	std::deque<CComPtr<IHTMLDOMNode> > m_unk0xf4;
+	std::deque<CComPtr<IHTMLDOMNode>> m_unk0xf4;
 	CComQIPtr<IHTMLDocument2> m_unk0x108;
 	CComQIPtr<IHTMLDOMNode> m_unk0x10c;
 };

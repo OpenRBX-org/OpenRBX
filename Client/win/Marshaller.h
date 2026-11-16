@@ -13,7 +13,7 @@ class Marshaller : public CWindowImpl<Marshaller>
 public:
 	Marshaller(DWORD threadId);
 
-	~Marshaller() {}
+	~Marshaller() override = default;
 
 	// clang-format off
 	BEGIN_MSG_MAP(Marshaller)
@@ -21,12 +21,12 @@ public:
 	END_MSG_MAP()
 	// clang-format on
 
-	virtual void OnFinalMessage(HWND hWnd) { delete this; }
+	void OnFinalMessage(HWND hWnd) override { delete this; }
 
 	void FUN_00418fd0(std::function<void()> function)
 	{
 		{
-			std::lock_guard<std::mutex> lock(m_unk0x40);
+			std::scoped_lock lock(m_unk0x40);
 			m_unk0x2c.push_back(function);
 		}
 
@@ -40,7 +40,7 @@ private:
 
 	int m_unk0x24;
 	DWORD m_unk0x28;
-	std::deque<std::function<void()> > m_unk0x2c;
+	std::deque<std::function<void()>> m_unk0x2c;
 	std::mutex m_unk0x40;
 
 	static std::map<DWORD, Marshaller*> g_unk0x00953144;

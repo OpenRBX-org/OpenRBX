@@ -25,7 +25,7 @@ bool Primitive::disableSleep = false;
 
 void Primitive::setSizeMultiplier(unsigned int value)
 {
-	if (value != sizeMultiplier && world == NULL) {
+	if (value != sizeMultiplier && world == nullptr) {
 		sizeMultiplier = value;
 	}
 }
@@ -46,7 +46,7 @@ Primitive* Primitive::downstreamPrimitive(Joint* j)
 	Primitive* answer = j->getPrimitive(0);
 	Primitive* other = j->getPrimitive(1);
 
-	if (other != NULL && answer->clumpDepth <= other->clumpDepth) {
+	if (other != nullptr && answer->clumpDepth <= other->clumpDepth) {
 		answer = other;
 	}
 
@@ -88,7 +88,7 @@ void Primitive::insertEdge(Edge* e)
 	if (e->getEdgeType() == Edge::JOINT) {
 		EdgeList::insertEdge(prim0, e, e->getPrimitive(0)->joints);
 
-		if (prim1 != NULL) {
+		if (prim1 != nullptr) {
 			EdgeList::insertEdge(prim1, e, e->getPrimitive(1)->joints);
 		}
 	}
@@ -106,7 +106,7 @@ void Primitive::removeEdge(Edge* e)
 	if (e->getEdgeType() == Edge::JOINT) {
 		EdgeList::removeEdge(prim0, e, e->getPrimitive(0)->joints);
 
-		if (prim1 != NULL) {
+		if (prim1 != nullptr) {
 			EdgeList::removeEdge(prim1, e, e->getPrimitive(1)->joints);
 		}
 	}
@@ -120,7 +120,7 @@ Edge* Primitive::getFirstEdge() const
 {
 	Edge* edge = joints.first;
 
-	if (edge == NULL) {
+	if (edge == nullptr) {
 		edge = contacts.first;
 	}
 
@@ -131,7 +131,7 @@ Edge* Primitive::getNextEdge(Edge* e) const
 {
 	Edge* next = e->getNext(this);
 
-	if (next != NULL) {
+	if (next != nullptr) {
 		return next;
 	}
 
@@ -139,7 +139,7 @@ Edge* Primitive::getNextEdge(Edge* e) const
 		return contacts.first;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 void Primitive::onNewTouch(Primitive* p0, Primitive* p1)
@@ -172,11 +172,11 @@ void Primitive::setClump(Clump* set)
 
 Assembly* Primitive::getAssembly() const
 {
-	if (clump != NULL) {
+	if (clump != nullptr) {
 		return clump->getRootAssembly();
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 float Primitive::computeJointK() const
@@ -189,7 +189,7 @@ void Primitive::setCanSleep(bool _canSleep)
 	if (_canSleep != canSleep) {
 		canSleep = _canSleep;
 
-		if (world != NULL) {
+		if (world != nullptr) {
 			world->onPrimitiveCanSleepChanged(this);
 		}
 	}
@@ -202,7 +202,7 @@ void Primitive::setCanCollide(bool _canCollide)
 	if (canCollide != _canCollide) {
 		canCollide = _canCollide;
 
-		if (world != NULL) {
+		if (world != nullptr) {
 			bool isCollideable = !dragging && canCollide;
 
 			if (wasCollideable != isCollideable) {
@@ -217,7 +217,7 @@ void Primitive::setFriction(float _friction)
 	if (_friction != friction) {
 		friction = _friction;
 
-		if (world != NULL) {
+		if (world != nullptr) {
 			world->onPrimitiveContactParametersChanged(this);
 		}
 	}
@@ -228,7 +228,7 @@ void Primitive::setElasticity(float _elasticity)
 	if (_elasticity != elasticity) {
 		elasticity = _elasticity;
 
-		if (world != NULL) {
+		if (world != nullptr) {
 			world->onPrimitiveContactParametersChanged(this);
 		}
 	}
@@ -253,20 +253,20 @@ void Primitive::setVelocity(const Velocity& vel)
 
 void Primitive::setSurfaceData(NormalId id, const SurfaceData& newSurfaceData)
 {
-	if (surfaceData[id] == NULL && newSurfaceData.isEmpty()) {
+	if (surfaceData[id] == nullptr && newSurfaceData.isEmpty()) {
 		return;
 	}
 
-	if (surfaceData[id] != NULL && *surfaceData[id] == newSurfaceData) {
+	if (surfaceData[id] != nullptr && *surfaceData[id] == newSurfaceData) {
 		return;
 	}
 
 	if (newSurfaceData.isEmpty()) {
 		delete surfaceData[id];
-		surfaceData[id] = NULL;
+		surfaceData[id] = nullptr;
 	}
 	else {
-		if (surfaceData[id] == NULL) {
+		if (surfaceData[id] == nullptr) {
 			surfaceData[id] = new SurfaceData();
 		}
 
@@ -324,7 +324,7 @@ Joint* Primitive::getNextJoint(Joint* prev) const
 
 RigidJoint* Primitive::getFirstRigidAt(Edge* start)
 {
-	while (start != NULL) {
+	while (start != nullptr) {
 		if (RigidJoint::isRigidJoint(start)) {
 			return static_cast<RigidJoint*>(start);
 		}
@@ -332,7 +332,7 @@ RigidJoint* Primitive::getFirstRigidAt(Edge* start)
 		start = getNextEdge(start);
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 RigidJoint* Primitive::getFirstRigid()
@@ -349,28 +349,29 @@ Joint* Primitive::getJoint(Primitive* p0, Primitive* p1)
 {
 	Primitive* shortest = p0->joints.num < p1->joints.num ? p0 : p1;
 
-	for (Joint* joint = shortest->getFirstJoint(); joint != NULL; joint = shortest->getNextJoint(joint)) {
+	for (Joint* joint = shortest->getFirstJoint(); joint != nullptr; joint = shortest->getNextJoint(joint)) {
 		if ((p0 == joint->getPrimitive(0) && p1 == joint->getPrimitive(1)) ||
 			(p0 == joint->getPrimitive(1) && p1 == joint->getPrimitive(0))) {
 			return joint;
 		}
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 Contact* Primitive::getContact(Primitive* p0, Primitive* p1)
 {
 	Primitive* shortest = p0->contacts.num < p1->contacts.num ? p0 : p1;
 
-	for (Contact* contact = shortest->getFirstContact(); contact != NULL; contact = shortest->getNextContact(contact)) {
+	for (Contact* contact = shortest->getFirstContact(); contact != nullptr;
+		 contact = shortest->getNextContact(contact)) {
 		if ((p0 == contact->getPrimitive(0) && p1 == contact->getPrimitive(1)) ||
 			(p0 == contact->getPrimitive(1) && p1 == contact->getPrimitive(0))) {
 			return contact;
 		}
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 Geometry* Primitive::newGeometry(Geometry::GeometryType geometryType)
@@ -412,7 +413,7 @@ bool Primitive::hitTest(const Ray& worldRay, Vector3& worldHitPoint, bool& insid
 
 void Primitive::setAnchor(bool _anchored)
 {
-	bool have = anchorObject != NULL;
+	bool have = anchorObject != nullptr;
 
 	anchored = _anchored;
 
@@ -422,15 +423,15 @@ void Primitive::setAnchor(bool _anchored)
 		if (wanted) {
 			anchorObject = new Anchor(this);
 
-			if (world != NULL) {
+			if (world != nullptr) {
 				world->onPrimitiveAddedAnchor(this);
 			}
 		}
 		else {
 			delete anchorObject;
-			anchorObject = NULL;
+			anchorObject = nullptr;
 
-			if (world != NULL) {
+			if (world != nullptr) {
 				world->onPrimitiveRemovedAnchor(this);
 			}
 		}
@@ -447,11 +448,11 @@ void Primitive::setCoordinateFrame(const CoordinateFrame& cFrame)
 	if (cFrame != body->getCoordinateFrame()) {
 		Assembly* assembly = getAssembly();
 
-		if (assembly == NULL) {
+		if (assembly == nullptr) {
 			body->setCoordinateFrame(cFrame);
 			myOwner->notifyMoved();
 
-			if (world != NULL) {
+			if (world != nullptr) {
 				world->onPrimitiveExtentsChanged(this);
 			}
 		}
@@ -484,15 +485,15 @@ CoordinateFrame Primitive::getGridCorner() const
 }
 
 Primitive::Primitive(Geometry::GeometryType geometryType)
-	: guidSetExternally(false), sizeMultiplier(1), worldIndex(-1), world(NULL), clump(NULL), clumpDepth(-1),
-	  traverseId(-1), spatialNodes(NULL), oldSpatialMin(), oldSpatialMax(), fuzzyExtents(), fuzzyExtentsStateId(-2),
-	  geometry(newGeometry(geometryType)), body(new Body()), myOwner(NULL), anchorObject(NULL), dragging(false),
+	: guidSetExternally(false), sizeMultiplier(1), worldIndex(-1), world(nullptr), clump(nullptr), clumpDepth(-1),
+	  traverseId(-1), spatialNodes(nullptr), oldSpatialMin(), oldSpatialMax(), fuzzyExtents(), fuzzyExtentsStateId(-2),
+	  geometry(newGeometry(geometryType)), body(new Body()), myOwner(nullptr), anchorObject(nullptr), dragging(false),
 	  anchored(false), canCollide(true), canSleep(true), friction(0), elasticity(0.75f),
 	  controller(NullController::getStaticNullController()), JointK(this, &Primitive::computeJointK)
 {
 	for (int i = 0; i < 6; i++) {
 		surfaceType[i] = NO_SURFACE;
-		surfaceData[i] = NULL;
+		surfaceData[i] = nullptr;
 	}
 }
 
@@ -521,7 +522,7 @@ void Primitive::setGridSize(const Vector3& gridSize)
 
 		JointK.setDirty();
 
-		if (world != NULL) {
+		if (world != nullptr) {
 			world->onPrimitiveExtentsChanged(this);
 		}
 
@@ -537,7 +538,7 @@ void Primitive::setDragging(bool _dragging)
 		dragging = _dragging;
 		setAnchor(anchored);
 
-		if (world != NULL) {
+		if (world != nullptr) {
 			bool isCollideable = !dragging && canCollide;
 
 			if (isCollideable != wasCollideable) {
@@ -562,7 +563,7 @@ void Primitive::setPV(const PV& pv)
 
 void Primitive::setController(Controller* _controller)
 {
-	if (_controller == NULL) {
+	if (_controller == nullptr) {
 		_controller = NullController::getStaticNullController();
 	}
 
@@ -579,7 +580,7 @@ void Primitive::setPrimitiveType(Geometry::GeometryType geometryType)
 		delete geometry;
 		geometry = newGeometry(geometryType);
 
-		if (world != NULL) {
+		if (world != nullptr) {
 			world->onPrimitiveGeometryTypeChanged(this);
 		}
 

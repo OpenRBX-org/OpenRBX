@@ -26,9 +26,9 @@ protected:
 	static const float fallCutoff() { return 0.85f; }
 	static const float maxClimbDistance();
 
-	virtual void onComputeForce(const float dt);
-	virtual State* onStep(const float stepDt, Controller& controller);
-	virtual Result filterResult(const Primitive* testMe) const; // HitTestFilter vtable+0x00
+	void onComputeForce(const float dt) override;
+	State* onStep(const float stepDt, Controller& controller) override;
+	Result filterResult(const Primitive* testMe) const override; // HitTestFilter vtable+0x00
 
 	G3D::Vector3 getYAxis() const;
 

@@ -8,9 +8,7 @@
 
 IMPLEMENT_DYNCREATE(CAboutRobloxDialog, CRobloxDHtmlDialog)
 
-CAboutRobloxDialog::~CAboutRobloxDialog()
-{
-}
+CAboutRobloxDialog::~CAboutRobloxDialog() = default;
 
 void CAboutRobloxDialog::OnDocumentComplete(LPDISPATCH pDisp, LPCTSTR szUrl)
 {
@@ -54,9 +52,10 @@ void CAboutRobloxDialog::DoDataExchange(CDataExchange* pDX)
 
 		std::string systemInfo;
 		G3D::System::describeSystem(systemInfo);
-		DDX_DHtml_ElementText(pDX, _T("systemInfo"), DISPID_IHTMLELEMENT_INNERHTML, CString(systemInfo.c_str()));
+		CString systemInfoText(systemInfo.c_str());
+		DDX_DHtml_ElementText(pDX, _T("systemInfo"), DISPID_IHTMLELEMENT_INNERHTML, systemInfoText);
 
-		if (glGetString(GL_VENDOR) != NULL) {
+		if (glGetString(GL_VENDOR) != nullptr) {
 			CString glVersion(G3D::GLCaps::glVersion().c_str());
 			DDX_DHtml_ElementText(pDX, _T("glVersion"), DISPID_IHTMLELEMENT_INNERHTML, glVersion);
 			CString driverVersion(G3D::GLCaps::driverVersion().c_str());

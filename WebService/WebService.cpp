@@ -64,20 +64,20 @@ public:
 
 	StandardOutLog() : standardOut(RBX::StandardOut::singleton())
 	{
-		std::lock_guard<std::recursive_mutex> lock(RBX::StandardOut::singleton()->sync);
+		std::scoped_lock lock(RBX::StandardOut::singleton()->sync);
 		RBX::startListening(standardOut, this);
 	}
 
-	virtual ~StandardOutLog()
+	~StandardOutLog() override
 	{
-		std::lock_guard<std::recursive_mutex> lock(RBX::StandardOut::singleton()->sync);
+		std::scoped_lock lock(RBX::StandardOut::singleton()->sync);
 		RBX::stopListening(standardOut, this);
 	}
 
 protected:
-	virtual void onEvent(const RBX::StandardOut* source, RBX::StandardOutMessage event)
+	void onEvent(const RBX::StandardOut* source, RBX::StandardOutMessage event) override
 	{
-		std::lock_guard<std::mutex> lock(messagesMutex);
+		std::scoped_lock lock(messagesMutex);
 
 		messages.push(event);
 
@@ -113,7 +113,7 @@ static void initRoblox()
 		RBX::ContentProvider::singleton();
 
 		char szPath[MAX_PATH] = "";
-		if (SHGetFolderPathAndSubDir(NULL, CSIDL_COMMON_APPDATA, NULL, 0, "Roblox\\content\\", szPath) != S_OK) {
+		if (SHGetFolderPathAndSubDir(nullptr, CSIDL_COMMON_APPDATA, nullptr, 0, "Roblox\\content\\", szPath) != S_OK) {
 			RBX::StandardOut::singleton()->print(
 				RBX::MESSAGE_ERROR, "Unable to find CSIDL_COMMON_APPDATA\\Roblox\\content"
 			);
@@ -234,7 +234,7 @@ std::recursive_mutex CWebService::sync;
 class CRbxIsapiExtension : public ATL::CIsapiExtension<>
 {
 private:
-	const char* GetExtensionDesc() noexcept { return "ROBLOX Web Service"; }
+	const char* GetExtensionDesc() noexcept override { return "ROBLOX Web Service"; }
 };
 
 CRbxIsapiExtension theExtension;
@@ -276,7 +276,7 @@ HRESULT CWebService::ReportException(const std::exception& e)
 
 HRESULT __stdcall CWebService::GetAllJobs(Strings* result)
 {
-	std::lock_guard<std::recursive_mutex> lock(sync);
+	std::scoped_lock lock(sync);
 
 	result->count = jobs.size();
 	result->items = allocate(result->items, result->count);
@@ -297,7 +297,7 @@ HRESULT __stdcall CWebService::GetAllJobs(Strings* result)
 HRESULT __stdcall CWebService::TouchJob(wchar_t* jobID, double timeout)
 {
 	try {
-		std::lock_guard<std::recursive_mutex> lock(sync);
+		std::scoped_lock lock(sync);
 		touch(getJob(jobID)->second, timeout);
 	}
 	catch (std::exception& e) {
@@ -313,7 +313,7 @@ HRESULT __stdcall CWebService::OpenJob(wchar_t* jobID, ScriptExecution script, d
 		std::string id(ATL::CStringA(jobID).GetString());
 		std::shared_ptr<RBX::DataModel> dataModel = RBX::DataModel::createDataModel();
 		{
-			std::lock_guard<std::recursive_mutex> lock(sync);
+			std::scoped_lock lock(sync);
 			Job job;
 			job.dataModel = dataModel;
 			touch(job, timeout);
@@ -333,7 +333,7 @@ HRESULT __stdcall CWebService::CloseJob(wchar_t* jobID)
 	try {
 		std::shared_ptr<RBX::DataModel> dataModel;
 		{
-			std::lock_guard<std::recursive_mutex> lock(sync);
+			std::scoped_lock lock(sync);
 			Jobs::iterator iter = jobs.find(ATL::CStringA(jobID).GetString());
 			if (iter != jobs.end()) {
 				dataModel = iter->second.dataModel;
@@ -358,9 +358,9 @@ HRESULT __stdcall CWebService::CloseTimedoutJobs(int* result)
 	*result = 0;
 
 	try {
-		std::vector<std::shared_ptr<RBX::DataModel> > dataModels;
+		std::vector<std::shared_ptr<RBX::DataModel>> dataModels;
 		{
-			std::lock_guard<std::recursive_mutex> lock(sync);
+			std::scoped_lock lock(sync);
 
 			std::map<std::string, Job> keep;
 			Jobs::iterator end = jobs.end();
@@ -376,8 +376,8 @@ HRESULT __stdcall CWebService::CloseTimedoutJobs(int* result)
 			jobs = keep;
 		}
 
-		std::vector<std::shared_ptr<RBX::DataModel> >::iterator iter = dataModels.begin();
-		std::vector<std::shared_ptr<RBX::DataModel> >::iterator end = dataModels.end();
+		std::vector<std::shared_ptr<RBX::DataModel>>::iterator iter = dataModels.begin();
+		std::vector<std::shared_ptr<RBX::DataModel>>::iterator end = dataModels.end();
 		while (iter != end) {
 			RBX::DataModel::closeDataModel(*iter, true);
 			(*result)++;
@@ -396,10 +396,10 @@ HRESULT __stdcall CWebService::CloseOrphanedJobs(Strings activeJobs, int* result
 	*result = 0;
 
 	try {
-		std::vector<std::shared_ptr<RBX::DataModel> > dataModels;
+		std::vector<std::shared_ptr<RBX::DataModel>> dataModels;
 		{
 			std::map<std::string, Job> keep;
-			std::lock_guard<std::recursive_mutex> lock(sync);
+			std::scoped_lock lock(sync);
 			Jobs::iterator end = jobs.end();
 			for (Jobs::iterator iter = jobs.begin(); iter != end; ++iter) {
 				bool found = false;
@@ -418,8 +418,8 @@ HRESULT __stdcall CWebService::CloseOrphanedJobs(Strings activeJobs, int* result
 			jobs = keep;
 		}
 
-		std::vector<std::shared_ptr<RBX::DataModel> >::iterator iter = dataModels.begin();
-		std::vector<std::shared_ptr<RBX::DataModel> >::iterator end = dataModels.end();
+		std::vector<std::shared_ptr<RBX::DataModel>>::iterator iter = dataModels.begin();
+		std::vector<std::shared_ptr<RBX::DataModel>>::iterator end = dataModels.end();
 		while (iter != end) {
 			RBX::DataModel::closeDataModel(*iter, true);
 			(*result)++;
@@ -436,7 +436,7 @@ HRESULT __stdcall CWebService::CloseOrphanedJobs(Strings activeJobs, int* result
 HRESULT __stdcall CWebService::CloseAllJobs()
 {
 	try {
-		std::lock_guard<std::recursive_mutex> lock(sync);
+		std::scoped_lock lock(sync);
 
 		Jobs::iterator end = jobs.end();
 		for (Jobs::iterator iter = jobs.begin(); iter != end; ++iter) {
@@ -456,7 +456,7 @@ HRESULT __stdcall CWebService::CloseAllJobs()
 HRESULT __stdcall CWebService::GetTimeout(wchar_t* jobID, double* timeout)
 {
 	try {
-		std::lock_guard<std::recursive_mutex> lock(sync);
+		std::scoped_lock lock(sync);
 		*timeout = secondsToTimeout(getJob(jobID)->second);
 	}
 	catch (std::exception& e) {
@@ -498,7 +498,7 @@ static void convert(const T& source, RBX::Reflection::Value& dest)
 	case LUA_TTABLE: {
 		dest = std::vector<RBX::Reflection::Value>(source.tableLength);
 
-		std::vector<RBX::Reflection::Value>& table = dest.convert<std::vector<RBX::Reflection::Value> >();
+		std::vector<RBX::Reflection::Value>& table = dest.convert<std::vector<RBX::Reflection::Value>>();
 		for (int i = 0; i < source.tableLength; ++i) {
 			convert(source.table[i], table[i]);
 		}
@@ -557,7 +557,7 @@ void CWebService::convertToLua(const RBX::Reflection::Value& source, T& dest)
 		return;
 	}
 
-	if (source.isType<std::vector<RBX::Reflection::Value> >()) {
+	if (source.isType<std::vector<RBX::Reflection::Value>>()) {
 		const std::vector<RBX::Reflection::Value>& table = source.cast<const std::vector<RBX::Reflection::Value>&>();
 
 		dest.type = (LuaType) LUA_TTABLE;
@@ -657,12 +657,12 @@ HRESULT __stdcall CWebService::Execute(wchar_t* jobID, ScriptExecution script, L
 
 		std::shared_ptr<RBX::DataModel> dataModel;
 		{
-			std::lock_guard<std::recursive_mutex> lock(sync);
+			std::scoped_lock lock(sync);
 			Jobs::iterator iter = getJob(jobID);
 			dataModel = iter->second.dataModel;
 		}
 
-		std::unique_ptr<std::vector<RBX::Reflection::Value> > tuple;
+		std::unique_ptr<std::vector<RBX::Reflection::Value>> tuple;
 		{
 			std::vector<RBX::Reflection::Value> args(script.arguments.count);
 			for (int i = 0; i < script.arguments.count; ++i) {
@@ -670,7 +670,7 @@ HRESULT __stdcall CWebService::Execute(wchar_t* jobID, ScriptExecution script, L
 			}
 
 			RBX::DataModel::Lock lock(dataModel);
-			RBX::ScriptContext* context = dataModel ? dataModel->create<RBX::ScriptContext>() : NULL;
+			RBX::ScriptContext* context = dataModel ? dataModel->create<RBX::ScriptContext>() : nullptr;
 			tuple = context->executeInNewThread(
 				RBX::Security::TrustedWebService, code.c_str(), ATL::CStringA(script.name), args
 			);
@@ -716,7 +716,7 @@ HRESULT __stdcall CWebService::GetStatus(Status* result)
 		return hr;
 	}
 
-	std::lock_guard<std::recursive_mutex> lock(sync);
+	std::scoped_lock lock(sync);
 	result->environmentCount = jobs.size();
 
 	return S_OK;
@@ -737,7 +737,7 @@ HRESULT __stdcall CWebService::Update(wchar_t* url)
 HRESULT __stdcall CWebService::GetStandardOutMessages(int maxCount, StandardOutMessages* result)
 {
 	try {
-		std::lock_guard<std::mutex> lock(standardOutLog->messagesMutex);
+		std::scoped_lock lock(standardOutLog->messagesMutex);
 
 		while (standardOutLog->messages.size() > maxCount) {
 			standardOutLog->messages.pop();

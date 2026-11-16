@@ -55,7 +55,7 @@ bool g_unk0x00961438;
 
 const String RbxSceneManagerFactory::FACTORY_TYPE_NAME = "RbxSceneManager";
 
-RenderQueue* RbxSceneManager::getRenderQueue(void)
+RenderQueue* RbxSceneManager::getRenderQueue()
 {
 	if (!mRenderQueue) {
 		initRenderQueue();
@@ -63,7 +63,7 @@ RenderQueue* RbxSceneManager::getRenderQueue(void)
 	return mRenderQueue;
 }
 
-void RbxSceneManager::initRenderQueue(void)
+void RbxSceneManager::initRenderQueue()
 {
 	mRenderQueue = new RenderQueue();
 
@@ -78,7 +78,7 @@ void RbxSceneManager::setSpecialCaseRenderQueueMode(SceneManager::SpecialCaseRen
 	mSpecialCaseQueueMode = mode;
 }
 
-SceneManager::SpecialCaseRenderQueueMode RbxSceneManager::getSpecialCaseRenderQueueMode(void)
+SceneManager::SpecialCaseRenderQueueMode RbxSceneManager::getSpecialCaseRenderQueueMode()
 {
 	return mSpecialCaseQueueMode;
 }
@@ -88,7 +88,7 @@ void RbxSceneManager::setWorldGeometryRenderQueue(uint8 qid)
 	mWorldGeometryRenderQueue = qid;
 }
 
-uint8 RbxSceneManager::getWorldGeometryRenderQueue(void)
+uint8 RbxSceneManager::getWorldGeometryRenderQueue()
 {
 	return mWorldGeometryRenderQueue;
 }
@@ -113,12 +113,12 @@ void RbxSceneManager::destroyLight(const String& name)
 	destroyMovableObject(name, LightFactory::FACTORY_TYPE_NAME);
 }
 
-void RbxSceneManager::destroyAllLights(void)
+void RbxSceneManager::destroyAllLights()
 {
 	destroyAllMovableObjectsByType(LightFactory::FACTORY_TYPE_NAME);
 }
 
-const LightList& RbxSceneManager::_getLightsAffectingFrustum(void) const
+const LightList& RbxSceneManager::_getLightsAffectingFrustum() const
 {
 	return mLightsAffectingFrustum;
 }
@@ -154,13 +154,13 @@ void RbxSceneManager::destroyEntity(const String& name)
 	destroyMovableObject(name, EntityFactory::FACTORY_TYPE_NAME);
 }
 
-void RbxSceneManager::destroyAllEntities(void)
+void RbxSceneManager::destroyAllEntities()
 {
 
 	destroyAllMovableObjectsByType(EntityFactory::FACTORY_TYPE_NAME);
 }
 
-void RbxSceneManager::destroyAllBillboardSets(void)
+void RbxSceneManager::destroyAllBillboardSets()
 {
 	destroyAllMovableObjectsByType(BillboardSetFactory::FACTORY_TYPE_NAME);
 }
@@ -185,7 +185,7 @@ void RbxSceneManager::destroyManualObject(const String& name)
 	destroyMovableObject(name, ManualObjectFactory::FACTORY_TYPE_NAME);
 }
 
-void RbxSceneManager::destroyAllManualObjects(void)
+void RbxSceneManager::destroyAllManualObjects()
 {
 	destroyAllMovableObjectsByType(ManualObjectFactory::FACTORY_TYPE_NAME);
 }
@@ -210,7 +210,7 @@ void RbxSceneManager::destroyBillboardChain(const String& name)
 	destroyMovableObject(name, BillboardChainFactory::FACTORY_TYPE_NAME);
 }
 
-void RbxSceneManager::destroyAllBillboardChains(void)
+void RbxSceneManager::destroyAllBillboardChains()
 {
 	destroyAllMovableObjectsByType(BillboardChainFactory::FACTORY_TYPE_NAME);
 }
@@ -265,7 +265,7 @@ void RbxSceneManager::destroyRibbonTrail(const String& name)
 	destroyMovableObject(name, RibbonTrailFactory::FACTORY_TYPE_NAME);
 }
 
-void RbxSceneManager::destroyAllRibbonTrails(void)
+void RbxSceneManager::destroyAllRibbonTrails()
 {
 	destroyAllMovableObjectsByType(RibbonTrailFactory::FACTORY_TYPE_NAME);
 }
@@ -290,7 +290,7 @@ void RbxSceneManager::destroyParticleSystem(const String& name)
 	destroyMovableObject(name, ParticleSystemFactory::FACTORY_TYPE_NAME);
 }
 
-void RbxSceneManager::destroyAllParticleSystems(void)
+void RbxSceneManager::destroyAllParticleSystems()
 {
 	destroyAllMovableObjectsByType(ParticleSystemFactory::FACTORY_TYPE_NAME);
 }
@@ -329,7 +329,7 @@ void RbxSceneManager::_findVisibleObjects(Camera* cam, VisibleObjectsBoundsInfo*
 	mSceneRoot->_findVisibleObjects(cam, getRenderQueue(), visibleBounds, true, mDisplayNodes, onlyShadowCasters);
 }
 
-void RbxSceneManager::_renderVisibleObjects(void)
+void RbxSceneManager::_renderVisibleObjects()
 {
 	RenderQueueInvocationSequence* invocationSequence = mCurrentViewport->_getRenderQueueInvocationSequence();
 
@@ -446,22 +446,22 @@ void RbxSceneManager::renderTransparentShadowCasterObjects(
 	mActiveQueuedRenderableVisitor->transparentShadowCastersMode = false;
 }
 
-const ColourValue& RbxSceneManager::getFogColour(void) const
+const ColourValue& RbxSceneManager::getFogColour() const
 {
 	return mFogColour;
 }
 
-Real RbxSceneManager::getFogStart(void) const
+Real RbxSceneManager::getFogStart() const
 {
 	return mFogStart;
 }
 
-Real RbxSceneManager::getFogEnd(void) const
+Real RbxSceneManager::getFogEnd() const
 {
 	return mFogEnd;
 }
 
-Real RbxSceneManager::getFogDensity(void) const
+Real RbxSceneManager::getFogDensity() const
 {
 	return mFogDensity;
 }
@@ -509,7 +509,7 @@ void RbxSceneManager::destroyAnimationState(const String& name)
 	mAnimationStates.removeAnimationState(name);
 }
 
-void RbxSceneManager::destroyAllAnimationStates(void)
+void RbxSceneManager::destroyAllAnimationStates()
 {
 	mAnimationStates.removeAllAnimationStates();
 }
@@ -563,7 +563,7 @@ void RbxSceneManager::useRenderableViewProjMode(const Renderable* pRend)
 	}
 }
 
-void RbxSceneManager::resetViewProjMode(void)
+void RbxSceneManager::resetViewProjMode()
 {
 	if (mResetIdentityView) {
 
@@ -607,7 +607,7 @@ void RbxSceneManager::_suppressRenderStateChanges(bool suppress)
 	mSuppressRenderStateChanges = suppress;
 }
 
-void RbxSceneManager::updateRenderQueueSplitOptions(void)
+void RbxSceneManager::updateRenderQueueSplitOptions()
 {
 	if (isShadowTechniqueStencilBased()) {
 
@@ -664,7 +664,7 @@ void RbxSceneManager::updateRenderQueueGroupSplitOptions(
 	}
 }
 
-void RbxSceneManager::_notifyLightsDirty(void)
+void RbxSceneManager::_notifyLightsDirty()
 {
 	++mLightsDirtyCounter;
 }
@@ -720,7 +720,7 @@ void RbxSceneManager::setShadowColour(const ColourValue& colour)
 	}
 }
 
-const ColourValue& RbxSceneManager::getShadowColour(void) const
+const ColourValue& RbxSceneManager::getShadowColour() const
 {
 	return mShadowColour;
 }
@@ -736,7 +736,7 @@ void RbxSceneManager::setShadowDirectionalLightExtrusionDistance(Real dist)
 	mShadowDirLightExtrudeDist = dist;
 }
 
-Real RbxSceneManager::getShadowDirectionalLightExtrusionDistance(void) const
+Real RbxSceneManager::getShadowDirectionalLightExtrusionDistance() const
 {
 	return mShadowDirLightExtrudeDist;
 }
@@ -1619,7 +1619,7 @@ void RbxSceneManager::fireShadowTexturesPreReceiver(Light* light, Frustum* f)
 	}
 }
 
-void RbxSceneManager::initShadowVolumeMaterials(void)
+void RbxSceneManager::initShadowVolumeMaterials()
 {
 
 	assert(mDestRenderSystem);
@@ -1812,7 +1812,7 @@ void RbxSceneManager::setShadowTextureSettings(unsigned short size, unsigned sho
 void RbxSceneManager::setShadowTextureCasterMaterial(const String& name)
 {
 	if (name.empty()) {
-		mShadowTextureCustomCasterPass = 0;
+		mShadowTextureCustomCasterPass = nullptr;
 	}
 	else {
 		MaterialPtr mat = MaterialManager::getSingleton().getByName(name);
@@ -1836,7 +1836,7 @@ void RbxSceneManager::setShadowTextureCasterMaterial(const String& name)
 void RbxSceneManager::setShadowTextureReceiverMaterial(const String& name)
 {
 	if (name.empty()) {
-		mShadowTextureCustomReceiverPass = 0;
+		mShadowTextureCustomReceiverPass = nullptr;
 	}
 	else {
 		MaterialPtr mat = MaterialManager::getSingleton().getByName(name);
@@ -1873,7 +1873,7 @@ void RbxSceneManager::setShadowCameraSetup(const ShadowCameraSetupPtr& shadowSet
 	mDefaultShadowCameraSetup = shadowSetup;
 }
 
-void RbxSceneManager::clearSpecialCaseRenderQueues(void)
+void RbxSceneManager::clearSpecialCaseRenderQueues()
 {
 	mSpecialCaseQueueList.clear();
 }
@@ -1893,7 +1893,7 @@ Camera* RbxSceneManager::getCamera(const String& name) const
 
 bool RbxSceneManager::hasCamera(const String& name) const
 {
-	return (mCameras.find(name) != mCameras.end());
+	return mCameras.contains(name);
 }
 
 SceneNode* RbxSceneManager::getSceneNode(const String& name) const
@@ -1911,7 +1911,7 @@ SceneNode* RbxSceneManager::getSceneNode(const String& name) const
 
 bool RbxSceneManager::hasSceneNode(const String& name) const
 {
-	return (mSceneNodes.find(name) != mSceneNodes.end());
+	return mSceneNodes.contains(name);
 }
 
 void RbxSceneManager::setSkyBox(
@@ -2051,7 +2051,7 @@ Animation* RbxSceneManager::getAnimation(const String& name) const
 bool RbxSceneManager::hasAnimation(const String& name) const
 {
 	OGRE_LOCK_MUTEX(mAnimationsListMutex)
-	return (mAnimationsList.find(name) != mAnimationsList.end());
+	return mAnimationsList.contains(name);
 }
 
 void RbxSceneManager::removeRenderQueueListener(RenderQueueListener* delListener)
@@ -2219,7 +2219,7 @@ StaticGeometry* RbxSceneManager::getStaticGeometry(const String& name) const
 
 bool RbxSceneManager::hasStaticGeometry(const String& name) const
 {
-	return (mStaticGeometryList.find(name) != mStaticGeometryList.end());
+	return mStaticGeometryList.contains(name);
 }
 
 InstancedGeometry* RbxSceneManager::getInstancedGeometry(const String& name) const
@@ -2275,7 +2275,7 @@ void RbxSceneManager::addSpecialCaseRenderQueue(uint8 qid)
 
 bool RbxSceneManager::isRenderQueueToBeProcessed(uint8 qid)
 {
-	bool inList = mSpecialCaseQueueList.find(qid) != mSpecialCaseQueueList.end();
+	bool inList = mSpecialCaseQueueList.contains(qid);
 	return (inList && mSpecialCaseQueueMode == SCRQM_INCLUDE) || (!inList && mSpecialCaseQueueMode == SCRQM_EXCLUDE);
 }
 
@@ -2465,7 +2465,7 @@ const Pass* RbxSceneManager::_setPass(const Pass* pass, bool evenIfSuppressed, b
 
 					shadowTex = mNullShadowTexture;
 					pTex->setProjectiveTexturing(false);
-					mAutoParamDataSource.setTextureProjector(0, shadowTexIndex);
+					mAutoParamDataSource.setTextureProjector(nullptr, shadowTexIndex);
 				}
 				pTex->_setTexturePtr(shadowTex);
 
@@ -2925,7 +2925,7 @@ void RbxSceneManager::destroyAnimation(const String& name)
 	mAnimationsList.erase(i);
 }
 
-void RbxSceneManager::_applySceneAnimations(void)
+void RbxSceneManager::_applySceneAnimations()
 {
 
 	OGRE_LOCK_MUTEX(mAnimationStates.OGRE_AUTO_MUTEX_NAME)
@@ -3016,7 +3016,7 @@ bool RbxSceneManager::hasMovableObject(const String& name, const String& typeNam
 
 	{
 		OGRE_LOCK_MUTEX(i->second->mutex)
-		return (i->second->map.find(name) != i->second->map.end());
+		return i->second->map.contains(name);
 	}
 }
 
@@ -3051,7 +3051,7 @@ void RbxSceneManager::clearScene()
 
 	destroyAllAnimations();
 
-	mSkyBoxNode = mSkyPlaneNode = mSkyDomeNode = NULL;
+	mSkyBoxNode = mSkyPlaneNode = mSkyDomeNode = nullptr;
 	mSkyBoxEnabled = mSkyPlaneEnabled = mSkyDomeEnabled = false;
 
 	if (mRenderQueue) {
@@ -3059,7 +3059,7 @@ void RbxSceneManager::clearScene()
 	}
 }
 
-void RbxSceneManager::destroyAllAnimations(void)
+void RbxSceneManager::destroyAllAnimations()
 {
 	OGRE_LOCK_MUTEX(mAnimationsListMutex)
 
@@ -3073,7 +3073,7 @@ void RbxSceneManager::destroyAllAnimations(void)
 	mAnimationsList.clear();
 }
 
-void RbxSceneManager::destroyAllStaticGeometry(void)
+void RbxSceneManager::destroyAllStaticGeometry()
 {
 	StaticGeometryList::iterator i, iend;
 	iend = mStaticGeometryList.end();
@@ -3083,7 +3083,7 @@ void RbxSceneManager::destroyAllStaticGeometry(void)
 	mStaticGeometryList.clear();
 }
 
-void RbxSceneManager::destroyAllInstancedGeometry(void)
+void RbxSceneManager::destroyAllInstancedGeometry()
 {
 	InstancedGeometryList::iterator i, iend;
 	iend = mInstancedGeometryList.end();
@@ -3093,7 +3093,7 @@ void RbxSceneManager::destroyAllInstancedGeometry(void)
 	mInstancedGeometryList.clear();
 }
 
-void RbxSceneManager::destroyAllMovableObjects(void)
+void RbxSceneManager::destroyAllMovableObjects()
 {
 
 	OGRE_LOCK_MUTEX(mMovableObjectCollectionMapMutex)
@@ -3122,7 +3122,7 @@ void RbxSceneManager::destroyAllMovableObjects(void)
 Camera* RbxSceneManager::createCamera(const String& name)
 {
 
-	if (mCameras.find(name) != mCameras.end()) {
+	if (mCameras.contains(name)) {
 		OGRE_EXCEPT(
 			Exception::ERR_DUPLICATE_ITEM,
 			"A camera with the name " + name + " already exists",
@@ -3138,10 +3138,10 @@ Camera* RbxSceneManager::createCamera(const String& name)
 	return c;
 }
 
-SceneNode* RbxSceneManager::createSceneNode(void)
+SceneNode* RbxSceneManager::createSceneNode()
 {
 	SceneNode* sn = new SceneNode(this);
-	assert(mSceneNodes.find(sn->getName()) == mSceneNodes.end());
+	assert(!mSceneNodes.contains(sn->getName()));
 	mSceneNodes[sn->getName()] = sn;
 	return sn;
 }
@@ -3149,7 +3149,7 @@ SceneNode* RbxSceneManager::createSceneNode(void)
 SceneNode* RbxSceneManager::createSceneNode(const String& name)
 {
 
-	if (mSceneNodes.find(name) != mSceneNodes.end()) {
+	if (mSceneNodes.contains(name)) {
 		OGRE_EXCEPT(
 			Exception::ERR_DUPLICATE_ITEM,
 			"A scene node with the name " + name + " already exists",
@@ -3162,7 +3162,7 @@ SceneNode* RbxSceneManager::createSceneNode(const String& name)
 	return sn;
 }
 
-void RbxSceneManager::prepareRenderQueue(void)
+void RbxSceneManager::prepareRenderQueue()
 {
 	RenderQueue* q = getRenderQueue();
 
@@ -3201,7 +3201,7 @@ void RbxSceneManager::prepareRenderQueue(void)
 	}
 }
 
-void RbxSceneManager::renderVisibleObjectsDefaultSequence(void)
+void RbxSceneManager::renderVisibleObjectsDefaultSequence()
 {
 
 	RenderQueue::QueueGroupIterator queueIt = getRenderQueue()->_getQueueGroupIterator();
@@ -3248,7 +3248,7 @@ Animation* RbxSceneManager::createAnimation(const String& name, Real length)
 {
 	OGRE_LOCK_MUTEX(mAnimationsListMutex)
 
-	if (mAnimationsList.find(name) != mAnimationsList.end()) {
+	if (mAnimationsList.contains(name)) {
 		OGRE_EXCEPT(
 			Exception::ERR_DUPLICATE_ITEM,
 			"An animation with the name " + name + " already exists",
@@ -3261,7 +3261,7 @@ Animation* RbxSceneManager::createAnimation(const String& name, Real length)
 	return pAnim;
 }
 
-void RbxSceneManager::destroyShadowTextures(void)
+void RbxSceneManager::destroyShadowTextures()
 {
 
 	ShadowTextureList::iterator i, iend;
@@ -3292,7 +3292,7 @@ void RbxSceneManager::destroyShadowTextures(void)
 StaticGeometry* RbxSceneManager::createStaticGeometry(const String& name)
 {
 
-	if (mStaticGeometryList.find(name) != mStaticGeometryList.end()) {
+	if (mStaticGeometryList.contains(name)) {
 		OGRE_EXCEPT(
 			Exception::ERR_DUPLICATE_ITEM,
 			"StaticGeometry with name '" + name + "' already exists!",
@@ -3307,7 +3307,7 @@ StaticGeometry* RbxSceneManager::createStaticGeometry(const String& name)
 InstancedGeometry* RbxSceneManager::createInstancedGeometry(const String& name)
 {
 
-	if (mInstancedGeometryList.find(name) != mInstancedGeometryList.end()) {
+	if (mInstancedGeometryList.contains(name)) {
 		OGRE_EXCEPT(
 			Exception::ERR_DUPLICATE_ITEM,
 			"InstancedGeometry with name '" + name + "' already exists!",
@@ -3949,7 +3949,7 @@ void RbxSceneManager::ensureShadowTexturesCreated()
 				mat->touch();
 			}
 
-			mShadowCamLightMapping[cam] = 0;
+			mShadowCamLightMapping[cam] = nullptr;
 
 			if (mShadowTextureConfigList.empty()) {
 				mNullShadowTexture.setNull();
@@ -4028,7 +4028,7 @@ MovableObject* RbxSceneManager::createMovableObject(
 	{
 		OGRE_LOCK_MUTEX(objectMap->mutex)
 
-		if (objectMap->map.find(name) != objectMap->map.end()) {
+		if (objectMap->map.contains(name)) {
 			OGRE_EXCEPT(
 				Exception::ERR_DUPLICATE_ITEM,
 				"An object of type '" + typeName + "' with name '" + name + "' already exists.",
@@ -4245,7 +4245,7 @@ void RbxSceneManager::findLightsAffectingFrustum(const Camera* camera)
 	}
 }
 
-SceneNode* RbxSceneManager::getRootSceneNode(void) const
+SceneNode* RbxSceneManager::getRootSceneNode() const
 {
 	return mSceneRoot;
 }
@@ -4255,7 +4255,7 @@ void RbxSceneManager::_setDestinationRenderSystem(RenderSystem* sys)
 	mDestRenderSystem = sys;
 }
 
-FogMode RbxSceneManager::getFogMode(void) const
+FogMode RbxSceneManager::getFogMode() const
 {
 	return mFogMode;
 }

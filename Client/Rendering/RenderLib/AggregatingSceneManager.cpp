@@ -6,8 +6,7 @@
 #include <G3D/g3dmath.h>
 #include <algorithm>
 
-namespace RBX {
-namespace Render {
+namespace RBX::Render {
 
 unsigned int AggregatingSceneManager::aggregationSize = 40;
 
@@ -130,7 +129,7 @@ void AggregatingSceneManager::deconstructAggregate(G3D::ReferenceCountedPointer<
 	while (iter != end) {
 		const G3D::ReferenceCountedPointer<Chunk>& chunk = *iter;
 
-		chunk->aggregate = NULL;
+		chunk->aggregate = nullptr;
 		RenderStats::aggregatedChunkCount--;
 
 		addToScene(chunk);
@@ -186,9 +185,7 @@ void AggregatingSceneManager::Bucket::addToQueue(const G3D::ReferenceCountedPoin
 	queue.push_back(chunk);
 }
 
-AggregatingSceneManager::~AggregatingSceneManager()
-{
-}
+AggregatingSceneManager::~AggregatingSceneManager() = default;
 
 void AggregatingSceneManager::queueSleepingChunk(const G3D::ReferenceCountedPointer<Chunk>& chunk)
 {
@@ -282,8 +279,8 @@ void AggregatingSceneManager::prerender(double optimizationTime)
 {
 	const double timeUp = G3D::System::getTick() + optimizationTime * 1000.0;
 
-	std::set<G3D::WeakReferenceCountedPointer<Chunk> >::iterator iter = invalidSleepingModels.begin();
-	std::set<G3D::WeakReferenceCountedPointer<Chunk> >::iterator end = invalidSleepingModels.end();
+	std::set<G3D::WeakReferenceCountedPointer<Chunk>>::iterator iter = invalidSleepingModels.begin();
+	std::set<G3D::WeakReferenceCountedPointer<Chunk>>::iterator end = invalidSleepingModels.end();
 	while (iter != end) {
 		G3D::ReferenceCountedPointer<Chunk> chunk = iter->createStrongPtr();
 		if (chunk.notNull()) {
@@ -315,5 +312,4 @@ void AggregatingSceneManager::prerender(double optimizationTime)
 	}
 }
 
-} // namespace Render
-} // namespace RBX
+} // namespace RBX::Render

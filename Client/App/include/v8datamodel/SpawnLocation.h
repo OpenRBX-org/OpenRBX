@@ -35,7 +35,7 @@ private:
 public:
 	SpawnLocation();
 
-	virtual void onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider);
+	void onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider) override;
 
 	bool neutral;
 	bool allowTeamChangeOnTouch;
@@ -53,7 +53,7 @@ class SpawnerService : public DescribedCreatable<SpawnerService, Instance, sSpaw
 {
 public:
 	SpawnerService();
-	virtual ~SpawnerService();
+	~SpawnerService() override;
 
 	void RegisterSpawner(SpawnLocation* spawner) { spawners.push_back(spawner); }
 	void UnregisterSpawner(SpawnLocation* spawner) { spawners.remove(spawner); }

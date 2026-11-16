@@ -18,8 +18,7 @@
 #include "v8datamodel/Workspace.h"
 #include "v8datamodel/custommesh.h"
 
-namespace RBX {
-namespace ViewNew {
+namespace RBX::ViewNew {
 
 bool PartChunk::castsShadows() const
 {
@@ -54,7 +53,7 @@ float primaryComponent(const G3D::Vector3& v)
 
 bool Part::usesMegaTexture() const
 {
-	if (specialShape == NULL && partInstance->getPartType() == RBX::Part::BLOCK_PART) {
+	if (specialShape == nullptr && partInstance->getPartType() == RBX::Part::BLOCK_PART) {
 		G3D::Vector3 size = partInstance->getPartSizeXml();
 
 		return primaryComponent(size) < 30.0;
@@ -119,17 +118,15 @@ void Part::onEvent(const PartInstance* source, CanAggregateChanged event)
 	view->sceneManager->setSleeping(this, event.canClump);
 }
 
-PartChunk::~PartChunk()
-{
-}
+PartChunk::~PartChunk() = default;
 
 void PartChunk::onAncestorChanged(std::shared_ptr<Instance> ancestor)
 {
 	Workspace* workspace = Workspace::findWorkspace(partInstance.get());
 	Instance* parent;
 
-	if (workspace == NULL ||
-		(workspace != (parent = partInstance->getParent()) && (parent == NULL || !parent->isDescendentOf(workspace)))) {
+	if (workspace == nullptr || (workspace != (parent = partInstance->getParent()) &&
+								 (parent == nullptr || !parent->isDescendentOf(workspace)))) {
 		view->sceneManager->removeModel(this);
 	}
 }
@@ -139,8 +136,8 @@ void Decal::onDecalAncestorChanged(std::shared_ptr<Instance> ancestor)
 	Workspace* workspace = Workspace::findWorkspace(decal.get());
 	Instance* parent;
 
-	if (workspace == NULL ||
-		(workspace != (parent = decal->getParent()) && (parent == NULL || !parent->isDescendentOf(workspace)))) {
+	if (workspace == nullptr ||
+		(workspace != (parent = decal->getParent()) && (parent == nullptr || !parent->isDescendentOf(workspace)))) {
 		view->sceneManager->removeModel(this);
 	}
 }
@@ -150,22 +147,22 @@ void Texture::onTextureAncestorChanged(std::shared_ptr<Instance> ancestor)
 	Workspace* workspace = Workspace::findWorkspace(texture.get());
 	Instance* parent;
 
-	if (workspace == NULL ||
-		(workspace != (parent = texture->getParent()) && (parent == NULL || !parent->isDescendentOf(workspace)))) {
+	if (workspace == nullptr ||
+		(workspace != (parent = texture->getParent()) && (parent == nullptr || !parent->isDescendentOf(workspace)))) {
 		view->sceneManager->removeModel(this);
 	}
 }
 
 void PartChunk::invalidateMesh()
 {
-	mesh = NULL;
+	mesh = nullptr;
 
 	view->sceneManager->invalidateModel(this, partInstance->getCanAggregate());
 }
 
 void PartChunk::invalidateMaterial()
 {
-	material = NULL;
+	material = nullptr;
 	materialInvalid = true;
 
 	view->sceneManager->invalidateModel(this, partInstance->getCanAggregate());
@@ -222,9 +219,7 @@ G3D::ReferenceCountedPointer<RenderNew::Mesh> PartChunk::getMesh()
 	return mesh;
 }
 
-Decal::~Decal()
-{
-}
+Decal::~Decal() = default;
 
 void Decal::onDecalPropertyChanged(const Reflection::PropertyDescriptor* descriptor)
 {
@@ -289,9 +284,7 @@ void Texture::onTexturePropertyChanged(const Reflection::PropertyDescriptor* des
 	}
 }
 
-Texture::~Texture()
-{
-}
+Texture::~Texture() = default;
 
 G3D::ReferenceCountedPointer<RenderNew::Material> Texture::getMaterial()
 {
@@ -322,7 +315,7 @@ void PartChunk::onChildRemoved(std::shared_ptr<Instance> child)
 {
 	if (child.get() == specialShape) {
 		shapePropertyChangedConnection.disconnect();
-		specialShape = NULL;
+		specialShape = nullptr;
 		invalidateMesh();
 	}
 }
@@ -525,7 +518,7 @@ void PartChunk::onChildAdded(std::shared_ptr<Instance> child)
 {
 	SpecialShape* specialShape = dynamic_cast<SpecialShape*>(child.get());
 
-	if (specialShape != NULL) {
+	if (specialShape != nullptr) {
 		this->specialShape = specialShape;
 
 		shapePropertyChangedConnection = Instance::event_propertyChanged.connect(
@@ -537,7 +530,8 @@ void PartChunk::onChildAdded(std::shared_ptr<Instance> child)
 }
 
 PartChunk::PartChunk(float polygonOffset, const std::shared_ptr<PartInstance>& partInstance, View* view)
-	: RenderNew::Chunk(polygonOffset), partInstance(partInstance), materialInvalid(true), view(view), specialShape(NULL)
+	: RenderNew::Chunk(polygonOffset), partInstance(partInstance), materialInvalid(true), view(view),
+	  specialShape(nullptr)
 {
 	view->sceneManager->addModel(this);
 
@@ -591,5 +585,4 @@ Part::Part(const std::shared_ptr<PartInstance>& partInstance, View* view) : Part
 	invalidateMaterial();
 }
 
-} // namespace ViewNew
-} // namespace RBX
+} // namespace RBX::ViewNew

@@ -2,8 +2,7 @@
 
 #include "reflection/enumconverter.h"
 
-namespace RBX {
-namespace Reflection {
+namespace RBX::Reflection {
 
 template <>
 EnumDesc<SoundType>::EnumDesc() : EnumDescriptor("SoundType", typeid(SoundType))
@@ -25,5 +24,4 @@ EnumDesc<SoundType>::EnumDesc() : EnumDescriptor("SoundType", typeid(SoundType))
 	addPair(VICTORY_SOUND, "Victory");
 }
 
-} // namespace Reflection
-} // namespace RBX
+} // namespace RBX::Reflection

@@ -6,9 +6,9 @@
 class CSettingsPropGrid : public CSelectionPropGrid
 {
 public:
-	virtual void FUN_00442e20(
+	void FUN_00442e20(
 		const RBX::Reflection::ClassDescriptor* classDescriptor, const RBX::Reflection::PropertyDescriptor* descriptor
-	);
+	) override;
 };
 
 #endif // SETTINGSPROPGRID_H

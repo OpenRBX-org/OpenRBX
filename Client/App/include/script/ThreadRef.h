@@ -28,13 +28,13 @@ public:
 	private:
 		friend class ThreadRef;
 
-		Node() : first(NULL), sync(syncSingleton) {}
+		Node() : first(nullptr), sync(syncSingleton) {}
 
 		ThreadRef* first;
 		const std::shared_ptr<std::recursive_mutex> sync;
 	};
 
-	ThreadRef() : sync(syncSingleton), node(NULL), previous(NULL), next(NULL), L(NULL), threadId(0) {}
+	ThreadRef() : sync(syncSingleton), node(nullptr), previous(nullptr), next(nullptr), L(nullptr), threadId(0) {}
 
 	ThreadRef(const ThreadRef& other);
 	ThreadRef(lua_State* L);
@@ -86,7 +86,7 @@ public:
 	bool operator!=(const FunctionRef& other) const;
 
 protected:
-	virtual void removeRef();
+	void removeRef() override;
 
 private:
 	friend void lua_pushfunction(lua_State* L, const FunctionRef& ref);

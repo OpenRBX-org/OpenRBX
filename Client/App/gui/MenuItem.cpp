@@ -21,7 +21,7 @@ void MenuItem::render2d(Adorn* adorn)
 
 	label2d(
 		adorn,
-		getVerb() != NULL && getVerb()->isChecked() ? "x " + getTitle() : getTitle(),
+		getVerb() != nullptr && getVerb()->isChecked() ? "x " + getTitle() : getTitle(),
 		fontColor,
 		G3D::Color4::clear(),
 		Adorn::XALIGN_LEFT

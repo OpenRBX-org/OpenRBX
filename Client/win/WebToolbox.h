@@ -16,18 +16,18 @@ protected:
 	CWebToolbox() {}
 
 public:
-	virtual ~CWebToolbox() {}
+	~CWebToolbox() override = default;
 
 	void FUN_0046ea00(int category);
 
-	virtual void OnInitialUpdate();
-	virtual HRESULT OnGetExternal(LPDISPATCH* lppDispatch);
-	virtual HRESULT OnDocWindowActivate(BOOL fActivate);
-	virtual HRESULT OnFrameWindowActivate(BOOL fActivate);
-	virtual HRESULT OnGetHostInfo(DOCHOSTUIINFO* pInfo);
+	void OnInitialUpdate() override;
+	HRESULT OnGetExternal(LPDISPATCH* lppDispatch) override;
+	HRESULT OnDocWindowActivate(BOOL fActivate) override;
+	HRESULT OnFrameWindowActivate(BOOL fActivate) override;
+	HRESULT OnGetHostInfo(DOCHOSTUIINFO* pInfo) override;
 
 protected:
-	virtual void OnActivateView(BOOL bActivate, CView* pActivateView, CView* pDeactiveView);
+	void OnActivateView(BOOL bActivate, CView* pActivateView, CView* pDeactiveView) override;
 
 	afx_msg void OnSetFocus(CWnd* pOldWnd);
 	afx_msg int OnMouseActivate(CWnd* pDesktopWnd, UINT nHitTest, UINT message);

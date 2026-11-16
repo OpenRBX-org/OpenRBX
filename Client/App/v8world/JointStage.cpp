@@ -35,7 +35,7 @@ void JointStage::insertToList(Joint* j)
 
 void JointStage::insertToMap(Joint* j, Primitive* p)
 {
-	if (p != NULL) {
+	if (p != nullptr) {
 		jointMap.insert(std::make_pair(p, j));
 	}
 }
@@ -45,14 +45,14 @@ bool JointStage::edgeHasPrimitivesDownstream(Edge* e)
 	Primitive* prim0 = e->getPrimitive(0);
 	Primitive* prim1 = e->getPrimitive(1);
 
-	return prim0 != NULL && prim1 != NULL && prim0->inPipeline() && prim1->inPipeline() &&
+	return prim0 != nullptr && prim1 != nullptr && prim0->inPipeline() && prim1->inPipeline() &&
 		   prim0->downstreamOfStage(this) && prim1->downstreamOfStage(this);
 }
 
 void JointStage::removeFromMap(Joint* j, Primitive* p)
 {
 	do {
-		if (p == NULL) {
+		if (p == nullptr) {
 			break;
 		}
 
@@ -64,7 +64,7 @@ void JointStage::removeFromMap(Joint* j, Primitive* p)
 				return;
 			}
 		}
-	} while (0);
+	} while (false);
 }
 
 void JointStage::onJointPrimitiveNulling(Joint* j, Primitive* nulling)
@@ -164,7 +164,7 @@ void JointStage::onPrimitiveRemoving(Primitive* p)
 
 	Joint* j = p->getFirstJoint();
 
-	while (j != NULL) {
+	while (j != nullptr) {
 		if (j->getJointType() != Joint::ANCHOR_JOINT && j->getJointType() != Joint::FREE_JOINT) {
 
 			jointsToPop.push_back(j);

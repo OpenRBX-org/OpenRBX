@@ -15,10 +15,10 @@ protected:
 	CStandardOutputView();
 
 public:
-	virtual ~CStandardOutputView();
+	~CStandardOutputView() override;
 
 protected:
-	virtual void onEvent(const RBX::StandardOut* source, RBX::StandardOutMessage message);
+	void onEvent(const RBX::StandardOut* source, RBX::StandardOutMessage message) override;
 
 	afx_msg LRESULT FUN_0043b8a0(WPARAM wParam, LPARAM lParam);
 

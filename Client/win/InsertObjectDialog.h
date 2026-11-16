@@ -6,11 +6,11 @@ class CInsertObjectDialog : public CDialog
 	DECLARE_DYNAMIC(CInsertObjectDialog)
 
 public:
-	CInsertObjectDialog(CWnd* pParent = NULL);
-	virtual ~CInsertObjectDialog();
+	CInsertObjectDialog(CWnd* pParent = nullptr);
+	~CInsertObjectDialog() override;
 
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);
+	void DoDataExchange(CDataExchange* pDX) override;
 
 	DECLARE_MESSAGE_MAP()
 

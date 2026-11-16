@@ -27,10 +27,8 @@ struct ServiceAdded
 	const std::shared_ptr<Instance> service;
 
 	ServiceAdded(Instance* service) : service(shared_from(service)) {}
-	ServiceAdded(const ServiceAdded& other) : service(other.service) {}
-
-private:
-	ServiceAdded& operator=(const ServiceAdded& other);
+	ServiceAdded(const ServiceAdded& other) = default;
+	ServiceAdded& operator=(const ServiceAdded& other) = delete;
 };
 
 struct ServiceRemoving
@@ -38,10 +36,8 @@ struct ServiceRemoving
 	const std::shared_ptr<Instance> service;
 
 	ServiceRemoving(Instance* service) : service(shared_from(service)) {}
-	ServiceRemoving(const ServiceRemoving& other) : service(other.service) {}
-
-private:
-	ServiceRemoving& operator=(const ServiceRemoving& other);
+	ServiceRemoving(const ServiceRemoving& other) = default;
+	ServiceRemoving& operator=(const ServiceRemoving& other) = delete;
 };
 
 class ServiceProvider : public DescribedNonCreatable<ServiceProvider, Instance, sServiceProvider>,
@@ -50,25 +46,25 @@ class ServiceProvider : public DescribedNonCreatable<ServiceProvider, Instance, 
 						public Notifier<ServiceProvider, ServiceRemoving>
 {
 private:
-	mutable std::vector<std::shared_ptr<Instance> > serviceArray;
-	std::map<const Name*, std::shared_ptr<Instance> > serviceMap;
+	mutable std::vector<std::shared_ptr<Instance>> serviceArray;
+	std::map<const Name*, std::shared_ptr<Instance>> serviceMap;
 
 public:
 	static Instance* create(Instance* context, const Name& name);
 
 	static const ServiceProvider* findServiceProvider(const Instance* context)
 	{
-		while (context != NULL) {
+		while (context != nullptr) {
 			const ServiceProvider* serviceProvider = dynamic_cast<const ServiceProvider*>(context);
 
-			if (serviceProvider != NULL) {
+			if (serviceProvider != nullptr) {
 				return serviceProvider;
 			}
 
 			context = context->getParent();
 		}
 
-		return NULL;
+		return nullptr;
 	}
 
 	template <class T>
@@ -85,12 +81,12 @@ public:
 
 		static const bool isNullClassName = &T::className() == &Name::getNullName();
 		if (isNullClassName) {
-			return NULL;
+			return nullptr;
 		}
 
 		std::shared_ptr<Instance> i = findServiceByClassName(T::className());
 		if (!i) {
-			return NULL;
+			return nullptr;
 		}
 
 		T* service = static_cast<T*>(i.get());
@@ -102,7 +98,7 @@ public:
 	T* create() const
 	{
 		T* t = find<T>();
-		if (t == NULL) {
+		if (t == nullptr) {
 			std::shared_ptr<T> s = Creatable<Instance>::create<T>();
 
 			t = s.get();
@@ -121,13 +117,13 @@ public:
 		const ServiceProvider* provider;
 
 		while (true) {
-			if (context == NULL) {
-				return NULL;
+			if (context == nullptr) {
+				return nullptr;
 			}
 
 			provider = dynamic_cast<const ServiceProvider*>(context);
 
-			if (provider != NULL) {
+			if (provider != nullptr) {
 				break;
 			}
 
@@ -143,13 +139,13 @@ public:
 		const ServiceProvider* provider;
 
 		while (true) {
-			if (context == NULL) {
-				return NULL;
+			if (context == nullptr) {
+				return nullptr;
 			}
 
 			provider = dynamic_cast<const ServiceProvider*>(context);
 
-			if (provider != NULL) {
+			if (provider != nullptr) {
 				break;
 			}
 
@@ -160,13 +156,13 @@ public:
 	}
 
 protected:
-	virtual shared_ptr<Instance> createChild(const Name& className);
-	virtual void onAddListener(Listener<ServiceProvider, ServiceAdded>* listener) const;
-	virtual bool askAddChild(const Instance* instance) const;
-	virtual void onChildAdded(Instance* instance);
-	virtual void onChildRemoving(Instance* instance);
-	virtual void onDescendentAdded(Instance* instance);
-	virtual void onDescendentRemoving(const shared_ptr<Instance>& instance);
+	shared_ptr<Instance> createChild(const Name& className) override;
+	void onAddListener(Listener<ServiceProvider, ServiceAdded>* listener) const override;
+	bool askAddChild(const Instance* instance) const override;
+	void onChildAdded(Instance* instance) override;
+	void onChildRemoving(Instance* instance) override;
+	void onDescendentAdded(Instance* instance) override;
+	void onDescendentRemoving(const shared_ptr<Instance>& instance) override;
 
 	void clearServices();
 

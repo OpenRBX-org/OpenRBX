@@ -61,7 +61,7 @@ void RbxSceneNode::_findVisibleObjects(
 	}
 }
 
-void RbxSceneNode::_updateBounds(void)
+void RbxSceneNode::_updateBounds()
 {
 	mWorldAABB.setNull();
 
@@ -79,7 +79,7 @@ void RbxSceneNode::_updateBounds(void)
 
 const Matrix4& RbxSceneNode::FUN_0067ac90(SubMesh* subMesh)
 {
-	if (subMesh != NULL) {
+	if (subMesh != nullptr) {
 		std::map<const SubMesh*, Matrix4*>::iterator it = m_unk0x1c0.find(subMesh);
 		if (it == m_unk0x1c0.end()) {
 			throw std::runtime_error("Transform map error");
@@ -128,7 +128,7 @@ bool RbxSceneNode::FUN_0067b020(SubMesh* subMesh) const
 
 bool RbxSceneNode::FUN_0067b070(SubMesh* subMesh)
 {
-	if (g_unk0x009613c4 == NULL) {
+	if (g_unk0x009613c4 == nullptr) {
 		return false;
 	}
 	std::map<const SubMesh*, Sphere>::iterator it = g_unk0x009613c4->find(subMesh);
@@ -149,7 +149,7 @@ RbxSceneNode::~RbxSceneNode()
 
 void RbxSceneNode::FUN_0067b220()
 {
-	if (g_unk0x009613c4 == NULL) {
+	if (g_unk0x009613c4 == nullptr) {
 		g_unk0x009613c4 = new std::map<const SubMesh*, Sphere>;
 	}
 }

@@ -18,8 +18,8 @@ private:
 	float desiredYRotationalVelocity;
 
 protected:
-	virtual State* onStep(const float stepDt, Controller& controller);
-	virtual void onComputeForce(const float dt);
+	State* onStep(const float stepDt, Controller& controller) override;
+	void onComputeForce(const float dt) override;
 
 	Flying(Humanoid* humanoid);
 };

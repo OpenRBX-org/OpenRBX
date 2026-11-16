@@ -10,7 +10,7 @@
 #include "v8world/Primitive.h"
 #include "v8world/RigidJoint.h"
 
-#include <stdlib.h>
+#include <cstdlib>
 #include <vector>
 
 namespace RBX {
@@ -47,7 +47,7 @@ Flag* FlagStand::GetFlag()
 		joint = primitive->getNextRigid(joint);
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 void FlagStand::AffixFlag(Flag* flag)
@@ -71,7 +71,7 @@ void FlagStand::AffixFlag(Flag* flag)
 FlagStand* FlagStandService::FindStandWithFlag(Flag* f)
 {
 	if (flagStands.size() == 0) {
-		return NULL;
+		return nullptr;
 	}
 
 	for (std::list<FlagStand*>::const_iterator iter = flagStands.begin(); iter != flagStands.end(); ++iter) {
@@ -80,17 +80,15 @@ FlagStand* FlagStandService::FindStandWithFlag(Flag* f)
 		}
 	}
 
-	return NULL;
+	return nullptr;
 }
 
-FlagStandService::~FlagStandService()
-{
-}
+FlagStandService::~FlagStandService() = default;
 
 FlagStand* FlagStandService::FindClosestEmptyStandForFlag(Flag* f)
 {
 	if (flagStands.empty()) {
-		return NULL;
+		return nullptr;
 	}
 
 	std::vector<FlagStand*> possibleLocations;
@@ -102,7 +100,7 @@ FlagStand* FlagStandService::FindClosestEmptyStandForFlag(Flag* f)
 	}
 
 	if (possibleLocations.size() == 0) {
-		return NULL;
+		return nullptr;
 	}
 
 	int index = rand() % possibleLocations.size();
@@ -162,8 +160,8 @@ void FlagStand::onServiceProvider(const ServiceProvider* oldProvider, const Serv
 {
 	Instance::onServiceProvider(oldProvider, newProvider);
 
-	if (oldProvider == NULL) {
-		FlagStandService* flagStandService = newProvider ? newProvider->create<FlagStandService>() : NULL;
+	if (oldProvider == nullptr) {
+		FlagStandService* flagStandService = newProvider ? newProvider->create<FlagStandService>() : nullptr;
 		flagStandService->RegisterFlagStand(this);
 
 		standTouched = PartInstance::event_Touched.connect(
@@ -171,8 +169,8 @@ void FlagStand::onServiceProvider(const ServiceProvider* oldProvider, const Serv
 		);
 	}
 
-	if (newProvider == NULL) {
-		FlagStandService* flagStandService = oldProvider ? oldProvider->create<FlagStandService>() : NULL;
+	if (newProvider == nullptr) {
+		FlagStandService* flagStandService = oldProvider ? oldProvider->create<FlagStandService>() : nullptr;
 		flagStandService->UnregisterFlagStand(this);
 
 		standTouched.disconnect();
@@ -185,12 +183,10 @@ template class RBX::FactoryProduct<RBX::FlagStandService, RBX::Instance, RBX::sF
 template class RBX::Reflection::Described<
 	RBX::FlagStandService,
 	RBX::sFlagStandService,
-	RBX::FactoryProduct<RBX::FlagStandService, RBX::Instance, RBX::sFlagStandService> >;
+	RBX::FactoryProduct<RBX::FlagStandService, RBX::Instance, RBX::sFlagStandService>>;
 template class RBX::DescribedCreatable<RBX::FlagStandService, RBX::Instance, RBX::sFlagStandService>;
 
 template class RBX::FactoryProduct<RBX::FlagStand, RBX::PartInstance, RBX::sFlagStand>;
-template class RBX::Reflection::Described<
-	RBX::FlagStand,
-	RBX::sFlagStand,
-	RBX::FactoryProduct<RBX::FlagStand, RBX::PartInstance, RBX::sFlagStand> >;
+template class RBX::Reflection::
+	Described<RBX::FlagStand, RBX::sFlagStand, RBX::FactoryProduct<RBX::FlagStand, RBX::PartInstance, RBX::sFlagStand>>;
 template class RBX::DescribedCreatable<RBX::FlagStand, RBX::PartInstance, RBX::sFlagStand>;

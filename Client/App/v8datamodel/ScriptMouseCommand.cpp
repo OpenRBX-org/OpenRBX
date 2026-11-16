@@ -11,7 +11,7 @@ const Name& ScriptMouseCommand::getName() const
 
 ScriptMouseCommand::~ScriptMouseCommand()
 {
-	mouse->setCommand(NULL);
+	mouse->setCommand(nullptr);
 
 	mouse->disconnect_all_slots();
 }

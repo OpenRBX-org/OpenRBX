@@ -38,12 +38,10 @@ IMPLEMENT_DYNCREATE(CClassTreeView, CXTTreeView)
 
 BEGIN_MESSAGE_MAP(CClassTreeView, CXTTreeView)
 ON_WM_CREATE()
-ON_NOTIFY_REFLECT(TVN_SELCHANGED, FUN_0043a280)
+ON_NOTIFY_REFLECT(TVN_SELCHANGED, &CClassTreeView::FUN_0043a280)
 END_MESSAGE_MAP()
 
-CClassTreeView::~CClassTreeView()
-{
-}
+CClassTreeView::~CClassTreeView() = default;
 
 IMPLEMENT_DYNCREATE(CObjectBrowser, CView)
 
@@ -56,16 +54,12 @@ IMPLEMENT_DYNCREATE(CMemberTreeView, CXTTreeView)
 
 BEGIN_MESSAGE_MAP(CMemberTreeView, CXTTreeView)
 ON_WM_CREATE()
-ON_NOTIFY_REFLECT(TVN_SELCHANGED, FUN_0043a240)
+ON_NOTIFY_REFLECT(TVN_SELCHANGED, &CMemberTreeView::FUN_0043a240)
 END_MESSAGE_MAP()
 
-CObjectBrowser::CObjectBrowser()
-{
-}
+CObjectBrowser::CObjectBrowser() = default;
 
-CObjectBrowser::~CObjectBrowser()
-{
-}
+CObjectBrowser::~CObjectBrowser() = default;
 
 static int FUN_00437700(const RBX::Reflection::Descriptor* descriptor)
 {
@@ -106,13 +100,11 @@ static int CALLBACK FUN_004377d0(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSo
 	return strcmp(descriptor1->name.c_str(), descriptor2->name.c_str());
 }
 
-CMemberTreeView::CMemberTreeView() : m_unk0xa8(true), m_unk0xac(NULL)
+CMemberTreeView::CMemberTreeView() : m_unk0xa8(true), m_unk0xac(nullptr)
 {
 }
 
-CMemberTreeView::~CMemberTreeView()
-{
-}
+CMemberTreeView::~CMemberTreeView() = default;
 
 void CMemberTreeView::OnInitialUpdate()
 {
@@ -136,7 +128,7 @@ static std::recursive_mutex& FUN_00437ab0()
 	return g_unk0x0095395c;
 }
 
-CClassTreeView::CClassTreeView() : m_unk0xa8(NULL)
+CClassTreeView::CClassTreeView() : m_unk0xa8(nullptr)
 {
 }
 
@@ -356,9 +348,7 @@ IMPLEMENT_DYNCREATE(CDeclarationView, CHtmlView)
 BEGIN_MESSAGE_MAP(CDeclarationView, CHtmlView)
 END_MESSAGE_MAP()
 
-CDeclarationView::CDeclarationView()
-{
-}
+CDeclarationView::CDeclarationView() = default;
 
 void CDeclarationView::OnInitialUpdate()
 {
@@ -366,9 +356,7 @@ void CDeclarationView::OnInitialUpdate()
 	LoadFromResource(210);
 }
 
-CDeclarationView::~CDeclarationView()
-{
-}
+CDeclarationView::~CDeclarationView() = default;
 
 void CDeclarationView::OnDocumentComplete(LPCTSTR lpszURL)
 {
@@ -415,7 +403,7 @@ void CDeclarationView::OnDocumentComplete(LPCTSTR lpszURL)
 		m_unk0x10c.Release();
 	}
 
-	FUN_00438530(NULL, NULL, NULL);
+	FUN_00438530(nullptr, nullptr, nullptr);
 }
 
 void CClassTreeView::FUN_00439690(const RBX::Reflection::ClassDescriptor* descriptor)
@@ -440,7 +428,7 @@ void CMemberTreeView::FUN_004397f0(const RBX::Reflection::EnumDescriptor* descri
 	GetTreeCtrl().DeleteAllItems();
 	m_unk0xac = descriptor;
 
-	std::lock_guard<std::recursive_mutex> lock(FUN_00437ab0());
+	std::scoped_lock lock(FUN_00437ab0());
 	std::for_each(descriptor->begin(), descriptor->end(), [this](const RBX::Reflection::EnumDescriptor::Item* item) {
 		FUN_004380e0(item);
 	});
@@ -508,13 +496,13 @@ void CMemberTreeView::FUN_00439a70(const RBX::Reflection::FunctionDescriptor* de
 void CDeclarationView::FUN_00439c30(const RBX::Reflection::Descriptor* descriptor)
 {
 	if (!descriptor) {
-		FUN_00438530(NULL, NULL, NULL);
+		FUN_00438530(nullptr, nullptr, nullptr);
 		return;
 	}
 
 	std::string declaration;
-	RBX::Reflection::Metadata::Item* metadata = NULL;
-	const RBX::Reflection::ClassDescriptor* owner = NULL;
+	RBX::Reflection::Metadata::Item* metadata = nullptr;
+	const RBX::Reflection::ClassDescriptor* owner = nullptr;
 
 	const RBX::Reflection::FunctionDescriptor* function =
 		dynamic_cast<const RBX::Reflection::FunctionDescriptor*>(descriptor);
@@ -591,7 +579,7 @@ void CDeclarationView::FUN_00439c30(const RBX::Reflection::Descriptor* descripto
 		}
 	}
 
-	FUN_00438530(metadata, declaration.c_str(), owner ? owner->name.c_str() : NULL);
+	FUN_00438530(metadata, declaration.c_str(), owner ? owner->name.c_str() : nullptr);
 }
 
 void CMemberTreeView::FUN_0043a060(const RBX::Reflection::ClassDescriptor* descriptor)
@@ -599,7 +587,7 @@ void CMemberTreeView::FUN_0043a060(const RBX::Reflection::ClassDescriptor* descr
 	GetTreeCtrl().DeleteAllItems();
 	m_unk0xac = descriptor;
 
-	std::lock_guard<std::recursive_mutex> lock(FUN_00437ab0());
+	std::scoped_lock lock(FUN_00437ab0());
 	std::for_each(
 		descriptor
 			->RBX::Reflection::MemberDescriptorContainer<RBX::Reflection::PropertyDescriptor>::descriptors_begin(),
@@ -666,7 +654,7 @@ void CClassTreeView::OnInitialUpdate()
 {
 	CXTTreeView::OnInitialUpdate();
 
-	std::lock_guard<std::recursive_mutex> lock(FUN_00437ab0());
+	std::scoped_lock lock(FUN_00437ab0());
 	FUN_00439690(&RBX::Reflection::ClassDescriptor::rootDescriptor());
 	std::for_each(
 		RBX::Reflection::EnumDescriptor::enumsBegin(),
@@ -688,7 +676,7 @@ IMPLEMENT_DYNAMIC(COutputView, CSecureHtmlView)
 IMPLEMENT_DYNCREATE(CStandardOutputView, COutputView)
 
 BEGIN_MESSAGE_MAP(CStandardOutputView, COutputView)
-ON_MESSAGE(WM_USER + 101, FUN_0043b8a0)
+ON_MESSAGE(WM_USER + 101, &CStandardOutputView::FUN_0043b8a0)
 END_MESSAGE_MAP()
 
 void COutputView::OnInitialUpdate()
@@ -715,13 +703,13 @@ void COutputView::OnDocumentComplete(LPCTSTR lpszURL)
 
 CStandardOutputView::~CStandardOutputView()
 {
-	std::lock_guard<std::recursive_mutex> lock(RBX::StandardOut::singleton()->sync);
+	std::scoped_lock lock(RBX::StandardOut::singleton()->sync);
 	RBX::stopListening<RBX::StandardOut, RBX::StandardOutMessage>(RBX::StandardOut::singleton(), this);
 }
 
 void CStandardOutputView::onEvent(const RBX::StandardOut* source, RBX::StandardOutMessage message)
 {
-	std::lock_guard<std::mutex> lock(m_unk0x128);
+	std::scoped_lock lock(m_unk0x128);
 	if (m_unk0x114.empty()) {
 		PostMessage(WM_USER + 101, 0, 0);
 	}
@@ -750,7 +738,7 @@ void COutputView::FUN_0043b490(RBX::MessageType type, const char* text, __time64
 {
 	CStringW message(text);
 	CStringW escaped;
-	int length = EscapeXML(message, message.GetLength(), NULL, 0);
+	int length = EscapeXML(message, message.GetLength(), nullptr, 0);
 	EscapeXML(message, message.GetLength(), escaped.GetBufferSetLength(length), length);
 	escaped.ReleaseBuffer();
 
@@ -794,7 +782,7 @@ void COutputView::FUN_0043b490(RBX::MessageType type, const char* text, __time64
 CStandardOutputView::CStandardOutputView()
 {
 	m_unk0xf0 = true;
-	std::lock_guard<std::recursive_mutex> lock(RBX::StandardOut::singleton()->sync);
+	std::scoped_lock lock(RBX::StandardOut::singleton()->sync);
 	RBX::startListening<RBX::StandardOut, RBX::StandardOutMessage>(RBX::StandardOut::singleton(), this);
 }
 
@@ -805,7 +793,7 @@ LRESULT CStandardOutputView::FUN_0043b8a0(WPARAM wParam, LPARAM lParam)
 		RBX::MessageType type;
 		__int64 time;
 		{
-			std::lock_guard<std::mutex> lock(m_unk0x128);
+			std::scoped_lock lock(m_unk0x128);
 			if (m_unk0x114.empty()) {
 				break;
 			}

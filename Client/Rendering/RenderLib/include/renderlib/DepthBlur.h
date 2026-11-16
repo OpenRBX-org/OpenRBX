@@ -6,8 +6,7 @@
 #include <GLG3D/Shader.h>
 #include <GLG3D/Texture.h>
 
-namespace RBX {
-namespace Render {
+namespace RBX::Render {
 
 class DepthBlur
 {
@@ -24,7 +23,6 @@ public:
 	void apply(G3D::RenderDevice* rd);
 };
 
-} // namespace Render
-} // namespace RBX
+} // namespace RBX::Render
 
 #endif // RENDERLIB_DEPTHBLUR_H

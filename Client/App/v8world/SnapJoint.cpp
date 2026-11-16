@@ -27,7 +27,7 @@ SnapJoint* SnapJoint::canBuildJoint(Primitive* p0, Primitive* p1, NormalId nId0,
 		return new SnapJoint(p0, p1, c0, c1);
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 } // namespace RBX

@@ -50,7 +50,7 @@ class TextXmlWriter : public XmlWriter
 public:
 	TextXmlWriter(std::ostream& stream) : XmlWriter(stream) {}
 
-	virtual void serialize(const XmlElement* xmlNode);
+	void serialize(const XmlElement* xmlNode) override;
 
 	static void encodedWrite(std::ostream& stream, const std::string& text) { encodedWrite(stream, text.c_str()); }
 
@@ -71,7 +71,7 @@ public:
 	TextXmlWriterWithEmbeddedContent(std::ostream& stream) : TextXmlWriter(stream) {}
 
 protected:
-	virtual void serializeNode(const XmlElement* xmlNode, int depth);
+	void serializeNode(const XmlElement* xmlNode, int depth) override;
 
 private:
 	std::set<RBX::ContentId> embeddedContent;
@@ -89,7 +89,7 @@ protected:
 	XmlParser(std::streambuf* buffer);
 
 	std::streambuf* buffer;
-	std::stack<XmlElement*, std::deque<XmlElement*> > elements;
+	std::stack<XmlElement*, std::deque<XmlElement*>> elements;
 
 public:
 };
@@ -99,7 +99,7 @@ class TextXmlParser : public XmlParser
 public:
 	TextXmlParser(std::streambuf* buffer) : XmlParser(buffer) {}
 
-	virtual std::unique_ptr<XmlElement> parse();
+	std::unique_ptr<XmlElement> parse() override;
 
 private:
 	void skipWhitespace();

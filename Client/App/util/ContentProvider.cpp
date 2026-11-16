@@ -33,19 +33,19 @@ public:
 	MD5HasherImpl();
 	~MD5HasherImpl();
 
-	virtual void addData(std::istream& data);
-	virtual void addData(const std::string& data);
-	virtual void addData(const char* data, unsigned int nBytes);
-	virtual std::string toString();
-	virtual const char* c_str();
+	void addData(std::istream& data) override;
+	void addData(const std::string& data) override;
+	void addData(const char* data, unsigned int nBytes) override;
+	std::string toString() override;
+	const char* c_str() override;
 };
 
 bool ContentProvider::isHttpUrl(const std::string& s)
 {
-	if (s.find("http://", 0, 7) == 0) {
+	if (s.starts_with("http://")) {
 		return true;
 	}
-	if (s.find("https://", 0, 8) == 0) {
+	if (s.starts_with("https://")) {
 		return true;
 	}
 	return false;
@@ -73,7 +73,7 @@ bool operator==(const ContentId& a, const ContentId& b)
 
 ContentId ContentId::fromFile(const std::string& filePath)
 {
-	if (filePath.find("file://") == 0) {
+	if (filePath.starts_with("file://")) {
 		return ContentId(filePath);
 	}
 
@@ -101,7 +101,7 @@ std::string MD5Hasher::convertToLegacyHash(std::string hash)
 
 MD5HasherImpl::MD5HasherImpl() : hProv(0), hHash(0)
 {
-	if (!CryptAcquireContext(&hProv, NULL, NULL, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT)) {
+	if (!CryptAcquireContext(&hProv, nullptr, nullptr, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT)) {
 		StandardOut::singleton()->print(
 			MESSAGE_ERROR, "Error during CryptAcquireContext. GetLastError = %d", GetLastError()
 		);
@@ -153,7 +153,7 @@ MD5Hasher* MD5Hasher::create()
 
 bool ContentProvider::isRequestQueueEmpty()
 {
-	std::lock_guard<std::recursive_mutex> lock(requestSync);
+	std::scoped_lock lock(requestSync);
 	return requestQueue.empty();
 }
 
@@ -200,7 +200,7 @@ bool ContentProvider::FailedUrl::expired() const
 
 bool ContentProvider::isUrlBad(const char* url)
 {
-	std::lock_guard<std::recursive_mutex> lock(requestSync);
+	std::scoped_lock lock(requestSync);
 	std::list<FailedUrl>::iterator end = failedUrls.end();
 	for (std::list<FailedUrl>::iterator iter = failedUrls.begin(); iter != end; ++iter) {
 		if (iter->expired()) {
@@ -289,7 +289,7 @@ bool ContentProvider::registerFile(CachedContent* item)
 {
 	CachedContent temp;
 	{
-		std::lock_guard<std::mutex> lock(contentCacheMutex);
+		std::scoped_lock lock(contentCacheMutex);
 		temp = *item;
 	}
 
@@ -303,7 +303,7 @@ bool ContentProvider::registerFile(CachedContent* item)
 
 		temp.filename.reset(new std::string(filename));
 
-		std::lock_guard<std::mutex> lock(contentCacheMutex);
+		std::scoped_lock lock(contentCacheMutex);
 		*item = temp;
 	}
 
@@ -312,7 +312,7 @@ bool ContentProvider::registerFile(CachedContent* item)
 
 void ContentProvider::clearContentCache()
 {
-	std::lock_guard<std::mutex> lock(contentCacheMutex);
+	std::scoped_lock lock(contentCacheMutex);
 	contentCache.clear();
 }
 
@@ -357,7 +357,7 @@ worker_thread::work_result ContentProvider::processRequests()
 {
 	ContentId id;
 	{
-		std::lock_guard<std::recursive_mutex> lock(requestSync);
+		std::scoped_lock lock(requestSync);
 		if (requestQueue.empty()) {
 			return worker_thread::done;
 		}
@@ -370,12 +370,12 @@ worker_thread::work_result ContentProvider::processRequests()
 			Http(id.toString()).get(*response);
 		}
 		catch (...) {
-			std::lock_guard<std::recursive_mutex> lock(requestSync);
+			std::scoped_lock lock(requestSync);
 			failedUrls.push_front(id.c_str());
 			throw;
 		}
 
-		std::lock_guard<std::mutex> lock(contentCacheMutex);
+		std::scoped_lock lock(contentCacheMutex);
 		contentCache[id].data = response;
 	}
 	catch (std::exception& e) {
@@ -383,7 +383,7 @@ worker_thread::work_result ContentProvider::processRequests()
 	}
 
 	{
-		std::lock_guard<std::recursive_mutex> lock(requestSync);
+		std::scoped_lock lock(requestSync);
 		requestQueue.pop_front();
 	}
 
@@ -393,11 +393,11 @@ worker_thread::work_result ContentProvider::processRequests()
 ContentProvider::CachedContent* ContentProvider::loadContent(ContentId id, HttpRequestType httpRequestType)
 {
 	if (id.isNull()) {
-		return NULL;
+		return nullptr;
 	}
 
 	{
-		std::lock_guard<std::mutex> lock(contentCacheMutex);
+		std::scoped_lock lock(contentCacheMutex);
 		ContentCache::iterator iter = contentCache.find(id);
 		if (iter != contentCache.end()) {
 			return &iter->second;
@@ -407,10 +407,10 @@ ContentProvider::CachedContent* ContentProvider::loadContent(ContentId id, HttpR
 	if (id.isFile()) {
 		std::shared_ptr<const std::string> filename(new std::string(findFile(id)));
 		if (filename->empty()) {
-			return NULL;
+			return nullptr;
 		}
 
-		std::lock_guard<std::mutex> lock(contentCacheMutex);
+		std::scoped_lock lock(contentCacheMutex);
 		CachedContent& content = contentCache[id];
 		content.filename = filename;
 		return &content;
@@ -419,10 +419,10 @@ ContentProvider::CachedContent* ContentProvider::loadContent(ContentId id, HttpR
 	if (id.isAsset()) {
 		std::shared_ptr<const std::string> filename(new std::string(findAsset(id)));
 		if (filename->empty()) {
-			return NULL;
+			return nullptr;
 		}
 
-		std::lock_guard<std::mutex> lock(contentCacheMutex);
+		std::scoped_lock lock(contentCacheMutex);
 		CachedContent& content = contentCache[id];
 		content.filename = filename;
 		return &content;
@@ -431,7 +431,7 @@ ContentProvider::CachedContent* ContentProvider::loadContent(ContentId id, HttpR
 	{
 		std::shared_ptr<const std::string> filename(new std::string(findHashFile(id)));
 		if (!filename->empty()) {
-			std::lock_guard<std::mutex> lock(contentCacheMutex);
+			std::scoped_lock lock(contentCacheMutex);
 			CachedContent& content = contentCache[id];
 			content.filename = filename;
 			return &content;
@@ -441,7 +441,7 @@ ContentProvider::CachedContent* ContentProvider::loadContent(ContentId id, HttpR
 	if (id.isHttp()) {
 		switch (httpRequestType) {
 		case AsyncHttpRequest: {
-			std::lock_guard<std::recursive_mutex> lock(requestSync);
+			std::scoped_lock lock(requestSync);
 			if (!isUrlBad(id.c_str())) {
 				if (std::find(requestQueue.begin(), requestQueue.end(), id) == requestQueue.end()) {
 					requestQueue.push_back(id);
@@ -456,12 +456,12 @@ ContentProvider::CachedContent* ContentProvider::loadContent(ContentId id, HttpR
 				Http(id.toString()).get(*response);
 			}
 			catch (...) {
-				std::lock_guard<std::recursive_mutex> lock(requestSync);
+				std::scoped_lock lock(requestSync);
 				failedUrls.push_front(id.c_str());
 				throw;
 			}
 
-			std::lock_guard<std::mutex> lock(contentCacheMutex);
+			std::scoped_lock lock(contentCacheMutex);
 			CachedContent& content = contentCache[id];
 			content.data = response;
 			return &content;
@@ -469,7 +469,7 @@ ContentProvider::CachedContent* ContentProvider::loadContent(ContentId id, HttpR
 		}
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 std::string ContentProvider::getFile(ContentId ticket)
@@ -510,7 +510,7 @@ std::string ContentProvider::getAssetFile(const std::string& filePath)
 
 bool ContentProvider::hasContent(ContentId id)
 {
-	return loadContent(id, NoHttpRequest) != NULL;
+	return loadContent(id, NoHttpRequest) != nullptr;
 }
 
 bool ContentProvider::requestContentFile(ContentId id, std::string& filename)
@@ -535,7 +535,7 @@ std::shared_ptr<const std::string> ContentProvider::requestContentString(Content
 		return std::shared_ptr<const std::string>();
 	}
 
-	std::lock_guard<std::mutex> lock(contentCacheMutex);
+	std::scoped_lock lock(contentCacheMutex);
 	if (!content->data) {
 		std::ifstream stream(content->filename->c_str(), std::ios_base::in | std::ios_base::binary);
 
@@ -569,7 +569,7 @@ ContentId ContentProvider::readContent(const char* id, std::istream& stream, uns
 	return result;
 }
 
-void ContentProvider::load(ContentId id, std::vector<std::shared_ptr<Instance> >& instances)
+void ContentProvider::load(ContentId id, std::vector<std::shared_ptr<Instance>>& instances)
 {
 	std::unique_ptr<std::istream> stream(getContent(id));
 
@@ -582,7 +582,7 @@ void ContentProvider::load(ContentId id, std::vector<std::shared_ptr<Instance> >
 ContentProvider::ContentProvider()
 {
 	char path[MAX_PATH];
-	if (SHGetFolderPathAndSubDir(NULL, CSIDL_COMMON_APPDATA, NULL, 0, "Roblox\\content\\", path) == S_OK) {
+	if (SHGetFolderPathAndSubDir(nullptr, CSIDL_COMMON_APPDATA, nullptr, 0, "Roblox\\content\\", path) == S_OK) {
 		setAssetFolder(path);
 	}
 	else {

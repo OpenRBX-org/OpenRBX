@@ -4,8 +4,7 @@
 
 #include <G3D/g3dmath.h>
 
-namespace RBX {
-namespace Render {
+namespace RBX::Render {
 
 const float Chunk::DECAL_OFFSET = -0.2f;
 const float Chunk::TEXTURE_OFFSET = -0.1f;
@@ -87,7 +86,7 @@ AggregateChunk::AggregateChunk(const G3D::ReferenceCountedPointer<Chunk>& firstC
 
 	if (randomColors) {
 		material = new Material();
-		material->appendLevel(NULL, (G3D::Color3::wheelRandom() + G3D::Color3::white()) / 2.0f, 0, 50, 0, 0);
+		material->appendLevel(nullptr, (G3D::Color3::wheelRandom() + G3D::Color3::white()) / 2.0f, 0, 50, 0, 0);
 	}
 }
 
@@ -98,5 +97,4 @@ AggregateChunk::~AggregateChunk()
 	RenderStats::aggregatedChunkCount -= components.size();
 }
 
-} // namespace Render
-} // namespace RBX
+} // namespace RBX::Render

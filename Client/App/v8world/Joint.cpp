@@ -19,9 +19,7 @@ bool Joint::joinsFace(Primitive* primitive, NormalId normalId) const
 	return false;
 }
 
-Joint::~Joint()
-{
-}
+Joint::~Joint() = default;
 
 void Joint::setJointOwner(IJointOwner* value)
 {
@@ -62,13 +60,13 @@ bool Joint::canBuildJointLoose(Primitive* p0, Primitive* p1, NormalId nId0, Norm
 Joint::Joint(
 	Primitive* prim0, Primitive* prim1, const CoordinateFrame& _jointCoord0, const CoordinateFrame& _jointCoord1
 )
-	: Edge(prim0, prim1), jointOwner(NULL), active(false)
+	: Edge(prim0, prim1), jointOwner(nullptr), active(false)
 {
 	jointCoord0 = Math::snapToGrid(_jointCoord0, 0.1f);
 	jointCoord1 = Math::snapToGrid(_jointCoord1, 0.1f);
 }
 
-Joint::Joint() : Edge(NULL, NULL), jointOwner(NULL), active(false)
+Joint::Joint() : Edge(nullptr, nullptr), jointOwner(nullptr), active(false)
 {
 }
 
@@ -78,13 +76,13 @@ void Joint::setPrimitive(int i, Primitive* p)
 
 		World* world = getWorld();
 
-		if (world != NULL && getPrimitive(i) != NULL) {
+		if (world != nullptr && getPrimitive(i) != nullptr) {
 			world->onJointPrimitiveNulling(this, getPrimitive(i));
 		}
 
 		Edge::setPrimitive(i, p);
 
-		if (world != NULL && p != NULL) {
+		if (world != nullptr && p != nullptr) {
 			world->onJointPrimitiveSet(this, p);
 		}
 	}

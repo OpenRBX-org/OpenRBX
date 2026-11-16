@@ -81,11 +81,11 @@ Explosion::Explosion() : age(0.0f), blastRadius(4.0f), blastPressure(500000.0f)
 
 void Explosion::onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider)
 {
-	stopListening(oldProvider ? oldProvider->find<RunService>() : NULL, this);
+	stopListening(oldProvider ? oldProvider->find<RunService>() : nullptr, this);
 
 	DescribedCreatable<Explosion, Instance, sExplosion>::onServiceProvider(oldProvider, newProvider);
 
-	startListening(newProvider ? newProvider->find<RunService>() : NULL, this);
+	startListening(newProvider ? newProvider->find<RunService>() : nullptr, this);
 }
 
 void Explosion::setBlastRadius(float _blastRadius)
@@ -128,13 +128,13 @@ void Explosion::onEvent(const RunService* source, Stepped event)
 			float radius = blastRadius;
 			Extents blastExtents = Extents::fromCenterCorner(position, G3D::Vector3(radius, radius, radius));
 
-			world->getContactManager().getPrimitivesTouchingExtents(blastExtents, NULL, primitives);
+			world->getContactManager().getPrimitivesTouchingExtents(blastExtents, nullptr, primitives);
 
 			signalBlast(primitives);
 			doBlast(primitives);
 		}
 
-		setParent(NULL);
+		setParent(nullptr);
 	}
 }
 
@@ -147,5 +147,5 @@ bool Explosion::askSetParent(const Instance* instance) const
 
 template class RBX::FactoryProduct<RBX::Explosion, RBX::Instance, RBX::sExplosion>;
 template class RBX::Reflection::
-	Described<RBX::Explosion, RBX::sExplosion, RBX::FactoryProduct<RBX::Explosion, RBX::Instance, RBX::sExplosion> >;
+	Described<RBX::Explosion, RBX::sExplosion, RBX::FactoryProduct<RBX::Explosion, RBX::Instance, RBX::sExplosion>>;
 template class RBX::DescribedCreatable<RBX::Explosion, RBX::Instance, RBX::sExplosion>;

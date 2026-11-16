@@ -67,24 +67,24 @@ protected:
 	void onChildAdded();
 	void onChildRemoved();
 
-	virtual void onAncestorChanged(const AncestorChanged& event);
+	void onAncestorChanged(const AncestorChanged& event) override;
 
-	virtual bool askSetParent(const Instance* instance) const { return true; }
+	bool askSetParent(const Instance* instance) const override { return true; }
 
-	virtual bool askAddChild(const Instance* instance) const { return true; }
+	bool askAddChild(const Instance* instance) const override { return true; }
 
-	virtual void readProperty(const XmlElement* element, IReferenceBinder& binder);
-	virtual const CoordinateFrame getLocation() const;
+	void readProperty(const XmlElement* element, IReferenceBinder& binder) override;
+	const CoordinateFrame getLocation() const override;
 	bool drawSelected() const;
-	virtual void render3dSelect(Adorn* adorn, SelectState selectState);
+	void render3dSelect(Adorn* adorn, SelectState selectState) override;
 
 public:
 	static bool writeUnlocked;
 
 	Accoutrement();
-	virtual ~Accoutrement();
+	~Accoutrement() override;
 
-	virtual XmlElement* write();
+	XmlElement* write() override;
 	static void dropAll(ModelInstance* model);
 	static void dropAllOthers(ModelInstance* model, Accoutrement* accoutrement);
 	PartInstance* getHandle();
@@ -96,7 +96,7 @@ public:
 	const CoordinateFrame& getAttachmentPoint() const { return attachmentPoint; }
 
 	void setAttachmentPoint(const CoordinateFrame& value);
-	virtual void onCameraNear(float distance);
+	void onCameraNear(float distance) override;
 	const G3D::Vector3 getAttachmentPos() const;
 	const G3D::Vector3 getAttachmentForward() const;
 	const G3D::Vector3 getAttachmentUp() const;

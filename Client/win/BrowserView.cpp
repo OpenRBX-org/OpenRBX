@@ -73,7 +73,7 @@ void CBrowserView::OnSize(UINT nType, int cx, int cy)
 	}
 
 	if (m_wndBrowser.GetSafeHwnd()) {
-		m_wndBrowser.SetWindowPos(NULL, 0, size.cy, cx, cy - size.cy, SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOREDRAW);
+		m_wndBrowser.SetWindowPos(nullptr, 0, size.cy, cx, cy - size.cy, SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOREDRAW);
 	}
 }
 
@@ -89,7 +89,7 @@ void CBrowserView::FUN_0040a340(CCmdUI* pCmdUI)
 
 void CBrowserView::FUN_0040a360(CCmdUI* pCmdUI)
 {
-	pCmdUI->Enable(m_unk0x104 != NULL);
+	pCmdUI->Enable(m_unk0x104 != nullptr);
 }
 
 void CBrowserView::FUN_0040a380(CCmdUI* pCmdUI)
@@ -220,19 +220,19 @@ BEGIN_MESSAGE_MAP(CBrowserView, CSecureHtmlView)
 	ON_WM_ERASEBKGND()
 	ON_WM_SIZE()
 	ON_WM_CREATE()
-	ON_COMMAND(0x80bb, FUN_0040ac40)
-	ON_UPDATE_COMMAND_UI(0x80bb, FUN_0040ac50)
-	ON_COMMAND(0x80bd, FUN_0040aa90)
-	ON_UPDATE_COMMAND_UI(0x80bd, FUN_0040a380)
-	ON_COMMAND(0x80bc, FUN_0040aad0)
-	ON_UPDATE_COMMAND_UI(0x80bc, FUN_00453eb0)
-	ON_COMMAND(0x80ba, FUN_0040ac30)
-	ON_UPDATE_COMMAND_UI(0x80ba, FUN_0040a320)
-	ON_COMMAND(0x80b9, FUN_0040aae0)
-	ON_UPDATE_COMMAND_UI(0x80b9, FUN_0040a340)
-	ON_COMMAND(0x80ca, FUN_0040aaf0)
-	ON_UPDATE_COMMAND_UI(0x80ca, FUN_0040a360)
-	ON_XTP_EXECUTE(0x80c9, FUN_0040b0f0)
+	ON_COMMAND(0x80bb, &CBrowserView::FUN_0040ac40)
+	ON_UPDATE_COMMAND_UI(0x80bb, &CBrowserView::FUN_0040ac50)
+	ON_COMMAND(0x80bd, &CBrowserView::FUN_0040aa90)
+	ON_UPDATE_COMMAND_UI(0x80bd, &CBrowserView::FUN_0040a380)
+	ON_COMMAND(0x80bc, &CBrowserView::FUN_0040aad0)
+	ON_UPDATE_COMMAND_UI(0x80bc, &CBrowserView::FUN_00453eb0)
+	ON_COMMAND(0x80ba, &CBrowserView::FUN_0040ac30)
+	ON_UPDATE_COMMAND_UI(0x80ba, &CBrowserView::FUN_0040a320)
+	ON_COMMAND(0x80b9, &CBrowserView::FUN_0040aae0)
+	ON_UPDATE_COMMAND_UI(0x80b9, &CBrowserView::FUN_0040a340)
+	ON_COMMAND(0x80ca, &CBrowserView::FUN_0040aaf0)
+	ON_UPDATE_COMMAND_UI(0x80ca, &CBrowserView::FUN_0040a360)
+	ON_XTP_EXECUTE(0x80c9, &CBrowserView::FUN_0040b0f0)
 	ON_XTP_CREATECONTROL()
 END_MESSAGE_MAP()
 // clang-format on
@@ -240,11 +240,11 @@ END_MESSAGE_MAP()
 CBrowserView* CBrowserView::FUN_0040b6d0(CRect rect, CWnd* parent, CString url, IDispatch* external)
 {
 	CFrameWnd* frame = new CFrameWnd;
-	frame->Create(NULL, NULL, WS_OVERLAPPEDWINDOW, CRect(0, 0, 0, 0), parent);
+	frame->Create(nullptr, nullptr, WS_OVERLAPPEDWINDOW, CRect(0, 0, 0, 0), parent);
 	frame->ModifyStyleEx(WS_EX_CLIENTEDGE, WS_EX_TOOLWINDOW);
 
 	CBrowserView* view = dynamic_cast<CBrowserView*>(
-		XTFuncCreateView(frame, RUNTIME_CLASS(CBrowserView), NULL, NULL, WS_CHILD | WS_VISIBLE | WS_BORDER)
+		XTFuncCreateView(frame, RUNTIME_CLASS(CBrowserView), nullptr, nullptr, WS_CHILD | WS_VISIBLE | WS_BORDER)
 	);
 	view->m_unk0x2b0 = external;
 
@@ -253,8 +253,8 @@ CBrowserView* CBrowserView::FUN_0040b6d0(CRect rect, CWnd* parent, CString url, 
 	view->Navigate(address);
 
 	parent->ClientToScreen(&rect);
-	frame->SetWindowPos(NULL, rect.left, rect.top, rect.Width(), rect.Height(), SWP_NOZORDER);
-	frame->InitialUpdateFrame(NULL, TRUE);
+	frame->SetWindowPos(nullptr, rect.left, rect.top, rect.Width(), rect.Height(), SWP_NOZORDER);
+	frame->InitialUpdateFrame(nullptr, TRUE);
 
 	return view;
 }
@@ -262,11 +262,11 @@ CBrowserView* CBrowserView::FUN_0040b6d0(CRect rect, CWnd* parent, CString url, 
 HRESULT FUN_0040bfb0(CComObjectNoLock<CBrowserViewExternal>** p_unk0x04, void* p_unk0x08)
 {
 	HRESULT result = E_OUTOFMEMORY;
-	CComObjectNoLock<CBrowserViewExternal>* object = NULL;
+	CComObjectNoLock<CBrowserViewExternal>* object = nullptr;
 
 	ATLTRY(object = new CComObjectNoLock<CBrowserViewExternal>(p_unk0x08))
 
-	if (object != NULL) {
+	if (object != nullptr) {
 		object->SetVoid(p_unk0x08);
 		object->InternalFinalConstructAddRef();
 		result = object->FinalConstruct();
@@ -281,7 +281,7 @@ HRESULT CBrowserView::OnGetExternal(LPDISPATCH* lppDispatch)
 {
 	if (!m_unk0x2b0) {
 		CComObjectNoLock<CBrowserViewExternal>* external;
-		HRESULT result = FUN_0040bfb0(&external, NULL);
+		HRESULT result = FUN_0040bfb0(&external, nullptr);
 
 		if (result != S_OK) {
 			return result;
@@ -330,14 +330,12 @@ void CBrowserView::OnBeforeNavigate2(
 	}
 }
 
-CBrowserView::CBrowserView() : m_unk0x104(NULL), m_unk0x2b4(0), m_unk0x2b5(0)
+CBrowserView::CBrowserView() : m_unk0x104(nullptr), m_unk0x2b4(false), m_unk0x2b5(false)
 {
 	FUN_004334d0(XTPImageManager());
 }
 
-CBrowserView::~CBrowserView()
-{
-}
+CBrowserView::~CBrowserView() = default;
 
 void CBrowserView::OnNavigateComplete2(LPCTSTR strURL)
 {

@@ -4,8 +4,7 @@
 #include "QuadVolume.h"
 #include "renderlibnew/Mesh.h"
 
-namespace RBX {
-namespace ViewNew {
+namespace RBX::ViewNew {
 
 class BevelMesh : public RenderNew::Mesh
 {
@@ -26,7 +25,7 @@ public:
 		}
 
 	public:
-		virtual void build(Purpose purpose);
+		void build(Purpose purpose) override;
 
 		void operator()(
 			G3D::Vector3& vertex,
@@ -52,7 +51,6 @@ public:
 	};
 };
 
-} // namespace ViewNew
-} // namespace RBX
+} // namespace RBX::ViewNew
 
 #endif // RENDERLIBNEW_BEVELMESH_H

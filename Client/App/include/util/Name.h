@@ -111,7 +111,7 @@ public:
 
 	static const Name& name() { return Name::declare<nameValue>(); }
 
-	virtual const Name& getName() const { return name(); }
+	const Name& getName() const override { return name(); }
 };
 
 } // namespace RBX

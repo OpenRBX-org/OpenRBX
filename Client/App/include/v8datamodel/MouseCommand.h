@@ -46,7 +46,7 @@ public:
 	static G3D::Ray getSearchRay(const UIEvent& uiEvent, ICameraOwner* _workspace);
 	static Instance* getTopSelectable3d(PartInstance* part);
 	PartInstance* getPart(
-		const UIEvent& uiEvent, const HitTestFilter* filter = NULL, G3D::Vector3& hitWorld = ignoreVector3
+		const UIEvent& uiEvent, const HitTestFilter* filter = nullptr, G3D::Vector3& hitWorld = ignoreVector3
 	);
 	PartInstance* getUnlockedPart(const UIEvent& uiEvent, G3D::Vector3& hitWorld = ignoreVector3);
 	PartInstance* getPartByLocalCharacter(const UIEvent& uiEvent, G3D::Vector3& hitWorld = ignoreVector3);
@@ -62,14 +62,14 @@ protected:
 
 	virtual MouseCommand* onKeyDown(const UIEvent& uiEvent) { return this; }
 
-	virtual MouseCommand* onPeekKeyDown(const UIEvent& uiEvent) { return NULL; }
+	virtual MouseCommand* onPeekKeyDown(const UIEvent& uiEvent) { return nullptr; }
 	virtual void onMouseMove(const UIEvent& uiEvent) {}
 	virtual void onMouseDelta(const UIEvent& uiEvent) {}
 
 	virtual MouseCommand* onMouseUp(const UIEvent& uiEvent)
 	{
 		releaseCapture();
-		return NULL;
+		return nullptr;
 	}
 
 	virtual void capture();
@@ -93,7 +93,7 @@ public:
 
 	bool captured() const { return capturedMouse; }
 
-	virtual MouseCommand* isSticky() const { return NULL; }
+	virtual MouseCommand* isSticky() const { return nullptr; }
 	virtual TextureId getCursorId() const;
 
 	static PartInstance* getMousePart(

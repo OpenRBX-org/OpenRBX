@@ -24,8 +24,8 @@ private:
 	std::shared_ptr<PartInstance> partInstance;
 
 protected:
-	virtual void render3dAdorn(Adorn* adorn);
-	virtual void onMouseHover(const UIEvent& uiEvent);
+	void render3dAdorn(Adorn* adorn) override;
+	void onMouseHover(const UIEvent& uiEvent) override;
 
 public:
 	PartTool(Workspace* workspace);
@@ -56,22 +56,22 @@ public:
 	static FillToolColor color;
 
 protected:
-	virtual MouseCommand* onMouseDown(const UIEvent& uiEvent);
+	MouseCommand* onMouseDown(const UIEvent& uiEvent) override;
 
-	virtual const std::string getCursorName() const { return "FillCursor"; }
+	const std::string getCursorName() const override { return "FillCursor"; }
 
 public:
 	FillTool(Workspace* workspace) : Named<PartTool, sFillTool>(workspace) {}
 
-	virtual MouseCommand* isSticky() const { return new FillTool(workspace); }
+	MouseCommand* isSticky() const override { return new FillTool(workspace); }
 };
 
 class DropperTool : public Named<PartTool, sDropperTool>
 {
 protected:
-	virtual MouseCommand* onMouseDown(const UIEvent& uiEvent);
+	MouseCommand* onMouseDown(const UIEvent& uiEvent) override;
 
-	virtual const std::string getCursorName() const { return "DropperCursor"; }
+	const std::string getCursorName() const override { return "DropperCursor"; }
 
 public:
 	DropperTool(Workspace* workspace) : Named<PartTool, sDropperTool>(workspace) {}
@@ -80,7 +80,7 @@ public:
 class ModelSetPrimaryPartTool : public Named<PartTool, sModelSetPrimaryPartTool>
 {
 protected:
-	virtual MouseCommand* onMouseDown(const UIEvent& uiEvent);
+	MouseCommand* onMouseDown(const UIEvent& uiEvent) override;
 
 public:
 	ModelSetPrimaryPartTool(Workspace* workspace) : Named<PartTool, sModelSetPrimaryPartTool>(workspace) {}

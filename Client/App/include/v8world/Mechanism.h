@@ -15,7 +15,7 @@ class Primitive;
 class MechanismTracker
 {
 public:
-	MechanismTracker() : mechanism(NULL) {}
+	MechanismTracker() : mechanism(nullptr) {}
 	~MechanismTracker() { stopTracking(); }
 
 	bool tracking();
@@ -40,11 +40,11 @@ public:
 	Mechanism(const Mechanism&) = delete;
 	Mechanism& operator=(const Mechanism&) = delete;
 
-	typedef std::set<Assembly*> AssemblySet;
+	using AssemblySet = std::set<Assembly*>;
 
 	static Mechanism* getMechanismFromPrimitive(const Primitive* primitive);
 
-	~Mechanism() {}
+	~Mechanism() = default;
 
 	const AssemblySet& getAssemblies() const { return assemblies; }
 	AssemblySet& getAssemblies() { return assemblies; }

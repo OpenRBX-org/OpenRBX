@@ -8,24 +8,24 @@
 #include <G3D/Vector2int16.h>
 #include <G3D/Vector3.h>
 #include <cstdio>
+#include <cstdlib>
 #include <limits>
 #include <locale>
 #include <sstream>
 #include <stdexcept>
-#include <stdlib.h>
 
 namespace RBX {
 
 void toLower(std::string& text)
 {
 	if (!text.empty()) {
-		std::use_facet<std::ctype<char> >(std::locale()).tolower(&text[0], &text[0] + text.size());
+		std::use_facet<std::ctype<char>>(std::locale()).tolower(&text[0], &text[0] + text.size());
 	}
 }
 
 void trim(std::string& text)
 {
-	const std::ctype<char>& ctype = std::use_facet<std::ctype<char> >(std::locale());
+	const std::ctype<char>& ctype = std::use_facet<std::ctype<char>>(std::locale());
 
 	std::string::size_type end = text.size();
 	while (end > 0 && ctype.is(std::ctype_base::space, text[end - 1])) {
@@ -375,18 +375,18 @@ bool StringConverter<G3D::Color3>::convertToValue(const std::string& text, G3D::
 			return false;
 		}
 
-		value.r = strtol(text.substr(1, 2).c_str(), NULL, 16) / 255.0f;
-		value.g = strtol(text.substr(3, 2).c_str(), NULL, 16) / 255.0f;
-		value.b = strtol(text.substr(5, 2).c_str(), NULL, 16) / 255.0f;
+		value.r = strtol(text.substr(1, 2).c_str(), nullptr, 16) / 255.0f;
+		value.g = strtol(text.substr(3, 2).c_str(), nullptr, 16) / 255.0f;
+		value.b = strtol(text.substr(5, 2).c_str(), nullptr, 16) / 255.0f;
 	}
-	else if (text.substr(0, 2) == "0x") {
+	else if (text.starts_with("0x")) {
 		if (text.size() != 8) {
 			return false;
 		}
 
-		value.r = strtol(text.substr(2, 2).c_str(), NULL, 16) / 255.0f;
-		value.g = strtol(text.substr(4, 2).c_str(), NULL, 16) / 255.0f;
-		value.b = strtol(text.substr(6, 2).c_str(), NULL, 16) / 255.0f;
+		value.r = strtol(text.substr(2, 2).c_str(), nullptr, 16) / 255.0f;
+		value.g = strtol(text.substr(4, 2).c_str(), nullptr, 16) / 255.0f;
+		value.b = strtol(text.substr(6, 2).c_str(), nullptr, 16) / 255.0f;
 	}
 	else {
 		int r = text.find_first_of(",;");

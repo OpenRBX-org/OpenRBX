@@ -18,7 +18,7 @@ class CRobloxTreeCtrlNode : public RBX::Listener<RBX::Instance, RBX::PropertyCha
 {
 public:
 	CRobloxTreeCtrlNode(CRobloxTreeCtrlNode* parent, std::shared_ptr<RBX::Instance> instance, CRobloxTreeCtrl* tree);
-	virtual ~CRobloxTreeCtrlNode();
+	~CRobloxTreeCtrlNode() override;
 
 	virtual void VTable0x08();
 	virtual void VTable0x0c();
@@ -38,9 +38,9 @@ protected:
 	friend class CRobloxTreeCtrl;
 	friend class CSelectionTreeCtrl;
 
-	virtual void onEvent(const RBX::Instance* source, RBX::PropertyChanged event);
-	virtual void onEvent(const RBX::Instance* source, RBX::ChildAdded event);
-	virtual void onEvent(const RBX::Instance* source, RBX::ChildRemoved event);
+	void onEvent(const RBX::Instance* source, RBX::PropertyChanged event) override;
+	void onEvent(const RBX::Instance* source, RBX::ChildAdded event) override;
+	void onEvent(const RBX::Instance* source, RBX::ChildRemoved event) override;
 
 	std::shared_ptr<RBX::Instance> m_unk0x0c;
 	std::map<RBX::Instance*, CRobloxTreeCtrlNode*> m_unk0x14;
@@ -50,7 +50,7 @@ protected:
 	bool m_unk0x2d;
 	CRobloxTreeCtrl* m_unk0x30;
 	CRobloxTreeCtrlNode* m_unk0x34;
-	std::set<std::shared_ptr<RBX::Instance>, std::owner_less<std::shared_ptr<RBX::Instance> > > m_unk0x38;
+	std::set<std::shared_ptr<RBX::Instance>, std::owner_less<std::shared_ptr<RBX::Instance>>> m_unk0x38;
 	HTREEITEM m_unk0x44;
 	int m_unk0x48;
 	const RBX::Reflection::ClassDescriptor* m_unk0x4c;

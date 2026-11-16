@@ -17,7 +17,7 @@ const Reflection::EnumPropDescriptor<FaceInstance, NormalId> FaceInstance::prop_
 
 bool FaceInstance::askSetParent(const Instance* instance) const
 {
-	return dynamic_cast<const PartInstance*>(instance) != NULL;
+	return dynamic_cast<const PartInstance*>(instance) != nullptr;
 }
 
 void FaceInstance::setFace(NormalId value)

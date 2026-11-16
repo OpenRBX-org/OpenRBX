@@ -52,9 +52,7 @@ static RBX::Reflection::BoundFuncDesc<ThumbnailGenerator, std::string(std::strin
 		RBX::Reflection::FunctionDescriptor::NeedTrustedCaller
 	);
 
-ThumbnailGenerator::ThumbnailGenerator()
-{
-}
+ThumbnailGenerator::ThumbnailGenerator() = default;
 
 class OSContext : public G3D::GWindow
 {
@@ -63,8 +61,8 @@ private:
 
 	OSContext(bool alphaChannel)
 	{
-		ctx = OSMesaCreateContext(alphaChannel ? OSMESA_RGBA : OSMESA_RGB, NULL);
-		if (ctx == NULL) {
+		ctx = OSMesaCreateContext(alphaChannel ? OSMESA_RGBA : OSMESA_RGB, nullptr);
+		if (ctx == nullptr) {
 			throw std::runtime_error("shared OSMesaCreateContext failed");
 		}
 	}
@@ -87,14 +85,14 @@ public:
 	OSContext(int cx, int cy, bool alphaChannel) : image(cx, cy, alphaChannel ? 4 : 3)
 	{
 		ctx = OSMesaCreateContext(alphaChannel ? OSMESA_RGBA : OSMESA_RGB, shared(alphaChannel));
-		if (ctx == NULL) {
+		if (ctx == nullptr) {
 			throw std::runtime_error("OSMesaCreateContext failed");
 		}
 	}
 
-	virtual ~OSContext() { OSMesaDestroyContext(ctx); }
+	~OSContext() override { OSMesaDestroyContext(ctx); }
 
-	virtual void reallyMakeCurrent() const
+	void reallyMakeCurrent() const override
 	{
 		if (!OSMesaMakeCurrent(
 				ctx, const_cast<G3D::uint8*>(image.byte()), GL_UNSIGNED_BYTE, image.width, image.height
@@ -103,75 +101,75 @@ public:
 		}
 	}
 
-	virtual void getSettings(G3D::GWindow::Settings& settings) const { settings = G3D::GWindow::Settings(); }
+	void getSettings(G3D::GWindow::Settings& settings) const override { settings = G3D::GWindow::Settings(); }
 
-	virtual int width() const { return image.width; }
+	int width() const override { return image.width; }
 
-	virtual int height() const { return image.height; }
+	int height() const override { return image.height; }
 
-	virtual G3D::Rect2D dimensions() const { throw std::runtime_error("OSContext unimplemented method"); }
+	G3D::Rect2D dimensions() const override { throw std::runtime_error("OSContext unimplemented method"); }
 
-	virtual void setDimensions(const G3D::Rect2D& dims) { throw std::runtime_error("OSContext unimplemented method"); }
+	void setDimensions(const G3D::Rect2D& dims) override { throw std::runtime_error("OSContext unimplemented method"); }
 
-	virtual void setPosition(int x, int y) { throw std::runtime_error("OSContext unimplemented method"); }
+	void setPosition(int x, int y) override { throw std::runtime_error("OSContext unimplemented method"); }
 
-	virtual bool hasFocus() const { throw std::runtime_error("OSContext unimplemented method"); }
+	bool hasFocus() const override { throw std::runtime_error("OSContext unimplemented method"); }
 
-	virtual std::string getAPIVersion() const { throw std::runtime_error("OSContext unimplemented method"); }
+	std::string getAPIVersion() const override { throw std::runtime_error("OSContext unimplemented method"); }
 
-	virtual std::string getAPIName() const { throw std::runtime_error("OSContext unimplemented method"); }
+	std::string getAPIName() const override { throw std::runtime_error("OSContext unimplemented method"); }
 
-	virtual void setGammaRamp(const G3D::Array<G3D::uint16>& gammaRamp) {}
+	void setGammaRamp(const G3D::Array<G3D::uint16>& gammaRamp) override {}
 
-	virtual void setCaption(const std::string& caption) {}
+	void setCaption(const std::string& caption) override {}
 
-	virtual int numJoysticks() const { return 0; }
+	int numJoysticks() const override { return 0; }
 
-	virtual std::string joystickName(unsigned int) { return ""; }
+	std::string joystickName(unsigned int) override { return ""; }
 
-	virtual std::string caption() { throw std::runtime_error("OSContext unimplemented method"); }
+	std::string caption() override { throw std::runtime_error("OSContext unimplemented method"); }
 
-	virtual void swapGLBuffers() { throw std::runtime_error("OSContext unimplemented method"); }
+	void swapGLBuffers() override { throw std::runtime_error("OSContext unimplemented method"); }
 
-	virtual void notifyResize(int w, int h) { throw std::runtime_error("OSContext unimplemented method"); }
+	void notifyResize(int w, int h) override { throw std::runtime_error("OSContext unimplemented method"); }
 
-	virtual void setRelativeMousePosition(double x, double y)
+	void setRelativeMousePosition(double x, double y) override
 	{
 		throw std::runtime_error("OSContext unimplemented method");
 	}
 
-	virtual void setRelativeMousePosition(const G3D::Vector2& p)
+	void setRelativeMousePosition(const G3D::Vector2& p) override
 	{
 		throw std::runtime_error("OSContext unimplemented method");
 	}
 
-	virtual void getRelativeMouseState(G3D::Vector2& position, G3D::uint8& mouseButtons) const
+	void getRelativeMouseState(G3D::Vector2& position, G3D::uint8& mouseButtons) const override
 	{
 		throw std::runtime_error("OSContext unimplemented method");
 	}
 
-	virtual void getRelativeMouseState(int& x, int& y, G3D::uint8& mouseButtons) const
+	void getRelativeMouseState(int& x, int& y, G3D::uint8& mouseButtons) const override
 	{
 		throw std::runtime_error("OSContext unimplemented method");
 	}
 
-	virtual void getRelativeMouseState(double& x, double& y, G3D::uint8& mouseButtons) const
+	void getRelativeMouseState(double& x, double& y, G3D::uint8& mouseButtons) const override
 	{
 		throw std::runtime_error("OSContext unimplemented method");
 	}
 
-	virtual void getJoystickState(unsigned int stickNum, G3D::Array<float>& axis, G3D::Array<bool>& button)
+	void getJoystickState(unsigned int stickNum, G3D::Array<float>& axis, G3D::Array<bool>& button) override
 	{
 		throw std::runtime_error("OSContext unimplemented method");
 	}
 
-	virtual void setInputCapture(bool c) { throw std::runtime_error("OSContext unimplemented method"); }
+	void setInputCapture(bool c) override { throw std::runtime_error("OSContext unimplemented method"); }
 
-	virtual bool inputCapture() const { return false; }
+	bool inputCapture() const override { return false; }
 
-	virtual void setMouseVisible(bool b) { throw std::runtime_error("OSContext unimplemented method"); }
+	void setMouseVisible(bool b) override { throw std::runtime_error("OSContext unimplemented method"); }
 
-	virtual bool mouseVisible() const { return false; }
+	bool mouseVisible() const override { return false; }
 };
 
 static void waitForContent()
@@ -202,7 +200,7 @@ std::string ThumbnailGenerator::clickTexture(std::string textureId, std::string 
 
 		OSContext context(cx, cy, true);
 
-		std::lock_guard<std::mutex> lock(osContextMutex);
+		std::scoped_lock lock(osContextMutex);
 
 		context.makeCurrent();
 
@@ -269,7 +267,7 @@ std::string ThumbnailGenerator::click(std::string fileType, int cx, int cy, bool
 		G3D::BinaryOutput binaryOutput;
 		binaryOutput.setEndian(G3D::G3D_LITTLE_ENDIAN);
 
-		doClick(fileType, cx, cy, hideSky, NULL);
+		doClick(fileType, cx, cy, hideSky, nullptr);
 
 		waitForContent();
 
@@ -317,7 +315,7 @@ void ThumbnailGenerator::doClick(std::string fileType, int cx, int cy, bool hide
 
 	OSContext context(cx, cy, alphaChannel);
 
-	std::lock_guard<std::mutex> lock(osContextMutex);
+	std::scoped_lock lock(osContextMutex);
 
 	context.makeCurrent();
 

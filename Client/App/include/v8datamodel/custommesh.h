@@ -58,7 +58,7 @@ public:
 	void setTextureId(const TextureId& value);
 
 protected:
-	virtual bool askSetParent(const Instance* instance) const;
+	bool askSetParent(const Instance* instance) const override;
 
 public:
 };

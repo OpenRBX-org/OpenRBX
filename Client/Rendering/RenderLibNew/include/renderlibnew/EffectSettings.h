@@ -5,8 +5,7 @@
 #include <GLG3D/LightingParameters.h>
 #include <GLG3D/ToneMap.h>
 
-namespace RBX {
-namespace RenderNew {
+namespace RBX::RenderNew {
 
 class EffectSettings
 {
@@ -54,7 +53,6 @@ public:
 	bool applyToneMap() const { return _toneMap; }
 };
 
-} // namespace RenderNew
-} // namespace RBX
+} // namespace RBX::RenderNew
 
 #endif // RENDERLIBNEW_EFFECTSETTINGS_H

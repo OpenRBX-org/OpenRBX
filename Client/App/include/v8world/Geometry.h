@@ -27,7 +27,7 @@ protected:
 	virtual void onSetSize();
 
 public:
-	virtual ~Geometry() {}
+	virtual ~Geometry() = default;
 
 	static Geometry* nullGeometry();
 

@@ -13,8 +13,7 @@
 #include <GLG3D/VAR.h>
 #include <vector>
 
-namespace RBX {
-namespace Render {
+namespace RBX::Render {
 
 class AggregateChunk;
 
@@ -29,7 +28,7 @@ public:
 
 	Chunk(float polygonOffset);
 
-	virtual ~Chunk() { RenderStats::chunkCount--; }
+	~Chunk() override { RenderStats::chunkCount--; }
 
 	virtual bool cachesShadows() const { return false; }
 
@@ -62,31 +61,30 @@ public:
 	static bool randomColors;
 	static const G3D::CoordinateFrame identity;
 
-	virtual bool cachesShadows() const { return true; }
+	bool cachesShadows() const override { return true; }
 
-	virtual bool castsShadows() const { return _castsShadows; }
+	bool castsShadows() const override { return _castsShadows; }
 
-	virtual bool cullable() const { return _cullable; }
+	bool cullable() const override { return _cullable; }
 
-	virtual const G3D::CoordinateFrame& cframe() { return _cframe; }
+	const G3D::CoordinateFrame& cframe() override { return _cframe; }
 
-	virtual G3D::ReferenceCountedPointer<Material> getMaterial() { return material; }
+	G3D::ReferenceCountedPointer<Material> getMaterial() override { return material; }
 
-	virtual G3D::ReferenceCountedPointer<Mesh> getMesh() { return mesh; }
+	G3D::ReferenceCountedPointer<Mesh> getMesh() override { return mesh; }
 
-	virtual void renderShadows(G3D::RenderDevice* rd, const G3D::GLight& light, bool caps, float shadowVertexDistance);
+	void renderShadows(G3D::RenderDevice* rd, const G3D::GLight& light, bool caps, float shadowVertexDistance) override;
 
-	typedef std::vector<G3D::ReferenceCountedPointer<Chunk> > Components;
+	using Components = std::vector<G3D::ReferenceCountedPointer<Chunk>>;
 
 	Components components;
 
 	AggregateChunk(const G3D::ReferenceCountedPointer<Chunk>& firstChunk);
-	virtual ~AggregateChunk();
+	~AggregateChunk() override;
 
 	void makeMesh();
 };
 
-} // namespace Render
-} // namespace RBX
+} // namespace RBX::Render
 
 #endif // RENDERLIB_CHUNK_H

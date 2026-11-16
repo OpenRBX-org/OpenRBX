@@ -11,7 +11,7 @@ char sForceField[] = "ForceField";
 
 bool ForceField::askSetParent(const Instance* instance) const
 {
-	return dynamic_cast<const Workspace*>(instance) == NULL;
+	return dynamic_cast<const Workspace*>(instance) == nullptr;
 }
 
 void renderForceField(std::shared_ptr<Instance> descendent, Adorn* adorn, int cycle)
@@ -41,7 +41,7 @@ bool ancestorContainsForceField(Instance* instance)
 	}
 
 	Instance* parent = instance->getParent();
-	if (parent != NULL && dynamic_cast<Workspace*>(parent) == NULL) {
+	if (parent != nullptr && dynamic_cast<Workspace*>(parent) == nullptr) {
 		return ancestorContainsForceField(parent);
 	}
 
@@ -72,8 +72,6 @@ ForceField::ForceField() : cycle(0)
 } // namespace RBX
 
 template class RBX::FactoryProduct<RBX::ForceField, RBX::Instance, RBX::sForceField>;
-template class RBX::Reflection::Described<
-	RBX::ForceField,
-	RBX::sForceField,
-	RBX::FactoryProduct<RBX::ForceField, RBX::Instance, RBX::sForceField> >;
+template class RBX::Reflection::
+	Described<RBX::ForceField, RBX::sForceField, RBX::FactoryProduct<RBX::ForceField, RBX::Instance, RBX::sForceField>>;
 template class RBX::DescribedCreatable<RBX::ForceField, RBX::Instance, RBX::sForceField>;

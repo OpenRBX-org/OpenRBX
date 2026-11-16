@@ -8,12 +8,12 @@ namespace RBX {
 class RigidJoint : public Joint
 {
 public:
-	virtual ~RigidJoint() {}
+	~RigidJoint() override = default;
 
 	static bool isRigidJoint(Edge* e) { return isJoint(e) && jointIsRigid(static_cast<Joint*>(e)); }
 
-	virtual bool isAligned();
-	virtual CoordinateFrame align(Primitive* prim0, Primitive* prim1);
+	bool isAligned() override;
+	CoordinateFrame align(Primitive* prim0, Primitive* prim1) override;
 
 	CoordinateFrame getChildInParent(Primitive* parent, Primitive* child);
 

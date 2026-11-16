@@ -76,7 +76,7 @@ void TwoDManager::FUN_0067c710()
 	renderSystem->_setProjectionMatrix(projection);
 	renderSystem->_setTextureMatrix(0, Matrix4::IDENTITY);
 	renderSystem->_setTextureCoordSet(0, 0);
-	renderSystem->_setTextureCoordCalculation(0, TEXCALC_NONE, NULL);
+	renderSystem->_setTextureCoordCalculation(0, TEXCALC_NONE, nullptr);
 	renderSystem->_setTextureUnitFiltering(0, FO_LINEAR, FO_LINEAR, FO_LINEAR);
 	renderSystem->_setTextureBlendMode(0, colourBlend);
 	renderSystem->_setTextureBlendMode(0, alphaBlend);
@@ -117,13 +117,9 @@ void TwoDManager::FUN_0067cb20(size_t numVertices)
 	m_unk0x10.operationType = RenderOperation::OT_TRIANGLE_LIST;
 }
 
-TwoDManager::~TwoDManager()
-{
-}
+TwoDManager::~TwoDManager() = default;
 
-TwoDManager::TwoDManager()
-{
-}
+TwoDManager::TwoDManager() = default;
 
 void TwoDManager::FUN_0067cec0()
 {
@@ -156,7 +152,7 @@ void TwoDManager::FUN_0067cec0()
 	if (m_unk0x24.isNull() || m_unk0x24->getNumVertices() < numVertices) {
 		if (!m_unk0x24.isNull()) {
 			delete m_unk0x10.vertexData;
-			m_unk0x10.vertexData = NULL;
+			m_unk0x10.vertexData = nullptr;
 			m_unk0x24.setNull();
 		}
 

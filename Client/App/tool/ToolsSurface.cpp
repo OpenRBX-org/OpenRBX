@@ -135,7 +135,7 @@ void ModelSetFrontTool::VTable0x40(Surface* surface)
 	}
 }
 
-SurfaceTool::SurfaceTool(Workspace* workspace) : MouseCommand(workspace), surface(NULL)
+SurfaceTool::SurfaceTool(Workspace* workspace) : MouseCommand(workspace), surface(nullptr)
 {
 }
 
@@ -143,7 +143,7 @@ void SurfaceTool::onMouseHover(const UIEvent& uiEvent)
 {
 	PartInstance* hitPart;
 	surface = getSurface(uiEvent, hitPart, surfaceId);
-	part = shared_from(surface ? hitPart : NULL);
+	part = shared_from(surface ? hitPart : nullptr);
 }
 
 MouseCommand* SurfaceTool::onMouseDown(const UIEvent& uiEvent)
@@ -160,7 +160,7 @@ MouseCommand* SurfaceTool::onMouseDown(const UIEvent& uiEvent)
 		workspace->getDataState().pushState(m_unk0x30, undoState.release(), redoState.release());
 		workspace->getDataState().setDirty(true);
 	}
-	return NULL;
+	return nullptr;
 }
 
 void GlueTool::VTable0x40(Surface* surface)
@@ -267,16 +267,16 @@ static Instance* FUN_0063a090(Instance* instance)
 		return part;
 	}
 
-	std::shared_ptr<const std::vector<std::shared_ptr<Instance> > > children = instance->getChildren().read();
+	std::shared_ptr<const std::vector<std::shared_ptr<Instance>>> children = instance->getChildren().read();
 	if (children) {
-		std::vector<std::shared_ptr<Instance> >::const_iterator end = children->end();
-		for (std::vector<std::shared_ptr<Instance> >::const_iterator iter = children->begin(); iter != end; ++iter) {
+		std::vector<std::shared_ptr<Instance>>::const_iterator end = children->end();
+		for (std::vector<std::shared_ptr<Instance>>::const_iterator iter = children->begin(); iter != end; ++iter) {
 			if (FUN_0063a090(iter->get())) {
 				return iter->get();
 			}
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 void ModelTool::onMouseHover(const UIEvent& uiEvent)
@@ -294,7 +294,7 @@ void AnchorTool::onMouseHover(const UIEvent& uiEvent)
 	if (oldInstance != m_unk0x20) {
 		bool anchored;
 		if (m_unk0x20) {
-			anchored = FUN_0063a090(m_unk0x20.get()) == NULL;
+			anchored = FUN_0063a090(m_unk0x20.get()) == nullptr;
 		}
 		else {
 			anchored = false;
@@ -306,7 +306,7 @@ void AnchorTool::onMouseHover(const UIEvent& uiEvent)
 MouseCommand* AnchorTool::onMouseDown(const UIEvent& uiEvent)
 {
 	if (m_unk0x20 && !PartInstance::getLocked(m_unk0x20.get())) {
-		bool anchored = FUN_0063a090(m_unk0x20.get()) != NULL;
+		bool anchored = FUN_0063a090(m_unk0x20.get()) != nullptr;
 		FUN_00639e20(m_unk0x20.get(), anchored);
 		ServiceProvider::create<Soundscape::SoundService>(workspace)->playSound(PING_SOUND);
 	}
@@ -344,7 +344,7 @@ void ShootTool::onMouseIdle(const UIEvent& uiEvent)
 PV SlingshotTool::VTable0x44(const UIEvent& uiEvent, const CoordinateFrame& cframe)
 {
 	G3D::Vector3 hitWorld;
-	PartInstance* part = getPart(uiEvent, NULL, hitWorld);
+	PartInstance* part = getPart(uiEvent, nullptr, hitWorld);
 	G3D::Vector3 direction = part ? (hitWorld - cframe.translation).direction() : cframe.lookVector();
 	G3D::Vector3 position = cframe.translation + direction * 3.0f;
 	if (!part) {
@@ -370,7 +370,7 @@ PV SlingshotTool::VTable0x44(const UIEvent& uiEvent, const CoordinateFrame& cfra
 PV RocketTool::VTable0x44(const UIEvent& uiEvent, const CoordinateFrame& cframe)
 {
 	G3D::Vector3 hitWorld;
-	PartInstance* part = getPart(uiEvent, NULL, hitWorld);
+	PartInstance* part = getPart(uiEvent, nullptr, hitWorld);
 	G3D::Vector3 direction = part ? (hitWorld - cframe.translation).direction() : cframe.lookVector();
 	CoordinateFrame frame;
 	frame.lookAt(direction);
@@ -385,14 +385,14 @@ ShootTool::ShootTool(Workspace* workspace, bool p_unk0x28, int p_unk0x2c)
 
 std::shared_ptr<PartInstance> SlingshotTool::VTable0x40()
 {
-	std::vector<std::shared_ptr<Instance> > instances;
+	std::vector<std::shared_ptr<Instance>> instances;
 	ContentProvider::singleton().load(ContentId::fromAssets("Fonts\\SlingshotPellet.rbxm"), instances);
 	return std::static_pointer_cast<PartInstance>(instances.front());
 }
 
 std::shared_ptr<PartInstance> RocketTool::VTable0x40()
 {
-	std::vector<std::shared_ptr<Instance> > instances;
+	std::vector<std::shared_ptr<Instance>> instances;
 	ContentProvider::singleton().load(ContentId::fromAssets("Fonts\\Rocket.rbxm"), instances);
 	return std::static_pointer_cast<PartInstance>(instances.front());
 }
@@ -457,7 +457,7 @@ MouseCommand* ResizeTool::onMouseUp(const UIEvent& uiEvent)
 			workspace->getDataState().setDirty(true);
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 void ResizeTool::FUN_0063af80(int p_unk0x04)
@@ -496,7 +496,7 @@ void ResizeTool::onMouseMove(const UIEvent& uiEvent)
 void ResizeTool::FUN_0063b240(const UIEvent& uiEvent)
 {
 	ServiceClient<Selection> selection(workspace);
-	std::vector<std::shared_ptr<Instance> >::const_iterator it;
+	std::vector<std::shared_ptr<Instance>>::const_iterator it;
 	for (it = selection->begin(); it != selection->end(); ++it) {
 		if (PartInstance* part = dynamic_cast<PartInstance*>(it->get())) {
 			G3D::Ray ray = getUnitMouseRay(uiEvent);
@@ -512,7 +512,7 @@ void ResizeTool::FUN_0063b240(const UIEvent& uiEvent)
 void ResizeTool::render3dAdorn(Adorn* adorn)
 {
 	ServiceClient<Selection> selection(workspace);
-	std::vector<std::shared_ptr<Instance> >::const_iterator it;
+	std::vector<std::shared_ptr<Instance>>::const_iterator it;
 	for (it = selection->begin(); it != selection->end(); ++it) {
 		if (PartInstance* part = dynamic_cast<PartInstance*>(it->get())) {
 			DrawAdorn::handles3d(
@@ -529,7 +529,7 @@ void ResizeTool::render3dAdorn(Adorn* adorn)
 void ResizeTool::render2d(Adorn* adorn)
 {
 	ServiceClient<Selection> selection(workspace);
-	std::vector<std::shared_ptr<Instance> >::const_iterator it;
+	std::vector<std::shared_ptr<Instance>>::const_iterator it;
 	for (it = selection->begin(); it != selection->end(); ++it) {
 		if (PartInstance* part = dynamic_cast<PartInstance*>(it->get())) {
 			DrawAdorn::handles2d(
@@ -591,10 +591,10 @@ MouseCommand* HammerTool::onMouseDown(const UIEvent& uiEvent)
 		Explosion::propPosition.setValue(explosion.get(), part->getCoordinateFrame().translation);
 		Explosion::propBlastPressure.setValue(explosion.get(), 0.0f);
 		explosion->setParent(workspace);
-		part->setParent(NULL);
+		part->setParent(nullptr);
 		ServiceProvider::create<Soundscape::SoundService>(workspace)->playSound(BOMB_SOUND);
 	}
-	return NULL;
+	return nullptr;
 }
 
 void LaserTool::render3dAdorn(Adorn* adorn)
@@ -614,7 +614,7 @@ MouseCommand* LaserTool::onMouseDown(const UIEvent& uiEvent)
 	if (head) {
 		m_unk0x24 = head->getCoordinateFrame().translation;
 		G3D::Vector3 hitWorld;
-		PartInstance* part = getPart(uiEvent, NULL, hitWorld);
+		PartInstance* part = getPart(uiEvent, nullptr, hitWorld);
 		if (part) {
 			std::shared_ptr<Explosion> explosion = Creatable<Instance>::create<Explosion>();
 			Explosion::propPosition.setValue(explosion.get(), hitWorld);
@@ -644,9 +644,7 @@ void GrabTool::onMouseHover(const UIEvent& uiEvent)
 	}
 }
 
-GrabTool::~GrabTool()
-{
-}
+GrabTool::~GrabTool() = default;
 
 GrabTool::GrabTool(Workspace* workspace) : Named<MouseCommand, sGrabTool>(workspace), cursor("ArrowCursor")
 {
@@ -661,7 +659,7 @@ MouseCommand* GrabTool::onMouseDown(const UIEvent& uiEvent)
 		dragInstances.push_back(getTopSelectable3d(part));
 		return DragTool::onMouseDown(part, hitWorld, dragInstances, uiEvent, workspace);
 	}
-	return NULL;
+	return nullptr;
 }
 
 const std::string CloneTool::getCursorName() const
@@ -681,7 +679,7 @@ MouseCommand* CloneTool::onMouseDown(const UIEvent& uiEvent)
 	if (part) {
 		const G3D::CoordinateFrame& cframe = part->getCoordinateFrame();
 		std::shared_ptr<PartInstance> clone = std::static_pointer_cast<PartInstance>(part->clone());
-		std::vector<std::shared_ptr<Instance> > instances;
+		std::vector<std::shared_ptr<Instance>> instances;
 		instances.push_back(clone);
 		workspace->insertInstances(instances, workspace, INSERT_TO_TREE, SUPPRESS_PROMPTS);
 		ServiceProvider::create<Soundscape::SoundService>(workspace)->playSound(PING_SOUND);
@@ -689,7 +687,7 @@ MouseCommand* CloneTool::onMouseDown(const UIEvent& uiEvent)
 		MouseCommand* dragger = new PartDragTool(clone.get(), clone->getCoordinateFrame().translation, workspace);
 		return dragger->onMouseDown(uiEvent);
 	}
-	return NULL;
+	return nullptr;
 }
 
 void CloneTool::onMouseIdle(const UIEvent& uiEvent)
@@ -727,12 +725,10 @@ MouseCommand* GameTool::onMouseDown(const UIEvent& uiEvent)
 		MouseCommand* dragger = new PartDragTool(part, hitWorld, workspace);
 		return dragger->onMouseDown(uiEvent);
 	}
-	return NULL;
+	return nullptr;
 }
 
-GameTool::~GameTool()
-{
-}
+GameTool::~GameTool() = default;
 
 GameTool::GameTool(Workspace* workspace) : Named<MouseCommand, sGameTool>(workspace)
 {
@@ -751,15 +747,15 @@ MouseCommand* AxisMoveTool::onMouseUp(const UIEvent& uiEvent)
 		m_unk0x44 = false;
 	}
 	releaseCapture();
-	return NULL;
+	return nullptr;
 }
 
 void AxisMoveTool::onMouseMove(const UIEvent& uiEvent)
 {
 	if (!m_unk0x44) {
 		if ((G3D::Vector2(uiEvent.mousePosition) - G3D::Vector2(m_unk0x46)).length() > 4.0f) {
-			ServiceClient<FilteredSelection<PVInstance> > selection(workspace);
-			dragger.reset(new MegaDragger(NULL, selection->items(), workspace));
+			ServiceClient<FilteredSelection<PVInstance>> selection(workspace);
+			dragger.reset(new MegaDragger(nullptr, selection->items(), workspace));
 			dragger->startDragging();
 			dragger->alignAndCleanParts();
 			m_unk0x44 = true;

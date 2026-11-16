@@ -26,20 +26,20 @@ private:
 
 	Matrix3 getMomentHollow(float mass) const;
 
-	virtual void onSetSize();
+	void onSetSize() override;
 
 public:
-	virtual bool hitTest(const Ray& rayInMe, Vector3& localHitPoint, bool& inside);
+	bool hitTest(const Ray& rayInMe, Vector3& localHitPoint, bool& inside) override;
 
-	virtual GeometryType getGeometryType() const { return GEOMETRY_BLOCK; }
+	GeometryType getGeometryType() const override { return GEOMETRY_BLOCK; }
 
-	virtual float getRadius() const { return cornerRadius; }
+	float getRadius() const override { return cornerRadius; }
 
-	virtual Vector3 getCenterToCorner(const Matrix3& rotation) const;
+	Vector3 getCenterToCorner(const Matrix3& rotation) const override;
 
-	virtual Matrix3 getMoment(float mass) const { return getMomentHollow(mass); }
+	Matrix3 getMoment(float mass) const override { return getMomentHollow(mass); }
 
-	virtual float getGridVolume() const;
+	float getGridVolume() const override;
 
 	void projectToFace(Vector3& ray, Vector3int16& clip, int& onBorder);
 
@@ -61,8 +61,8 @@ public:
 
 	Vector2 getProjectedVertex(const Vector3& vertex, NormalId normalID);
 
-	Block() : vertices(NULL), cornerRadius(0) {}
-	virtual ~Block() {}
+	Block() : vertices(nullptr), cornerRadius(0) {}
+	~Block() override = default;
 
 private:
 	const Vector3* vertices;

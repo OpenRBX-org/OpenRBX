@@ -32,7 +32,7 @@ private:
 		G3D::Vector3 lastDragSnap;
 
 		SnapInfo()
-			: snap(NULL), surface(NORM_UNDEFINED), hitWorld(G3D::Vector3::inf()), lastDragSnap(G3D::Vector3::inf())
+			: snap(nullptr), surface(NORM_UNDEFINED), hitWorld(G3D::Vector3::inf()), lastDragSnap(G3D::Vector3::inf())
 		{
 		}
 

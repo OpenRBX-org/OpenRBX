@@ -13,7 +13,7 @@ private:
 	std::string equation;
 
 protected:
-	virtual std::string getLabel() const;
+	std::string getLabel() const override;
 
 public:
 	EquationDisplay(const std::string& name, const std::string& label, const std::string& equation);

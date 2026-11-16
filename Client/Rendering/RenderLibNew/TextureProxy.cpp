@@ -14,8 +14,7 @@
 #include <algorithm>
 #include <fstream>
 
-namespace RBX {
-namespace RenderNew {
+namespace RBX::RenderNew {
 
 void TextureProxy::shadePixel(const G3D::Color3uint8& base, G3D::Color3uint8& lighting)
 {
@@ -198,8 +197,8 @@ G3D::ReferenceCountedPointer<G3D::Texture> TextureProxy::resolve(G3D::RenderDevi
 
 			m_unk0x4c = Ogre::TextureManager::getSingleton().getByName(std::string(encodedFileName));
 			if (!m_unk0x4c.isNull()) {
-				root = NULL;
-				shadeTexture = NULL;
+				root = nullptr;
+				shadeTexture = nullptr;
 				loaded = true;
 				return texture;
 			}
@@ -250,7 +249,7 @@ G3D::ReferenceCountedPointer<G3D::Texture> TextureProxy::resolve(G3D::RenderDevi
 				mipData.resize(Ogre::Image::calculateSize(numMipmaps, 1, width, height, 1, Ogre::PF_BYTE_RGB), 0);
 
 				unsigned char* dst = &mipData[0];
-				unsigned char* prev = NULL;
+				unsigned char* prev = nullptr;
 				int prevWidth = -1;
 				int prevHeight = -1;
 				for (int level = 0; level <= numMipmaps; level++) {
@@ -288,7 +287,7 @@ G3D::ReferenceCountedPointer<G3D::Texture> TextureProxy::resolve(G3D::RenderDevi
 			m_unk0x4c = Ogre::TextureManager::getSingleton().create(name, g_unk0x009587d4);
 			m_unk0x4c->loadImage(shadedImage);
 
-			root = NULL;
+			root = nullptr;
 			loaded = true;
 
 			Ogre::LogManager::getSingleton().logMessage("create shadetex=" + m_unk0x4c->getName() + "\n");
@@ -385,8 +384,8 @@ G3D::ReferenceCountedPointer<G3D::Texture> TextureProxy::resolve(G3D::RenderDevi
 			Ogre::LogManager::getSingleton().logMessage("RBX texture not loaded in resolve()\n");
 		}
 
-		root = NULL;
-		shadeTexture = NULL;
+		root = nullptr;
+		shadeTexture = nullptr;
 		loaded = true;
 	}
 
@@ -398,5 +397,4 @@ TextureProxyRef TextureProxy::alphaOnlyVersion()
 	return new TextureProxy(this);
 }
 
-} // namespace RenderNew
-} // namespace RBX
+} // namespace RBX::RenderNew

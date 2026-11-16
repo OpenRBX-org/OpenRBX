@@ -1,7 +1,6 @@
 #include "security/SecurityContext.h"
 
-namespace RBX {
-namespace Security {
+namespace RBX::Security {
 
 bool Context::isInRole(Identities identity, Permissions permission)
 {
@@ -22,5 +21,4 @@ bool Context::isInRole(Identities identity, Permissions permission)
 	}
 }
 
-} // namespace Security
-} // namespace RBX
+} // namespace RBX::Security

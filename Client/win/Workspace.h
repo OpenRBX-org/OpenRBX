@@ -26,7 +26,7 @@ class __declspec(novtable) CWorkspace : public IDispatchImpl<IWorkspace, &IID_IW
 {
 public:
 	CWorkspace();
-	~CWorkspace();
+	~CWorkspace() override;
 
 	DECLARE_REGISTRY_RESOURCEID(106)
 
@@ -61,8 +61,8 @@ public:
 	void FUN_004702b0(RBX::ContentId contentId, bool p_unk0x20);
 
 protected:
-	virtual void onEvent(const RBX::Selection* source, RBX::SelectionChanged event);
-	virtual void onEvent(const RBX::Workspace* source, RBX::DrawChanged event);
+	void onEvent(const RBX::Selection* source, RBX::SelectionChanged event) override;
+	void onEvent(const RBX::Workspace* source, RBX::DrawChanged event) override;
 
 private:
 	friend class CRobloxDoc;

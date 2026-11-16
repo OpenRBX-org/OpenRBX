@@ -31,9 +31,7 @@ static std::once_flag flagInitScriptCpp;
 
 namespace RBX {
 
-Script::~Script()
-{
-}
+Script::~Script() = default;
 
 std::shared_ptr<const std::string> Script::requestCode()
 {
@@ -53,7 +51,7 @@ static void initScriptCpp()
 
 namespace RBX {
 
-Script::Script() : DescribedCreatable<Script, Instance, sScript>("Script"), disabled(false), owner(NULL)
+Script::Script() : DescribedCreatable<Script, Instance, sScript>("Script"), disabled(false), owner(nullptr)
 {
 	std::call_once(flagInitScriptCpp, initScriptCpp);
 
@@ -64,12 +62,12 @@ void Script::onAncestorChanged(const AncestorChanged& event)
 {
 	Instance::onAncestorChanged(event);
 
-	IScriptOwner* newOwner = NULL;
+	IScriptOwner* newOwner = nullptr;
 
-	for (Instance* i = getParent(); i != NULL; i = i->getParent()) {
+	for (Instance* i = getParent(); i != nullptr; i = i->getParent()) {
 		IScriptOwner* scriptOwner = dynamic_cast<IScriptOwner*>(i);
 
-		if (scriptOwner && (newOwner = scriptOwner->scriptShouldRun(this)) != NULL) {
+		if (scriptOwner && (newOwner = scriptOwner->scriptShouldRun(this)) != nullptr) {
 			break;
 		}
 	}
@@ -93,7 +91,7 @@ void Script::onAncestorChanged(const AncestorChanged& event)
 
 void Script::onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider)
 {
-	if (ScriptContext* scriptContext = oldProvider ? oldProvider->find<ScriptContext>() : NULL) {
+	if (ScriptContext* scriptContext = oldProvider ? oldProvider->find<ScriptContext>() : nullptr) {
 		scriptContext->removeScript(this);
 	}
 
@@ -134,12 +132,12 @@ template const RBX::FactoryProduct<RBX::Network::Player, RBX::Instance, RBX::Net
 
 template class RBX::FactoryProduct<RBX::Script, RBX::Instance, RBX::sScript>;
 template class RBX::Reflection::
-	Described<RBX::Script, RBX::sScript, RBX::FactoryProduct<RBX::Script, RBX::Instance, RBX::sScript> >;
+	Described<RBX::Script, RBX::sScript, RBX::FactoryProduct<RBX::Script, RBX::Instance, RBX::sScript>>;
 template class RBX::DescribedCreatable<RBX::Script, RBX::Instance, RBX::sScript>;
 
 template class RBX::FactoryProduct<RBX::LocalScript, RBX::Script, RBX::sLocalScript>;
 template class RBX::Reflection::Described<
 	RBX::LocalScript,
 	RBX::sLocalScript,
-	RBX::FactoryProduct<RBX::LocalScript, RBX::Script, RBX::sLocalScript> >;
+	RBX::FactoryProduct<RBX::LocalScript, RBX::Script, RBX::sLocalScript>>;
 template class RBX::DescribedCreatable<RBX::LocalScript, RBX::Script, RBX::sLocalScript>;

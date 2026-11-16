@@ -27,11 +27,10 @@
 #include <OgreMaterialManager.h>
 #include <OgreResourceGroupManager.h>
 #include <OgreStringConverter.h>
-#include <stdio.h>
+#include <cstdio>
 #include <windows.h>
 
-namespace RBX {
-namespace ViewNew {
+namespace RBX::ViewNew {
 
 char g_unk0x0092a250[] = "material %s\n{\n\ttechnique\n\t{\n\t\tpass\n\t\t{\n\t\t\tlighting off\n\t\t\tdepth_write "
 						 "off\n\t\t\ttexture_unit\n\t\t\t{\n\t\t\t\tcubic_texture %s %s %s %s %s %s "
@@ -108,10 +107,10 @@ void View::onWorkspaceDescendentAdded(std::shared_ptr<Instance> descendent)
 
 void View::suppressSkybox()
 {
-	Lighting* lighting = dataModel ? dataModel->create<Lighting>() : NULL;
+	Lighting* lighting = dataModel ? dataModel->create<Lighting>() : nullptr;
 
 	renderLibScene->presetLighting(
-		NULL, lighting->getSkyParameters(), lighting->getAmbientTop(), lighting->getAmbientBottom()
+		nullptr, lighting->getSkyParameters(), lighting->getAmbientTop(), lighting->getAmbientBottom()
 	);
 
 	G3D::Color4 clearColor = lighting->getClearColor();
@@ -122,7 +121,7 @@ void View::FUN_0050c5c0(void* rd)
 {
 	Ogre::VisualEngine* engine = static_cast<Ogre::VisualEngine*>(rd);
 	std::string files[6];
-	Lighting* lighting = dataModel ? dataModel->create<Lighting>() : NULL;
+	Lighting* lighting = dataModel ? dataModel->create<Lighting>() : nullptr;
 
 	ContentId up = ContentId();
 	ContentId lf = ContentId();
@@ -130,7 +129,7 @@ void View::FUN_0050c5c0(void* rd)
 	ContentId bk = ContentId();
 	ContentId ft = ContentId();
 	ContentId dn = ContentId();
-	if (lighting->sky == NULL) {
+	if (lighting->sky == nullptr) {
 		up = ContentId::fromAssets("Sky\\null_plainsky512_up.jpg");
 		lf = ContentId::fromAssets("Sky\\null_plainsky512_lf.jpg");
 		rt = ContentId::fromAssets("Sky\\null_plainsky512_rt.jpg");
@@ -241,7 +240,7 @@ void View::FUN_0050d3d0(void* rd)
 {
 	if (!lightingValid) {
 		Ogre::VisualEngine* engine = static_cast<Ogre::VisualEngine*>(rd);
-		Lighting* lighting = dataModel ? dataModel->create<Lighting>() : NULL;
+		Lighting* lighting = dataModel ? dataModel->create<Lighting>() : nullptr;
 
 		if (lighting->isSkySuppressed()) {
 			engine->m_unk0x04->setSkyBox(
@@ -296,7 +295,7 @@ View::View(std::shared_ptr<DataModel> dataModel)
 
 	renderLibScene->setThrottle(0, 0, false, 0);
 
-	Lighting* lighting = dataModel ? dataModel->create<Lighting>() : NULL;
+	Lighting* lighting = dataModel ? dataModel->create<Lighting>() : nullptr;
 	lightingChangedConnection = Lighting::event_LightingChanged.connect(
 		lighting, [this](bool updateSkybox) { invalidateLighting(updateSkybox); }, 10
 	);
@@ -329,5 +328,4 @@ void View::updateLighting()
 {
 }
 
-} // namespace ViewNew
-} // namespace RBX
+} // namespace RBX::ViewNew

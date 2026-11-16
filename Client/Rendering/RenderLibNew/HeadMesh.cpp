@@ -4,10 +4,9 @@
 
 #include <G3D/Vector2int16.h>
 #include <algorithm>
-#include <math.h>
+#include <cmath>
 
-namespace RBX {
-namespace ViewNew {
+namespace RBX::ViewNew {
 
 class CylinderTransform
 {
@@ -63,12 +62,12 @@ public:
 	}
 
 protected:
-	virtual void buildTop(Purpose purpose);
-	virtual void buildBottom(Purpose purpose);
-	virtual void buildLeft(Purpose purpose);
-	virtual void buildRight(Purpose purpose);
-	virtual void buildFront(Purpose purpose);
-	virtual void buildBack(Purpose purpose);
+	void buildTop(Purpose purpose) override;
+	void buildBottom(Purpose purpose) override;
+	void buildLeft(Purpose purpose) override;
+	void buildRight(Purpose purpose) override;
+	void buildFront(Purpose purpose) override;
+	void buildBack(Purpose purpose) override;
 };
 
 inline void CylinderTransform::operator()(
@@ -210,5 +209,4 @@ template HeadMesh* MeshFactory<HeadMesh, 1>::createDecal(const G3D::Vector3&, No
 
 template HeadMesh* MeshFactory<HeadMesh, 1>::createTexture(const G3D::Vector3&, NormalId, const G3D::Vector2&);
 
-} // namespace ViewNew
-} // namespace RBX
+} // namespace RBX::ViewNew

@@ -6,7 +6,7 @@
 
 namespace RBX {
 
-Point::Point(Body* _body) : numOwners(1), body(_body != NULL ? _body : Body::getWorldBody())
+Point::Point(Body* _body) : numOwners(1), body(_body != nullptr ? _body : Body::getWorldBody())
 {
 }
 

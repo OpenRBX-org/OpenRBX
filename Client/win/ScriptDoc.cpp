@@ -18,9 +18,7 @@ static int g_unk0x009544b4;
 IMPLEMENT_DYNCREATE(CScriptDoc, CNullDoc)
 IMPLEMENT_DYNCREATE(CScriptEditor, Scintilla::CScintillaView)
 
-CScriptDoc::CScriptDoc()
-{
-}
+CScriptDoc::CScriptDoc() = default;
 
 void CScriptEditor::VTable0x08(const RBX::RunService* source, RBX::RunState event)
 {
@@ -360,7 +358,7 @@ void CScriptEditor::FUN_00468db0()
 {
 	if (GetCtrl().GetModify() && !m_unk0x144) {
 		if (m_unk0x134) {
-			std::lock_guard<std::recursive_mutex> lock(*m_unk0x128);
+			std::scoped_lock lock(*m_unk0x128);
 			int length = GetCtrl().GetTextLength();
 			CString text;
 			GetCtrl().GetText(length + 1, text.GetBuffer(length + 1));
@@ -377,7 +375,7 @@ void CScriptEditor::OnKillFocus()
 	FUN_00468db0();
 }
 
-CScriptEditor::CScriptEditor() : m_unk0x130(NULL), m_unk0x144(false), m_unk0x145(false), m_unk0x146(false)
+CScriptEditor::CScriptEditor() : m_unk0x130(nullptr), m_unk0x144(false), m_unk0x145(false), m_unk0x146(false)
 {
 }
 
@@ -388,7 +386,7 @@ void CScriptEditor::FUN_004696d0()
 
 		if (m_unk0x134) {
 			try {
-				std::lock_guard<std::recursive_mutex> lock(*m_unk0x128);
+				std::scoped_lock lock(*m_unk0x128);
 				m_unk0x146 = m_unk0x134->getScriptId().isNull();
 
 				if (m_unk0x146) {
@@ -426,7 +424,7 @@ LRESULT CScriptEditor::FUN_00469a20(WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-void CScriptEditor::VTable0x0c(const RBX::Instance* source, RBX::PropertyChanged event) throw()
+void CScriptEditor::VTable0x0c(const RBX::Instance* source, RBX::PropertyChanged event) noexcept
 {
 	if (&event.getDescriptor() == &RBX::Script::prop_EmbeddedSourceCode ||
 		&event.getDescriptor() == &RBX::Instance::desc_Name) {
@@ -449,7 +447,7 @@ void CScriptEditor::VTable0x08(const RBX::Instance* source, RBX::PropertyChanged
 void CScriptEditor::FUN_00469b30(std::shared_ptr<RBX::Script> script)
 {
 	if (m_unk0x134) {
-		std::lock_guard<std::recursive_mutex> lock(*m_unk0x128);
+		std::scoped_lock lock(*m_unk0x128);
 		RBX::stopListening<RBX::Instance, RBX::AncestorChanged>(m_unk0x134, this);
 		RBX::stopListening<RBX::Instance, RBX::PropertyChanged>(m_unk0x134, this);
 		RBX::stopListening<RBX::RunService, RBX::RunState>(m_unk0x13c, this);
@@ -462,7 +460,7 @@ void CScriptEditor::FUN_00469b30(std::shared_ptr<RBX::Script> script)
 		m_unk0x128 = RBX::DataModel::getMutex(script.get());
 		m_unk0x134 = script;
 
-		std::lock_guard<std::recursive_mutex> lock(*m_unk0x128);
+		std::scoped_lock lock(*m_unk0x128);
 		m_unk0x13c = RBX::shared_from(RBX::ServiceProvider::find<RBX::RunService>(script.get()));
 		RBX::startListening<RBX::RunService, RBX::RunState>(m_unk0x13c, this);
 		RBX::startListening<RBX::Instance, RBX::PropertyChanged>(m_unk0x134, this);
@@ -497,23 +495,23 @@ CScriptEditor::~CScriptEditor()
 // clang-format off
 BEGIN_MESSAGE_MAP(CScriptEditor, Scintilla::CScintillaView)
 	ON_WM_CREATE()
-	ON_COMMAND(0x80e5, OnOptionsAddmarker)
-	ON_COMMAND(0x80e6, OnOptionsDeletemarker)
-	ON_UPDATE_COMMAND_UI(0x80e6, OnUpdateOptionsDeletemarker)
-	ON_COMMAND(0x80e7, OnOptionsFindNextmarker)
-	ON_COMMAND(0x80e8, OnOptionsFindPrevmarker)
-	ON_COMMAND(0x80e4, OnOptionsFoldMargin)
-	ON_COMMAND(0x80e3, OnOptionsSelectionMargin)
-	ON_UPDATE_COMMAND_UI(0x80e3, OnUpdateOptionsSelectionMargin)
-	ON_COMMAND(0x80e2, OnOptionsViewLinenumbers)
-	ON_UPDATE_COMMAND_UI(0x80e2, OnUpdateOptionsViewLinenumbers)
-	ON_UPDATE_COMMAND_UI(0x80e5, OnUpdateOptionsAddmarker)
-	ON_UPDATE_COMMAND_UI(0x80e4, OnUpdateOptionsFoldMargin)
-	ON_UPDATE_COMMAND_UI(203, OnUpdateLine)
-	ON_UPDATE_COMMAND_UI(204, OnUpdateStyle)
-	ON_UPDATE_COMMAND_UI(205, OnUpdateFold)
-	ON_UPDATE_COMMAND_UI(ID_INDICATOR_OVR, OnUpdateInsert)
+	ON_COMMAND(0x80e5, &CScriptEditor::OnOptionsAddmarker)
+	ON_COMMAND(0x80e6, &CScriptEditor::OnOptionsDeletemarker)
+	ON_UPDATE_COMMAND_UI(0x80e6, &CScriptEditor::OnUpdateOptionsDeletemarker)
+	ON_COMMAND(0x80e7, &CScriptEditor::OnOptionsFindNextmarker)
+	ON_COMMAND(0x80e8, &CScriptEditor::OnOptionsFindPrevmarker)
+	ON_COMMAND(0x80e4, &CScriptEditor::OnOptionsFoldMargin)
+	ON_COMMAND(0x80e3, &CScriptEditor::OnOptionsSelectionMargin)
+	ON_UPDATE_COMMAND_UI(0x80e3, &CScriptEditor::OnUpdateOptionsSelectionMargin)
+	ON_COMMAND(0x80e2, &CScriptEditor::OnOptionsViewLinenumbers)
+	ON_UPDATE_COMMAND_UI(0x80e2, &CScriptEditor::OnUpdateOptionsViewLinenumbers)
+	ON_UPDATE_COMMAND_UI(0x80e5, &CScriptEditor::OnUpdateOptionsAddmarker)
+	ON_UPDATE_COMMAND_UI(0x80e4, &CScriptEditor::OnUpdateOptionsFoldMargin)
+	ON_UPDATE_COMMAND_UI(203, &CScriptEditor::OnUpdateLine)
+	ON_UPDATE_COMMAND_UI(204, &CScriptEditor::OnUpdateStyle)
+	ON_UPDATE_COMMAND_UI(205, &CScriptEditor::OnUpdateFold)
+	ON_UPDATE_COMMAND_UI(ID_INDICATOR_OVR, &CScriptEditor::OnUpdateInsert)
 	ON_WM_ACTIVATE()
-	ON_MESSAGE(0x465, FUN_00469a20)
+	ON_MESSAGE(0x465, &CScriptEditor::FUN_00469a20)
 END_MESSAGE_MAP()
 // clang-format on

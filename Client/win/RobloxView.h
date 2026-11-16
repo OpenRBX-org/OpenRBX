@@ -21,9 +21,9 @@ class InsertModelFromRobloxVerb : public RBX::Verb
 public:
 	InsertModelFromRobloxVerb(CRobloxView* view, RBX::DataModel* dataModel);
 
-	virtual bool isEnabled() const;
-	virtual bool isChecked() const;
-	virtual void doIt(RBX::IDataState* dataState);
+	bool isEnabled() const override;
+	bool isChecked() const override;
+	void doIt(RBX::IDataState* dataState) override;
 
 private:
 	CRobloxView* m_unk0x0c;
@@ -36,9 +36,9 @@ class ToggleIDEModeVerb : public RBX::Verb
 public:
 	ToggleIDEModeVerb(RBX::VerbContainer* container);
 
-	virtual bool isEnabled() const;
-	virtual bool isChecked() const;
-	virtual void doIt(RBX::IDataState* dataState);
+	bool isEnabled() const override;
+	bool isChecked() const override;
+	void doIt(RBX::IDataState* dataState) override;
 
 private:
 	double m_unk0x10;
@@ -49,7 +49,7 @@ class LockPlayModeVerb : public RBX::Verb
 public:
 	LockPlayModeVerb(RBX::VerbContainer* container) : RBX::Verb(container, "LockPlayMode") {}
 
-	virtual void doIt(RBX::IDataState* dataState);
+	void doIt(RBX::IDataState* dataState) override;
 };
 
 class ToggleFullscreenVerb : public RBX::Verb
@@ -57,8 +57,8 @@ class ToggleFullscreenVerb : public RBX::Verb
 public:
 	ToggleFullscreenVerb(RBX::VerbContainer* container) : RBX::Verb(container, "ToggleFullScreen") {}
 
-	virtual bool isChecked() const;
-	virtual void doIt(RBX::IDataState* dataState);
+	bool isChecked() const override;
+	void doIt(RBX::IDataState* dataState) override;
 };
 
 class HelpCommand : public RBX::Verb
@@ -66,7 +66,7 @@ class HelpCommand : public RBX::Verb
 public:
 	HelpCommand(RBX::VerbContainer* container, CRobloxView* view) : RBX::Verb(container, "Help"), m_unk0x0c(view) {}
 
-	virtual void doIt(RBX::IDataState* dataState);
+	void doIt(RBX::IDataState* dataState) override;
 
 private:
 	CRobloxView* m_unk0x0c;
@@ -85,10 +85,10 @@ protected:
 	CRobloxView();
 
 public:
-	virtual ~CRobloxView();
+	~CRobloxView() override;
 
-	virtual void OnDraw(CDC* pDC);
-	virtual void OnInitialUpdate();
+	void OnDraw(CDC* pDC) override;
+	void OnInitialUpdate() override;
 
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
@@ -107,20 +107,20 @@ public:
 	afx_msg void FUN_0045de50();
 	afx_msg void FUN_0045de70();
 	afx_msg LRESULT FUN_0045e740(WPARAM wParam, LPARAM lParam);
-	virtual void OnActivateView(BOOL bActivate, CView* pActivateView, CView* pDeactiveView);
-	virtual void OnActivateFrame(UINT nState, CFrameWnd* pFrameWnd);
-	virtual BOOL OnPreparePrinting(CPrintInfo* pInfo);
-	virtual void OnBeginPrinting(CDC* pDC, CPrintInfo* pInfo);
-	virtual void OnEndPrinting(CDC* pDC, CPrintInfo* pInfo);
+	void OnActivateView(BOOL bActivate, CView* pActivateView, CView* pDeactiveView) override;
+	void OnActivateFrame(UINT nState, CFrameWnd* pFrameWnd) override;
+	BOOL OnPreparePrinting(CPrintInfo* pInfo) override;
+	void OnBeginPrinting(CDC* pDC, CPrintInfo* pInfo) override;
+	void OnEndPrinting(CDC* pDC, CPrintInfo* pInfo) override;
 
 	std::shared_ptr<RBX::DataModel> FUN_00403290() const;
 	void FUN_0045e900();
 	CRobloxView* FUN_004558a0() { return this; }
 
 protected:
-	virtual void onEvent(const RBX::ServiceProvider* source, RBX::ServiceAdded event);
-	virtual void onEvent(const RBX::ServiceProvider* source, RBX::ServiceRemoving event);
-	virtual void onEvent(const RBX::Network::Players* source, RBX::SuperSafeChanged event);
+	void onEvent(const RBX::ServiceProvider* source, RBX::ServiceAdded event) override;
+	void onEvent(const RBX::ServiceProvider* source, RBX::ServiceRemoving event) override;
+	void onEvent(const RBX::Network::Players* source, RBX::SuperSafeChanged event) override;
 
 private:
 	friend class InsertModelFromRobloxVerb;

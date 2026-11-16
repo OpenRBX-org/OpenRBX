@@ -38,16 +38,15 @@ char sWorkspace[] = "Workspace";
 bool Workspace::showWorldCoord;
 bool Workspace::showHashGrid;
 
-static Reflection::
-	BoundFuncDesc<Workspace, std::shared_ptr<const std::vector<std::shared_ptr<Instance> > >(ContentId), 1>
-		workspace_insertContent(
-			&Workspace::insertContent, "InsertContent", "url", Reflection::FunctionDescriptor::NeedTrustedCaller
-		);
-static Reflection::BoundFuncDesc<Workspace, void(std::shared_ptr<const std::vector<std::shared_ptr<Instance> > >), 1>
+static Reflection::BoundFuncDesc<Workspace, std::shared_ptr<const std::vector<std::shared_ptr<Instance>>>(ContentId), 1>
+	workspace_insertContent(
+		&Workspace::insertContent, "InsertContent", "url", Reflection::FunctionDescriptor::NeedTrustedCaller
+	);
+static Reflection::BoundFuncDesc<Workspace, void(std::shared_ptr<const std::vector<std::shared_ptr<Instance>>>), 1>
 	workspace_makeJoints(
 		&Workspace::makeJoints, "MakeJoints", "objects", Reflection::FunctionDescriptor::NeedTrustedCaller
 	);
-static Reflection::BoundFuncDesc<Workspace, void(std::shared_ptr<const std::vector<std::shared_ptr<Instance> > >), 1>
+static Reflection::BoundFuncDesc<Workspace, void(std::shared_ptr<const std::vector<std::shared_ptr<Instance>>>), 1>
 	workspace_breakJoints(
 		&Workspace::breakJoints, "BreakJoints", "objects", Reflection::FunctionDescriptor::NeedTrustedCaller
 	);
@@ -68,7 +67,7 @@ static Reflection::RefPropDescriptor<Workspace, Camera> currentCameraProxyProp(
 
 bool Workspace::askAddChild(const Instance* instance) const
 {
-	return dynamic_cast<const IRenderable*>(instance) != NULL;
+	return dynamic_cast<const IRenderable*>(instance) != nullptr;
 }
 
 const G3D::GCamera& Workspace::getGCamera() const
@@ -108,7 +107,7 @@ Workspace* Workspace::getMyWorkspaceFast(const Instance* context)
 	const Instance* workspace = context->getParent();
 	const Instance* dataModel = workspace->getParent();
 
-	while (dataModel->getParent() != NULL) {
+	while (dataModel->getParent() != nullptr) {
 		workspace = dataModel;
 		dataModel = dataModel->getParent();
 	}
@@ -122,7 +121,7 @@ World* Workspace::getMyWorldFast(const Instance* context)
 }
 
 void Workspace::insertItems(
-	XmlElement* root, std::vector<std::shared_ptr<Instance> >& items, InsertMode insertMode, PromptMode promptMode
+	XmlElement* root, std::vector<std::shared_ptr<Instance>>& items, InsertMode insertMode, PromptMode promptMode
 )
 {
 	SerializerV2().loadInstances(root, items);
@@ -164,7 +163,7 @@ IScriptOwner* Workspace::scriptShouldRun(Script* script)
 		shouldRun = character && script->isDescendentOf(character);
 	}
 
-	return shouldRun ? this : NULL;
+	return shouldRun ? this : nullptr;
 }
 
 void Workspace::setThrottleEnabled(bool value)
@@ -269,12 +268,12 @@ static void wrapper2(std::shared_ptr<Instance> instance)
 	wrapper<i>(instance.get());
 }
 
-void Workspace::makeJoints(std::shared_ptr<const std::vector<std::shared_ptr<Instance> > > instances)
+void Workspace::makeJoints(std::shared_ptr<const std::vector<std::shared_ptr<Instance>>> instances)
 {
 	std::for_each(instances->begin(), instances->end(), wrapper2<1>);
 }
 
-void Workspace::breakJoints(std::shared_ptr<const std::vector<std::shared_ptr<Instance> > > instances)
+void Workspace::breakJoints(std::shared_ptr<const std::vector<std::shared_ptr<Instance>>> instances)
 {
 	std::for_each(instances->begin(), instances->end(), wrapper2<0>);
 }
@@ -286,7 +285,7 @@ void clearEmptiedModels(std::shared_ptr<Instance> test, Instance* workspace)
 			if (!Humanoid::modelIsCharacter(model)) {
 				if (!model->findFirstChildOfType<PartInstance>() && !model->findFirstChildOfType<ModelInstance>()) {
 					std::shared_ptr<Instance> oldParent = shared_from(model->getParent());
-					model->setParent(NULL);
+					model->setParent(nullptr);
 					clearEmptiedModels(oldParent, workspace);
 				}
 			}
@@ -295,19 +294,19 @@ void clearEmptiedModels(std::shared_ptr<Instance> test, Instance* workspace)
 		if (Flag* flag = dynamic_cast<Flag*>(test.get())) {
 			if (!flag->findFirstChildOfType<PartInstance>()) {
 				std::shared_ptr<Instance> oldParent = shared_from(flag->getParent());
-				flag->setParent(NULL);
+				flag->setParent(nullptr);
 				clearEmptiedModels(oldParent, workspace);
 			}
 		}
 	}
 }
 
-void Workspace::handleFallenParts(const G3D::Array<std::shared_ptr<PartInstance> >& fallenParts)
+void Workspace::handleFallenParts(const G3D::Array<std::shared_ptr<PartInstance>>& fallenParts)
 {
 	for (int i = 0; i < fallenParts.size(); ++i) {
 		std::shared_ptr<PartInstance> part = fallenParts[i];
 		std::shared_ptr<Instance> oldParent = shared_from(part->getParent());
-		part->setParent(NULL);
+		part->setParent(nullptr);
 		clearEmptiedModels(oldParent, this);
 	}
 }
@@ -395,7 +394,7 @@ GuiResponse Workspace::process(const GuiEvent& event)
 		idleMouseEvent.eventType = UIEvent::MOUSE_IDLE;
 	}
 
-	return GuiResponse::used(currentCommand->captured() ? this : NULL);
+	return GuiResponse::used(currentCommand->captured() ? this : nullptr);
 }
 
 void Workspace::runScript(Script* script, ScriptContext* context)
@@ -408,9 +407,7 @@ void Workspace::runScript(Script* script, ScriptContext* context)
 	}
 }
 
-Workspace::~Workspace()
-{
-}
+Workspace::~Workspace() = default;
 
 Extents Workspace::computeCameraOwnerExtents()
 {
@@ -426,10 +423,10 @@ float Workspace::step(float timeInterval)
 {
 	timeInterval = world->step(timeInterval);
 
-	G3D::Array<std::shared_ptr<PartInstance> > touchParts;
-	G3D::Array<std::shared_ptr<PartInstance> > touchOtherParts;
+	G3D::Array<std::shared_ptr<PartInstance>> touchParts;
+	G3D::Array<std::shared_ptr<PartInstance>> touchOtherParts;
 	G3D::Array<Primitive*> fallen;
-	G3D::Array<std::shared_ptr<PartInstance> > fallenParts;
+	G3D::Array<std::shared_ptr<PartInstance>> fallenParts;
 
 	PartInstance::primitivesToParts(world->getTouch(), touchParts);
 	PartInstance::primitivesToParts(world->getTouchOther(), touchOtherParts);
@@ -450,7 +447,7 @@ float Workspace::step(float timeInterval)
 void Workspace::setDefaultMouseCommand()
 {
 	stickyCommand.reset();
-	setMouseCommand(NULL);
+	setMouseCommand(nullptr);
 }
 
 void Workspace::releaseScript(Script* script)
@@ -467,27 +464,27 @@ Workspace* Workspace::getWorkspaceIfInWorkspace(const Instance* context)
 {
 	Workspace* workspace = ServiceProvider::find<Workspace>(context);
 
-	if (workspace != NULL && (context == workspace || context->isDescendentOf(workspace))) {
+	if (workspace != nullptr && (context == workspace || context->isDescendentOf(workspace))) {
 		return workspace;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 World* Workspace::getWorldIfInWorkspace(const Instance* context)
 {
 	Workspace* workspace = ServiceProvider::find<Workspace>(context);
 
-	if (workspace != NULL && (context == workspace || context->isDescendentOf(workspace))) {
+	if (workspace != nullptr && (context == workspace || context->isDescendentOf(workspace))) {
 		return workspace->world.get();
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 bool Workspace::contextInWorkspace(const Instance* context)
 {
-	return getWorkspaceIfInWorkspace(context) != NULL;
+	return getWorkspaceIfInWorkspace(context) != nullptr;
 }
 
 void Workspace::onEvent(const RunService* source, Heartbeat event)
@@ -515,7 +512,7 @@ void Workspace::onEvent(const RunService* source, Heartbeat event)
 
 void Workspace::setImageServerView(const G3D::Rect2D& viewPortRect)
 {
-	HopperBin* superHack = NULL;
+	HopperBin* superHack = nullptr;
 
 	for (unsigned int i = 0; i < numChildren(); ++i) {
 		HopperBin* hopperBin = dynamic_cast<HopperBin*>(getChild(i));
@@ -541,7 +538,7 @@ void Workspace::setImageServerView(const G3D::Rect2D& viewPortRect)
 }
 
 void Workspace::insertContent(
-	ContentId contentId, std::vector<std::shared_ptr<Instance> >& items, InsertMode insertMode, PromptMode promptMode
+	ContentId contentId, std::vector<std::shared_ptr<Instance>>& items, InsertMode insertMode, PromptMode promptMode
 )
 {
 	std::unique_ptr<std::istream> stream = ContentProvider::singleton().getContent(contentId);
@@ -555,7 +552,7 @@ void Workspace::insertContent(
 	}
 }
 
-static void append(const std::shared_ptr<Instance>& item, std::vector<std::shared_ptr<Instance> >* values)
+static void append(const std::shared_ptr<Instance>& item, std::vector<std::shared_ptr<Instance>>* values)
 {
 	values->push_back(item);
 }
@@ -566,7 +563,7 @@ void Workspace::start()
 	getCamera()->alwaysMode();
 
 	if (scriptContext) {
-		std::vector<std::shared_ptr<Script> > startScripts;
+		std::vector<std::shared_ptr<Script>> startScripts;
 
 		std::set<Script*>::const_iterator iter = pendingScripts.begin();
 		std::set<Script*>::const_iterator end = pendingScripts.end();
@@ -595,12 +592,12 @@ void Workspace::setCursor(Adorn* adorn)
 	}
 }
 
-std::shared_ptr<const std::vector<std::shared_ptr<Instance> > > Workspace::insertContent(ContentId contentId)
+std::shared_ptr<const std::vector<std::shared_ptr<Instance>>> Workspace::insertContent(ContentId contentId)
 {
-	std::vector<std::shared_ptr<Instance> > items;
+	std::vector<std::shared_ptr<Instance>> items;
 	insertContent(contentId, items, INSERT_TO_TREE, SUPPRESS_PROMPTS);
 
-	std::shared_ptr<std::vector<std::shared_ptr<Instance> > > values(new std::vector<std::shared_ptr<Instance> >());
+	std::shared_ptr<std::vector<std::shared_ptr<Instance>>> values(new std::vector<std::shared_ptr<Instance>>());
 
 	std::for_each(items.begin(), items.end(), [&values](const std::shared_ptr<Instance>& item) {
 		append(item, values.get());
@@ -651,8 +648,9 @@ void Workspace::render3dAdorn(Adorn* adorn)
 }
 
 Workspace::Workspace(IDataState* dataState)
-	: VerbContainer(NULL), dataState(dataState), arrowCameraControls(false), flySteps(0), isSimulating(false),
-	  scriptContext(NULL), inMouselookMode(false), profileWorkspaceStep(new Profiling::CodeProfiler("DataModel Step")),
+	: VerbContainer(nullptr), dataState(dataState), arrowCameraControls(false), flySteps(0), isSimulating(false),
+	  scriptContext(nullptr), inMouselookMode(false),
+	  profileWorkspaceStep(new Profiling::CodeProfiler("DataModel Step")),
 	  profileRunServiceStepped(new Profiling::CodeProfiler("RunService Stepped")),
 	  profileRunServiceHeartbeat(new Profiling::CodeProfiler("RunService Heartbeat")),
 	  profileRun(new Profiling::ThreadProfiler("Run Thread")), imageServerViewHack(0)
@@ -673,7 +671,7 @@ void Workspace::setCamera(Camera* value)
 {
 	if (value != currentCamera.get()) {
 		if (currentCamera) {
-			currentCamera->setParent(NULL);
+			currentCamera->setParent(nullptr);
 		}
 
 		currentCamera = shared_from(value);
@@ -727,16 +725,16 @@ WorkspaceStatsItem::WorkspaceStatsItem(const Workspace* workspace, const World* 
 
 void Workspace::onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider)
 {
-	stopListening(oldProvider ? oldProvider->find<RunService>() : NULL, this);
+	stopListening(oldProvider ? oldProvider->find<RunService>() : nullptr, this);
 
 	if (statsItem) {
-		statsItem->setParent(NULL);
+		statsItem->setParent(nullptr);
 		statsItem.reset();
 	}
 
 	Instance::onServiceProvider(oldProvider, newProvider);
 
-	scriptContext = newProvider ? newProvider->create<ScriptContext>() : NULL;
+	scriptContext = newProvider ? newProvider->create<ScriptContext>() : nullptr;
 
 	if (newProvider) {
 		if (Stats::StatsService* stats = newProvider->create<Stats::StatsService>()) {
@@ -745,7 +743,7 @@ void Workspace::onServiceProvider(const ServiceProvider* oldProvider, const Serv
 		}
 	}
 
-	startListening(newProvider ? newProvider->find<RunService>() : NULL, this);
+	startListening(newProvider ? newProvider->find<RunService>() : nullptr, this);
 }
 
 } // namespace RBX

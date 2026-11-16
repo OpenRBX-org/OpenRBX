@@ -23,14 +23,14 @@ public:
 			FUN_0045b7d0(source);
 		}
 
-		virtual ~EventData()
+		~EventData() override
 		{
 			if (m_unk0x0c) {
 				m_unk0x0c->FUN_0045bcb0(this);
 			}
 		}
 
-		virtual void VTable0x00()
+		void VTable0x00() override
 		{
 			if (m_unk0x0c) {
 				try {
@@ -39,7 +39,7 @@ public:
 				}
 				catch (...) {
 				}
-				m_unk0x0c = NULL;
+				m_unk0x0c = nullptr;
 			}
 		}
 
@@ -52,7 +52,7 @@ public:
 
 	MarshaledListener() : m_unk0x14(GetCurrentThreadId()), m_unk0x18(CMarshalWindow::FUN_00436e70()) {}
 
-	virtual ~MarshaledListener()
+	~MarshaledListener() override
 	{
 		FUN_00420ac0();
 		CMarshalWindow::FUN_00436cc0(m_unk0x18);
@@ -62,7 +62,7 @@ public:
 	{
 		CCritSecLock lock(m_unk0x18->m_unk0x2c);
 		for (typename std::vector<EventData*>::iterator it = m_unk0x04.begin(); it != m_unk0x04.end(); ++it) {
-			(*it)->m_unk0x0c = NULL;
+			(*it)->m_unk0x0c = nullptr;
 		}
 		m_unk0x04.clear();
 	}
@@ -79,7 +79,7 @@ public:
 	}
 
 protected:
-	virtual void onEvent(const Source* source, Event event) throw()
+	void onEvent(const Source* source, Event event) noexcept override
 	{
 		CCritSecLock lock(m_unk0x18->m_unk0x2c);
 		VTable0x0c(source, event);
@@ -87,7 +87,7 @@ protected:
 
 	virtual void VTable0x08(const Source2* source, Event2 event) = 0;
 
-	virtual void VTable0x0c(const Source* source, Event event) throw()
+	virtual void VTable0x0c(const Source* source, Event event) noexcept
 	{
 		EventData* data = new EventData(this, source, event);
 		m_unk0x04.push_back(data);

@@ -17,8 +17,7 @@
 #include <GLG3D/VAR.h>
 #include <GLG3D/VARArea.h>
 
-namespace RBX {
-namespace Render {
+namespace RBX::Render {
 
 class RenderScene
 {
@@ -30,7 +29,7 @@ private:
 	G3D::Array<RenderSurface*> reflectProxyArray;
 	G3D::Array<RenderSurface*> transparentProxyArray;
 	G3D::Array<RenderSurface> shadowProxyArray;
-	G3D::Array<G3D::ReferenceCountedPointer<Chunk> > shadowCachingChunkArray;
+	G3D::Array<G3D::ReferenceCountedPointer<Chunk>> shadowCachingChunkArray;
 	G3D::VAR shadowVAR;
 	G3D::ReferenceCountedPointer<G3D::VARArea> shadowVARArea;
 	EffectSettings effectSettings;
@@ -86,7 +85,7 @@ private:
 		G3D::RenderDevice* rd, const G3D::GLight& light, bool caps, float shadowVertexDistance
 	);
 
-	G3D::Array<G3D::ReferenceCountedPointer<Chunk> > chunkArray;
+	G3D::Array<G3D::ReferenceCountedPointer<Chunk>> chunkArray;
 	G3D::Array<unsigned int> shadowIndexArray;
 
 public:
@@ -126,7 +125,7 @@ public:
 	virtual void setSleeping(const G3D::ReferenceCountedPointer<Chunk>& chunk, bool sleeping) = 0;
 	virtual void prerender(double optimizationTime) = 0;
 
-	virtual ~SceneManager() {}
+	virtual ~SceneManager() = default;
 
 	RenderScene* renderScene;
 
@@ -144,7 +143,6 @@ protected:
 	}
 };
 
-} // namespace Render
-} // namespace RBX
+} // namespace RBX::Render
 
 #endif // RENDERLIB_RENDERSCENE_H

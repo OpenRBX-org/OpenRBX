@@ -7,8 +7,7 @@
 #include <G3D/CoordinateFrame.h>
 #include <G3D/ReferenceCount.h>
 
-namespace RBX {
-namespace RenderNew {
+namespace RBX::RenderNew {
 
 class RenderSurface
 {
@@ -23,7 +22,6 @@ public:
 	RenderSurface() {}
 };
 
-} // namespace RenderNew
-} // namespace RBX
+} // namespace RBX::RenderNew
 
 #endif // RENDERLIBNEW_RENDERSURFACE_H

@@ -17,7 +17,7 @@ public:
 
 	Velocity() : linear(Vector3::zero()), rotational(Vector3::zero()) {}
 	Velocity(const Vector3& linear, const Vector3& rotational) : linear(linear), rotational(rotational) {}
-	Velocity(const Velocity& other) : linear(other.linear), rotational(other.rotational) {}
+	Velocity(const Velocity& other) = default;
 
 	Vector3 linearVelocityAtOffset(const Vector3& offset) const { return linear + rotational.cross(offset); }
 

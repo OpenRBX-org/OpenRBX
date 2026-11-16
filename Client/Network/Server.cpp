@@ -14,8 +14,7 @@
 #include <algorithm>
 #include <stdexcept>
 
-namespace RBX {
-namespace Network {
+namespace RBX::Network {
 
 char sServer[] = "NetworkServer";
 
@@ -42,7 +41,7 @@ void Server::ClientProxy::onSentMarker(long id)
 
 static bool isReplicator(std::shared_ptr<Instance> instance)
 {
-	return dynamic_cast<Replicator*>(instance.get()) != NULL;
+	return dynamic_cast<Replicator*>(instance.get()) != nullptr;
 }
 
 void Server::stop(int blockDuration)
@@ -54,13 +53,9 @@ void Server::stop(int blockDuration)
 	removeAllChildren();
 }
 
-Server::ClientProxy::~ClientProxy()
-{
-}
+Server::ClientProxy::~ClientProxy() = default;
 
-Server::~Server()
-{
-}
+Server::~Server() = default;
 
 void Server::start(int port, int threadSleepTime)
 {
@@ -171,13 +166,13 @@ PluginReceiveResult Server::ClientProxy::OnReceive(RakPeerInterface* peer, Packe
 bool Server::serverIsPresent(const Instance* context, bool testInDatamodel)
 {
 	const ServiceProvider* serviceProvider = ServiceProvider::findServiceProvider(context);
-	return (serviceProvider ? serviceProvider->find<Server>() : NULL) != NULL;
+	return (serviceProvider ? serviceProvider->find<Server>() : nullptr) != nullptr;
 }
 
 void Server::onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider)
 {
 	if (oldProvider) {
-		players->setConnection(NULL);
+		players->setConnection(nullptr);
 		stop(1000);
 		players.reset();
 	}
@@ -229,5 +224,4 @@ PluginReceiveResult Server::OnReceive(RakPeerInterface* peer, Packet* packet)
 	return RR_CONTINUE_PROCESSING;
 }
 
-} // namespace Network
-} // namespace RBX
+} // namespace RBX::Network

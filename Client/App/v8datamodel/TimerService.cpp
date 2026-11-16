@@ -51,9 +51,7 @@ void TimerService::onEvent(const RunService* source, Heartbeat event)
 	}
 }
 
-TimerService::TimerService()
-{
-}
+TimerService::TimerService() = default;
 
 void TimerService::onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider)
 {
@@ -61,7 +59,7 @@ void TimerService::onServiceProvider(const ServiceProvider* oldProvider, const S
 
 	DescribedCreatable<TimerService, Instance, sTimerService>::onServiceProvider(oldProvider, newProvider);
 
-	runService = shared_from(newProvider ? newProvider->create<RunService>() : NULL);
+	runService = shared_from(newProvider ? newProvider->create<RunService>() : nullptr);
 
 	startListening(runService, this);
 }
@@ -72,5 +70,5 @@ template class RBX::FactoryProduct<RBX::TimerService, RBX::Instance, RBX::sTimer
 template class RBX::Reflection::Described<
 	RBX::TimerService,
 	RBX::sTimerService,
-	RBX::FactoryProduct<RBX::TimerService, RBX::Instance, RBX::sTimerService> >;
+	RBX::FactoryProduct<RBX::TimerService, RBX::Instance, RBX::sTimerService>>;
 template class RBX::DescribedCreatable<RBX::TimerService, RBX::Instance, RBX::sTimerService>;

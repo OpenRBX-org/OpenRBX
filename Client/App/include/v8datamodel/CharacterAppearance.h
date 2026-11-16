@@ -34,8 +34,8 @@ public:
 	}
 
 protected:
-	virtual void onAncestorChanged(const AncestorChanged& event);
-	virtual bool askSetParent(const Instance* instance) const;
+	void onAncestorChanged(const AncestorChanged& event) override;
+	bool askSetParent(const Instance* instance) const override;
 };
 
 class ShirtGraphic : public DescribedCreatable<ShirtGraphic, CharacterAppearance, sShirtGraphic>
@@ -49,7 +49,7 @@ public:
 	ShirtGraphic();
 
 protected:
-	virtual void apply(Humanoid* humanoid);
+	void apply(Humanoid* humanoid) override;
 
 private:
 	void dataChanged(const Reflection::PropertyDescriptor&) { CharacterAppearance::apply(); }
@@ -70,7 +70,7 @@ public:
 	Shirt();
 
 private:
-	virtual void apply(Humanoid* humanoid);
+	void apply(Humanoid* humanoid) override;
 
 	void dataChanged(const Reflection::PropertyDescriptor&) { CharacterAppearance::apply(); }
 };
@@ -86,7 +86,7 @@ public:
 	Skin();
 
 private:
-	virtual void apply(Humanoid* humanoid);
+	void apply(Humanoid* humanoid) override;
 
 	void dataChanged(const Reflection::PropertyDescriptor&) { CharacterAppearance::apply(); }
 };
@@ -112,7 +112,7 @@ public:
 	BodyColors();
 
 private:
-	virtual void apply(Humanoid* humanoid);
+	void apply(Humanoid* humanoid) override;
 
 	void dataChanged(const Reflection::PropertyDescriptor&) { CharacterAppearance::apply(); }
 };

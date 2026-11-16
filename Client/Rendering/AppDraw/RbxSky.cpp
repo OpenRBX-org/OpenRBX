@@ -135,9 +135,7 @@ void RbxSky::FUN_00678610(Camera* cam, RenderQueue* queue, uint8 queueGroupId)
 	}
 }
 
-RbxSky::~RbxSky()
-{
-}
+RbxSky::~RbxSky() = default;
 
 RbxSky::RbxSky(SceneManager* sceneManager, const String& folder, bool p_unk0x0c) : m_unk0x84(false)
 {

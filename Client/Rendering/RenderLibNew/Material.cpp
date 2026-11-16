@@ -3,8 +3,7 @@
 #include <OgreLogManager.h>
 #include <OgreMaterialManager.h>
 
-namespace RBX {
-namespace RenderNew {
+namespace RBX::RenderNew {
 
 bool Material::veryTransparent() const
 {
@@ -13,7 +12,7 @@ bool Material::veryTransparent() const
 
 Material::Level::Level()
 	: emptyLevel(true), mColor(G3D::Color3::white()), mSpecular(0), mShiny(0), mReflect(0), mTransparent(0),
-	  m_unk0x28(NULL)
+	  m_unk0x28(nullptr)
 {
 }
 
@@ -21,7 +20,7 @@ Material::Level::Level(
 	TextureProxyRef baseTexture, G3D::Color3 color, float specular, float shiny, float reflect, float transparent
 )
 	: emptyLevel(false), mBaseTexture(baseTexture), mColor(color), mSpecular(specular), mShiny(shiny),
-	  mReflect(reflect), mTransparent(transparent), m_unk0x28(NULL)
+	  mReflect(reflect), mTransparent(transparent), m_unk0x28(nullptr)
 {
 	if (!baseTexture.isNull()) {
 		mMatte = baseTexture->alphaOnlyVersion();
@@ -45,9 +44,7 @@ void Material::Level::configureRenderDevice(G3D::RenderDevice* renderDevice) con
 	renderDevice->setTexture(0, baseTexture(renderDevice));
 }
 
-Material::~Material()
-{
-}
+Material::~Material() = default;
 
 const Material::Level& Material::appendEmptyLevel()
 {
@@ -64,9 +61,6 @@ const Material::Level& Material::appendLevel(
 	return levels.last();
 }
 
-Material::Material()
-{
-}
+Material::Material() = default;
 
-} // namespace RenderNew
-} // namespace RBX
+} // namespace RBX::RenderNew

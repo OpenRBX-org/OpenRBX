@@ -87,7 +87,7 @@ private:
 		SpatialNode* const& head = nodes[bucket];
 		unsigned int answer = 0;
 
-		for (SpatialNode* node = head; node != NULL; node = node->nextHashLink) {
+		for (SpatialNode* node = head; node != nullptr; node = node->nextHashLink) {
 			answer++;
 		}
 

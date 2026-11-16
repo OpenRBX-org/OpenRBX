@@ -14,26 +14,26 @@ namespace RBX {
 
 Edge* EdgeIterator::getNextExternalUtil(Primitive* p, Edge* e)
 {
-	while (e != NULL) {
+	while (e != nullptr) {
 		Primitive* other = e->getPrimitive(0);
 
 		if (p == other) {
 			other = e->getPrimitive(1);
 		}
 
-		if (other != NULL && p->getAssembly() != other->getAssembly()) {
+		if (other != nullptr && p->getAssembly() != other->getAssembly()) {
 			return e;
 		}
 
 		e = p->getNextEdge(e);
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 bool PrimIterator::isParent(Primitive* parentCandidate, Primitive* child, Joint* joint, SearchType searchType)
 {
-	if (parentCandidate == NULL || child == NULL) {
+	if (parentCandidate == nullptr || child == nullptr) {
 		return false;
 	}
 
@@ -62,7 +62,7 @@ Primitive* PrimIterator::findParent(Primitive* p, SearchType searchType)
 {
 	Joint* joint = p->getFirstJoint();
 
-	while (joint != NULL) {
+	while (joint != nullptr) {
 		Primitive* other = p == joint->getPrimitive(0) ? joint->getPrimitive(1) : joint->getPrimitive(0);
 
 		if (isParent(other, p, joint, searchType)) {
@@ -72,14 +72,14 @@ Primitive* PrimIterator::findParent(Primitive* p, SearchType searchType)
 		joint = p->getNextJoint(joint);
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 Primitive* PrimIterator::findFirstChild(Primitive* p, SearchType searchType)
 {
 	Joint* joint = p->getFirstJoint();
 
-	while (joint != NULL) {
+	while (joint != nullptr) {
 		Primitive* other = p == joint->getPrimitive(0) ? joint->getPrimitive(1) : joint->getPrimitive(0);
 
 		if (isParent(p, other, joint, searchType)) {
@@ -89,14 +89,14 @@ Primitive* PrimIterator::findFirstChild(Primitive* p, SearchType searchType)
 		joint = p->getNextJoint(joint);
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 Primitive* PrimIterator::findNextSibling(Primitive* parent, Primitive* sibling, SearchType searchType)
 {
 	bool found = false;
 
-	for (Joint* joint = parent->getFirstJoint(); joint != NULL; joint = parent->getNextJoint(joint)) {
+	for (Joint* joint = parent->getFirstJoint(); joint != nullptr; joint = parent->getNextJoint(joint)) {
 		Primitive* other = parent == joint->getPrimitive(0) ? joint->getPrimitive(1) : joint->getPrimitive(0);
 
 		if (isParent(parent, other, joint, searchType)) {
@@ -110,18 +110,18 @@ Primitive* PrimIterator::findNextSibling(Primitive* parent, Primitive* sibling, 
 		}
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 Primitive* PrimIterator::findNextRelative(Primitive* parent, Primitive* p, SearchType searchType)
 {
-	if (parent == NULL) {
-		return NULL;
+	if (parent == nullptr) {
+		return nullptr;
 	}
 
 	Primitive* sibling = findNextSibling(parent, p, searchType);
 
-	if (sibling != NULL) {
+	if (sibling != nullptr) {
 		return sibling;
 	}
 
@@ -137,7 +137,7 @@ PrimIterator& PrimIterator::operator++()
 
 	Primitive* next = findFirstChild(current, type);
 
-	if (next == NULL) {
+	if (next == nullptr) {
 		Primitive* parent = findParent(current, type);
 
 		primitive = findNextRelative(parent, current, type);
@@ -151,10 +151,10 @@ PrimIterator& PrimIterator::operator++()
 
 void EdgeIterator::findEdgeOnNextPrimitive()
 {
-	while (edge == NULL) {
+	while (edge == nullptr) {
 		Primitive* next = *++PrimIterator::begin(primitive, PrimIterator::IN_ASSEMBLY);
 
-		if ((primitive = next) == NULL) {
+		if ((primitive = next) == nullptr) {
 			return;
 		}
 
@@ -168,7 +168,7 @@ EdgeIterator& EdgeIterator::operator++()
 
 	edge = getNextExternalUtil(current, current->getNextEdge(edge));
 
-	if (edge == NULL) {
+	if (edge == nullptr) {
 		findEdgeOnNextPrimitive();
 	}
 
@@ -179,7 +179,7 @@ EdgeIterator EdgeIterator::begin(Primitive* p)
 {
 	EdgeIterator answer(p, getNextExternalUtil(p, p->getFirstEdge()));
 
-	if (answer.edge == NULL) {
+	if (answer.edge == nullptr) {
 		answer.findEdgeOnNextPrimitive();
 	}
 

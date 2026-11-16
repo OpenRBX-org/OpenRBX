@@ -174,7 +174,7 @@ std::string DebugSettings::gfxcard() const
 	DISPLAY_DEVICE displayDevice;
 	memset(&displayDevice, 0, sizeof(displayDevice));
 	displayDevice.cb = sizeof(displayDevice);
-	EnumDisplayDevices(NULL, 0, &displayDevice, 0);
+	EnumDisplayDevices(nullptr, 0, &displayDevice, 0);
 
 	SP_CLASSIMAGELIST_DATA _spImageData = {0};
 	SetupDiDestroyClassImageList(&_spImageData);
@@ -185,7 +185,8 @@ std::string DebugSettings::gfxcard() const
 	SP_DEVINFO_DATA spDevInfoData = {0};
 	char szName[64] = {0};
 
-	HDEVINFO hDevInfo = SetupDiGetClassDevs(NULL, NULL, NULL, DIGCF_PRESENT | DIGCF_ALLCLASSES | DIGCF_PROFILE);
+	HDEVINFO hDevInfo =
+		SetupDiGetClassDevs(nullptr, nullptr, nullptr, DIGCF_PRESENT | DIGCF_ALLCLASSES | DIGCF_PROFILE);
 	if (hDevInfo == INVALID_HANDLE_VALUE) {
 		return "";
 	}
@@ -197,13 +198,13 @@ std::string DebugSettings::gfxcard() const
 		int wImageIdx = 0;
 
 		if (SetupDiGetDeviceRegistryProperty(
-				hDevInfo, &spDevInfoData, SPDRP_CLASS, NULL, (PBYTE) szBuf, MAX_PATH - 1, NULL
+				hDevInfo, &spDevInfoData, SPDRP_CLASS, nullptr, (PBYTE) szBuf, MAX_PATH - 1, nullptr
 			)) {
 			if (SetupDiGetClassImageIndex(&_spImageData, &spDevInfoData.ClassGuid, &wImageIdx)) {
 				DWORD dwRequireSize;
 				if (SetupDiGetClassDescription(&spDevInfoData.ClassGuid, szBuf, MAX_PATH, &dwRequireSize)) {
 					if (SetupDiGetDeviceRegistryProperty(
-							hDevInfo, &spDevInfoData, SPDRP_FRIENDLYNAME, NULL, (PBYTE) szName, 63, NULL
+							hDevInfo, &spDevInfoData, SPDRP_FRIENDLYNAME, nullptr, (PBYTE) szName, 63, nullptr
 						)) {
 						if (strcmp(szName, displayDevice.DeviceString) == 0) {
 							break;
@@ -211,7 +212,7 @@ std::string DebugSettings::gfxcard() const
 					}
 					else if (
 						SetupDiGetDeviceRegistryProperty(
-							hDevInfo, &spDevInfoData, SPDRP_DEVICEDESC, NULL, (PBYTE) szName, 63, NULL
+							hDevInfo, &spDevInfoData, SPDRP_DEVICEDESC, nullptr, (PBYTE) szName, 63, nullptr
 						)
 					) {
 						if (strcmp(szName, displayDevice.DeviceString) == 0) {
@@ -229,7 +230,7 @@ std::string DebugSettings::gfxcard() const
 
 	char buf[64] = {0};
 	spDevInfoData.cbSize = sizeof(SP_DEVINFO_DATA);
-	if (SetupDiGetDeviceRegistryProperty(hDevInfo, &spDevInfoData, SPDRP_DRIVER, NULL, (PBYTE) buf, 63, NULL)) {
+	if (SetupDiGetDeviceRegistryProperty(hDevInfo, &spDevInfoData, SPDRP_DRIVER, nullptr, (PBYTE) buf, 63, nullptr)) {
 		deviceKey = buf;
 	}
 

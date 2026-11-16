@@ -55,21 +55,21 @@ private:
 
 public:
 	AdornRbxGfx(Ogre::VisualEngine* visualEngine);
-	virtual ~AdornRbxGfx();
+	~AdornRbxGfx() override;
 
-	virtual G3D::ReferenceCountedPointer<TextureProxyBase> createTextureProxy(const std::string& name);
-	virtual void prepareRenderPass();
-	virtual void finishRenderPass();
-	virtual G3D::Rect2D getViewport() const;
-	virtual int getWidth() const;
-	virtual int getHeight() const;
-	virtual void setTexture(int stage, G3D::ReferenceCountedPointer<TextureProxyBase> texture);
-	virtual G3D::Rect2D getTextureSize(G3D::ReferenceCountedPointer<TextureProxyBase> texture) const;
-	virtual void line2d(const G3D::Vector2& from, const G3D::Vector2& to, const G3D::Color4& color) const;
-	virtual void outlineRect2d(const G3D::Rect2D& rect, float thickness, const G3D::Color4& color) const;
-	virtual void rect2d(const G3D::Rect2D& rect, const G3D::Color4& color) const;
-	virtual G3D::Vector2 get2DStringBounds(const std::string& s, double size, Spacing spacing) const;
-	virtual G3D::Vector2 drawFont2D(
+	G3D::ReferenceCountedPointer<TextureProxyBase> createTextureProxy(const std::string& name) override;
+	void prepareRenderPass() override;
+	void finishRenderPass() override;
+	G3D::Rect2D getViewport() const override;
+	int getWidth() const override;
+	int getHeight() const override;
+	void setTexture(int stage, G3D::ReferenceCountedPointer<TextureProxyBase> texture) override;
+	G3D::Rect2D getTextureSize(G3D::ReferenceCountedPointer<TextureProxyBase> texture) const override;
+	void line2d(const G3D::Vector2& from, const G3D::Vector2& to, const G3D::Color4& color) const override;
+	void outlineRect2d(const G3D::Rect2D& rect, float thickness, const G3D::Color4& color) const override;
+	void rect2d(const G3D::Rect2D& rect, const G3D::Color4& color) const override;
+	G3D::Vector2 get2DStringBounds(const std::string& s, double size, Spacing spacing) const override;
+	G3D::Vector2 drawFont2D(
 		const std::string& s,
 		const G3D::Vector2& position,
 		double size,
@@ -78,23 +78,23 @@ public:
 		XAlign xAlign,
 		YAlign yAlign,
 		Spacing spacing
-	) const;
-	virtual void setObjectToWorldMatrix(const G3D::CoordinateFrame& coord);
-	virtual void setColor(const G3D::Color4& color) {}
-	virtual void box(const G3D::AABox& box, const G3D::Color4& solid, const G3D::Color4& wire);
-	virtual void sphere(const G3D::Sphere& sphere, const G3D::Color4& solid, const G3D::Color4& wire);
-	virtual void explosion(const G3D::Sphere& sphere, const G3D::Color4& solid, const G3D::Color4& wire);
-	virtual void cylinderAlongX(float radius, float length, const G3D::Color4& solid, const G3D::Color4& wire);
-	virtual void ray(const G3D::Ray& ray, const G3D::Color4& color, float scale);
-	virtual void lineSegment(const G3D::LineSegment& segment, const G3D::Color4& color, float scale);
-	virtual void axes(const G3D::Color4& x, const G3D::Color4& y, const G3D::Color4& z, float scale);
-	virtual void quad(
+	) const override;
+	void setObjectToWorldMatrix(const G3D::CoordinateFrame& coord) override;
+	void setColor(const G3D::Color4& color) override {}
+	void box(const G3D::AABox& box, const G3D::Color4& solid, const G3D::Color4& wire) override;
+	void sphere(const G3D::Sphere& sphere, const G3D::Color4& solid, const G3D::Color4& wire) override;
+	void explosion(const G3D::Sphere& sphere, const G3D::Color4& solid, const G3D::Color4& wire) override;
+	void cylinderAlongX(float radius, float length, const G3D::Color4& solid, const G3D::Color4& wire) override;
+	void ray(const G3D::Ray& ray, const G3D::Color4& color, float scale) override;
+	void lineSegment(const G3D::LineSegment& segment, const G3D::Color4& color, float scale) override;
+	void axes(const G3D::Color4& x, const G3D::Color4& y, const G3D::Color4& z, float scale) override;
+	void quad(
 		const G3D::Vector3& v0,
 		const G3D::Vector3& v1,
 		const G3D::Vector3& v2,
 		const G3D::Vector3& v3,
 		const G3D::Color4& color
-	);
+	) override;
 };
 
 } // namespace RBX

@@ -5,7 +5,7 @@
 #include <G3D/Vector2int16.h>
 #include <G3D/vectorMath.h>
 #include <algorithm>
-#include <math.h>
+#include <cmath>
 
 static void EndcapTransform(
 	G3D::Vector3& vertex,
@@ -39,12 +39,12 @@ public:
 	}
 
 protected:
-	virtual void buildRight(Purpose purpose);
-	virtual void buildTop(Purpose purpose);
-	virtual void buildBack(Purpose purpose);
-	virtual void buildLeft(Purpose purpose);
-	virtual void buildBottom(Purpose purpose);
-	virtual void buildFront(Purpose purpose);
+	void buildRight(Purpose purpose) override;
+	void buildTop(Purpose purpose) override;
+	void buildBack(Purpose purpose) override;
+	void buildLeft(Purpose purpose) override;
+	void buildBottom(Purpose purpose) override;
+	void buildFront(Purpose purpose) override;
 };
 
 static void EndcapTransform(
@@ -125,8 +125,7 @@ inline void CylinderBuilder::buildFront(Purpose purpose)
 	buildFace<RBX::NORM_Z_NEG>(CylinderTransform, elements, 1, purpose);
 }
 
-namespace RBX {
-namespace View {
+namespace RBX::View {
 
 CylinderAlongXMesh::CylinderAlongXMesh(const G3D::Vector3& size, RenderSurfaceTypes surfaceTypes)
 {
@@ -172,5 +171,4 @@ template CylinderAlongXMesh* MeshFactory<CylinderAlongXMesh, 1>::createTexture(
 	const G3D::Vector3&, NormalId, const G3D::Vector2&
 );
 
-} // namespace View
-} // namespace RBX
+} // namespace RBX::View

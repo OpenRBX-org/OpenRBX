@@ -36,9 +36,9 @@ private:
 	void selectReverse(const std::set<Instance*>& newItemsInBox);
 
 public:
-	virtual MouseCommand* onMouseDown(const UIEvent& uiEvent);
-	virtual void onMouseMove(const UIEvent& uiEvent);
-	virtual void render2d(Adorn* adorn);
+	MouseCommand* onMouseDown(const UIEvent& uiEvent) override;
+	void onMouseMove(const UIEvent& uiEvent) override;
+	void render2d(Adorn* adorn) override;
 
 	BoxSelectCommand(Workspace* workspace);
 };
@@ -50,10 +50,10 @@ class __declspec(novtable) ArrowToolBase : public MouseCommand
 protected:
 	bool overInstance;
 
-	virtual void onMouseIdle(const UIEvent& uiEvent);
-	virtual void onMouseHover(const UIEvent& uiEvent);
-	virtual MouseCommand* onMouseDown(const UIEvent& uiEvent);
-	virtual const std::string getCursorName() const;
+	void onMouseIdle(const UIEvent& uiEvent) override;
+	void onMouseHover(const UIEvent& uiEvent) override;
+	MouseCommand* onMouseDown(const UIEvent& uiEvent) override;
+	const std::string getCursorName() const override;
 
 public:
 	ArrowToolBase(Workspace* workspace) : MouseCommand(workspace), overInstance(false) {}
@@ -64,7 +64,7 @@ class ArrowTool : public Named<ArrowToolBase, sArrowTool>
 public:
 	ArrowTool(Workspace* workspace) : Named<ArrowToolBase, sArrowTool>(workspace) {}
 
-	virtual MouseCommand* isSticky() const { return new ArrowTool(workspace); }
+	MouseCommand* isSticky() const override { return new ArrowTool(workspace); }
 };
 
 class MegaDragger;
@@ -92,19 +92,19 @@ private:
 	bool FUN_0063cc60(Extents& extents);
 	bool FUN_0063ce30(const UIEvent& uiEvent, G3D::Vector3& hitPoint, NormalId& normalId);
 
-	virtual MouseCommand* onMouseDown(const UIEvent& uiEvent);
-	virtual void onMouseIdle(const UIEvent& uiEvent);
-	virtual void onMouseMove(const UIEvent& uiEvent);
-	virtual MouseCommand* onMouseUp(const UIEvent& uiEvent);
-	virtual const std::string getCursorName() const { return cursor; }
+	MouseCommand* onMouseDown(const UIEvent& uiEvent) override;
+	void onMouseIdle(const UIEvent& uiEvent) override;
+	void onMouseMove(const UIEvent& uiEvent) override;
+	MouseCommand* onMouseUp(const UIEvent& uiEvent) override;
+	const std::string getCursorName() const override { return cursor; }
 
 public:
 	AxisMoveTool(Workspace* workspace);
 
-	virtual MouseCommand* isSticky() const { return new AxisMoveTool(workspace); }
+	MouseCommand* isSticky() const override { return new AxisMoveTool(workspace); }
 
-	virtual void render2d(Adorn* adorn);
-	virtual void render3dAdorn(Adorn* adorn);
+	void render2d(Adorn* adorn) override;
+	void render3dAdorn(Adorn* adorn) override;
 };
 
 class DataModel;
@@ -114,8 +114,8 @@ class UndoVerb : public Verb
 public:
 	UndoVerb(DataModel* dataModel);
 
-	virtual bool isEnabled() const;
-	virtual void doIt(IDataState* dataState);
+	bool isEnabled() const override;
+	void doIt(IDataState* dataState) override;
 
 private:
 	DataModel* m_unk0x0c;
@@ -126,8 +126,8 @@ class RedoVerb : public Verb
 public:
 	RedoVerb(DataModel* dataModel);
 
-	virtual bool isEnabled() const;
-	virtual void doIt(IDataState* dataState);
+	bool isEnabled() const override;
+	void doIt(IDataState* dataState) override;
 
 private:
 	DataModel* m_unk0x0c;

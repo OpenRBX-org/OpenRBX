@@ -82,7 +82,7 @@ public:
 	Item* createBoundMemChildItem(const char* name, const unsigned int& v);
 
 protected:
-	virtual bool askAddChild(const Instance* instance) const { return dynamic_cast<const Item*>(instance) != NULL; }
+	bool askAddChild(const Instance* instance) const override { return dynamic_cast<const Item*>(instance) != nullptr; }
 };
 
 template <>
@@ -106,7 +106,7 @@ public:
 	TypedStatsItem(std::function<T()> func) : func(std::move(func)) {}
 	TypedStatsItem(const T* value) : func([value] { return *value; }) {}
 
-	virtual void update() { formatValue(func()); }
+	void update() override { formatValue(func()); }
 };
 
 class TypedMemItem : public TypedStatsItem<unsigned int>
@@ -114,7 +114,7 @@ class TypedMemItem : public TypedStatsItem<unsigned int>
 public:
 	TypedMemItem(const unsigned int* value) : TypedStatsItem<unsigned int>(value) {}
 
-	virtual void update() { formatMem(func()); }
+	void update() override { formatMem(func()); }
 };
 
 class StatsService : public DescribedNonCreatable<StatsService, Instance, sStats>, public Service
@@ -123,9 +123,9 @@ public:
 	StatsService() : DescribedNonCreatable<StatsService, Instance, sStats>("Stats") {}
 
 protected:
-	virtual bool askAddChild(const Instance* instance) const { return dynamic_cast<const Item*>(instance) != NULL; }
+	bool askAddChild(const Instance* instance) const override { return dynamic_cast<const Item*>(instance) != nullptr; }
 
-	virtual XmlElement* write() { return NULL; }
+	XmlElement* write() override { return nullptr; }
 
 public:
 };
@@ -133,7 +133,7 @@ public:
 template <class T>
 Item* Item::createChildItem(const char* name, std::function<T()> func)
 {
-	std::shared_ptr<Item> item = Creatable<Instance>::create<TypedStatsItem<T> >(func);
+	std::shared_ptr<Item> item = Creatable<Instance>::create<TypedStatsItem<T>>(func);
 	item->setName(name);
 	item->setParent(this);
 	return item.get();
@@ -142,7 +142,7 @@ Item* Item::createChildItem(const char* name, std::function<T()> func)
 template <class T>
 Item* Item::createBoundChildItem(const char* name, const T& v)
 {
-	std::shared_ptr<Item> item = Creatable<Instance>::create<TypedStatsItem<T> >(&v);
+	std::shared_ptr<Item> item = Creatable<Instance>::create<TypedStatsItem<T>>(&v);
 	item->setName(name);
 	item->setParent(this);
 	return item.get();

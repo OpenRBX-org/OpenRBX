@@ -30,8 +30,8 @@ private:
 public:
 	FirstPersonCommand(DataModel* dataModel);
 
-	virtual bool isEnabled() const;
-	virtual void doIt(IDataState* dataState);
+	bool isEnabled() const override;
+	void doIt(IDataState* dataState) override;
 };
 
 class StatsCommand : public Verb
@@ -42,9 +42,9 @@ private:
 public:
 	StatsCommand(DataModel* dataModel);
 
-	virtual bool isEnabled() const;
-	virtual bool isChecked() const;
-	virtual void doIt(IDataState* dataState);
+	bool isEnabled() const override;
+	bool isChecked() const override;
+	void doIt(IDataState* dataState) override;
 };
 
 class ForceAssertionCommand : public Verb
@@ -52,7 +52,7 @@ class ForceAssertionCommand : public Verb
 public:
 	ForceAssertionCommand(DataModel* dataModel);
 
-	virtual void doIt(IDataState* dataState);
+	void doIt(IDataState* dataState) override;
 };
 
 class EngineStatsCommand : public Verb
@@ -63,8 +63,8 @@ private:
 public:
 	EngineStatsCommand(DataModel* dataModel);
 
-	virtual bool isEnabled() const;
-	virtual void doIt(IDataState* dataState);
+	bool isEnabled() const override;
+	void doIt(IDataState* dataState) override;
 };
 
 class JoinCommand : public Verb
@@ -75,8 +75,8 @@ private:
 public:
 	JoinCommand(DataModel* dataModel);
 
-	virtual bool isEnabled() const;
-	virtual void doIt(IDataState* dataState);
+	bool isEnabled() const override;
+	void doIt(IDataState* dataState) override;
 };
 
 class ClearStarterpack : public Verb
@@ -87,8 +87,8 @@ private:
 public:
 	ClearStarterpack(DataModel* dataModel);
 
-	virtual bool isEnabled() const;
-	virtual void doIt(IDataState* dataState);
+	bool isEnabled() const override;
+	void doIt(IDataState* dataState) override;
 };
 
 class ClearBackpack : public Verb
@@ -99,8 +99,8 @@ private:
 public:
 	ClearBackpack(DataModel* dataModel);
 
-	virtual bool isEnabled() const;
-	virtual void doIt(IDataState* dataState);
+	bool isEnabled() const override;
+	void doIt(IDataState* dataState) override;
 };
 
 class RunStateVerb : public Verb
@@ -114,7 +114,7 @@ protected:
 	void playActionSound();
 
 public:
-	virtual ~RunStateVerb();
+	~RunStateVerb() override;
 };
 
 class SelectAllCommand : public RunStateVerb
@@ -122,7 +122,7 @@ class SelectAllCommand : public RunStateVerb
 public:
 	SelectAllCommand(DataModel* dataModel) : RunStateVerb("SelectAll", dataModel) {}
 
-	virtual void doIt(IDataState* dataState);
+	void doIt(IDataState* dataState) override;
 };
 
 class AllCanSelectCommand : public RunStateVerb
@@ -130,7 +130,7 @@ class AllCanSelectCommand : public RunStateVerb
 public:
 	AllCanSelectCommand(DataModel* dataModel) : RunStateVerb("AllCanSelect", dataModel) {}
 
-	virtual void doIt(IDataState* dataState);
+	void doIt(IDataState* dataState) override;
 };
 
 class RunCommand : public RunStateVerb
@@ -138,8 +138,8 @@ class RunCommand : public RunStateVerb
 public:
 	RunCommand(DataModel* dataModel) : RunStateVerb("Run", dataModel) {}
 
-	virtual bool isEnabled() const;
-	virtual void doIt(IDataState* dataState);
+	bool isEnabled() const override;
+	void doIt(IDataState* dataState) override;
 };
 
 class StopCommand : public RunStateVerb
@@ -147,8 +147,8 @@ class StopCommand : public RunStateVerb
 public:
 	StopCommand(DataModel* dataModel) : RunStateVerb("Stop", dataModel) {}
 
-	virtual bool isEnabled() const;
-	virtual void doIt(IDataState* dataState);
+	bool isEnabled() const override;
+	void doIt(IDataState* dataState) override;
 };
 
 class ResetCommand : public RunStateVerb
@@ -156,8 +156,8 @@ class ResetCommand : public RunStateVerb
 public:
 	ResetCommand(DataModel* dataModel) : RunStateVerb("Reset", dataModel) {}
 
-	virtual bool isEnabled() const;
-	virtual void doIt(IDataState* dataState);
+	bool isEnabled() const override;
+	void doIt(IDataState* dataState) override;
 };
 
 template <class T, class Base>
@@ -166,7 +166,7 @@ class TToolVerb : public Base
 public:
 	TToolVerb(DataModel* dataModel) : Base(T::name().toString() + "Tool", dataModel) {}
 
-	virtual bool isChecked() const
+	bool isChecked() const override
 	{
 		MouseCommand* command = this->dataModel->getWorkspace()->getCurrentMouseCommand();
 		if (command) {
@@ -175,7 +175,7 @@ public:
 		return false;
 	}
 
-	virtual void doIt(IDataState* dataState) { this->dataModel->getWorkspace()->setMouseCommand(VTable0x14()); }
+	void doIt(IDataState* dataState) override { this->dataModel->getWorkspace()->setMouseCommand(VTable0x14()); }
 
 	virtual MouseCommand* VTable0x14() { return new T(this->dataModel->getWorkspace()); }
 };
@@ -191,9 +191,9 @@ protected:
 	EditSelectionVerb(std::string name, DataModel* dataModel);
 
 public:
-	virtual ~EditSelectionVerb();
+	~EditSelectionVerb() override;
 
-	virtual bool isEnabled() const;
+	bool isEnabled() const override;
 };
 
 class DeleteBase : public EditSelectionVerb
@@ -205,7 +205,7 @@ protected:
 	DeleteBase(VerbContainer* container, DataModel* dataModel, std::string name);
 
 public:
-	virtual void doIt(IDataState* dataState);
+	void doIt(IDataState* dataState) override;
 };
 
 class PlayDeleteSelectionVerb : public DeleteBase
@@ -230,7 +230,7 @@ class CanNotSelectCommand : public EditSelectionVerb
 public:
 	CanNotSelectCommand(DataModel* dataModel) : EditSelectionVerb("CanNotSelect", dataModel) {}
 
-	virtual void doIt(IDataState* dataState);
+	void doIt(IDataState* dataState) override;
 };
 
 class RotateAxisCommand : public EditSelectionVerb
@@ -244,7 +244,7 @@ private:
 	void FUN_00598da0(const G3D::Matrix3& rotation, const std::vector<PVInstance*>& pvInstances);
 
 public:
-	virtual void doIt(IDataState* dataState);
+	void doIt(IDataState* dataState) override;
 };
 
 class ControllerCommand : public EditSelectionVerb
@@ -255,7 +255,7 @@ protected:
 	void setController(Controller::ControllerType controllerType);
 
 public:
-	virtual bool isEnabled() const;
+	bool isEnabled() const override;
 };
 
 class BoolPropertyVerb : public EditSelectionVerb
@@ -267,8 +267,8 @@ public:
 	BoolPropertyVerb(const std::string& name, DataModel* dataModel, const char* property);
 
 protected:
-	virtual void doIt(IDataState* dataState);
-	virtual bool isChecked() const;
+	void doIt(IDataState* dataState) override;
+	bool isChecked() const override;
 };
 
 class AnchorVerb : public BoolPropertyVerb
@@ -300,7 +300,7 @@ public:
 	{
 	}
 
-	virtual void doIt(IDataState* dataState);
+	void doIt(IDataState* dataState) override;
 };
 
 class MoveUpPlateVerb : public MoveUpSelectionVerb
@@ -321,7 +321,7 @@ public:
 	RotateSelectionVerb(DataModel* dataModel);
 
 protected:
-	virtual G3D::Matrix3 getRotationAxis();
+	G3D::Matrix3 getRotationAxis() override;
 };
 
 class TiltSelectionVerb : public RotateAxisCommand
@@ -330,7 +330,7 @@ public:
 	TiltSelectionVerb(DataModel* dataModel);
 
 protected:
-	virtual G3D::Matrix3 getRotationAxis();
+	G3D::Matrix3 getRotationAxis() override;
 };
 
 class PrimaryControllerCommand : public ControllerCommand
@@ -338,7 +338,7 @@ class PrimaryControllerCommand : public ControllerCommand
 public:
 	PrimaryControllerCommand(DataModel* dataModel);
 
-	virtual void doIt(IDataState* dataState);
+	void doIt(IDataState* dataState) override;
 };
 
 class SecondaryControllerCommand : public ControllerCommand
@@ -346,7 +346,7 @@ class SecondaryControllerCommand : public ControllerCommand
 public:
 	SecondaryControllerCommand(DataModel* dataModel);
 
-	virtual void doIt(IDataState* dataState);
+	void doIt(IDataState* dataState) override;
 };
 
 class GroupSelectionVerb : public EditSelectionVerb
@@ -354,8 +354,8 @@ class GroupSelectionVerb : public EditSelectionVerb
 public:
 	GroupSelectionVerb(DataModel* dataModel);
 
-	virtual bool isEnabled() const;
-	virtual void doIt(IDataState* dataState);
+	bool isEnabled() const override;
+	void doIt(IDataState* dataState) override;
 };
 
 class WeldSelectionVerb : public EditSelectionVerb
@@ -363,8 +363,8 @@ class WeldSelectionVerb : public EditSelectionVerb
 public:
 	WeldSelectionVerb(DataModel* dataModel);
 
-	virtual bool isEnabled() const;
-	virtual void doIt(IDataState* dataState);
+	bool isEnabled() const override;
+	void doIt(IDataState* dataState) override;
 };
 
 class SnapSelectionVerb : public EditSelectionVerb
@@ -372,8 +372,8 @@ class SnapSelectionVerb : public EditSelectionVerb
 public:
 	SnapSelectionVerb(DataModel* dataModel);
 
-	virtual bool isEnabled() const;
-	virtual void doIt(IDataState* dataState);
+	bool isEnabled() const override;
+	void doIt(IDataState* dataState) override;
 };
 
 class UngroupSelectionVerb : public EditSelectionVerb
@@ -381,8 +381,8 @@ class UngroupSelectionVerb : public EditSelectionVerb
 public:
 	UngroupSelectionVerb(DataModel* dataModel);
 
-	virtual bool isEnabled() const;
-	virtual void doIt(IDataState* dataState);
+	bool isEnabled() const override;
+	void doIt(IDataState* dataState) override;
 };
 
 class DuplicateSelectionVerb : public EditSelectionVerb
@@ -390,8 +390,8 @@ class DuplicateSelectionVerb : public EditSelectionVerb
 public:
 	DuplicateSelectionVerb(DataModel* dataModel);
 
-	virtual bool isEnabled() const;
-	virtual void doIt(IDataState* dataState);
+	bool isEnabled() const override;
+	void doIt(IDataState* dataState) override;
 };
 
 class AttachCameraCommand : public EditSelectionVerb
@@ -399,9 +399,9 @@ class AttachCameraCommand : public EditSelectionVerb
 public:
 	AttachCameraCommand(DataModel* dataModel);
 
-	virtual bool isEnabled() const;
-	virtual bool isChecked() const;
-	virtual void doIt(IDataState* dataState);
+	bool isEnabled() const override;
+	bool isChecked() const override;
+	void doIt(IDataState* dataState) override;
 };
 
 class TrackCameraCommand : public EditSelectionVerb
@@ -409,9 +409,9 @@ class TrackCameraCommand : public EditSelectionVerb
 public:
 	TrackCameraCommand(DataModel* dataModel);
 
-	virtual bool isEnabled() const;
-	virtual bool isChecked() const;
-	virtual void doIt(IDataState* dataState);
+	bool isEnabled() const override;
+	bool isChecked() const override;
+	void doIt(IDataState* dataState) override;
 };
 
 class FollowCameraCommand : public EditSelectionVerb
@@ -419,9 +419,9 @@ class FollowCameraCommand : public EditSelectionVerb
 public:
 	FollowCameraCommand(DataModel* dataModel);
 
-	virtual bool isEnabled() const;
-	virtual bool isChecked() const;
-	virtual void doIt(IDataState* dataState);
+	bool isEnabled() const override;
+	bool isChecked() const override;
+	void doIt(IDataState* dataState) override;
 };
 
 class WatchCameraCommand : public EditSelectionVerb
@@ -429,9 +429,9 @@ class WatchCameraCommand : public EditSelectionVerb
 public:
 	WatchCameraCommand(DataModel* dataModel);
 
-	virtual bool isEnabled() const;
-	virtual bool isChecked() const;
-	virtual void doIt(IDataState* dataState);
+	bool isEnabled() const override;
+	bool isChecked() const override;
+	void doIt(IDataState* dataState) override;
 };
 
 class MoveDownSelectionVerb : public EditSelectionVerb
@@ -439,7 +439,7 @@ class MoveDownSelectionVerb : public EditSelectionVerb
 public:
 	MoveDownSelectionVerb(DataModel* dataModel);
 
-	virtual void doIt(IDataState* dataState);
+	void doIt(IDataState* dataState) override;
 };
 
 class CameraVerb : public Verb
@@ -454,8 +454,8 @@ protected:
 public:
 	CameraVerb(std::string name, Workspace* workspace);
 
-	virtual bool isEnabled() const;
-	virtual void doIt(IDataState* dataState);
+	bool isEnabled() const override;
+	void doIt(IDataState* dataState) override;
 };
 
 class CameraPanLeftCommand : public CameraVerb
@@ -463,8 +463,8 @@ class CameraPanLeftCommand : public CameraVerb
 public:
 	CameraPanLeftCommand(Workspace* workspace) : CameraVerb("CameraPanLeft", workspace) {}
 
-	virtual bool isEnabled() const;
-	virtual void doIt(IDataState* dataState);
+	bool isEnabled() const override;
+	void doIt(IDataState* dataState) override;
 };
 
 class CameraPanRightCommand : public CameraVerb
@@ -472,8 +472,8 @@ class CameraPanRightCommand : public CameraVerb
 public:
 	CameraPanRightCommand(Workspace* workspace) : CameraVerb("CameraPanRight", workspace) {}
 
-	virtual bool isEnabled() const;
-	virtual void doIt(IDataState* dataState);
+	bool isEnabled() const override;
+	void doIt(IDataState* dataState) override;
 };
 
 class CameraTiltUpCommand : public CameraVerb
@@ -481,8 +481,8 @@ class CameraTiltUpCommand : public CameraVerb
 public:
 	CameraTiltUpCommand(Workspace* workspace) : CameraVerb("CameraTiltUp", workspace) {}
 
-	virtual bool isEnabled() const;
-	virtual void doIt(IDataState* dataState);
+	bool isEnabled() const override;
+	void doIt(IDataState* dataState) override;
 };
 
 class CameraTiltDownCommand : public CameraVerb
@@ -490,8 +490,8 @@ class CameraTiltDownCommand : public CameraVerb
 public:
 	CameraTiltDownCommand(Workspace* workspace) : CameraVerb("CameraTiltDown", workspace) {}
 
-	virtual bool isEnabled() const;
-	virtual void doIt(IDataState* dataState);
+	bool isEnabled() const override;
+	void doIt(IDataState* dataState) override;
 };
 
 class CameraZoomInCommand : public CameraVerb
@@ -499,8 +499,8 @@ class CameraZoomInCommand : public CameraVerb
 public:
 	CameraZoomInCommand(Workspace* workspace) : CameraVerb("CameraZoomIn", workspace) {}
 
-	virtual bool isEnabled() const;
-	virtual void doIt(IDataState* dataState);
+	bool isEnabled() const override;
+	void doIt(IDataState* dataState) override;
 };
 
 class CameraZoomOutCommand : public CameraVerb
@@ -508,8 +508,8 @@ class CameraZoomOutCommand : public CameraVerb
 public:
 	CameraZoomOutCommand(Workspace* workspace) : CameraVerb("CameraZoomOut", workspace) {}
 
-	virtual bool isEnabled() const;
-	virtual void doIt(IDataState* dataState);
+	bool isEnabled() const override;
+	void doIt(IDataState* dataState) override;
 };
 
 class CameraModelViewCommand : public CameraVerb
@@ -517,7 +517,7 @@ class CameraModelViewCommand : public CameraVerb
 public:
 	CameraModelViewCommand(Workspace* workspace) : CameraVerb("CameraModelView", workspace) {}
 
-	virtual void doIt(IDataState* dataState);
+	void doIt(IDataState* dataState) override;
 };
 
 class FixedCameraCommand : public CameraVerb
@@ -525,9 +525,9 @@ class FixedCameraCommand : public CameraVerb
 public:
 	FixedCameraCommand(Workspace* workspace) : CameraVerb("FixedCamera", workspace) {}
 
-	virtual bool isEnabled() const;
-	virtual bool isChecked() const;
-	virtual void doIt(IDataState* dataState);
+	bool isEnabled() const override;
+	bool isChecked() const override;
+	void doIt(IDataState* dataState) override;
 };
 
 class CameraCenterCommand : public CameraVerb
@@ -535,8 +535,8 @@ class CameraCenterCommand : public CameraVerb
 public:
 	CameraCenterCommand(Workspace* workspace) : CameraVerb("CameraCenter", workspace) {}
 
-	virtual bool isEnabled() const;
-	virtual void doIt(IDataState* dataState);
+	bool isEnabled() const override;
+	void doIt(IDataState* dataState) override;
 };
 
 class CameraZoomExtentsCommand : public CameraVerb
@@ -544,7 +544,7 @@ class CameraZoomExtentsCommand : public CameraVerb
 public:
 	CameraZoomExtentsCommand(Workspace* workspace) : CameraVerb("CameraZoomExtents", workspace) {}
 
-	virtual void doIt(IDataState* dataState);
+	void doIt(IDataState* dataState) override;
 };
 
 } // namespace RBX

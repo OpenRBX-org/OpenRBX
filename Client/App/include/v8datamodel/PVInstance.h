@@ -49,7 +49,7 @@ protected:
 	PVInstance(const char* name);
 
 public:
-	virtual ~PVInstance();
+	~PVInstance() override;
 
 	Controller::ControllerType getControllerType() const { return controllerType; }
 	void setControllerType(Controller::ControllerType _control);
@@ -64,14 +64,14 @@ protected:
 	virtual unsigned int topHashCode() const;
 	virtual unsigned int childHashCode() const;
 
-	virtual void onChildAdded(Instance* child);
-	virtual void onChildRemoving(Instance* child);
-	virtual void onDescendentAdded(Instance* instance);
-	virtual void onDescendentRemoving(const shared_ptr<Instance>& instance);
-	virtual void readProperty(const XmlElement* propertyElement, IReferenceBinder& binder);
+	void onChildAdded(Instance* child) override;
+	void onChildRemoving(Instance* child) override;
+	void onDescendentAdded(Instance* instance) override;
+	void onDescendentRemoving(const shared_ptr<Instance>& instance) override;
+	void readProperty(const XmlElement* propertyElement, IReferenceBinder& binder) override;
 
 public:
-	virtual bool isControllable() const;
+	bool isControllable() const override;
 
 protected:
 	void renderCoordinateFrame(Adorn* adorn);
@@ -100,7 +100,7 @@ public:
 
 	bool isTopLevelPVInstance() const
 	{
-		return dynamic_cast<const PVInstance*>(getParent()) == NULL || getTypedRoot<PVInstance>() == getParent();
+		return dynamic_cast<const PVInstance*>(getParent()) == nullptr || getTypedRoot<PVInstance>() == getParent();
 	}
 
 	void setPVGridOffsetLegacy(const CoordinateFrame& _offset);

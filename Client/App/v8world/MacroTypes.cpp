@@ -1,8 +1,7 @@
 #include "reflection/enumconverter.h"
 #include "v8world/SurfaceData.h"
 
-namespace RBX {
-namespace Reflection {
+namespace RBX::Reflection {
 
 template <>
 EnumDesc<SurfaceType>::EnumDesc() : EnumDescriptor("SurfaceType", typeid(SurfaceType))
@@ -20,5 +19,4 @@ EnumDesc<SurfaceType>::EnumDesc() : EnumDescriptor("SurfaceType", typeid(Surface
 	addLegacyName("Bumps", GLUE);
 }
 
-} // namespace Reflection
-} // namespace RBX
+} // namespace RBX::Reflection

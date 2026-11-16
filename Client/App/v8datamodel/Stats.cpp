@@ -5,11 +5,10 @@
 
 #include <G3D/Stopwatch.h>
 #include <G3D/format.h>
-#include <stdarg.h>
-#include <stdio.h>
+#include <cstdarg>
+#include <cstdio>
 
-namespace RBX {
-namespace Stats {
+namespace RBX::Stats {
 
 char sStats[] = "Stats";
 
@@ -74,8 +73,7 @@ void Item::formatValue<bool>(const bool& value)
 	val = value ? 1 : 0;
 }
 
-} // namespace Stats
-} // namespace RBX
+} // namespace RBX::Stats
 
 class ProfilingItem : public RBX::Stats::Item
 {
@@ -84,7 +82,7 @@ class ProfilingItem : public RBX::Stats::Item
 public:
 	ProfilingItem(const RBX::Profiling::Profiler* p) : p(*p) {}
 
-	virtual void update()
+	void update() override
 	{
 		RBX::Profiling::Bucket b = p.getData(5.0);
 		if (b.sampleTimeSpan > 0) {
@@ -106,8 +104,7 @@ public:
 	}
 };
 
-namespace RBX {
-namespace Stats {
+namespace RBX::Stats {
 
 Item* Item::createChildItem(const char* name)
 {
@@ -133,5 +130,4 @@ Item* Item::createBoundMemChildItem(const char* name, const unsigned int& v)
 	return item.get();
 }
 
-} // namespace Stats
-} // namespace RBX
+} // namespace RBX::Stats

@@ -3,8 +3,7 @@
 
 #include <string>
 
-namespace RBX {
-namespace Render {
+namespace RBX::Render {
 
 struct SpecData
 {
@@ -22,7 +21,6 @@ struct SpecData
 	SpecData();
 };
 
-} // namespace Render
-} // namespace RBX
+} // namespace RBX::Render
 
 #endif // RENDERLIB_PROFILER_H

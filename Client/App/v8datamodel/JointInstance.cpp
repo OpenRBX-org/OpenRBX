@@ -106,9 +106,9 @@ float Motor::getDesiredAngle() const
 
 JointInstance::~JointInstance()
 {
-	joint->setJointOwner(NULL);
+	joint->setJointOwner(nullptr);
 	delete joint;
-	joint = NULL;
+	joint = nullptr;
 }
 
 void AutoJoint::setPart(int i, PartInstance* value)
@@ -118,13 +118,13 @@ void AutoJoint::setPart(int i, PartInstance* value)
 	}
 
 	part[i] = shared_from(value);
-	joint->setPrimitive(i, value ? value->getPrimitive() : NULL);
+	joint->setPrimitive(i, value ? value->getPrimitive() : nullptr);
 }
 
 AutoJoint::~AutoJoint()
 {
-	setPart(0, NULL);
-	setPart(1, NULL);
+	setPart(0, nullptr);
+	setPart(1, nullptr);
 }
 
 bool AutoJoint::askSetParent(const Instance* instance) const
@@ -140,9 +140,9 @@ JointInstance::JointInstance(Joint* joint) : joint(joint)
 
 World* AutoJoint::computeWorld()
 {
-	if (getParent() != NULL && getParent()->getDescriptor() == Instance::classDescriptor()) {
+	if (getParent() != nullptr && getParent()->getDescriptor() == Instance::classDescriptor()) {
 		Workspace* workspace = ServiceProvider::find<Workspace>(this);
-		return workspace ? workspace->getWorld() : NULL;
+		return workspace ? workspace->getWorld() : nullptr;
 	}
 
 	return Workspace::getWorldIfInWorkspace(this);
@@ -305,30 +305,30 @@ template void RBX::Name::callDoDeclare<RBX::sAutoJoint>();
 
 template class RBX::FactoryProduct<RBX::Glue, RBX::AutoJoint, RBX::sGlue>;
 template class RBX::Reflection::
-	Described<RBX::Glue, RBX::sGlue, RBX::FactoryProduct<RBX::Glue, RBX::AutoJoint, RBX::sGlue> >;
+	Described<RBX::Glue, RBX::sGlue, RBX::FactoryProduct<RBX::Glue, RBX::AutoJoint, RBX::sGlue>>;
 template class RBX::DescribedCreatable<RBX::Glue, RBX::AutoJoint, RBX::sGlue>;
 
 template class RBX::FactoryProduct<RBX::Rotate, RBX::AutoJoint, RBX::sRotate>;
 template class RBX::Reflection::
-	Described<RBX::Rotate, RBX::sRotate, RBX::FactoryProduct<RBX::Rotate, RBX::AutoJoint, RBX::sRotate> >;
+	Described<RBX::Rotate, RBX::sRotate, RBX::FactoryProduct<RBX::Rotate, RBX::AutoJoint, RBX::sRotate>>;
 template class RBX::DescribedCreatable<RBX::Rotate, RBX::AutoJoint, RBX::sRotate>;
 
 template class RBX::FactoryProduct<RBX::RotateP, RBX::AutoJoint, RBX::sRotateP>;
 template class RBX::Reflection::
-	Described<RBX::RotateP, RBX::sRotateP, RBX::FactoryProduct<RBX::RotateP, RBX::AutoJoint, RBX::sRotateP> >;
+	Described<RBX::RotateP, RBX::sRotateP, RBX::FactoryProduct<RBX::RotateP, RBX::AutoJoint, RBX::sRotateP>>;
 template class RBX::DescribedCreatable<RBX::RotateP, RBX::AutoJoint, RBX::sRotateP>;
 
 template class RBX::FactoryProduct<RBX::RotateV, RBX::AutoJoint, RBX::sRotateV>;
 template class RBX::Reflection::
-	Described<RBX::RotateV, RBX::sRotateV, RBX::FactoryProduct<RBX::RotateV, RBX::AutoJoint, RBX::sRotateV> >;
+	Described<RBX::RotateV, RBX::sRotateV, RBX::FactoryProduct<RBX::RotateV, RBX::AutoJoint, RBX::sRotateV>>;
 template class RBX::DescribedCreatable<RBX::RotateV, RBX::AutoJoint, RBX::sRotateV>;
 
 template class RBX::FactoryProduct<RBX::Snap, RBX::AutoJoint, RBX::sSnap>;
 template class RBX::Reflection::
-	Described<RBX::Snap, RBX::sSnap, RBX::FactoryProduct<RBX::Snap, RBX::AutoJoint, RBX::sSnap> >;
+	Described<RBX::Snap, RBX::sSnap, RBX::FactoryProduct<RBX::Snap, RBX::AutoJoint, RBX::sSnap>>;
 template class RBX::DescribedCreatable<RBX::Snap, RBX::AutoJoint, RBX::sSnap>;
 
 template class RBX::FactoryProduct<RBX::Weld, RBX::AutoJoint, RBX::sWeld>;
 template class RBX::Reflection::
-	Described<RBX::Weld, RBX::sWeld, RBX::FactoryProduct<RBX::Weld, RBX::AutoJoint, RBX::sWeld> >;
+	Described<RBX::Weld, RBX::sWeld, RBX::FactoryProduct<RBX::Weld, RBX::AutoJoint, RBX::sWeld>>;
 template class RBX::DescribedCreatable<RBX::Weld, RBX::AutoJoint, RBX::sWeld>;

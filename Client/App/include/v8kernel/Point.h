@@ -32,7 +32,7 @@ protected:
 
 	Point(Body* _body);
 
-	virtual ~Point() {}
+	virtual ~Point() = default;
 
 public:
 	static bool sameBodyAndOffset(const Point* p0, const Point* p1)

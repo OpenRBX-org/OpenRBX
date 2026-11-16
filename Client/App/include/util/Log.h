@@ -41,7 +41,7 @@ public:
 
 	std::string logFile;
 
-	static Log* current() { return provider != NULL ? provider->provideLog() : NULL; }
+	static Log* current() { return provider != nullptr ? provider->provideLog() : nullptr; }
 
 private:
 	static std::ofstream* currentStream();

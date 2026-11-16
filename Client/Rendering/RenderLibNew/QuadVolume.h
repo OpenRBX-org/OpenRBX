@@ -13,10 +13,9 @@
 #include <G3D/g3dmath.h>
 #include <G3D/vectorMath.h>
 #include <algorithm>
-#include <math.h>
+#include <cmath>
 
-namespace RBX {
-namespace ViewNew {
+namespace RBX::ViewNew {
 
 template <int face>
 inline G3D::Vector3 uvwToObject(const G3D::Vector3& uvw)
@@ -76,13 +75,13 @@ protected:
 	}
 
 	template <int face, class Deform>
-	inline void buildFace(Deform deform, unsigned int uElements, unsigned int vElements, Purpose purpose)
+	void buildFace(Deform deform, unsigned int uElements, unsigned int vElements, Purpose purpose)
 	{
 		buildFace<face>(deform, G3D::Vector2int16(uElements, vElements), purpose);
 	}
 
 	template <int face, class Deform>
-	inline void buildFace(Deform deform, G3D::Vector2int16 elements, Purpose purpose)
+	void buildFace(Deform deform, G3D::Vector2int16 elements, Purpose purpose)
 	{
 		RenderSurfaceType surfaceType = surfaceTypes.getSurfaceType((NormalId) face);
 
@@ -156,7 +155,7 @@ protected:
 	}
 
 	template <int face, class Deform>
-	inline void buildFace(
+	void buildFace(
 		Deform deform,
 		G3D::Rect2D faceCoords,
 		const float faceZ,
@@ -227,7 +226,6 @@ protected:
 	void appendQuadFromVertexIndices(unsigned int a, unsigned int b, unsigned int c);
 };
 
-} // namespace ViewNew
-} // namespace RBX
+} // namespace RBX::ViewNew
 
 #endif // RENDERLIBNEW_QUADVOLUME_H

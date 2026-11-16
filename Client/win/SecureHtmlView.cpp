@@ -12,9 +12,7 @@ CSecureHtmlView::CSecureHtmlView() : m_unk0xf0(false)
 {
 }
 
-CSecureHtmlView::~CSecureHtmlView()
-{
-}
+CSecureHtmlView::~CSecureHtmlView() = default;
 
 BOOL CSecureHtmlView::OnAmbientProperty(COleControlSite* pSite, DISPID dispid, VARIANT* pvar)
 {
@@ -52,7 +50,7 @@ void CSecureHtmlView::OnBeforeNavigate2(
 
 BOOL CSecureHtmlView::PreCreateWindow(CREATESTRUCT& cs)
 {
-	cs.lpszClass = AfxRegisterWndClass(CS_DBLCLKS, LoadCursor(NULL, IDC_ARROW), NULL, NULL);
+	cs.lpszClass = AfxRegisterWndClass(CS_DBLCLKS, LoadCursor(nullptr, IDC_ARROW), nullptr, nullptr);
 	cs.style |= WS_CLIPSIBLINGS | WS_CLIPCHILDREN;
 	return CHtmlView::PreCreateWindow(cs);
 }

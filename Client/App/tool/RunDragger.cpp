@@ -38,9 +38,7 @@ void RunDragger::SnapInfo::updateHitFromSurface(const G3D::Ray& mouseRay)
 	}
 }
 
-RunDragger::~RunDragger()
-{
-}
+RunDragger::~RunDragger() = default;
 
 bool RunDragger::adjacent(Primitive* p0, Primitive* p1)
 {
@@ -76,7 +74,7 @@ float RunDragger::SnapInfo::hitOutsideExtents()
 	return (hitInSnap - clipInSnap).magnitude();
 }
 
-RunDragger::RunDragger() : workspace(NULL), drag(NULL)
+RunDragger::RunDragger() : workspace(nullptr), drag(nullptr)
 {
 }
 
@@ -95,7 +93,7 @@ RunDragger::SnapInfo RunDragger::createSnapSurface(Primitive* snap, G3D::Array<N
 
 	for (int i = 0; i < 6; ++i) {
 		NormalId surface = (NormalId) i;
-		if (!ignore || ignore->find(surface) == ignore->end()) {
+		if (!ignore || !ignore->contains(surface)) {
 			G3D::Plane plane = snapExtents.getPlane(surface);
 			if (plane.halfSpaceContainsFinite(rayInSnap.origin)) {
 				G3D::Vector3 hitInSnap;
@@ -118,7 +116,7 @@ RunDragger::SnapInfo RunDragger::createSnapSurface(Primitive* snap, G3D::Array<N
 
 bool RunDragger::notTried(Primitive* check, const G3D::Array<Primitive*>& tried)
 {
-	return check && tried.find(check) == tried.end();
+	return check && !tried.contains(check);
 }
 
 RunDragger::SnapInfo RunDragger::bestProximatePart(
@@ -131,7 +129,7 @@ RunDragger::SnapInfo RunDragger::bestProximatePart(
 		if ((contact->*proximityTest)(0.01f)) {
 			Primitive* test = contact->otherPrimitive(drag);
 			if (notTried(test, triedSnap)) {
-				SnapInfo testInfo = createSnapSurface(test, NULL);
+				SnapInfo testInfo = createSnapSurface(test, nullptr);
 				if (testInfo.snap) {
 					if (testInfo.hitOutsideExtents() < 1e10f) {
 						answer = testInfo;
@@ -219,7 +217,7 @@ void RunDragger::smartPtrHackPre()
 		snapInfo.snap = p->getPrimitive();
 	}
 	else {
-		snapInfo.snap = NULL;
+		snapInfo.snap = nullptr;
 	}
 }
 
@@ -354,7 +352,7 @@ bool RunDragger::fallOffPart(bool& snapped)
 		}
 	}
 
-	return snapInfo.snap == NULL;
+	return snapInfo.snap == nullptr;
 }
 
 void RunDragger::findNoSnapPosition(const G3D::CoordinateFrame& original)
@@ -380,7 +378,7 @@ bool RunDragger::snap(const G3D::Ray& _mouseRay)
 		snapInfo = findSnap(triedSnap);
 	}
 
-	while (snapInfo.snap && triedSnap.find(snapInfo.snap) == triedSnap.end()) {
+	while (snapInfo.snap && !triedSnap.contains(snapInfo.snap)) {
 		triedSnap.append(snapInfo.snap);
 
 		bool snapped = moveDragPart();

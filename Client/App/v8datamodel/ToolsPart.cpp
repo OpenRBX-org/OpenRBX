@@ -32,7 +32,7 @@ MouseCommand* ModelSetPrimaryPartTool::onMouseDown(const UIEvent& uiEvent)
 			model->setPrimaryPart(part);
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 void PartTool::render3dAdorn(Adorn* adorn)
@@ -67,7 +67,7 @@ MouseCommand* FillTool::onMouseDown(const UIEvent& uiEvent)
 		dataState.pushState(name.toString(), undoState, redoState);
 		workspace->getDataState().setDirty(true);
 	}
-	return NULL;
+	return nullptr;
 }
 
 MouseCommand* DropperTool::onMouseDown(const UIEvent& uiEvent)
@@ -77,7 +77,7 @@ MouseCommand* DropperTool::onMouseDown(const UIEvent& uiEvent)
 		FillTool::color.set(part->getColor());
 		ServiceProvider::create<Soundscape::SoundService>(workspace)->playSound(CLICK_SOUND);
 	}
-	return NULL;
+	return nullptr;
 }
 
 } // namespace RBX

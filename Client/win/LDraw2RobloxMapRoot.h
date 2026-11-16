@@ -7,8 +7,7 @@
 #include <map>
 #include <string>
 
-namespace RBX {
-namespace LDraw2Lua {
+namespace RBX::LDraw2Lua {
 
 class LDraw2RobloxMapRoot
 {
@@ -32,7 +31,6 @@ public:
 	std::map<std::string, LDraw2RobloxPartMap*> m_unk0x48;
 };
 
-} // namespace LDraw2Lua
-} // namespace RBX
+} // namespace RBX::LDraw2Lua
 
 #endif // LDRAW2ROBLOXMAPROOT_H

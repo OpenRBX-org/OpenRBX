@@ -7,10 +7,9 @@
 #include <G3D/Log.h>
 #include <OgreLogManager.h>
 #include <OgreSubMesh.h>
-#include <stdio.h>
+#include <cstdio>
 
-namespace RBX {
-namespace RenderNew {
+namespace RBX::RenderNew {
 
 G3D::MeshAlg::Geometry Mesh::visibleGeometry;
 G3D::Array<G3D::Vector2> Mesh::texCoordArray;
@@ -50,7 +49,7 @@ const Mesh::LevelRef Mesh::detailLevel(float meshLOD) const
 
 void Mesh::sendGeometry(const Level* lvl, G3D::RenderDevice* rd)
 {
-	if (lvl != NULL && lvl->indexArray.size() > 0) {
+	if (lvl != nullptr && lvl->indexArray.size() > 0) {
 		rd->sendIndices(lvl->primitive, lvl->indexArray);
 	}
 }
@@ -61,14 +60,14 @@ void Mesh::Level::FUN_005322f0()
 
 	if (m_unk0x24) {
 		delete m_unk0x24;
-		m_unk0x24 = NULL;
+		m_unk0x24 = nullptr;
 	}
 
 	if (m_unk0x20 > 0) {
 		g_unk0x0095877c->getNumSubMeshes();
 		Ogre::IndexData*& indexData = g_unk0x0095877c->getSubMesh(m_unk0x20)->indexData;
 		delete indexData;
-		indexData = NULL;
+		indexData = nullptr;
 		Ogre::RbxSceneNode::FUN_0067b070(g_unk0x0095877c->getSubMesh(m_unk0x20));
 	}
 }
@@ -82,10 +81,10 @@ void Mesh::FUN_00532380(Ogre::VisualEngine* engine)
 				visibleGeometry.vertexArray[0],
 				visibleGeometry.vertexArray.size(),
 				visibleGeometry.normalArray[0],
-				NULL,
+				nullptr,
 				texCoordArray[0],
-				NULL,
-				NULL
+				nullptr,
+				nullptr
 			);
 			varDirty = false;
 		}
@@ -96,10 +95,10 @@ void Mesh::FUN_00532380(Ogre::VisualEngine* engine)
 				visibleGeometry.vertexArray[0],
 				visibleGeometry.vertexArray.size(),
 				visibleGeometry.normalArray[0],
-				NULL,
+				nullptr,
 				texCoordArray[0],
-				NULL,
-				NULL
+				nullptr,
+				nullptr
 			);
 			Ogre::LogManager::getSingleton().logMessage(
 				std::string("create mesh=") + g_unk0x0095877c->getName() + "\n"
@@ -118,11 +117,11 @@ void Mesh::FUN_005324e0(Ogre::VisualEngine* engine)
 		m_unk0x38 = engine->FUN_006735b0(
 			m_unk0x28[0],
 			m_unk0x28.size(),
-			NULL,
-			NULL,
-			NULL,
+			nullptr,
+			nullptr,
+			nullptr,
 			&m_unk0x18[0],
-			NULL,
+			nullptr,
 			m_unk0x18.size() / 3,
 			&minimum,
 			&maximum
@@ -131,12 +130,12 @@ void Mesh::FUN_005324e0(Ogre::VisualEngine* engine)
 }
 
 G3D::ReferenceCountedPointer<Mesh> Mesh::aggregate(
-	const std::vector<G3D::ReferenceCountedPointer<Chunk> >& chunkArray,
+	const std::vector<G3D::ReferenceCountedPointer<Chunk>>& chunkArray,
 	G3D::CoordinateFrame& outCFrame,
 	float& outBoundingRadius
 )
 {
-	return NULL;
+	return nullptr;
 }
 
 unsigned int Mesh::allocVertex(
@@ -174,7 +173,7 @@ unsigned int Mesh::allocVertex(
 
 void Mesh::freeVertex(unsigned int index)
 {
-	if (vertexRefCounts.getCArray() != NULL && vertexRefCounts.size() != 0) {
+	if (vertexRefCounts.getCArray() != nullptr && vertexRefCounts.size() != 0) {
 		vertexRefCount--;
 		if (vertexRefCount < 20) {
 			G3D::Log::common()->printf("vertexRefCount = %d\n", vertexRefCount);
@@ -263,7 +262,7 @@ Mesh::Mesh()
 		g_unk0x00958794 = true;
 	}
 
-	m_unk0x38 = NULL;
+	m_unk0x38 = nullptr;
 	m_unk0x3c = 0;
 }
 
@@ -288,10 +287,10 @@ void Mesh::Level::makeHWSubMesh(Ogre::VisualEngine* engine, Ogre::AxisAlignedBox
 				triangles[quad * 6 + 4] = indexArray[quad * 4 + 1];
 				triangles[quad * 6 + 5] = indexArray[quad * 4 + 2];
 			}
-			subMesh = engine->FUN_00671d90(g_unk0x0095877c, NULL, &triangles[0], triangles.size() / 3);
+			subMesh = engine->FUN_00671d90(g_unk0x0095877c, nullptr, &triangles[0], triangles.size() / 3);
 		}
 		else {
-			subMesh = engine->FUN_00671d90(g_unk0x0095877c, NULL, indexArray.getCArray(), indexArray.size() / 3);
+			subMesh = engine->FUN_00671d90(g_unk0x0095877c, nullptr, indexArray.getCArray(), indexArray.size() / 3);
 		}
 
 		if (subMesh) {
@@ -448,10 +447,10 @@ void Mesh::Level::FUN_00533160(Ogre::VisualEngine* engine, Ogre::AxisAlignedBox&
 		&positions[0],
 		vertexCount,
 		&normals[0],
-		NULL,
+		nullptr,
 		&textureCoords[0],
-		engine->m_unk0x7f4 ? NULL : &indices16[0],
-		engine->m_unk0x7f4 ? &indices32[0] : NULL,
+		engine->m_unk0x7f4 ? nullptr : &indices16[0],
+		engine->m_unk0x7f4 ? &indices32[0] : nullptr,
 		triangleCount,
 		&minimum,
 		&maximum
@@ -461,5 +460,4 @@ void Mesh::Level::FUN_00533160(Ogre::VisualEngine* engine, Ogre::AxisAlignedBox&
 	m_unk0x1c = false;
 }
 
-} // namespace RenderNew
-} // namespace RBX
+} // namespace RBX::RenderNew

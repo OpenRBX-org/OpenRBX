@@ -154,9 +154,9 @@ const Type& Type::singleton<TextureId>()
 
 template class RBX::FactoryProduct<RBX::Decal, RBX::FaceInstance, RBX::sDecal>;
 template class RBX::Reflection::
-	Described<RBX::Decal, RBX::sDecal, RBX::FactoryProduct<RBX::Decal, RBX::FaceInstance, RBX::sDecal> >;
+	Described<RBX::Decal, RBX::sDecal, RBX::FactoryProduct<RBX::Decal, RBX::FaceInstance, RBX::sDecal>>;
 template class RBX::DescribedCreatable<RBX::Decal, RBX::FaceInstance, RBX::sDecal>;
 template class RBX::FactoryProduct<RBX::Texture, RBX::Decal, RBX::sTexture>;
 template class RBX::Reflection::
-	Described<RBX::Texture, RBX::sTexture, RBX::FactoryProduct<RBX::Texture, RBX::Decal, RBX::sTexture> >;
+	Described<RBX::Texture, RBX::sTexture, RBX::FactoryProduct<RBX::Texture, RBX::Decal, RBX::sTexture>>;
 template class RBX::DescribedCreatable<RBX::Texture, RBX::Decal, RBX::sTexture>;

@@ -8,7 +8,7 @@ class CSaveToRobloxDialog : public CRobloxDHtmlDialog
 
 public:
 	CSaveToRobloxDialog(IDispatch* external, const char* url, CWnd* pParentWnd);
-	virtual ~CSaveToRobloxDialog();
+	~CSaveToRobloxDialog() override;
 
 protected:
 	void OnWindowClosing(BOOL isChildWindow, VARIANT_BOOL* cancel);

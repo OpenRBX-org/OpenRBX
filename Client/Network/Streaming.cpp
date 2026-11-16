@@ -8,8 +8,7 @@
 #include <algorithm>
 #include <cmath>
 
-namespace RBX {
-namespace Network {
+namespace RBX::Network {
 
 const float brickEpsilon = 0.0005f;
 
@@ -553,5 +552,4 @@ void IdSerializer::deserializeRef(Reflection::Property& property, RakNet::BitStr
 	}
 }
 
-} // namespace Network
-} // namespace RBX
+} // namespace RBX::Network

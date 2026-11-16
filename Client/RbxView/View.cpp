@@ -17,8 +17,7 @@
 
 #include <GLG3D/Sky.h>
 
-namespace RBX {
-namespace View {
+namespace RBX::View {
 
 Instance* View::getWorkspace()
 {
@@ -29,7 +28,7 @@ void View::invalidateLighting(bool updateSkybox)
 {
 	lightingValid = false;
 	if (updateSkybox) {
-		sky = NULL;
+		sky = nullptr;
 	}
 }
 
@@ -83,13 +82,13 @@ void View::onWorkspaceDescendentAdded(std::shared_ptr<Instance> descendent)
 
 void View::suppressSkybox()
 {
-	Lighting* lighting = dataModel ? dataModel->create<Lighting>() : NULL;
+	Lighting* lighting = dataModel ? dataModel->create<Lighting>() : nullptr;
 
 	renderLibScene->presetLighting(
-		NULL, lighting->getSkyParameters(), lighting->getAmbientTop(), lighting->getAmbientBottom()
+		nullptr, lighting->getSkyParameters(), lighting->getAmbientTop(), lighting->getAmbientBottom()
 	);
 
-	sky = NULL;
+	sky = nullptr;
 
 	G3D::Color4 clearColor = lighting->getClearColor();
 	renderLibScene->colorClearValue = clearColor;
@@ -98,10 +97,10 @@ void View::suppressSkybox()
 void View::updateLighting()
 {
 	if (!lightingValid) {
-		Lighting* lighting = dataModel ? dataModel->create<Lighting>() : NULL;
+		Lighting* lighting = dataModel ? dataModel->create<Lighting>() : nullptr;
 
 		if (lighting->isSkySuppressed()) {
-			sky = NULL;
+			sky = nullptr;
 		}
 		else if (sky.isNull()) {
 			try {
@@ -134,7 +133,7 @@ View::View(std::shared_ptr<DataModel> dataModel)
 
 	renderLibScene->setThrottle(0, 0, false, 0);
 
-	Lighting* lighting = dataModel ? dataModel->create<Lighting>() : NULL;
+	Lighting* lighting = dataModel ? dataModel->create<Lighting>() : nullptr;
 	lightingChangedConnection = Lighting::event_LightingChanged.connect(
 		lighting, [this](bool updateSkybox) { invalidateLighting(updateSkybox); }, 10
 	);
@@ -163,5 +162,4 @@ View::~View()
 	BrickMesh::flushCache();
 }
 
-} // namespace View
-} // namespace RBX
+} // namespace RBX::View

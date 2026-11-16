@@ -11,7 +11,7 @@ int CBrowserFrameWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	CMenu* menu = GetMenu();
 	if (menu && ::IsMenu(menu->m_hMenu)) {
 		menu->DestroyMenu();
-		::SetMenu(m_hWnd, NULL);
+		::SetMenu(m_hWnd, nullptr);
 	}
 
 	CWnd* pane = GetDescendantWindow(AFX_IDW_PANE_FIRST, TRUE);
@@ -37,8 +37,8 @@ void CNullDoc::FUN_004374b0(CCmdUI* pCmdUI)
 
 // clang-format off
 BEGIN_MESSAGE_MAP(CNullDoc, CDocument)
-	ON_UPDATE_COMMAND_UI(ID_FILE_SAVE, FUN_004374b0)
-	ON_UPDATE_COMMAND_UI(ID_FILE_SAVE_AS, FUN_004374b0)
-	ON_UPDATE_COMMAND_UI(0x80b6, FUN_004374b0)
+	ON_UPDATE_COMMAND_UI(ID_FILE_SAVE, &CNullDoc::FUN_004374b0)
+	ON_UPDATE_COMMAND_UI(ID_FILE_SAVE_AS, &CNullDoc::FUN_004374b0)
+	ON_UPDATE_COMMAND_UI(0x80b6, &CNullDoc::FUN_004374b0)
 END_MESSAGE_MAP()
 // clang-format on

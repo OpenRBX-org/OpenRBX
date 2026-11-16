@@ -41,13 +41,13 @@ public:
 
 	float getMass() const { return mass; }
 
-	float getBranchMass() const { return cofm != NULL ? cofm->getMass() : mass; }
+	float getBranchMass() const { return cofm != nullptr ? cofm->getMass() : mass; }
 
 	int numChildren() const { return children.size(); }
 
 	Body* getChild(int index) const { return children[index]; }
 
-	const Vector3& getCofmOffset() const { return cofm != NULL ? cofm->getCofmInBody() : Vector3::zero(); }
+	const Vector3& getCofmOffset() const { return cofm != nullptr ? cofm->getCofmInBody() : Vector3::zero(); }
 	G3D::CoordinateFrame getMeInDescendant(const Body*) const;
 	G3D::CoordinateFrame getMeInRoot() const;
 
@@ -59,7 +59,7 @@ public:
 
 	Matrix3 getIBody() const { return moment; }
 
-	Matrix3 getBranchIBody() const { return cofm != NULL ? cofm->getMoment() : moment; }
+	Matrix3 getBranchIBody() const { return cofm != nullptr ? cofm->getMoment() : moment; }
 
 	Vector3 getIBodyV3() const { return Math::toDiagonal(getIBody()); }
 	Vector3 getBranchIBodyV3() const { return Math::toDiagonal(getBranchIBody()); }
@@ -68,21 +68,21 @@ public:
 	{
 		const SimBody* simBody = getRootSimBody();
 
-		return simBody != NULL ? simBody->getForce() : Vector3::zero();
+		return simBody != nullptr ? simBody->getForce() : Vector3::zero();
 	}
 
 	const Vector3& getBranchTorque() const
 	{
 		const SimBody* simBody = getRootSimBody();
 
-		return simBody != NULL ? simBody->getTorque() : Vector3::zero();
+		return simBody != nullptr ? simBody->getTorque() : Vector3::zero();
 	}
 
 	const Velocity& getBranchVelocity() const
 	{
 		const SimBody* simBody = getRootSimBody();
 
-		return simBody != NULL ? simBody->getPV().velocity : Velocity::zero();
+		return simBody != nullptr ? simBody->getPV().velocity : Velocity::zero();
 	}
 
 	Matrix3 getIWorld() const { return Math::momentToWorldSpace(getIBody(), getPV().position.rotation); }
@@ -194,7 +194,7 @@ inline void Body::accumulateForceAtBranchCofm(const Vector3& force)
 {
 	SimBody* simBody = getRootSimBody();
 
-	if (simBody != NULL) {
+	if (simBody != nullptr) {
 		simBody->accumulateForceCofm(force);
 	}
 }
@@ -203,7 +203,7 @@ inline void Body::accumulateForce(const Vector3& force, const Vector3& worldPos)
 {
 	SimBody* simBody = getRootSimBody();
 
-	if (simBody != NULL) {
+	if (simBody != nullptr) {
 		simBody->accumulateForce(force, worldPos);
 	}
 }
@@ -212,7 +212,7 @@ inline void Body::accumulateTorque(const Vector3& torque)
 {
 	SimBody* simBody = getRootSimBody();
 
-	if (simBody != NULL) {
+	if (simBody != nullptr) {
 		simBody->accumulateTorque(torque);
 	}
 }
@@ -220,14 +220,14 @@ inline void Body::accumulateTorque(const Vector3& torque)
 inline void Body::resetAccumulators()
 {
 	SimBody* simBody = getRootSimBody();
-	if (simBody != NULL) {
+	if (simBody != nullptr) {
 		simBody->resetAccumulators();
 	}
 }
 
 inline Body* Body::calcRoot()
 {
-	return parent != NULL ? parent->calcRoot() : this;
+	return parent != nullptr ? parent->calcRoot() : this;
 }
 
 } // namespace RBX

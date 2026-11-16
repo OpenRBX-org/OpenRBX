@@ -8,14 +8,11 @@
 #include <fstream>
 #include <memory>
 
-namespace RBX {
-namespace LDraw2Lua {
+namespace RBX::LDraw2Lua {
 
 static std::unique_ptr<LDraw2RobloxMapRoot> g_unk0x0095535c;
 
-LDrawParser::~LDrawParser()
-{
-}
+LDrawParser::~LDrawParser() = default;
 
 LDrawParser::LDrawParser(const char* p_unk0x04) : m_unk0x04(p_unk0x04)
 {
@@ -90,5 +87,4 @@ void LDrawParser::FUN_00473a80(std::ostream& stream)
 	writer.FUN_00474020(stream);
 }
 
-} // namespace LDraw2Lua
-} // namespace RBX
+} // namespace RBX::LDraw2Lua

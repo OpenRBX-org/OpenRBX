@@ -66,7 +66,7 @@ void DxUserInput::setKeyState(SDLKey key, bool down)
 
 void DxUserInput::FUN_0046b9d0()
 {
-	HRESULT hr = m_unk0x188->CreateDevice(GUID_SysMouse, &m_unk0x18c, NULL);
+	HRESULT hr = m_unk0x188->CreateDevice(GUID_SysMouse, &m_unk0x18c, nullptr);
 	if (FAILED(hr)) {
 		AtlThrow(hr);
 	}
@@ -96,7 +96,7 @@ void DxUserInput::FUN_0046b9d0()
 
 void DxUserInput::FUN_0046ba80()
 {
-	HRESULT hr = m_unk0x188->CreateDevice(GUID_SysKeyboard, &m_unk0x190, NULL);
+	HRESULT hr = m_unk0x188->CreateDevice(GUID_SysKeyboard, &m_unk0x190, nullptr);
 	if (FAILED(hr)) {
 		AtlThrow(hr);
 	}
@@ -275,7 +275,7 @@ G3D::ReferenceCountedPointer<RBX::TextureProxyBase> DxUserInput::getGameCursor(R
 		return UserInputBase::getGameCursor(adorn);
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 G3D::Vector2 DxUserInput::FUN_0046c4f0()
@@ -397,7 +397,7 @@ void DxUserInput::FUN_0046ca90()
 		static HCURSOR cursor = AfxGetApp()->LoadStandardCursor(IDC_ARROW);
 		SetCursor(cursor);
 
-		m_unk0x180->InvalidateRect(NULL);
+		m_unk0x180->InvalidateRect(nullptr);
 		m_unk0x68 = false;
 	}
 }
@@ -552,16 +552,16 @@ DxUserInput::~DxUserInput()
 
 	if (m_unk0x18c) {
 		m_unk0x18c->Unacquire();
-		m_unk0x18c = NULL;
+		m_unk0x18c = nullptr;
 	}
 
 	if (m_unk0x190) {
 		m_unk0x190->Unacquire();
-		m_unk0x190 = NULL;
+		m_unk0x190 = nullptr;
 	}
 
 	if (m_unk0x188) {
-		m_unk0x188 = NULL;
+		m_unk0x188 = nullptr;
 	}
 
 	delete[] m_unk0x50;
@@ -578,14 +578,14 @@ void DxUserInput::centerCursor()
 }
 
 DxUserInput::DxUserInput(CWnd* wnd, RBX::DataModel* dataModel)
-	: m_unk0x50(NULL), m_unk0x54(0), m_unk0x68(false), m_unk0x6c(WRAP_AUTO), m_unk0x78(false), m_unk0x79(false),
+	: m_unk0x50(nullptr), m_unk0x54(0), m_unk0x68(false), m_unk0x6c(WRAP_AUTO), m_unk0x78(false), m_unk0x79(false),
 	  m_unk0x7a(false), m_unk0x17c(SDLK_UNKNOWN), m_unk0x180(wnd), m_unk0x184(wnd->GetTopLevelFrame()->GetSafeHwnd()),
 	  m_unk0x194(RBX::shared_from(dataModel))
 {
 	FUN_0046bb10();
 
-	for (m_unk0x4c = m_unk0x180->GetParentFrame(); m_unk0x4c != NULL; m_unk0x4c = m_unk0x4c->GetParentFrame()) {
-		m_unk0x54 = CopyAcceleratorTable(m_unk0x4c->GetDefaultAccelerator(), NULL, 0);
+	for (m_unk0x4c = m_unk0x180->GetParentFrame(); m_unk0x4c != nullptr; m_unk0x4c = m_unk0x4c->GetParentFrame()) {
+		m_unk0x54 = CopyAcceleratorTable(m_unk0x4c->GetDefaultAccelerator(), nullptr, 0);
 
 		if (m_unk0x54) {
 			m_unk0x50 = new ACCEL[m_unk0x54];
@@ -596,8 +596,9 @@ DxUserInput::DxUserInput(CWnd* wnd, RBX::DataModel* dataModel)
 
 	memset(m_unk0x7b, 0, sizeof(m_unk0x7b));
 
-	HRESULT hr =
-		DirectInput8Create(GetModuleHandle(NULL), DIRECTINPUT_VERSION, IID_IDirectInput8, (void**) &m_unk0x188, NULL);
+	HRESULT hr = DirectInput8Create(
+		GetModuleHandle(nullptr), DIRECTINPUT_VERSION, IID_IDirectInput8, (void**) &m_unk0x188, nullptr
+	);
 	if (FAILED(hr)) {
 		AtlThrow(hr);
 	}

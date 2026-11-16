@@ -41,19 +41,19 @@ public:
 			RbxSubEntity* subent,
 			bool isLightCap = false
 		);
-		~RbxSubEntityShadowRenderable();
+		~RbxSubEntityShadowRenderable() override;
 
-		HardwareVertexBufferSharedPtr getPositionBuffer(void) { return mPositionBuffer; }
+		HardwareVertexBufferSharedPtr getPositionBuffer() { return mPositionBuffer; }
 
-		void getWorldTransforms(Matrix4* xform) const;
-		const Quaternion& getWorldOrientation(void) const;
-		const Vector3& getWorldPosition(void) const;
-		bool isVisible(void) const;
+		void getWorldTransforms(Matrix4* xform) const override;
+		const Quaternion& getWorldOrientation() const override;
+		const Vector3& getWorldPosition() const override;
+		bool isVisible() const override;
 	};
 
 	RbxSubEntity(Entity* parent);
 	RbxSubEntity(Entity* parent, SubMesh* subMesh, int lodIndex);
-	virtual ~RbxSubEntity();
+	~RbxSubEntity() override;
 
 	void FUN_0067b3d0(SubMesh* subMesh);
 	void FUN_0067b4b0(const MaterialPtr& material);
@@ -61,30 +61,30 @@ public:
 	SubMesh* FUN_0067b4e0(int lodIndex);
 	void FUN_0067b500(int lodIndex);
 
-	virtual void getRenderOperation(RenderOperation& op);
-	virtual void getWorldTransforms(Matrix4* xform) const;
-	virtual const Quaternion& getWorldOrientation(void) const;
-	virtual const Vector3& getWorldPosition(void) const;
-	virtual Real getSquaredViewDepth(const Camera* cam) const;
+	void getRenderOperation(RenderOperation& op) override;
+	void getWorldTransforms(Matrix4* xform) const override;
+	const Quaternion& getWorldOrientation() const override;
+	const Vector3& getWorldPosition() const override;
+	Real getSquaredViewDepth(const Camera* cam) const override;
 
 	virtual void FUN_0067bcc0(Real value);
 	virtual Real FUN_0067bcd0() const;
 
-	virtual bool getCastShadows(void) const;
-	virtual EdgeData* getEdgeList(void);
-	virtual bool hasEdgeList(void);
-	virtual const AxisAlignedBox& getWorldBoundingBox(bool derive = false) const;
-	virtual const AxisAlignedBox& getLightCapBounds(void) const;
-	virtual const AxisAlignedBox& getDarkCapBounds(const Light& light, Real dirLightExtrusionDist) const;
-	virtual ShadowRenderableListIterator getShadowVolumeRenderableIterator(
+	bool getCastShadows() const override;
+	EdgeData* getEdgeList() override;
+	bool hasEdgeList() override;
+	const AxisAlignedBox& getWorldBoundingBox(bool derive = false) const override;
+	const AxisAlignedBox& getLightCapBounds() const override;
+	const AxisAlignedBox& getDarkCapBounds(const Light& light, Real dirLightExtrusionDist) const override;
+	ShadowRenderableListIterator getShadowVolumeRenderableIterator(
 		ShadowTechnique shadowTechnique,
 		const Light* light,
 		HardwareIndexBufferSharedPtr* indexBuffer,
 		bool extrudeVertices,
 		Real extrusionDistance,
 		unsigned long flags = 0
-	);
-	virtual Real getPointExtrusionDistance(const Light* l) const;
+	) override;
+	Real getPointExtrusionDistance(const Light* l) const override;
 
 private:
 	friend class RBX::RenderNew::RenderScene;

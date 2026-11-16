@@ -61,7 +61,7 @@ void AssemblyStage::onEdgeAdded(Edge* e)
 	if (e->getEdgeType() == Edge::CONTACT) {
 		Joint* joint = Primitive::getJoint(e->getPrimitive(0), e->getPrimitive(1));
 
-		if (joint != NULL && joint->downstreamOfStage(this)) {
+		if (joint != nullptr && joint->downstreamOfStage(this)) {
 			return;
 		}
 
@@ -70,7 +70,7 @@ void AssemblyStage::onEdgeAdded(Edge* e)
 	else {
 		Contact* contact = Primitive::getContact(e->getPrimitive(0), e->getPrimitive(1));
 
-		if (contact != NULL && contact->downstreamOfStage(this)) {
+		if (contact != nullptr && contact->downstreamOfStage(this)) {
 			getDownstreamWS()->onEdgeRemoving(contact);
 		}
 
@@ -80,9 +80,7 @@ void AssemblyStage::onEdgeAdded(Edge* e)
 	}
 }
 
-AssemblyStage::~AssemblyStage()
-{
-}
+AssemblyStage::~AssemblyStage() = default;
 
 void AssemblyStage::onAssemblyRemoving(Assembly* assembly)
 {
@@ -106,7 +104,7 @@ void AssemblyStage::onEdgeRemoving(Edge* e)
 
 		Contact* contact = Primitive::getContact(e->getPrimitive(0), e->getPrimitive(1));
 
-		if (contact != NULL && contact->inStage(this)) {
+		if (contact != nullptr && contact->inStage(this)) {
 			getDownstreamWS()->onEdgeAdded(contact);
 		}
 	}

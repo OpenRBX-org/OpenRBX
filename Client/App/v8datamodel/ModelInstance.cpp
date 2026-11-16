@@ -44,14 +44,14 @@ static Reflection::BoundFuncDesc<ModelInstance, void(G3D::Vector3), 1> model_mov
 
 bool ModelInstance::askSetParent(const Instance* instance) const
 {
-	return dynamic_cast<const ModelInstance*>(instance) != NULL;
+	return dynamic_cast<const ModelInstance*>(instance) != nullptr;
 }
 
 float ModelInstance::computeFlagHeight() const
 {
 	float height = 6.0f;
 
-	if (primaryPart != NULL) {
+	if (primaryPart != nullptr) {
 		float primaryTop = primaryPart->getExtentsWorld().max().y;
 
 		height = getExtentsWorld().max().y - primaryTop + 6.0f;
@@ -73,18 +73,18 @@ const Primitive* ModelInstance::getBiggestPrimitive() const
 {
 	const PartInstance* part = getPrimaryPartConst();
 
-	if (part != NULL) {
+	if (part != nullptr) {
 		return part->getPrimitive();
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 void ModelInstance::updatePrimaryPart(PartInstance* set) const
 {
 	if (primaryPart != set) {
-		if (set != NULL) {
-			if (primaryPart != NULL) {
+		if (set != nullptr) {
+			if (primaryPart != nullptr) {
 				Matrix3 meOld = getLocation().rotation;
 
 				modelInPrimary =
@@ -98,7 +98,7 @@ void ModelInstance::updatePrimaryPart(PartInstance* set) const
 		}
 		else {
 			modelInPrimary = CoordinateFrame();
-			primaryPart = NULL;
+			primaryPart = nullptr;
 		}
 	}
 }
@@ -141,9 +141,7 @@ void ModelInstance::render3dSelect(Adorn* adorn, SelectState selectState)
 	Draw::selectionBox(part, adorn, selectState);
 }
 
-ModelInstance::~ModelInstance()
-{
-}
+ModelInstance::~ModelInstance() = default;
 
 Extents ModelInstance::getExtentsWorld() const
 {
@@ -157,20 +155,20 @@ Extents ModelInstance::getExtentsLocal() const
 
 PartInstance* ModelInstance::getPrimaryPartInternal() const
 {
-	if (primaryPart != NULL) {
+	if (primaryPart != nullptr) {
 		return primaryPart;
 	}
 
 	float biggest = -1.0f;
-	PartInstance* best = NULL;
+	PartInstance* best = nullptr;
 
 	for (unsigned int i = 0; i < numChildren(); i++) {
 		const PVInstance* pv = dynamic_cast<const PVInstance*>(getChild(i));
 
-		if (pv != NULL) {
+		if (pv != nullptr) {
 			const Primitive* primitive = pv->getBiggestPrimitive();
 
-			if (primitive != NULL) {
+			if (primitive != nullptr) {
 				PartInstance* part = PartInstance::fromPrimitive(const_cast<Primitive*>(primitive));
 
 				float area = part->getExtentsWorld().areaXZ();
@@ -198,7 +196,7 @@ void ModelInstance::legacyTraverseState(const CoordinateFrame& parentState)
 		for (int i = 0; i < count; i++) {
 			PVInstance* pv = dynamic_cast<PVInstance*>(getChild(i));
 
-			if (pv != NULL) {
+			if (pv != nullptr) {
 				pv->legacyTraverseState(myState);
 			}
 		}
@@ -210,7 +208,7 @@ bool ModelInstance::hitTest(const G3D::Ray& worldRay, G3D::Vector3& worldHitPoin
 	for (unsigned int i = 0; i < numChildren(); i++) {
 		PVInstance* pv = dynamic_cast<PVInstance*>(getChild(i));
 
-		if (pv != NULL && pv->hitTest(worldRay, worldHitPoint)) {
+		if (pv != nullptr && pv->hitTest(worldRay, worldHitPoint)) {
 			return true;
 		}
 	}
@@ -239,7 +237,7 @@ void ModelInstance::onCameraNear(float distance)
 	for (unsigned int i = 0; i < numChildren(); i++) {
 		ICameraSubject* subject = dynamic_cast<ICameraSubject*>(getChild(i));
 
-		if (subject != NULL) {
+		if (subject != nullptr) {
 			subject->onCameraNear(distance);
 		}
 	}
@@ -275,7 +273,7 @@ void ModelInstance::onDescendentAdded(Instance* instance)
 void ModelInstance::onDescendentRemoving(const shared_ptr<Instance>& instance)
 {
 	if (primaryPart == instance.get()) {
-		primaryPart = NULL;
+		primaryPart = nullptr;
 	}
 
 	if (candidatePrimaryPart.get() == instance.get()) {
@@ -350,7 +348,7 @@ Extents ModelInstance::computeLocalGridExtents() const
 }
 
 ModelInstance::ModelInstance()
-	: DescribedCreatable<ModelInstance, PVInstance, sModel>("Model"), primaryPart(NULL),
+	: DescribedCreatable<ModelInstance, PVInstance, sModel>("Model"), primaryPart(nullptr),
 	  FlagHeight(this, &ModelInstance::computeFlagHeight),
 	  LocalGridExtents(this, &ModelInstance::computeLocalGridExtents),
 	  WorldGridExtents(this, &ModelInstance::computeWorldGridExtents)
@@ -366,13 +364,13 @@ ModelInstance::ModelInstance()
 
 void ModelInstance::setPrimaryPart(PartInstance* set)
 {
-	if (set == NULL || set->isDescendentOf(this)) {
+	if (set == nullptr || set->isDescendentOf(this)) {
 		candidatePrimaryPart.reset();
 		updatePrimaryPart(set);
 	}
 	else {
 		candidatePrimaryPart = shared_from(set);
-		updatePrimaryPart(NULL);
+		updatePrimaryPart(nullptr);
 	}
 
 	raisePropertyChanged(primaryPartProp);

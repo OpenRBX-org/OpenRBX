@@ -10,7 +10,7 @@ class IMoving;
 class __declspec(novtable) IMovingManager
 {
 public:
-	typedef std::set<IMoving*> MovingSet;
+	using MovingSet = std::set<IMoving*>;
 
 	IMovingManager();
 
@@ -34,7 +34,7 @@ struct CanAggregateChanged
 {
 	const bool canClump;
 
-	CanAggregateChanged(const CanAggregateChanged& other) : canClump(other.canClump) {}
+	CanAggregateChanged(const CanAggregateChanged& other) = default;
 	CanAggregateChanged(bool canClump) : canClump(canClump) {}
 };
 

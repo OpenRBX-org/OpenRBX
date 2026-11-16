@@ -33,7 +33,7 @@ void StandardOut::print(MessageType type, const char* format, ...)
 	}
 
 	if (hasListeners()) {
-		std::lock_guard<std::recursive_mutex> lock(sync);
+		std::scoped_lock lock(sync);
 
 		if (hasListeners()) {
 			raise(StandardOutMessage(type, message.c_str()));

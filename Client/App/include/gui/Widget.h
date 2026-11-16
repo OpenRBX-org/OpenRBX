@@ -25,11 +25,11 @@ public:
 	Widget();
 
 protected:
-	virtual GuiResponse process(const GuiEvent& event);
+	GuiResponse process(const GuiEvent& event) override;
 
-	virtual void onLoseFocus() { widgetState = NOTHING; }
+	void onLoseFocus() override { widgetState = NOTHING; }
 
-	virtual void render2d(Adorn* adorn);
+	void render2d(Adorn* adorn) override;
 
 	virtual void onClick(const GuiEvent& event) {}
 
@@ -42,7 +42,7 @@ protected:
 
 	virtual bool isEnabled() { return isVisible(); }
 
-	virtual int getFontSize() const { return 12; }
+	int getFontSize() const override { return 12; }
 
 	WidgetState widgetState;
 
@@ -58,13 +58,13 @@ private:
 
 protected:
 	Verb* getVerb() { return verb; }
-	virtual bool isEnabled();
-	virtual void onClick(const GuiEvent& p_unk0x04);
+	bool isEnabled() override;
+	void onClick(const GuiEvent& p_unk0x04) override;
 
 public:
 	VerbWidget(Verb* p_unk0x04);
 	VerbWidget();
-	virtual ~VerbWidget();
+	~VerbWidget() override;
 };
 
 } // namespace RBX

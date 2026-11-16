@@ -3,8 +3,7 @@
 
 #include <string>
 
-namespace RBX {
-namespace Network {
+namespace RBX::Network {
 
 class API
 {
@@ -14,7 +13,6 @@ public:
 	static void init(const char* version);
 };
 
-} // namespace Network
-} // namespace RBX
+} // namespace RBX::Network
 
 #endif // NETWORK_API_H

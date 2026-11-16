@@ -59,39 +59,39 @@ public:
 	static Instance* findTopInstance(Instance*);
 
 private:
-	virtual bool askAddChild(const Instance* instance) const;
-	virtual void onChildChanged(Instance* instance, const PropertyChanged& event);
-	virtual void onDescendentAdded(Instance* instance);
-	virtual void onDescendentRemoving(const std::shared_ptr<Instance>& instance);
+	bool askAddChild(const Instance* instance) const override;
+	void onChildChanged(Instance* instance, const PropertyChanged& event) override;
+	void onDescendentAdded(Instance* instance) override;
+	void onDescendentRemoving(const std::shared_ptr<Instance>& instance) override;
 
 public:
-	virtual void render2d(Adorn* adorn);
-	virtual void render3dAdorn(Adorn* adorn);
+	void render2d(Adorn* adorn) override;
+	void render3dAdorn(Adorn* adorn) override;
 
-	virtual void render3dSelect(Adorn* adorn, SelectState selectState) {}
+	void render3dSelect(Adorn* adorn, SelectState selectState) override {}
 
 private:
-	virtual IScriptOwner* scriptShouldRun(Script* script);
-	virtual void runScript(Script* script, ScriptContext* context);
-	virtual void releaseScript(Script* script);
+	IScriptOwner* scriptShouldRun(Script* script) override;
+	void runScript(Script* script, ScriptContext* context) override;
+	void releaseScript(Script* script) override;
 
-	virtual Extents computeCameraOwnerExtents(); // ICameraOwner vtable+0x10
-	virtual void cameraMoved();                  // ICameraOwner vtable+0x0c
+	Extents computeCameraOwnerExtents() override; // ICameraOwner vtable+0x10
+	void cameraMoved() override;                  // ICameraOwner vtable+0x0c
 
-	virtual void onExtentsChanged() const
+	void onExtentsChanged() const override
 	{
 		ModelInstance::onExtentsChanged();
 		raiseDrawChanged();
 	}
 
-	virtual void onEvent(const RunService* source, Heartbeat event);
-	virtual void onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider);
+	void onEvent(const RunService* source, Heartbeat event) override;
+	void onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider) override;
 
 public:
-	virtual ~Workspace();
+	~Workspace() override;
 
-	virtual const G3D::GCamera& getGCamera() const; // ICameraOwner vtable+0x08
-	virtual Camera* getCamera() const;              // ICameraOwner vtable+0x04
+	const G3D::GCamera& getGCamera() const override; // ICameraOwner vtable+0x08
+	Camera* getCamera() const override;              // ICameraOwner vtable+0x04
 	void setCamera(Camera* value);
 
 	Workspace(IDataState* dataState);
@@ -112,7 +112,7 @@ public:
 	void zoomToExtents();
 	void onWrapMouse(const G3D::Vector2&);
 
-	virtual GuiResponse process(const GuiEvent& guiEvent);
+	GuiResponse process(const GuiEvent& guiEvent) override;
 	void selectAll();
 
 	void start();
@@ -120,24 +120,21 @@ public:
 	void reset();
 	void setThrottleEnabled(bool value);
 	void joinAllHack();
-	void insertItems(XmlElement*, std::vector<std::shared_ptr<Instance> >&, InsertMode, PromptMode);
+	void insertItems(XmlElement*, std::vector<std::shared_ptr<Instance>>&, InsertMode, PromptMode);
 
 	float step(float timeInterval);
 
 	void insertContent(
-		ContentId contentId,
-		std::vector<std::shared_ptr<Instance> >& items,
-		InsertMode insertMode,
-		PromptMode promptMode
+		ContentId contentId, std::vector<std::shared_ptr<Instance>>& items, InsertMode insertMode, PromptMode promptMode
 	);
-	std::shared_ptr<const std::vector<std::shared_ptr<Instance> > > insertContent(ContentId contentId);
+	std::shared_ptr<const std::vector<std::shared_ptr<Instance>>> insertContent(ContentId contentId);
 
-	void makeJoints(std::shared_ptr<const std::vector<std::shared_ptr<Instance> > > instances);
-	void breakJoints(std::shared_ptr<const std::vector<std::shared_ptr<Instance> > > instances);
+	void makeJoints(std::shared_ptr<const std::vector<std::shared_ptr<Instance>>> instances);
+	void breakJoints(std::shared_ptr<const std::vector<std::shared_ptr<Instance>>> instances);
 	void setCursor(Adorn*);
 
 private:
-	void handleFallenParts(const G3D::Array<std::shared_ptr<PartInstance> >& fallenParts);
+	void handleFallenParts(const G3D::Array<std::shared_ptr<PartInstance>>& fallenParts);
 
 public:
 	void raiseDrawChanged() const { Notifier<Workspace, DrawChanged>::raise(DrawChanged()); }

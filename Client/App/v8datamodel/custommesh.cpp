@@ -29,7 +29,7 @@ static Reflection::PropDescriptor<SpecialShape, G3D::Vector3> desc_vertColor(
 
 bool SpecialShape::askSetParent(const Instance* instance) const
 {
-	return dynamic_cast<const PartInstance*>(instance) != NULL;
+	return dynamic_cast<const PartInstance*>(instance) != nullptr;
 }
 
 const float SpecialShape::getAlpha() const
@@ -112,5 +112,5 @@ template class RBX::FactoryProduct<RBX::SpecialShape, RBX::Instance, RBX::sSpeci
 template class RBX::Reflection::Described<
 	RBX::SpecialShape,
 	RBX::sSpecialShape,
-	RBX::FactoryProduct<RBX::SpecialShape, RBX::Instance, RBX::sSpecialShape> >;
+	RBX::FactoryProduct<RBX::SpecialShape, RBX::Instance, RBX::sSpecialShape>>;
 template class RBX::DescribedCreatable<RBX::SpecialShape, RBX::Instance, RBX::sSpecialShape>;

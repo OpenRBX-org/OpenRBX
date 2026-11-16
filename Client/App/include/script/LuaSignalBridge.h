@@ -5,8 +5,7 @@
 #include "reflection/signal.h"
 #include "util/Signals.h"
 
-namespace RBX {
-namespace Lua {
+namespace RBX::Lua {
 
 template <>
 int Bridge<Signals::Connection, 1>::on_index(const Signals::Connection& value, const char* name, lua_State* L);
@@ -57,7 +56,6 @@ public:
 	static int wait(lua_State* L);
 };
 
-} // namespace Lua
-} // namespace RBX
+} // namespace RBX::Lua
 
 #endif // SCRIPT_LUASIGNALBRIDGE_H

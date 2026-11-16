@@ -2,11 +2,11 @@
 
 CVersionInfo::CVersionInfo()
 {
-	m_pVerData = NULL;
-	m_pffi = NULL;
+	m_pVerData = nullptr;
+	m_pffi = nullptr;
 	m_wLangID = 0;
 	m_wCharset = 1252;
-	m_pTranslations = NULL;
+	m_pTranslations = nullptr;
 	m_nTranslations = 0;
 }
 
@@ -17,16 +17,16 @@ CVersionInfo::~CVersionInfo()
 
 void CVersionInfo::Unload()
 {
-	m_pffi = NULL;
+	m_pffi = nullptr;
 
 	if (m_pVerData) {
 		delete[] m_pVerData;
-		m_pVerData = NULL;
+		m_pVerData = nullptr;
 	}
 
 	m_wLangID = 0;
 	m_wCharset = 1252;
-	m_pTranslations = NULL;
+	m_pTranslations = nullptr;
 	m_nTranslations = 0;
 }
 
@@ -70,7 +70,7 @@ int CVersionInfo::Load(const CString& fileName)
 	if (!bSuccess) {
 		if (m_pVerData) {
 			delete[] m_pVerData;
-			m_pVerData = NULL;
+			m_pVerData = nullptr;
 		}
 	}
 
@@ -82,9 +82,9 @@ CString CVersionInfo::GetValue(const CString& sKey)
 	CString strResult;
 
 	CString sQueryValue;
-	sQueryValue.Format("\\StringFileInfo\\%04x%04x\\%s", m_wLangID, m_wCharset, sKey);
+	sQueryValue.Format("\\StringFileInfo\\%04x%04x\\%s", m_wLangID, m_wCharset, static_cast<LPCTSTR>(sKey));
 
-	LPCTSTR pVal = NULL;
+	LPCTSTR pVal = nullptr;
 	UINT nLen = 0;
 
 	if (VerQueryValue(m_pVerData, sQueryValue.GetBuffer(), (LPVOID*) &pVal, &nLen)) {

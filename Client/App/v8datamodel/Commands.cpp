@@ -176,7 +176,7 @@ void StatsCommand::doIt(IDataState* dataState)
 bool StatsCommand::isEnabled() const
 {
 	GuiRoot* guiRoot = dataModel->getGuiRoot();
-	return dynamic_cast<TopMenuBar*>(guiRoot->findFirstChildByName("StatsHud1")) != NULL;
+	return dynamic_cast<TopMenuBar*>(guiRoot->findFirstChildByName("StatsHud1")) != nullptr;
 }
 
 bool StatsCommand::isChecked() const
@@ -242,18 +242,14 @@ void FUN_00597490(XmlElement* container, std::shared_ptr<Instance> instance)
 {
 	XmlElement* child = instance->write();
 
-	if (child != NULL) {
+	if (child != nullptr) {
 		container->addChild(child);
 	}
 }
 
-RunStateVerb::~RunStateVerb()
-{
-}
+RunStateVerb::~RunStateVerb() = default;
 
-EditSelectionVerb::~EditSelectionVerb()
-{
-}
+EditSelectionVerb::~EditSelectionVerb() = default;
 
 RunStateVerb::RunStateVerb(std::string name, DataModel* dataModel)
 	: Verb(dataModel, name), dataModel(dataModel), runService(dataModel)
@@ -355,7 +351,7 @@ MoveDownSelectionVerb::MoveDownSelectionVerb(DataModel* dataModel) : EditSelecti
 
 bool JoinCommand::isEnabled() const
 {
-	Selection* currentSelection = dataModel ? dataModel->create<Selection>() : NULL;
+	Selection* currentSelection = dataModel ? dataModel->create<Selection>() : nullptr;
 
 	if (currentSelection->size() == 2) {
 		std::shared_ptr<Instance> first = currentSelection->front();
@@ -373,7 +369,7 @@ void JoinCommand::doIt(IDataState* dataState)
 {
 	FUN_00596660(dataModel);
 
-	Selection* currentSelection = dataModel ? dataModel->create<Selection>() : NULL;
+	Selection* currentSelection = dataModel ? dataModel->create<Selection>() : nullptr;
 
 	if (currentSelection->size() == 2) {
 		std::shared_ptr<Instance> first = currentSelection->front();
@@ -467,7 +463,7 @@ void Unknown00597dd0::operator()(std::shared_ptr<Instance> instance)
 void RotateAxisCommand::FUN_00598da0(const G3D::Matrix3& rotation, const std::vector<PVInstance*>& pvInstances)
 {
 	if (pvInstances.size() > 0) {
-		MegaDragger dragger(NULL, pvInstances, workspace.get());
+		MegaDragger dragger(nullptr, pvInstances, workspace.get());
 		dragger.startDragging();
 		dragger.safeRotate(rotation);
 		dragger.finishDragging();
@@ -508,7 +504,7 @@ public:
 			}
 
 			instance->promoteChildren();
-			instance->setParent(NULL);
+			instance->setParent(nullptr);
 			m_unk0x04 = true;
 		}
 	}
@@ -519,14 +515,14 @@ private:
 };
 
 EditSelectionVerb::EditSelectionVerb(VerbContainer* container, std::string name, DataModel* dataModel)
-	: Verb(container, name), workspace(shared_from(dataModel ? dataModel->find<Workspace>() : NULL)),
+	: Verb(container, name), workspace(shared_from(dataModel ? dataModel->find<Workspace>() : nullptr)),
 	  selection(dataModel), dataModel(dataModel)
 {
 }
 
 bool DuplicateSelectionVerb::isEnabled() const
 {
-	return (dataModel ? dataModel->create<Selection>() : NULL)->size() > 0;
+	return (dataModel ? dataModel->create<Selection>() : nullptr)->size() > 0;
 }
 
 DeleteBase::DeleteBase(VerbContainer* container, DataModel* dataModel, std::string name)
@@ -547,7 +543,7 @@ public:
 void ControllerCommand::setController(Controller::ControllerType controllerType)
 {
 	FilteredSelection<PVInstance>* filteredSelection =
-		dataModel ? dataModel->create<FilteredSelection<PVInstance> >() : NULL;
+		dataModel ? dataModel->create<FilteredSelection<PVInstance>>() : nullptr;
 
 	Controller::ControllerType newType =
 		filteredSelection->FUN_00598690(Unknown00598770(controllerType)) ? controllerType : Controller::NO_CONTROLLER;
@@ -569,11 +565,11 @@ void GroupSelectionVerb::doIt(IDataState* dataState)
 {
 	FUN_00596660(dataModel);
 
-	Selection* currentSelection = dataModel ? dataModel->create<Selection>() : NULL;
+	Selection* currentSelection = dataModel ? dataModel->create<Selection>() : nullptr;
 	ModelInstance* model = workspace->FUN_005984c0(currentSelection->begin(), currentSelection->end()).get();
 	currentSelection->setSelection(model);
 
-	(dataModel ? dataModel->create<Soundscape::SoundService>() : NULL)->playSound(PING_SOUND);
+	(dataModel ? dataModel->create<Soundscape::SoundService>() : nullptr)->playSound(PING_SOUND);
 	dataState->clearStack();
 	dataState->setDirty(true);
 }
@@ -583,9 +579,9 @@ void UngroupSelectionVerb::doIt(IDataState* dataState)
 	FUN_00596660(dataModel);
 
 	FilteredSelection<ModelInstance>* filteredSelection =
-		dataModel ? dataModel->create<FilteredSelection<ModelInstance> >() : NULL;
+		dataModel ? dataModel->create<FilteredSelection<ModelInstance>>() : nullptr;
 
-	std::vector<std::shared_ptr<Instance> > models;
+	std::vector<std::shared_ptr<Instance>> models;
 	for (std::vector<ModelInstance*>::const_iterator iter = filteredSelection->begin();
 		 iter != filteredSelection->end();
 		 ++iter) {
@@ -599,7 +595,7 @@ void UngroupSelectionVerb::doIt(IDataState* dataState)
 
 	if (changed) {
 		filteredSelection->setSelection(newSelection.begin(), newSelection.end());
-		(dataModel ? dataModel->create<Soundscape::SoundService>() : NULL)->playSound(PING_SOUND);
+		(dataModel ? dataModel->create<Soundscape::SoundService>() : nullptr)->playSound(PING_SOUND);
 	}
 
 	dataState->clearStack();
@@ -611,7 +607,7 @@ void RotateAxisCommand::doIt(IDataState* dataState)
 	FUN_00596660(dataModel);
 
 	FilteredSelection<PVInstance>* filteredSelection =
-		dataModel ? dataModel->create<FilteredSelection<PVInstance> >() : NULL;
+		dataModel ? dataModel->create<FilteredSelection<PVInstance>>() : nullptr;
 
 	UndoState* undoState = new UndoState();
 
@@ -623,7 +619,7 @@ void RotateAxisCommand::doIt(IDataState* dataState)
 
 	FUN_00598da0(getRotationAxis(), filteredSelection->items());
 
-	(dataModel ? dataModel->create<Soundscape::SoundService>() : NULL)->playSound(CLICK_SOUND);
+	(dataModel ? dataModel->create<Soundscape::SoundService>() : nullptr)->playSound(CLICK_SOUND);
 
 	workspace->raiseDrawChanged();
 
@@ -642,8 +638,8 @@ void RotateAxisCommand::doIt(IDataState* dataState)
 void AttachCameraCommand::doIt(IDataState* dataState)
 {
 	FilteredSelection<PVInstance>* filteredSelection =
-		dataModel ? dataModel->create<FilteredSelection<PVInstance> >() : NULL;
-	PVInstance* subject = filteredSelection->items().size() > 0 ? filteredSelection->items().front() : NULL;
+		dataModel ? dataModel->create<FilteredSelection<PVInstance>>() : nullptr;
+	PVInstance* subject = filteredSelection->items().size() > 0 ? filteredSelection->items().front() : nullptr;
 
 	workspace->getCamera()->setCameraType(Camera::ATTACH_CAMERA);
 	workspace->getCamera()->setCameraSubject(subject);
@@ -653,7 +649,7 @@ void AttachCameraCommand::doIt(IDataState* dataState)
 
 void TrackCameraCommand::doIt(IDataState* dataState)
 {
-	Selection* currentSelection = dataModel ? dataModel->create<Selection>() : NULL;
+	Selection* currentSelection = dataModel ? dataModel->create<Selection>() : nullptr;
 
 	if (PVInstance* subject = dynamic_cast<PVInstance*>(currentSelection->front().get())) {
 		workspace->getCamera()->setCameraSubject(subject);
@@ -667,8 +663,8 @@ void TrackCameraCommand::doIt(IDataState* dataState)
 void FollowCameraCommand::doIt(IDataState* dataState)
 {
 	FilteredSelection<PVInstance>* filteredSelection =
-		dataModel ? dataModel->create<FilteredSelection<PVInstance> >() : NULL;
-	PVInstance* subject = filteredSelection->items().size() > 0 ? filteredSelection->items().front() : NULL;
+		dataModel ? dataModel->create<FilteredSelection<PVInstance>>() : nullptr;
+	PVInstance* subject = filteredSelection->items().size() > 0 ? filteredSelection->items().front() : nullptr;
 
 	workspace->getCamera()->setCameraType(Camera::FOLLOW_CAMERA);
 	workspace->getCamera()->setCameraSubject(subject);
@@ -679,8 +675,8 @@ void FollowCameraCommand::doIt(IDataState* dataState)
 void WatchCameraCommand::doIt(IDataState* dataState)
 {
 	FilteredSelection<PVInstance>* filteredSelection =
-		dataModel ? dataModel->create<FilteredSelection<PVInstance> >() : NULL;
-	PVInstance* subject = filteredSelection->items().size() > 0 ? filteredSelection->items().front() : NULL;
+		dataModel ? dataModel->create<FilteredSelection<PVInstance>>() : nullptr;
+	PVInstance* subject = filteredSelection->items().size() > 0 ? filteredSelection->items().front() : nullptr;
 
 	workspace->getCamera()->setCameraType(Camera::WATCH_CAMERA);
 	workspace->getCamera()->setCameraSubject(subject);
@@ -693,15 +689,15 @@ void MoveUpSelectionVerb::doIt(IDataState* dataState)
 	FUN_00596660(dataModel);
 
 	FilteredSelection<PVInstance>* filteredSelection =
-		dataModel ? dataModel->create<FilteredSelection<PVInstance> >() : NULL;
+		dataModel ? dataModel->create<FilteredSelection<PVInstance>>() : nullptr;
 
 	if (filteredSelection->items().size() > 0) {
-		MegaDragger dragger(NULL, filteredSelection->items(), workspace.get());
+		MegaDragger dragger(nullptr, filteredSelection->items(), workspace.get());
 		dragger.startDragging();
 		dragger.safeMoveNoDrop(G3D::Vector3(0.0f, moveUpHeight, 0.0f));
 		dragger.finishDragging();
 
-		(dataModel ? dataModel->create<Soundscape::SoundService>() : NULL)->playSound(CLICK_SOUND);
+		(dataModel ? dataModel->create<Soundscape::SoundService>() : nullptr)->playSound(CLICK_SOUND);
 
 		workspace->raiseDrawChanged();
 		dataState->clearStack();
@@ -714,16 +710,16 @@ void MoveDownSelectionVerb::doIt(IDataState* dataState)
 	FUN_00596660(dataModel);
 
 	FilteredSelection<PVInstance>* filteredSelection =
-		dataModel ? dataModel->create<FilteredSelection<PVInstance> >() : NULL;
+		dataModel ? dataModel->create<FilteredSelection<PVInstance>>() : nullptr;
 
 	if (filteredSelection->items().size() > 0) {
-		MegaDragger dragger(NULL, filteredSelection->items(), workspace.get());
+		MegaDragger dragger(nullptr, filteredSelection->items(), workspace.get());
 		dragger.startDragging();
 		G3D::Vector3 moved = dragger.safeMoveNoDrop(G3D::Vector3(0.0f, -1.2f, 0.0f));
 		dragger.finishDragging();
 
 		SoundType sound = moved.y != 0.0f ? CLICK_SOUND : BOING_SOUND;
-		(dataModel ? dataModel->create<Soundscape::SoundService>() : NULL)->playSound(sound);
+		(dataModel ? dataModel->create<Soundscape::SoundService>() : nullptr)->playSound(sound);
 
 		workspace->raiseDrawChanged();
 		dataState->clearStack();
@@ -826,7 +822,7 @@ void BoolPropertyVerb::doIt(IDataState* dataState)
 
 bool CameraCenterCommand::isEnabled() const
 {
-	bool hasSelection = ServiceClient<FilteredSelection<PVInstance> >(workspace)->items().size() >= 1;
+	bool hasSelection = ServiceClient<FilteredSelection<PVInstance>>(workspace)->items().size() >= 1;
 
 	if (hasSelection) {
 		Camera* camera = getCamera();
@@ -841,7 +837,7 @@ bool CameraCenterCommand::isEnabled() const
 
 void CameraCenterCommand::doIt(IDataState* dataState)
 {
-	ServiceClient<FilteredSelection<PVInstance> > filteredSelection(workspace);
+	ServiceClient<FilteredSelection<PVInstance>> filteredSelection(workspace);
 	G3D::Vector3 center;
 
 	if (filteredSelection->items().size() >= 1) {
@@ -871,7 +867,7 @@ void CanNotSelectCommand::doIt(IDataState* dataState)
 {
 	FUN_00596660(dataModel);
 	FilteredSelection<PVInstance>* filteredSelection =
-		dataModel ? dataModel->create<FilteredSelection<PVInstance> >() : NULL;
+		dataModel ? dataModel->create<FilteredSelection<PVInstance>>() : nullptr;
 	std::for_each(selection->begin(), selection->end(), &FUN_00596ca0);
 	filteredSelection->clearSelection();
 	dataState->clearStack();
@@ -933,9 +929,9 @@ bool GroupSelectionVerb::isEnabled() const
 void WeldSelectionVerb::doIt(IDataState* dataState)
 {
 	FUN_00596660(dataModel);
-	Selection* currentSelection = dataModel ? dataModel->create<Selection>() : NULL;
+	Selection* currentSelection = dataModel ? dataModel->create<Selection>() : nullptr;
 	std::for_each(selection->begin(), selection->end(), FUN_00598570);
-	(dataModel ? dataModel->create<Soundscape::SoundService>() : NULL)->playSound(PING_SOUND);
+	(dataModel ? dataModel->create<Soundscape::SoundService>() : nullptr)->playSound(PING_SOUND);
 	dataState->clearStack();
 	dataState->setDirty(true);
 }
@@ -946,7 +942,7 @@ bool WeldSelectionVerb::isEnabled() const
 		return false;
 	}
 
-	return (dataModel ? dataModel->create<Selection>() : NULL)->size() > 0;
+	return (dataModel ? dataModel->create<Selection>() : nullptr)->size() > 0;
 }
 
 bool SnapSelectionVerb::isEnabled() const
@@ -955,15 +951,15 @@ bool SnapSelectionVerb::isEnabled() const
 		return false;
 	}
 
-	return (dataModel ? dataModel->create<Selection>() : NULL)->size() > 0;
+	return (dataModel ? dataModel->create<Selection>() : nullptr)->size() > 0;
 }
 
 void SnapSelectionVerb::doIt(IDataState* dataState)
 {
 	FUN_00596660(dataModel);
-	Selection* currentSelection = dataModel ? dataModel->create<Selection>() : NULL;
+	Selection* currentSelection = dataModel ? dataModel->create<Selection>() : nullptr;
 	std::for_each(selection->begin(), selection->end(), FUN_00597890);
-	(dataModel ? dataModel->create<Soundscape::SoundService>() : NULL)->playSound(PING_SOUND);
+	(dataModel ? dataModel->create<Soundscape::SoundService>() : nullptr)->playSound(PING_SOUND);
 	dataState->clearStack();
 	dataState->setDirty(true);
 }
@@ -975,8 +971,8 @@ bool UngroupSelectionVerb::isEnabled() const
 	}
 
 	FilteredSelection<ModelInstance>* filteredSelection =
-		dataModel ? dataModel->create<FilteredSelection<ModelInstance> >() : NULL;
-	return filteredSelection->FUN_00598690(&FUN_00597450) != NULL;
+		dataModel ? dataModel->create<FilteredSelection<ModelInstance>>() : nullptr;
+	return filteredSelection->FUN_00598690(&FUN_00597450) != nullptr;
 }
 
 void DuplicateSelectionVerb::doIt(IDataState* dataState)
@@ -987,7 +983,7 @@ void DuplicateSelectionVerb::doIt(IDataState* dataState)
 	RedoState* redoState = new RedoState();
 
 	std::unique_ptr<XmlElement> root(SerializerV2::newRootElement());
-	Selection* currentSelection = dataModel ? dataModel->create<Selection>() : NULL;
+	Selection* currentSelection = dataModel ? dataModel->create<Selection>() : nullptr;
 	std::for_each(
 		selection->begin(), selection->end(), [container = root.get()](const std::shared_ptr<Instance>& instance) {
 			FUN_00597490(container, instance);
@@ -995,15 +991,15 @@ void DuplicateSelectionVerb::doIt(IDataState* dataState)
 	);
 	SerializerV2::isolateHandles(root.get());
 
-	std::vector<std::shared_ptr<Instance> > instances;
+	std::vector<std::shared_ptr<Instance>> instances;
 	workspace->insertItems(root.get(), instances, INSERT_TO_3D_VIEW, ALLOW_PROMPTS);
 
-	const std::vector<std::shared_ptr<Instance> >& items = instances;
+	const std::vector<std::shared_ptr<Instance>>& items = instances;
 	selection->setSelection(items.begin(), items.end());
 
-	(dataModel ? dataModel->create<Soundscape::SoundService>() : NULL)->playSound(PING_SOUND);
+	(dataModel ? dataModel->create<Soundscape::SoundService>() : nullptr)->playSound(PING_SOUND);
 
-	for (std::vector<std::shared_ptr<Instance> >::const_iterator iter = items.begin(); iter != items.end(); ++iter) {
+	for (std::vector<std::shared_ptr<Instance>>::const_iterator iter = items.begin(); iter != items.end(); ++iter) {
 		if (Instance* instance = iter->get()) {
 			undoState->addDelete(*instance);
 			redoState->addParentProperty(*instance);
@@ -1019,7 +1015,7 @@ void DeleteBase::doIt(IDataState* dataState)
 	FUN_00596660(dataModel);
 
 	if (selection->size() > 0) {
-		Selection* currentSelection = dataModel ? dataModel->create<Selection>() : NULL;
+		Selection* currentSelection = dataModel ? dataModel->create<Selection>() : nullptr;
 
 		UndoState* undoState = new UndoState();
 		RedoState* redoState = new RedoState();
@@ -1031,10 +1027,10 @@ void DeleteBase::doIt(IDataState* dataState)
 		);
 
 		while (std::shared_ptr<Instance> instance = selection->front()) {
-			instance->setParent(NULL);
+			instance->setParent(nullptr);
 		}
 
-		(dataModel ? dataModel->create<Soundscape::SoundService>() : NULL)->playSound(PAGE_SOUND);
+		(dataModel ? dataModel->create<Soundscape::SoundService>() : nullptr)->playSound(PAGE_SOUND);
 
 		if (undoState) {
 			dataState->pushState(getName(), undoState, redoState);
@@ -1055,7 +1051,7 @@ bool AttachCameraCommand::isEnabled() const
 
 	bool result;
 	{
-		ServiceClient<FilteredSelection<PVInstance> > filteredSelection(dataModel);
+		ServiceClient<FilteredSelection<PVInstance>> filteredSelection(dataModel);
 		result = filteredSelection->items().size() == 1;
 	}
 
@@ -1068,14 +1064,14 @@ bool TrackCameraCommand::isEnabled() const
 		return false;
 	}
 
-	return (dataModel ? dataModel->create<Selection>() : NULL)->size() == 1;
+	return (dataModel ? dataModel->create<Selection>() : nullptr)->size() == 1;
 }
 
 bool FollowCameraCommand::isEnabled() const
 {
 	if (selection->size() > 0) {
 		FilteredSelection<PVInstance>* filteredSelection =
-			dataModel ? dataModel->create<FilteredSelection<PVInstance> >() : NULL;
+			dataModel ? dataModel->create<FilteredSelection<PVInstance>>() : nullptr;
 
 		if (filteredSelection->items().size() == 1) {
 			return true;
@@ -1089,7 +1085,7 @@ bool WatchCameraCommand::isEnabled() const
 {
 	if (selection->size() > 0) {
 		FilteredSelection<PVInstance>* filteredSelection =
-			dataModel ? dataModel->create<FilteredSelection<PVInstance> >() : NULL;
+			dataModel ? dataModel->create<FilteredSelection<PVInstance>>() : nullptr;
 
 		if (filteredSelection->items().size() == 1) {
 			return true;
@@ -1106,13 +1102,13 @@ bool ControllerCommand::isEnabled() const
 	}
 
 	FilteredSelection<PVInstance>* filteredSelection =
-		dataModel ? dataModel->create<FilteredSelection<PVInstance> >() : NULL;
-	return filteredSelection->FUN_00598690(&FUN_00596960) != NULL;
+		dataModel ? dataModel->create<FilteredSelection<PVInstance>>() : nullptr;
+	return filteredSelection->FUN_00598690(&FUN_00596960) != nullptr;
 }
 
 void CameraZoomExtentsCommand::doIt(IDataState* dataState)
 {
-	ServiceClient<FilteredSelection<PVInstance> > filteredSelection(workspace);
+	ServiceClient<FilteredSelection<PVInstance>> filteredSelection(workspace);
 	Extents extents;
 
 	if (filteredSelection->items().size() >= 1) {

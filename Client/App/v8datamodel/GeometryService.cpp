@@ -11,7 +11,7 @@ char sGeometryService[] = "Geometry";
 
 G3D::Vector3 GeometryService::getHitLocationFilterDescendants(Instance* ancestor, G3D::Ray ray)
 {
-	if (workspace == NULL) {
+	if (workspace == nullptr) {
 		return G3D::Vector3::ZERO;
 	}
 
@@ -23,7 +23,7 @@ G3D::Vector3 GeometryService::getHitLocationFilterDescendants(Instance* ancestor
 
 	Primitive* hit = contactManager->getHit(ray, &dummy, &filter, hitPoint);
 
-	if (hit == NULL) {
+	if (hit == nullptr) {
 		hitPoint = ray.unit().origin + ray.direction;
 	}
 
@@ -40,7 +40,7 @@ void GeometryService::onServiceProvider(const ServiceProvider* oldProvider, cons
 }
 
 inline GeometryService::GeometryService()
-	: DescribedCreatable<GeometryService, Instance, sGeometryService>(sGeometryService), workspace(NULL)
+	: DescribedCreatable<GeometryService, Instance, sGeometryService>(sGeometryService), workspace(nullptr)
 {
 }
 
@@ -50,5 +50,5 @@ template class RBX::FactoryProduct<RBX::GeometryService, RBX::Instance, RBX::sGe
 template class RBX::Reflection::Described<
 	RBX::GeometryService,
 	RBX::sGeometryService,
-	RBX::FactoryProduct<RBX::GeometryService, RBX::Instance, RBX::sGeometryService> >;
+	RBX::FactoryProduct<RBX::GeometryService, RBX::Instance, RBX::sGeometryService>>;
 template class RBX::DescribedCreatable<RBX::GeometryService, RBX::Instance, RBX::sGeometryService>;

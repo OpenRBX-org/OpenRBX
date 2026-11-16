@@ -45,7 +45,7 @@ public:
 	void setValue(const T& value);
 
 protected:
-	virtual bool askSetParent(const Instance* instance) const { return true; }
+	bool askSetParent(const Instance* instance) const override { return true; }
 
 private:
 	void onValueChanged(const Reflection::PropertyDescriptor&) { desc_ValueChanged.fire(this, value); }
@@ -66,7 +66,7 @@ public:
 	void setValue(Instance* value);
 
 protected:
-	virtual bool askSetParent(const Instance* instance) const { return true; }
+	bool askSetParent(const Instance* instance) const override { return true; }
 
 private:
 	void onValueChanged(const Reflection::PropertyDescriptor& descriptor);

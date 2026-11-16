@@ -46,7 +46,7 @@ public:
 
 	World();
 
-	virtual ~World();
+	~World() override;
 
 	static bool disableEnvironmentalThrottle;
 
@@ -68,7 +68,7 @@ public:
 
 	void computeFallen(G3D::Array<Primitive*>& fallen) const;
 
-	typedef IndexArray<Primitive, &Primitive::worldIndexFunc> PrimitiveArray;
+	using PrimitiveArray = IndexArray<Primitive, &Primitive::worldIndexFunc>;
 
 	const G3D::Array<Primitive*>& getPrimitives() const { return primitives.underlyingArray(); }
 

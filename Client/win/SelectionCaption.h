@@ -17,23 +17,25 @@ class CSelectionCaption
 
 public:
 	CSelectionCaption();
-	virtual ~CSelectionCaption();
+	~CSelectionCaption() override;
 
 protected:
-	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
+	BOOL PreCreateWindow(CREATESTRUCT& cs) override;
 
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 
 	DECLARE_MESSAGE_MAP()
 
-	virtual void VTable0x00(std::shared_ptr<RBX::DataModel> newDataModel, std::shared_ptr<RBX::DataModel> oldDataModel);
-	virtual void VTable0x08(const RBX::Selection* source, RBX::SelectionChanged event);
-	virtual bool VTable0x10(
+	void VTable0x00(
+		std::shared_ptr<RBX::DataModel> newDataModel, std::shared_ptr<RBX::DataModel> oldDataModel
+	) override;
+	void VTable0x08(const RBX::Selection* source, RBX::SelectionChanged event) override;
+	bool VTable0x10(
 		const RBX::Selection* source,
 		const RBX::SelectionChanged& event,
 		const RBX::Selection* oldSource,
 		const RBX::SelectionChanged& oldEvent
-	);
+	) override;
 
 private:
 	void FUN_0046a290();

@@ -23,10 +23,13 @@ public:
 	void saveState();
 	void eraseSettingsStore();
 
-	class Item : public NonFactoryProduct<Instance, static_cast<const char*>(0)>
+	class Item : public NonFactoryProduct<Instance, nullptr>
 	{
 	protected:
-		virtual bool askAddChild(const Instance* instance) const { return dynamic_cast<const Item*>(instance) != NULL; }
+		bool askAddChild(const Instance* instance) const override
+		{
+			return dynamic_cast<const Item*>(instance) != nullptr;
+		}
 	};
 };
 
@@ -43,13 +46,13 @@ protected:
 		sing = this;
 	}
 
-	virtual ~GlobalSettingsItem() { sing = NULL; }
+	~GlobalSettingsItem() override { sing = nullptr; }
 
 public:
 	static T& singleton()
 	{
-		std::lock_guard<std::recursive_mutex> lock(GlobalSettings::mutex);
-		if (sing == NULL) {
+		std::scoped_lock lock(GlobalSettings::mutex);
+		if (sing == nullptr) {
 			std::shared_ptr<T> s = Creatable<Instance>::create<T>();
 			s->setParent(GlobalSettings::singleton().get());
 		}
@@ -58,7 +61,7 @@ public:
 };
 
 template <class T, const char* sName>
-GlobalSettingsItem<T, sName>* GlobalSettingsItem<T, sName>::sing = NULL;
+GlobalSettingsItem<T, sName>* GlobalSettingsItem<T, sName>::sing = nullptr;
 
 } // namespace RBX
 

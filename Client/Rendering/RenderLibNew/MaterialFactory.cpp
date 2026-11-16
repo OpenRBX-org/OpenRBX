@@ -7,12 +7,11 @@
 #include <OgreLogManager.h>
 #include <OgreTextureManager.h>
 #include <algorithm>
+#include <cstdio>
 #include <sstream>
 #include <stdexcept>
-#include <stdio.h>
 
-namespace RBX {
-namespace ViewNew {
+namespace RBX::ViewNew {
 
 static float g_unk0x0092b2d0 = 0.9f;
 static float g_unk0x0092b2d4 = 50.0f;
@@ -34,7 +33,7 @@ public:
 
 	static float stripWidth();
 
-	virtual G3D::ReferenceCountedPointer<G3D::Texture> resolve(G3D::RenderDevice* rd);
+	G3D::ReferenceCountedPointer<G3D::Texture> resolve(G3D::RenderDevice* rd) override;
 };
 
 static int g_unk0x009586f4 = 0;
@@ -105,7 +104,7 @@ G3D::ReferenceCountedPointer<G3D::Texture> MegaTextureProxy::resolve(G3D::Render
 			}
 		}
 
-		root = NULL;
+		root = nullptr;
 		loaded = true;
 	}
 
@@ -192,5 +191,4 @@ MaterialFactory::MaterialFactory(G3D::TextureManager* textureManager)
 		new MegaTextureProxy(*textureManager, ContentProvider::singleton().getAssetFile("textures\\SurfacesStrip.png"));
 }
 
-} // namespace ViewNew
-} // namespace RBX
+} // namespace RBX::ViewNew

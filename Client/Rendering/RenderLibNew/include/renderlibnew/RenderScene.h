@@ -26,8 +26,7 @@ class RbxSceneNode;
 class VisualEngine;
 } // namespace Ogre
 
-namespace RBX {
-namespace RenderNew {
+namespace RBX::RenderNew {
 
 class Chunk;
 
@@ -45,7 +44,7 @@ private:
 	G3D::Array<RenderSurface*> reflectProxyArray;
 	G3D::Array<RenderSurface*> transparentProxyArray;
 	G3D::Array<RenderSurface> shadowProxyArray;
-	G3D::Array<G3D::ReferenceCountedPointer<Chunk> > shadowCachingChunkArray;
+	G3D::Array<G3D::ReferenceCountedPointer<Chunk>> shadowCachingChunkArray;
 	G3D::VAR shadowVAR;
 	G3D::ReferenceCountedPointer<G3D::VARArea> shadowVARArea;
 	EffectSettings effectSettings;
@@ -55,7 +54,7 @@ private:
 	float meshDetail;
 	bool shadows;
 	float cameraDistance;
-	G3D::Array<G3D::ReferenceCountedPointer<Chunk> > chunkArray;
+	G3D::Array<G3D::ReferenceCountedPointer<Chunk>> chunkArray;
 	G3D::Array<unsigned int> shadowIndexArray;
 
 public:
@@ -98,7 +97,7 @@ public:
 	virtual void setSleeping(const G3D::ReferenceCountedPointer<Chunk>& chunk, bool sleeping) = 0;
 	virtual void prerender(double optimizationTime) = 0;
 
-	virtual ~SceneManager() {}
+	virtual ~SceneManager() = default;
 
 	RenderScene* renderScene;
 
@@ -116,7 +115,6 @@ protected:
 	}
 };
 
-} // namespace RenderNew
-} // namespace RBX
+} // namespace RBX::RenderNew
 
 #endif // RENDERLIBNEW_RENDERSCENE_H

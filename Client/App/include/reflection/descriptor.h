@@ -5,8 +5,7 @@
 
 #include <mutex>
 
-namespace RBX {
-namespace Reflection {
+namespace RBX::Reflection {
 
 static std::recursive_mutex& sync()
 {
@@ -21,14 +20,13 @@ public:
 	Descriptor(const Descriptor&) = delete;
 	Descriptor& operator=(const Descriptor&) = delete;
 
-	virtual ~Descriptor() {}
+	virtual ~Descriptor() = default;
 
 	const Name& name;
 
 	Descriptor(const char* name) : name(Name::declare(name, -1)) {}
 };
 
-} // namespace Reflection
-} // namespace RBX
+} // namespace RBX::Reflection
 
 #endif // REFLECTION_DESCRIPTOR_H

@@ -10,7 +10,7 @@ class Anchor
 public:
 	Anchor(Primitive* primitive) : primitive(primitive) {}
 
-	~Anchor() {}
+	~Anchor() = default;
 
 	Primitive* getPrimitive() { return primitive; }
 

@@ -13,7 +13,7 @@ int RBXImage::FUN_00445c70()
 }
 
 RBXImage::RBXImage()
-	: m_unk0x04(NULL), m_unk0x08(NULL), m_unk0x0c(0), m_unk0x10(0), m_unk0x14(0), m_unk0x18(0), m_unk0x1c(false),
+	: m_unk0x04(nullptr), m_unk0x08(nullptr), m_unk0x0c(0), m_unk0x10(0), m_unk0x14(0), m_unk0x18(0), m_unk0x1c(false),
 	  m_unk0x1d(false), m_unk0x20(-1)
 {
 }
@@ -44,18 +44,18 @@ void RBXImage::FUN_00445cc0(int orientation)
 		m_unk0x10 = section.dsBm.bmHeight;
 		m_unk0x18 = section.dsBm.bmBitsPixel;
 		m_unk0x14 = 0;
-		m_unk0x08 = NULL;
+		m_unk0x08 = nullptr;
 		m_unk0x20 = -1;
 		m_unk0x1d = false;
 	}
 }
 
-RBXImage::~RBXImage() throw()
+RBXImage::~RBXImage() noexcept
 {
-	if (m_unk0x04 != NULL) {
+	if (m_unk0x04 != nullptr) {
 		HBITMAP bitmap = m_unk0x04;
-		m_unk0x04 = NULL;
-		m_unk0x08 = NULL;
+		m_unk0x04 = nullptr;
+		m_unk0x08 = nullptr;
 		m_unk0x0c = 0;
 		m_unk0x10 = 0;
 		m_unk0x18 = 0;
@@ -67,13 +67,13 @@ RBXImage::~RBXImage() throw()
 	}
 }
 
-BOOL RBXImage::FUN_00445dd0(int width, int height, int bpp, DWORD compression, const DWORD* masks, DWORD flags) throw()
+BOOL RBXImage::FUN_00445dd0(int width, int height, int bpp, DWORD compression, const DWORD* masks, DWORD flags) noexcept
 {
 	USES_ATL_SAFE_ALLOCA;
 	BITMAPINFO* info = static_cast<BITMAPINFO*>(
 		_ATL_SAFE_ALLOCA(sizeof(BITMAPINFOHEADER) + 256 * sizeof(RGBQUAD), _ATL_SAFE_ALLOCA_DEF_THRESHOLD)
 	);
-	if (info == NULL) {
+	if (info == nullptr) {
 		return FALSE;
 	}
 
@@ -91,8 +91,8 @@ BOOL RBXImage::FUN_00445dd0(int width, int height, int bpp, DWORD compression, c
 		memcpy(info->bmiColors, masks, 3 * sizeof(DWORD));
 	}
 
-	HBITMAP bitmap = CreateDIBSection(NULL, info, DIB_RGB_COLORS, &m_unk0x08, NULL, 0);
-	if (bitmap == NULL) {
+	HBITMAP bitmap = CreateDIBSection(nullptr, info, DIB_RGB_COLORS, &m_unk0x08, nullptr, 0);
+	if (bitmap == nullptr) {
 		return FALSE;
 	}
 	m_unk0x04 = bitmap;
@@ -105,7 +105,7 @@ BOOL RBXImage::FUN_00445dd0(int width, int height, int bpp, DWORD compression, c
 
 BOOL RBXImage::FUN_00445f50(int width, int height, int bpp, DWORD flags)
 {
-	return FUN_00445dd0(width, height, bpp, BI_RGB, NULL, flags);
+	return FUN_00445dd0(width, height, bpp, BI_RGB, nullptr, flags);
 }
 
 RBXImage::operator HBITMAP()

@@ -24,9 +24,9 @@
 #include <OgreTechnique.h>
 #include <OgreTextureManager.h>
 #include <OgreViewport.h>
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
 
 namespace RBX {
 
@@ -430,15 +430,16 @@ void AdornRbxGfx::cylinderAlongX(float radius, float length, const G3D::Color4& 
 		Ogre::Vector3(m_unk0x94.translation + G3D::Vector3(length * 0.5, 0.0f, 0.0f)),
 		radius > length ? radius * 1.4f : length * 1.4f
 	);
-	if (!m_unk0x04->m_unk0x08->isVisible(bounds, NULL)) {
+	if (!m_unk0x04->m_unk0x08->isVisible(bounds, nullptr)) {
 		return;
 	}
 
 	FUN_0066aae0(solid, 0);
 	Ogre::Unknown0067eb00 quadric;
 	if (g_unk0x00961300.isNull()) {
-		Ogre::ManualObject* manual =
-			quadric.FUN_0067ecc0(m_unk0x04->getSceneManager(), "cyl" + FUN_0066a3c0(), NULL, 1.0f, 1.0f, 1.0f, 12, 1);
+		Ogre::ManualObject* manual = quadric.FUN_0067ecc0(
+			m_unk0x04->getSceneManager(), "cyl" + FUN_0066a3c0(), nullptr, 1.0f, 1.0f, 1.0f, 12, 1
+		);
 		quadric.FUN_0067eae0(Ogre::Vector3(0.0f, 0.0f, 1.0f));
 		quadric.FUN_00685580(m_unk0x04->getSceneManager(), "dsk" + FUN_0066a3c0(), manual, 0.0f, 1.0f, 12, 1);
 		quadric.FUN_0067eae0(Ogre::Vector3(0.0f, 0.0f, 0.0f));
@@ -479,7 +480,7 @@ void AdornRbxGfx::sphere(const G3D::Sphere& sphere, const G3D::Color4& solid, co
 	Ogre::MeshPtr mesh = FUN_0066b450(key);
 	if (mesh.isNull()) {
 		Ogre::ManualObject* manual =
-			quadric.FUN_00682ad0(m_unk0x04->getSceneManager(), "sph" + FUN_0066a3c0(), NULL, 1.0f, 17, 17);
+			quadric.FUN_00682ad0(m_unk0x04->getSceneManager(), "sph" + FUN_0066a3c0(), nullptr, 1.0f, 17, 17);
 		for (int i = 0; i < (int) manual->getNumSections(); i++) {
 			manual->setMaterialName(i, m_unk0x24->getName());
 		}
@@ -526,7 +527,7 @@ void AdornRbxGfx::quad(
 	Ogre::Sphere bounds(Ogre::Vector3(m_unk0x94.translation + center), size * 1.4f);
 	Ogre::Vector3 offset =
 		reinterpret_cast<const Ogre::Vector3&>(m_unk0x94.translation) - m_unk0x04->m_unk0x08->getDerivedPosition();
-	if (!m_unk0x04->m_unk0x08->isVisible(bounds, NULL)) {
+	if (!m_unk0x04->m_unk0x08->isVisible(bounds, nullptr)) {
 		return;
 	}
 
@@ -591,7 +592,7 @@ void AdornRbxGfx::ray(const G3D::Ray& ray, const G3D::Color4& color, float scale
 	if (mesh.isNull()) {
 		Ogre::Unknown0067eb00 quadric;
 		Ogre::ManualObject* manual =
-			quadric.FUN_0067ecc0(m_unk0x04->getSceneManager(), FUN_0066a3c0(), NULL, 0.05f, 0.05f, 1.0f, 12, 1);
+			quadric.FUN_0067ecc0(m_unk0x04->getSceneManager(), FUN_0066a3c0(), nullptr, 0.05f, 0.05f, 1.0f, 12, 1);
 		quadric.FUN_0067eae0(Ogre::Vector3(0.0f, 0.0f, 1.0f));
 		quadric.FUN_0067ecc0(m_unk0x04->getSceneManager(), FUN_0066a3c0(), manual, 0.15f, 0.0f, 0.3f, 12, 1);
 		quadric.orientation = 1;
@@ -651,7 +652,7 @@ AdornRbxGfx::~AdornRbxGfx()
 	m_unk0x88.clear();
 }
 
-AdornRbxGfx::AdornRbxGfx(Ogre::VisualEngine* visualEngine) : m_unk0x08(""), m_unk0x74(NULL)
+AdornRbxGfx::AdornRbxGfx(Ogre::VisualEngine* visualEngine) : m_unk0x08(""), m_unk0x74(nullptr)
 {
 	m_unk0x04 = visualEngine;
 	if (g_unk0x00949c7c.isNull()) {
@@ -707,7 +708,7 @@ void AdornRbxGfx::explosion(const G3D::Sphere& sphere, const G3D::Color4& solid,
 		std::string("RBX expl ") + " r=" + Ogre::StringConverter::toString(sphere.radius)
 	);
 
-	if (m_unk0x88.find(key) != m_unk0x88.end()) {
+	if (m_unk0x88.contains(key)) {
 		Ogre::ParticleSystem* particleSystem =
 			static_cast<Ogre::ParticleSystem*>(m_unk0x88[key]->getAttachedObject((unsigned short) 0));
 		if (particleSystem->getNumParticles() == 0) {

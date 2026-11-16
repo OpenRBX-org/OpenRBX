@@ -8,8 +8,8 @@
 #include "v8datamodel/PVInstance.h"
 #include "v8datamodel/Workspace.h"
 
-#include <math.h>
-#include <stdlib.h>
+#include <cmath>
+#include <cstdlib>
 
 namespace RBX {
 
@@ -169,7 +169,7 @@ float KeyboardSecondaryController::getValue(InputType inputType) const
 
 const UserInputBase* PlayerController::getHardwareDevice() const
 {
-	return controllerService.expired() ? NULL : controllerService.lock()->getHardwareDevice();
+	return controllerService.expired() ? nullptr : controllerService.lock()->getHardwareDevice();
 }
 
 G3D::Vector3 AIController::getLocalTargetPosition() const
@@ -248,9 +248,7 @@ SteppingController::~SteppingController()
 	stopListening(runService, this);
 }
 
-AIController::~AIController()
-{
-}
+AIController::~AIController() = default;
 
 SteppingController::SteppingController(const PVInstance* _controlledInstance)
 	: runService(shared_from(ServiceProvider::create<RunService>(_controlledInstance))),
@@ -268,7 +266,7 @@ void PlayerController::onEvent(const RunService* source, Heartbeat event)
 {
 	const UserInputBase* hardware = getHardwareDevice();
 
-	Humanoid* localHumanoid = NULL;
+	Humanoid* localHumanoid = nullptr;
 	const Instance* controlled = controlledInstance.lock().get();
 	ModelInstance* character = Network::Players::findLocalCharacter(controlled);
 	if (controlled == character) {
@@ -337,7 +335,7 @@ AIController::AIController(const PVInstance* controlledInstance)
 }
 
 ControllerService::ControllerService()
-	: hardwareDevice(NULL), keyboardPrimaryController(new KeyboardPrimaryController(this)),
+	: hardwareDevice(nullptr), keyboardPrimaryController(new KeyboardPrimaryController(this)),
 	  keyboardSecondaryController(new KeyboardSecondaryController(this)), nullController(new NullController())
 {
 }
@@ -373,5 +371,5 @@ template class RBX::FactoryProduct<RBX::ControllerService, RBX::Instance, RBX::s
 template class RBX::Reflection::Described<
 	RBX::ControllerService,
 	RBX::sControllerService,
-	RBX::FactoryProduct<RBX::ControllerService, RBX::Instance, RBX::sControllerService> >;
+	RBX::FactoryProduct<RBX::ControllerService, RBX::Instance, RBX::sControllerService>>;
 template class RBX::DescribedCreatable<RBX::ControllerService, RBX::Instance, RBX::sControllerService>;

@@ -15,9 +15,9 @@ void MultiJoint::init(int numBreaking)
 	numConnector = 0;
 
 	for (int i = 0; i < 4; ++i) {
-		point[i * 2] = NULL;
-		point[i * 2 + 1] = NULL;
-		connector[i] = NULL;
+		point[i * 2] = nullptr;
+		point[i * 2 + 1] = nullptr;
+		connector[i] = nullptr;
 	}
 }
 
@@ -38,9 +38,7 @@ MultiJoint::MultiJoint(
 	init(numBreaking);
 }
 
-MultiJoint::~MultiJoint()
-{
-}
+MultiJoint::~MultiJoint() = default;
 
 void MultiJoint::putInKernel(Kernel* _kernel)
 {
@@ -70,14 +68,14 @@ void MultiJoint::removeFromKernel()
 		getKernel()->deletePoint(point[i * 2]);
 		getKernel()->deletePoint(point[i * 2 + 1]);
 
-		point[i * 2] = NULL;
-		point[i * 2 + 1] = NULL;
+		point[i * 2] = nullptr;
+		point[i * 2 + 1] = nullptr;
 
 		getKernel()->removeConnector(connector[i]);
 
 		delete connector[i];
 
-		connector[i] = NULL;
+		connector[i] = nullptr;
 	}
 
 	numConnector = 0;

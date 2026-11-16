@@ -69,7 +69,7 @@ Verb* VerbContainer::getVerb(const Name& name)
 		}
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 VerbContainer::~VerbContainer()

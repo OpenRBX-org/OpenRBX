@@ -14,26 +14,26 @@ IMPLEMENT_DYNCREATE(CRobloxView, CView)
 template <class T>
 static T* findService(RBX::DataModel* dataModel)
 {
-	return dataModel ? dataModel->find<T>() : NULL;
+	return dataModel ? dataModel->find<T>() : nullptr;
 }
 
 BEGIN_MESSAGE_MAP(CRobloxView, CView)
-ON_COMMAND(ID_FILE_PRINT, CView::OnFilePrint)
-ON_COMMAND(ID_FILE_PRINT_DIRECT, CView::OnFilePrint)
-ON_COMMAND(ID_FILE_PRINT_PREVIEW, CView::OnFilePrintPreview)
+ON_COMMAND(ID_FILE_PRINT, &CRobloxView::OnFilePrint)
+ON_COMMAND(ID_FILE_PRINT_DIRECT, &CRobloxView::OnFilePrint)
+ON_COMMAND(ID_FILE_PRINT_PREVIEW, &CRobloxView::OnFilePrintPreview)
 ON_WM_SIZE()
 ON_WM_CREATE()
 ON_WM_ERASEBKGND()
 ON_WM_DESTROY()
-ON_MESSAGE(0x46b, FUN_0045e740)
-ON_MESSAGE(0x46c, FUN_0045de20)
-ON_COMMAND(0x8020, FUN_0045dbe0)
-ON_COMMAND(0x80d6, FUN_0045dbf0)
+ON_MESSAGE(0x46b, &CRobloxView::FUN_0045e740)
+ON_MESSAGE(0x46c, &CRobloxView::FUN_0045de20)
+ON_COMMAND(0x8020, &CRobloxView::FUN_0045dbe0)
+ON_COMMAND(0x80d6, &CRobloxView::FUN_0045dbf0)
 ON_WM_SETFOCUS()
-ON_UPDATE_COMMAND_UI(0x80fe, FUN_0045d8c0)
-ON_COMMAND(0x80fe, FUN_0045de50)
-ON_COMMAND(0x80fd, FUN_0045dc00)
-ON_COMMAND(0x800c, FUN_0045de70)
+ON_UPDATE_COMMAND_UI(0x80fe, &CRobloxView::FUN_0045d8c0)
+ON_COMMAND(0x80fe, &CRobloxView::FUN_0045de50)
+ON_COMMAND(0x80fd, &CRobloxView::FUN_0045dc00)
+ON_COMMAND(0x800c, &CRobloxView::FUN_0045de70)
 END_MESSAGE_MAP()
 
 BOOL CRobloxView::OnPreparePrinting(CPrintInfo* pInfo)
@@ -69,7 +69,7 @@ bool InsertModelFromRobloxVerb::isEnabled() const
 
 bool InsertModelFromRobloxVerb::isChecked() const
 {
-	return m_unk0x0c->m_unk0x1a8 != 0;
+	return m_unk0x0c->m_unk0x1a8 != nullptr;
 }
 
 void InsertModelFromRobloxVerb::doIt(RBX::IDataState* dataState)
@@ -130,7 +130,7 @@ int CRobloxView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	CRect rect;
 	GetClientRect(&rect);
-	return m_unk0x88.Create(NULL, "Roblox", WS_CHILD | WS_VISIBLE, rect, this, 1) ? 0 : -1;
+	return m_unk0x88.Create(nullptr, "Roblox", WS_CHILD | WS_VISIBLE, rect, this, 1) ? 0 : -1;
 }
 
 void CRobloxView::OnActivateFrame(UINT nState, CFrameWnd* pFrameWnd)
@@ -154,7 +154,7 @@ void CRobloxView::OnSetFocus(CWnd* pOldWnd)
 
 void CRobloxView::FUN_0045d8c0(CCmdUI* pCmdUI)
 {
-	pCmdUI->SetCheck(m_unk0x1a8 != NULL);
+	pCmdUI->SetCheck(m_unk0x1a8 != nullptr);
 }
 
 std::shared_ptr<RBX::DataModel> CRobloxView::FUN_00403290() const
@@ -216,7 +216,7 @@ void CRobloxView::FUN_0045da90(int p_unk0x04)
 	CString filter;
 	filter.LoadString(184);
 
-	CFileDialog dialog(TRUE, "rbxm", NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, filter, this);
+	CFileDialog dialog(TRUE, "rbxm", nullptr, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, filter, this);
 	if (dialog.DoModal() == IDOK) {
 		static_cast<CRobloxDoc*>(GetDocument())
 			->m_unk0x78->FUN_004702b0(RBX::ContentId::fromFile(static_cast<LPCTSTR>(dialog.GetPathName())), false);
@@ -240,12 +240,12 @@ void CRobloxView::FUN_0045dc00()
 	rect.InflateRect(-12, -12);
 	rect.right = rect.Width() / 2;
 	rect.bottom = std::min(480, rect.Height()) - rect.top;
-	CBrowserView::FUN_0040b6d0(rect, &m_unk0x88, FUN_00407190() + "/Game/Help.aspx", NULL);
+	CBrowserView::FUN_0040b6d0(rect, &m_unk0x88, FUN_00407190() + "/Game/Help.aspx", nullptr);
 }
 
 void CRobloxView::FUN_0045dd10(bool show, bool activate)
 {
-	bool shown = m_unk0x1a8 != NULL;
+	bool shown = m_unk0x1a8 != nullptr;
 	if (show == shown) {
 		return;
 	}
@@ -256,8 +256,8 @@ void CRobloxView::FUN_0045dd10(bool show, bool activate)
 		m_unk0x1a8->m_unk0xf4 = &m_unk0x88;
 
 		CRect rect(0, 0, 0, 0);
-		if (!m_unk0x1a8->Create(NULL, NULL, WS_CHILD | WS_VISIBLE, rect, this, 0x413)) {
-			m_unk0x1a8 = NULL;
+		if (!m_unk0x1a8->Create(nullptr, nullptr, WS_CHILD | WS_VISIBLE, rect, this, 0x413)) {
+			m_unk0x1a8 = nullptr;
 			return;
 		}
 
@@ -267,7 +267,7 @@ void CRobloxView::FUN_0045dd10(bool show, bool activate)
 	}
 	else {
 		m_unk0x1a8->DestroyWindow();
-		m_unk0x1a8 = NULL;
+		m_unk0x1a8 = nullptr;
 	}
 
 	FUN_0045d920();
@@ -277,7 +277,7 @@ LRESULT CRobloxView::FUN_0045de20(WPARAM wParam, LPARAM lParam)
 {
 	if (m_unk0x1a8) {
 		m_unk0x1a8->DestroyWindow();
-		m_unk0x1a8 = NULL;
+		m_unk0x1a8 = nullptr;
 		FUN_0045d920();
 	}
 
@@ -286,7 +286,7 @@ LRESULT CRobloxView::FUN_0045de20(WPARAM wParam, LPARAM lParam)
 
 void CRobloxView::FUN_0045de50()
 {
-	FUN_0045dd10(m_unk0x1a8 == NULL, true);
+	FUN_0045dd10(m_unk0x1a8 == nullptr, true);
 }
 
 void CRobloxView::FUN_0045de70()
@@ -311,11 +311,9 @@ void CRobloxView::onEvent(const RBX::ServiceProvider* source, RBX::ServiceRemovi
 	}
 }
 
-CRobloxView::~CRobloxView()
-{
-}
+CRobloxView::~CRobloxView() = default;
 
-CRobloxView::CRobloxView() : RBX::VerbContainer(NULL), m_unk0x88(false), m_unk0x1a8(0)
+CRobloxView::CRobloxView() : RBX::VerbContainer(nullptr), m_unk0x88(false), m_unk0x1a8(nullptr)
 {
 	m_unk0x148.LoadMenu(0x67);
 }
@@ -349,7 +347,7 @@ LRESULT CRobloxView::FUN_0045e740(WPARAM wParam, LPARAM lParam)
 			}
 		}
 
-		bool paneShown = m_unk0x150.m_hWnd != NULL;
+		bool paneShown = m_unk0x150.m_hWnd != nullptr;
 		if (showPane != paneShown) {
 			if (showPane) {
 				m_unk0x150.FUN_00436ff0(this, FUN_00403290().get());
@@ -386,7 +384,7 @@ void CRobloxView::OnInitialUpdate()
 {
 	try {
 		FUN_0045e900();
-		m_unk0x88.FUN_00463c30(NULL);
+		m_unk0x88.FUN_00463c30(nullptr);
 		m_unk0x140.reset();
 		CView::OnInitialUpdate();
 

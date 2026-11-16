@@ -9,9 +9,7 @@
 #include <algorithm>
 #include <string>
 
-namespace RBX {
-namespace Reflection {
-namespace Metadata {
+namespace RBX::Reflection::Metadata {
 
 extern char sReflection[];
 extern char sClasses[];
@@ -30,7 +28,7 @@ public:
 	Members() {}
 
 protected:
-	virtual bool askAddChild(const Instance* instance) const;
+	bool askAddChild(const Instance* instance) const override;
 };
 
 class Classes : public DescribedCreatable<Classes, Instance, sClasses>
@@ -42,7 +40,7 @@ public:
 	void FUN_00447d00(const ClassDescriptor& descriptor);
 
 protected:
-	virtual bool askAddChild(const Instance* instance) const;
+	bool askAddChild(const Instance* instance) const override;
 };
 
 class Properties : public DescribedCreatable<Properties, Members, sProperties>
@@ -104,7 +102,7 @@ public:
 	static RBX::Reflection::BoundProp<int, 1> prop_ExplorerImageIndex;
 
 protected:
-	virtual bool askAddChild(const Instance* instance) const;
+	bool askAddChild(const Instance* instance) const override;
 
 private:
 	int explorerOrder;
@@ -132,7 +130,7 @@ public:
 	static std::shared_ptr<Reflection> FUN_004480c0();
 
 protected:
-	virtual bool askAddChild(const Instance* instance) const;
+	bool askAddChild(const Instance* instance) const override;
 
 private:
 	Classes* m_unk0xf8;
@@ -140,8 +138,6 @@ private:
 
 void FUN_00447680();
 
-} // namespace Metadata
-} // namespace Reflection
-} // namespace RBX
+} // namespace RBX::Reflection::Metadata
 
 #endif // REFLECTIONMETADATA_H

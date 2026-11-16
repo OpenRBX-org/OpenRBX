@@ -15,10 +15,10 @@ public:
 	RotateJoint();
 	RotateJoint(Primitive* prim0, Primitive* prim1, const CoordinateFrame& coord0, const CoordinateFrame& coord1);
 
-	virtual ~RotateJoint();
+	~RotateJoint() override;
 
 private:
-	virtual void removeFromKernel();
+	void removeFromKernel() override;
 
 public:
 	Primitive* getAxlePrim() { return getPrimitive(0); }
@@ -44,9 +44,9 @@ private:
 		const CoordinateFrame& coord1
 	);
 
-	virtual void putInKernel(Kernel* _kernel);
+	void putInKernel(Kernel* _kernel) override;
 
-	virtual JointType getJointType() const { return ROTATE_JOINT; }
+	JointType getJointType() const override { return ROTATE_JOINT; }
 };
 
 class RotatePJoint : public RotateJoint
@@ -56,11 +56,11 @@ public:
 	RotatePJoint(Primitive* prim0, Primitive* prim1, const CoordinateFrame& coord0, const CoordinateFrame& coord1);
 
 private:
-	virtual JointType getJointType() const { return ROTATE_P_JOINT; }
+	JointType getJointType() const override { return ROTATE_P_JOINT; }
 
-	virtual bool canStepUi() const { return true; }
+	bool canStepUi() const override { return true; }
 
-	virtual void stepUi(int uiStepId);
+	void stepUi(int uiStepId) override;
 };
 
 class RotateVJoint : public RotateJoint
@@ -70,11 +70,11 @@ public:
 	RotateVJoint(Primitive* prim0, Primitive* prim1, const CoordinateFrame& coord0, const CoordinateFrame& coord1);
 
 private:
-	virtual JointType getJointType() const { return ROTATE_V_JOINT; }
+	JointType getJointType() const override { return ROTATE_V_JOINT; }
 
-	virtual bool canStepUi() const { return true; }
+	bool canStepUi() const override { return true; }
 
-	virtual void stepUi(int frameCount);
+	void stepUi(int frameCount) override;
 };
 
 } // namespace RBX

@@ -42,7 +42,7 @@ public:
 	virtual std::string getLogFileName() = 0;
 
 protected:
-	LogManager(const char* name) : log(NULL), threadID(GetCurrentThreadId()), name(name) {}
+	LogManager(const char* name) : log(nullptr), threadID(GetCurrentThreadId()), name(name) {}
 };
 
 class RobloxCrashReporter : public CrashReporter
@@ -52,7 +52,7 @@ public:
 
 	RobloxCrashReporter(const char* outputPath, const char* appName, MINIDUMP_TYPE mdType);
 
-	virtual LONG ProcessException(_EXCEPTION_POINTERS* info);
+	LONG ProcessException(_EXCEPTION_POINTERS* info) override;
 };
 
 class MainLogManager : public RBX::ILogProvider, public LogManager
@@ -61,10 +61,10 @@ class MainLogManager : public RBX::ILogProvider, public LogManager
 
 public:
 	MainLogManager(const char* productName);
-	virtual ~MainLogManager();
+	~MainLogManager() override;
 
-	virtual RBX::Log* provideLog();
-	virtual std::string getLogFileName();
+	RBX::Log* provideLog() override;
+	std::string getLogFileName() override;
 
 	std::string MakeLogFileName(const char* prefix);
 
@@ -102,10 +102,10 @@ class ThreadLogManager : public LogManager
 public:
 	static ThreadLogManager* getCurrent();
 
-	virtual ~ThreadLogManager() {}
+	~ThreadLogManager() override = default;
 
 protected:
-	virtual std::string getLogFileName();
+	std::string getLogFileName() override;
 };
 
 void FUN_0042b3c0(const std::exception& e);

@@ -7,7 +7,7 @@ class KernelIndex
 {
 public:
 	KernelIndex() : kernelIndex(-1) {}
-	~KernelIndex() {}
+	~KernelIndex() = default;
 
 	bool inKernel() const { return kernelIndex >= 0; }
 

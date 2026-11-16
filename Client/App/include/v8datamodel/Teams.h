@@ -25,7 +25,7 @@ class Teams : public DescribedCreatable<Teams, Instance, sTeams>, public Service
 {
 public:
 	Teams();
-	virtual ~Teams();
+	~Teams() override;
 
 	void assignNewPlayerToTeam(Network::Player* p);
 	int getNumPlayersInTeam(BrickColor color);
@@ -35,15 +35,15 @@ public:
 	BrickColor getUnusedTeamColor();
 	Team* getTeamFromTeamColor(BrickColor c);
 	Team* getTeamFromPlayer(Network::Player* p);
-	std::shared_ptr<const std::vector<std::shared_ptr<Instance> > > getTeams();
+	std::shared_ptr<const std::vector<std::shared_ptr<Instance>>> getTeams();
 	G3D::Color3 getTeamColorForHumanoid(Humanoid* h);
 
 private:
-	CopyOnWrite<std::vector<std::shared_ptr<Instance> > > teams;
+	CopyOnWrite<std::vector<std::shared_ptr<Instance>>> teams;
 
 protected:
-	virtual void onChildAdded(Instance* child);
-	virtual void onChildRemoving(Instance* child);
+	void onChildAdded(Instance* child) override;
+	void onChildRemoving(Instance* child) override;
 };
 
 } // namespace RBX

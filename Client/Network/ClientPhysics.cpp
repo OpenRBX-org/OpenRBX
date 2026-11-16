@@ -4,7 +4,7 @@
 #include "v8datamodel/PartInstance.h"
 
 #include <G3D/System.h>
-#include <math.h>
+#include <cmath>
 
 using G3D::CoordinateFrame;
 
@@ -39,8 +39,7 @@ bool areClose(const CoordinateFrame& c1, const CoordinateFrame& c2)
 	return true;
 }
 
-namespace RBX {
-namespace Network {
+namespace RBX::Network {
 
 ClientPhysics::ClientPhysics(PartInstance* part) : part(part)
 {
@@ -88,5 +87,4 @@ void ClientPhysics::update(const std::shared_ptr<RunService>& runService)
 	}
 }
 
-} // namespace Network
-} // namespace RBX
+} // namespace RBX::Network

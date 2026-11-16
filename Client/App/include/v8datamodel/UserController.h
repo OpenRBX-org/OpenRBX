@@ -48,7 +48,7 @@ protected:
 	std::weak_ptr<const PVInstance> controlledInstance;
 
 	SteppingController(const PVInstance* _controlledInstance);
-	virtual ~SteppingController();
+	~SteppingController() override;
 };
 
 class AIController : public SteppingController
@@ -61,40 +61,40 @@ protected:
 	std::weak_ptr<const PVInstance> target;
 
 	AIController(const PVInstance* controlledInstance);
-	virtual ~AIController();
+	~AIController() override;
 
 	void updateTarget(ControllerType excludeType, float time);
 	G3D::Vector3 getLocalTargetPosition() const;
 	void chaseTarget(const G3D::Vector3& localChasePoint);
 
-	virtual bool hasIntelligence() const { return true; }
-	virtual bool isUserController() const { return false; }
-	virtual float getValue(InputType inputType) const;
+	bool hasIntelligence() const override { return true; }
+	bool isUserController() const override { return false; }
+	float getValue(InputType inputType) const override;
 	virtual void updateBuffer(float time) = 0;
 
-	virtual void onEvent(const RunService* source, Heartbeat event) { updateBuffer(event.time); }
+	void onEvent(const RunService* source, Heartbeat event) override { updateBuffer(event.time); }
 };
 
 class AIChaseController : public AIController
 {
 protected:
-	virtual void updateBuffer(float time);
+	void updateBuffer(float time) override;
 
 public:
 	AIChaseController(const PVInstance* controlledInstance) : AIController(controlledInstance) {}
 
-	virtual ControllerType getControllerType() const { return AI_CHASE_CONTROLLER; }
+	ControllerType getControllerType() const override { return AI_CHASE_CONTROLLER; }
 };
 
 class AIFleeController : public AIController
 {
 protected:
-	virtual void updateBuffer(float time);
+	void updateBuffer(float time) override;
 
 public:
 	AIFleeController(const PVInstance* controlledInstance) : AIController(controlledInstance) {}
 
-	virtual ControllerType getControllerType() const { return AI_FLEE_CONTROLLER; }
+	ControllerType getControllerType() const override { return AI_FLEE_CONTROLLER; }
 };
 
 class __declspec(novtable) HardwareController : public Controller
@@ -107,11 +107,11 @@ protected:
 
 	const UserInputBase* getHardwareDevice() const
 	{
-		return controllerService ? controllerService->getHardwareDevice() : NULL;
+		return controllerService ? controllerService->getHardwareDevice() : nullptr;
 	}
 
-	virtual bool hasIntelligence() const { return true; }
-	virtual bool isUserController() const { return true; }
+	bool hasIntelligence() const override { return true; }
+	bool isUserController() const override { return true; }
 };
 
 class KeyboardPrimaryController : public HardwareController
@@ -119,8 +119,8 @@ class KeyboardPrimaryController : public HardwareController
 public:
 	KeyboardPrimaryController(ControllerService* _controllerService) : HardwareController(_controllerService) {}
 
-	virtual float getValue(InputType inputType) const;
-	virtual ControllerType getControllerType() const { return PRIMARY_CONTROLLER; }
+	float getValue(InputType inputType) const override;
+	ControllerType getControllerType() const override { return PRIMARY_CONTROLLER; }
 };
 
 class KeyboardSecondaryController : public HardwareController
@@ -128,8 +128,8 @@ class KeyboardSecondaryController : public HardwareController
 public:
 	KeyboardSecondaryController(ControllerService* _controllerService) : HardwareController(_controllerService) {}
 
-	virtual float getValue(InputType inputType) const;
-	virtual ControllerType getControllerType() const { return SECONDARY_CONTROLLER; }
+	float getValue(InputType inputType) const override;
+	ControllerType getControllerType() const override { return SECONDARY_CONTROLLER; }
 };
 
 class PlayerController : public SteppingController
@@ -140,10 +140,10 @@ private:
 
 	const UserInputBase* getHardwareDevice() const;
 
-	virtual bool hasIntelligence() const { return true; }
-	virtual bool isUserController() const { return true; }
-	virtual ControllerType getControllerType() const { return PLAYER_CONTROLLER; }
-	virtual void onEvent(const RunService* source, Heartbeat event);
+	bool hasIntelligence() const override { return true; }
+	bool isUserController() const override { return true; }
+	ControllerType getControllerType() const override { return PLAYER_CONTROLLER; }
+	void onEvent(const RunService* source, Heartbeat event) override;
 
 public:
 	PlayerController(ControllerService* _controllerService, const PVInstance* _controlledInstance);

@@ -133,7 +133,7 @@ public:
 
 	Number number;
 
-	typedef std::vector<BrickColor> Colors;
+	using Colors = std::vector<BrickColor>;
 
 	static const Colors& colorPalette();
 	static const Colors& allColors();
@@ -167,11 +167,7 @@ public:
 	static BrickColor legoBlue() { return BrickColor(lego_23); }
 	static BrickColor defaultColor();
 
-	BrickColor& operator=(const BrickColor& other)
-	{
-		number = other.number;
-		return *this;
-	}
+	BrickColor& operator=(const BrickColor& other) = default;
 
 	G3D::Color4uint8 color4uint8() const;
 	G3D::Color3uint8 color3uint8() const;

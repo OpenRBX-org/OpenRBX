@@ -14,7 +14,7 @@ class ViewBase
 public:
 	ViewBase() {}
 
-	virtual ~ViewBase() {}
+	virtual ~ViewBase() = default;
 
 	virtual void render(void* rd) = 0;
 	virtual float getShadingQuality() const = 0;

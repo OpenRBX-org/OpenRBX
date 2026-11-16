@@ -11,12 +11,12 @@ extern const char sGettingUp[];
 class GettingUp : public Named<Balancing, sGettingUp>
 {
 protected:
-	virtual State* onStep(const float stepDt, Controller& controller);
+	State* onStep(const float stepDt, Controller& controller) override;
 
 public:
 	GettingUp(Humanoid* humanoid);
 
-	virtual ~GettingUp();
+	~GettingUp() override;
 };
 
 } // namespace RBX

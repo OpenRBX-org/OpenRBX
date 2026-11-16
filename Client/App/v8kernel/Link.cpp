@@ -9,7 +9,7 @@ namespace RBX {
 
 void Link::dirty()
 {
-	if (body != NULL) {
+	if (body != nullptr) {
 		body->getRoot()->advanceStateIndex();
 	}
 }
@@ -21,7 +21,7 @@ void RevoluteLink::computeChildInParent(CoordinateFrame& answer) const
 	answer = rotatedParentCoord * childCoordInverse;
 }
 
-Link::Link() : body(NULL), stateIndex(Body::getNextStateIndex())
+Link::Link() : body(nullptr), stateIndex(Body::getNextStateIndex())
 {
 }
 
@@ -45,8 +45,6 @@ void Link::reset(const CoordinateFrame& parentC, const CoordinateFrame& childC)
 	childCoordInverse = childC.inverse();
 }
 
-Link::~Link()
-{
-}
+Link::~Link() = default;
 
 } // namespace RBX

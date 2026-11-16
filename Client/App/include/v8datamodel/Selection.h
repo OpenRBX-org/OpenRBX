@@ -46,7 +46,7 @@ class Selection : public DescribedCreatable<Selection, Instance, sSelection>,
 {
 public:
 	Selection();
-	virtual ~Selection();
+	~Selection() override;
 
 	unsigned int size() const { return selection->size(); }
 
@@ -61,18 +61,18 @@ public:
 		}
 	}
 
-	std::vector<std::shared_ptr<Instance> >::const_iterator begin() const { return selection->begin(); }
+	std::vector<std::shared_ptr<Instance>>::const_iterator begin() const { return selection->begin(); }
 
-	std::vector<std::shared_ptr<Instance> >::const_iterator end() const { return selection->end(); }
+	std::vector<std::shared_ptr<Instance>>::const_iterator end() const { return selection->end(); }
 
 	std::shared_ptr<Instance> back() const { return size() > 0 ? selection->back() : std::shared_ptr<Instance>(); }
 
-	const CopyOnWrite<std::vector<std::shared_ptr<Instance> > >& getSelection() const;
+	const CopyOnWrite<std::vector<std::shared_ptr<Instance>>>& getSelection() const;
 
 	void clearSelection();
 
-	std::shared_ptr<const std::vector<std::shared_ptr<Instance> > > getSelection2() { return selection.read(); }
-	void setSelection(std::shared_ptr<const std::vector<std::shared_ptr<Instance> > > selection)
+	std::shared_ptr<const std::vector<std::shared_ptr<Instance>>> getSelection2() { return selection.read(); }
+	void setSelection(std::shared_ptr<const std::vector<std::shared_ptr<Instance>>> selection)
 	{
 		setSelection(selection->begin(), selection->end());
 	}
@@ -91,11 +91,11 @@ public:
 	class AddIterator
 	{
 	public:
-		typedef std::output_iterator_tag iterator_category;
-		typedef void value_type;
-		typedef void difference_type;
-		typedef void pointer;
-		typedef void reference;
+		using iterator_category = std::output_iterator_tag;
+		using value_type = void;
+		using difference_type = void;
+		using pointer = void;
+		using reference = void;
 
 	private:
 		Selection* selection;
@@ -118,11 +118,11 @@ public:
 	class RemoveIterator
 	{
 	public:
-		typedef std::output_iterator_tag iterator_category;
-		typedef void value_type;
-		typedef void difference_type;
-		typedef void pointer;
-		typedef void reference;
+		using iterator_category = std::output_iterator_tag;
+		using value_type = void;
+		using difference_type = void;
+		using pointer = void;
+		using reference = void;
 
 	private:
 		Selection* selection;
@@ -145,11 +145,11 @@ public:
 	class ToggleIterator
 	{
 	public:
-		typedef std::output_iterator_tag iterator_category;
-		typedef void value_type;
-		typedef void difference_type;
-		typedef void pointer;
-		typedef void reference;
+		using iterator_category = std::output_iterator_tag;
+		using value_type = void;
+		using difference_type = void;
+		using pointer = void;
+		using reference = void;
 
 	private:
 		Selection* selection;
@@ -169,7 +169,7 @@ public:
 		}
 	};
 
-	virtual void onEvent(const Instance* source, AncestorChanged event);
+	void onEvent(const Instance* source, AncestorChanged event) override;
 
 	void addFilteredSelection(ISelectionBase* fs);
 	void removeFilteredSelection(ISelectionBase* fs);
@@ -178,18 +178,16 @@ private:
 	void raiseAdded(std::shared_ptr<Instance> instance);
 	void raiseRemoved(std::shared_ptr<Instance> source);
 
-	CopyOnWrite<std::vector<std::shared_ptr<Instance> > > selection;
+	CopyOnWrite<std::vector<std::shared_ptr<Instance>>> selection;
 	std::vector<ISelectionBase*> filteredSelections;
 };
 
 template <class T>
-class FilteredSelection : public NonFactoryProduct<Instance, static_cast<const char*>(0)>,
-						  public Service,
-						  public ISelectionBase
+class FilteredSelection : public NonFactoryProduct<Instance, nullptr>, public Service, public ISelectionBase
 {
 public:
 	FilteredSelection() { setName("FilteredSelection"); }
-	virtual ~FilteredSelection()
+	~FilteredSelection() override
 	{
 		if (rootSelection) {
 			rootSelection->removeFilteredSelection(this);
@@ -216,11 +214,11 @@ public:
 		typename std::vector<T*>::const_iterator it =
 			std::find_if(filteredSelection.begin(), filteredSelection.end(), predicate);
 
-		return it != filteredSelection.end() ? *it : NULL;
+		return it != filteredSelection.end() ? *it : nullptr;
 	}
 
 protected:
-	virtual void onAncestorChanged(const AncestorChanged& event)
+	void onAncestorChanged(const AncestorChanged& event) override
 	{
 		Instance::onAncestorChanged(event);
 
@@ -228,7 +226,7 @@ protected:
 			rootSelection = shared_from(ServiceProvider::create<Selection>(event.newParent));
 
 			if (rootSelection) {
-				for (std::vector<std::shared_ptr<Instance> >::const_iterator iter = rootSelection->begin();
+				for (std::vector<std::shared_ptr<Instance>>::const_iterator iter = rootSelection->begin();
 					 iter != rootSelection->end();
 					 ++iter) {
 					if (T* c = dynamic_cast<T*>(iter->get())) {
@@ -241,7 +239,7 @@ protected:
 		}
 	}
 
-	virtual void onSelectionChanged(const SelectionChanged& event)
+	void onSelectionChanged(const SelectionChanged& event) override
 	{
 		if (T* c = dynamic_cast<T*>(event.addedItem.get())) {
 			filteredSelection.push_back(c);

@@ -31,7 +31,7 @@ ChatWidget::ChatWidget(const std::string& p_unk0x04, std::string p_unk0x08)
 bool ChatButton::isVisible() const
 {
 	Network::Players* players = ServiceProvider::find<Network::Players>(this);
-	return players != NULL && players->getLocalPlayer() != NULL && Network::Players::clientIsPresent(this, true);
+	return players != nullptr && players->getLocalPlayer() != nullptr && Network::Players::clientIsPresent(this, true);
 }
 
 GuiResponse ChatWidget::process(const GuiEvent& p_unk0x04)

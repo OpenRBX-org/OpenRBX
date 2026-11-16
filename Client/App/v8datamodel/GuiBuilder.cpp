@@ -37,7 +37,7 @@ std::shared_ptr<TopMenuBar> GuiBuilder::buildMenu()
 
 	for (unsigned int i = 0; i < menu->numChildren(); ++i) {
 		GuiItem* item = menu->getGuiItem(i);
-		if (item != NULL) {
+		if (item != nullptr) {
 			item->setGuiSize(G3D::Vector2(100, 20));
 		}
 	}

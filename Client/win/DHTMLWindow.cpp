@@ -77,7 +77,7 @@ LRESULT Marshaller::FUN_00418660(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& 
 	try {
 		std::function<void()> function;
 		{
-			std::lock_guard<std::mutex> lock(m_unk0x40);
+			std::scoped_lock lock(m_unk0x40);
 			function = m_unk0x2c.front();
 			m_unk0x2c.pop_front();
 		}
@@ -93,12 +93,12 @@ LRESULT Marshaller::FUN_00418660(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& 
 Marshaller::Marshaller(DWORD threadId) : m_unk0x24(0)
 {
 	m_unk0x28 = threadId;
-	Create(NULL, NULL, NULL, WS_POPUP);
+	Create(nullptr, nullptr, nullptr, WS_POPUP);
 }
 
 Marshaller* Marshaller::FUN_0041a4a0()
 {
-	std::lock_guard<std::recursive_mutex> lock(g_unk0x00953150);
+	std::scoped_lock lock(g_unk0x00953150);
 	DWORD threadId = GetCurrentThreadId();
 	std::map<DWORD, Marshaller*>::iterator it = g_unk0x00953144.find(threadId);
 	if (it != g_unk0x00953144.end()) {
@@ -122,7 +122,7 @@ DHTMLWindowService::DHTMLWindowService()
 	setName("WindowService");
 }
 
-DHTMLWindow::DHTMLWindow() : m_unk0x104(NULL)
+DHTMLWindow::DHTMLWindow() : m_unk0x104(nullptr)
 {
 	setName("Window");
 }
@@ -135,7 +135,7 @@ void DHTMLWindow::onServiceProvider(const RBX::ServiceProvider* oldProvider, con
 		g_unk0x00952f1c->FUN_00418fd0([self = RBX::shared_from(this)] { self->FUN_004155f0(); });
 	}
 
-	std::lock_guard<std::recursive_mutex> lock(m_unk0xf8);
+	std::scoped_lock lock(m_unk0xf8);
 	if (newProvider) {
 		g_unk0x00952f1c->FUN_00418fd0([self = RBX::shared_from(this)] { self->FUN_00417550(); });
 	}
@@ -183,7 +183,7 @@ void DHTMLWindow::FUN_0041d880(std::shared_ptr<RBX::Instance> instance, std::str
 	RBX::Reflection::MemberDescriptorContainer<RBX::Reflection::PropertyDescriptor>::Iterator iter =
 		instance->findProperty(RBX::Name::lookup(property));
 	if (iter == instance->properties_end()) {
-		throw std::runtime_error(G3D::format("Instance does not have property %s", property));
+		throw std::runtime_error(G3D::format("Instance does not have property %s", property.c_str()));
 	}
 
 	const RBX::Reflection::PropertyDescriptor* descriptor = &(*iter).getDescriptor();

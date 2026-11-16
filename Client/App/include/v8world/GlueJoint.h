@@ -20,11 +20,11 @@ private:
 
 	float getMaxForce();
 
-	virtual void putInKernel(Kernel* _kernel);
+	void putInKernel(Kernel* _kernel) override;
 
-	virtual JointType getJointType() const { return GLUE_JOINT; }
+	JointType getJointType() const override { return GLUE_JOINT; }
 
-	virtual bool isBreakable() const { return true; }
+	bool isBreakable() const override { return true; }
 
 	Face overlapInP0;
 	Face overlapInP1;

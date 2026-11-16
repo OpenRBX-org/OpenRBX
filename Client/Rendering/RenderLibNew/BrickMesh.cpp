@@ -9,8 +9,7 @@
 #include <algorithm>
 #include <map>
 
-namespace RBX {
-namespace ViewNew {
+namespace RBX::ViewNew {
 
 bool g_unk0x0092a908 = true;
 
@@ -499,5 +498,4 @@ G3D::ReferenceCountedPointer<RenderNew::Mesh> BrickMesh::create(
 	return result;
 }
 
-} // namespace ViewNew
-} // namespace RBX
+} // namespace RBX::ViewNew

@@ -4,8 +4,7 @@
 
 #include <lua.h>
 
-namespace RBX {
-namespace Lua {
+namespace RBX::Lua {
 
 YieldingThreads::WaitingThread::WaitingThread(lua_State* L, double requestedDelay)
 	: thread(new ThreadRef(L)), requestedDelay(requestedDelay), elapsedTime(0.0)
@@ -61,5 +60,4 @@ void YieldingThreads::queueWaiter(lua_State* L)
 	queueWaiter(L, 0.0);
 }
 
-} // namespace Lua
-} // namespace RBX
+} // namespace RBX::Lua

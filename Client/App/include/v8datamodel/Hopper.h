@@ -25,14 +25,14 @@ private:
 
 	bool inBackpack();
 
-	virtual bool askSetParent(const Instance* instance) const { return true; }
-	virtual bool askAddChild(const Instance* instance) const { return true; }
+	bool askSetParent(const Instance* instance) const override { return true; }
+	bool askAddChild(const Instance* instance) const override { return true; }
 
 protected:
-	virtual G3D::Vector2 getSize() const;
-	virtual void render2d(Adorn* adorn);
+	G3D::Vector2 getSize() const override;
+	void render2d(Adorn* adorn) override;
 
-	virtual bool isEnabled() { return inBackpack(); }
+	bool isEnabled() override { return inBackpack(); }
 
 	int getBinId() const;
 
@@ -69,7 +69,7 @@ private:
 	void onSelectCommand();
 	int getCursor();
 
-	virtual bool drawSelected() const { return active; }
+	bool drawSelected() const override { return active; }
 
 public:
 	HopperBin();
@@ -78,8 +78,8 @@ public:
 
 	void setBinType(const BinType value);
 
-	virtual void onLocalClicked();
-	virtual void onLocalOtherClicked();
+	void onLocalClicked() override;
+	void onLocalOtherClicked() override;
 
 	void setLegacyCommand(const std::string& text);
 	void setLegacyTextureName(const std::string& value);
@@ -93,8 +93,8 @@ public:
 	Hopper();
 
 protected:
-	virtual bool askAddChild(const Instance* instance) const;
-	virtual bool askSetParent(const Instance* instance) const;
+	bool askAddChild(const Instance* instance) const override;
+	bool askSetParent(const Instance* instance) const override;
 };
 
 class StarterPackService : public DescribedCreatable<StarterPackService, Hopper, sStarterPackService>, public Service
@@ -102,17 +102,17 @@ class StarterPackService : public DescribedCreatable<StarterPackService, Hopper,
 public:
 	StarterPackService();
 
-	virtual void render2d(Adorn* adorn);
+	void render2d(Adorn* adorn) override;
 };
 
 class LegacyHopperService : public DescribedCreatable<LegacyHopperService, Hopper, sLegacyHopperService>, public Service
 {
 private:
-	virtual void onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider);
+	void onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider) override;
 
 public:
 	LegacyHopperService();
-	virtual ~LegacyHopperService();
+	~LegacyHopperService() override;
 };
 
 } // namespace RBX

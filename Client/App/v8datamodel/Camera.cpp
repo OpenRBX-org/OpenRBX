@@ -36,7 +36,7 @@ static Reflection::RefPropDescriptor<Camera, Instance> cameraSubjectProp(
 
 bool Camera::askSetParent(const Instance* instance) const
 {
-	return dynamic_cast<const Workspace*>(instance) != NULL;
+	return dynamic_cast<const Workspace*>(instance) != nullptr;
 }
 
 ICameraOwner* Camera::getCameraOwner()
@@ -50,7 +50,7 @@ ICameraOwner* Camera::getCameraOwner()
 		parent = parent->getParent();
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 bool Camera::canZoom(int p_unk0x04) const
@@ -142,7 +142,7 @@ Instance* Camera::getCameraSubjectInstance() const
 
 ICameraSubject* Camera::getCameraSubject() const
 {
-	return cameraSubject ? dynamic_cast<ICameraSubject*>(cameraSubject.get()) : NULL;
+	return cameraSubject ? dynamic_cast<ICameraSubject*>(cameraSubject.get()) : nullptr;
 }
 
 void Camera::autoMode()
@@ -588,5 +588,5 @@ void Camera::doFly(const NavKeys& nav, int steps)
 
 template class RBX::FactoryProduct<RBX::Camera, RBX::Instance, RBX::sCamera>;
 template class RBX::Reflection::
-	Described<RBX::Camera, RBX::sCamera, RBX::FactoryProduct<RBX::Camera, RBX::Instance, RBX::sCamera> >;
+	Described<RBX::Camera, RBX::sCamera, RBX::FactoryProduct<RBX::Camera, RBX::Instance, RBX::sCamera>>;
 template class RBX::DescribedCreatable<RBX::Camera, RBX::Instance, RBX::sCamera>;

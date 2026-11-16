@@ -34,7 +34,7 @@ void CMarshalWindow::FUN_00436cc0(CMarshalWindow* window)
 CMarshalWindow::CMarshalWindow(DWORD threadId) : m_unk0x24(0)
 {
 	m_unk0x28 = threadId;
-	Create(NULL, NULL, NULL, WS_POPUP);
+	Create(nullptr, nullptr, nullptr, WS_POPUP);
 }
 
 CMarshalWindow* CMarshalWindow::FUN_00436e70()

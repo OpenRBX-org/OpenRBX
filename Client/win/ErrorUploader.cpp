@@ -13,7 +13,7 @@ void ErrorUploader::Upload(std::string url, bool synchronous)
 	std::vector<std::string> f = LogManager::getMainLogManger()->archiveCrashLogs();
 
 	{
-		std::lock_guard<std::recursive_mutex> lock(_data->sync);
+		std::scoped_lock lock(_data->sync);
 		_data->url = url;
 
 		for (unsigned int i = std::max<int>(0, f.size() - 12); i < f.size(); ++i) {
@@ -33,7 +33,7 @@ RBX::worker_thread::work_result ErrorUploader::run(std::shared_ptr<data> _data)
 {
 	std::string file;
 	{
-		std::lock_guard<std::recursive_mutex> lock(_data->sync);
+		std::scoped_lock lock(_data->sync);
 		if (_data->files.empty()) {
 			return RBX::worker_thread::done;
 		}
@@ -65,7 +65,7 @@ RBX::worker_thread::work_result ErrorUploader::run(std::shared_ptr<data> _data)
 	}
 
 	{
-		std::lock_guard<std::recursive_mutex> lock(_data->sync);
+		std::scoped_lock lock(_data->sync);
 		_data->files.pop();
 	}
 

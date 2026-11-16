@@ -46,7 +46,7 @@ public:
 		CENTER_IO = 2
 	};
 
-	typedef NormalId FaceId;
+	using FaceId = NormalId;
 
 	NormalId faceId;
 	TopBottom topBottom;
@@ -54,11 +54,11 @@ public:
 	InOut inOut;
 
 private:
-	virtual bool askSetParent(const Instance* instance) const { return true; }
+	bool askSetParent(const Instance* instance) const override { return true; }
 
-	virtual bool shouldRender3dAdorn() const { return true; }
+	bool shouldRender3dAdorn() const override { return true; }
 
-	virtual void render3dSelect(Adorn* adorn, SelectState selectState);
+	void render3dSelect(Adorn* adorn, SelectState selectState) override;
 
 protected:
 	bool getRenderCoord(CoordinateFrame& c) const;
@@ -73,7 +73,7 @@ protected:
 
 public:
 	Feature();
-	virtual ~Feature();
+	~Feature() override;
 
 	NormalId getFaceId() const { return faceId; }
 
@@ -103,13 +103,13 @@ private:
 	void onEvent_HoleAncestorChanged();
 	void setPart(int i, Feature* feature);
 
-	virtual bool askSetParent(const Instance* instance) const { return true; }
+	bool askSetParent(const Instance* instance) const override { return true; }
 
-	virtual void onAncestorChanged(const AncestorChanged& event);
+	void onAncestorChanged(const AncestorChanged& event) override;
 
 public:
 	VelocityMotor();
-	virtual ~VelocityMotor();
+	~VelocityMotor() override;
 
 	Hole* getHole() const;
 	void setHole(Hole* value);
@@ -126,9 +126,9 @@ public:
 class Hole : public DescribedCreatable<Hole, Feature, sHole>
 {
 private:
-	virtual void render3dAdorn(Adorn* adorn);
+	void render3dAdorn(Adorn* adorn) override;
 
-	virtual InOutZ getCoordOrientation() const { return Z_IN; }
+	InOutZ getCoordOrientation() const override { return Z_IN; }
 
 public:
 	Hole();
@@ -139,7 +139,7 @@ class MotorFeature : public DescribedCreatable<MotorFeature, Feature, sMotorFeat
 	void otherFeatureChanged();
 
 private:
-	virtual void render3dAdorn(Adorn* adorn);
+	void render3dAdorn(Adorn* adorn) override;
 
 public:
 	MotorFeature();

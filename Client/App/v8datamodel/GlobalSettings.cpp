@@ -17,7 +17,7 @@ std::recursive_mutex GlobalSettings::mutex;
 
 static std::string FUN_00581c60()
 {
-	std::string fileName = FileSystem::getUserAppDataDirectory(true, NULL);
+	std::string fileName = FileSystem::getUserAppDataDirectory(true, nullptr);
 
 	if (fileName.size() > 0) {
 		fileName += "\\GlobalSettings7.xml";
@@ -44,7 +44,7 @@ void GlobalSettings::loadState()
 		TextXmlParser parser(stream.rdbuf());
 		std::unique_ptr<XmlElement> root(parser.parse());
 
-		std::lock_guard<std::recursive_mutex> lock(mutex);
+		std::scoped_lock lock(mutex);
 		MergeBinder binder;
 		readChildren(root.get(), binder);
 		binder.resolveRefs();
@@ -77,7 +77,7 @@ GlobalSettings::GlobalSettings()
 
 std::shared_ptr<GlobalSettings> GlobalSettings::singleton()
 {
-	std::lock_guard<std::recursive_mutex> lock(mutex);
+	std::scoped_lock lock(mutex);
 
 	static std::shared_ptr<GlobalSettings> sing = Creatable<Instance>::create<GlobalSettings>();
 

@@ -50,7 +50,7 @@ BOOL CMainFrame::PreCreateWindow(CREATESTRUCT& cs)
 		return FALSE;
 	}
 
-	cs.lpszClass = AfxRegisterWndClass(0, NULL, NULL, AfxGetApp()->LoadIcon(128));
+	cs.lpszClass = AfxRegisterWndClass(0, nullptr, nullptr, AfxGetApp()->LoadIcon(128));
 	return TRUE;
 }
 
@@ -58,7 +58,7 @@ void CMainFrame::FUN_004325e0(UINT nID, CRect rect, XTPDockingPaneDirection dire
 {
 	CXTPDockingPane* pane = m_unk0x120.FindPane(nID);
 
-	if (pane == NULL) {
+	if (pane == nullptr) {
 		pane = m_unk0x120.CreatePane(nID, rect, direction);
 	}
 
@@ -73,13 +73,13 @@ void CMainFrame::FUN_00432650()
 
 void CMainFrame::FUN_00432680()
 {
-	bool created = m_unk0x120.FindPane(0xc1) == NULL;
+	bool created = m_unk0x120.FindPane(0xc1) == nullptr;
 	FUN_004325e0(0xc1, CRect(0, 0, 250, 300), xtpPaneDockRight);
 
 	if (created) {
 		CXTPDockingPane* neighbour = m_unk0x120.FindPane(0xc2);
 
-		if (neighbour != NULL) {
+		if (neighbour != nullptr) {
 			m_unk0x120.DockPane(m_unk0x120.FindPane(0xc1), xtpPaneDockBottom, neighbour);
 		}
 	}
@@ -87,9 +87,7 @@ void CMainFrame::FUN_00432680()
 
 IMPLEMENT_XTP_CONTROL(CPatchedControlComboBox, CXTPControlComboBox)
 
-CWrapperView::CWrapperView()
-{
-}
+CWrapperView::CWrapperView() = default;
 
 BOOL CWrapperView::PreCreateWindow(CREATESTRUCT& cs)
 {
@@ -129,7 +127,7 @@ BOOL CWrapperView::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT*
 		return TRUE;
 	}
 	case WM_SIZE:
-		if (m_unk0x58.m_hWnd != NULL) {
+		if (m_unk0x58.m_hWnd != nullptr) {
 			m_unk0x58.MoveWindow(0, 0, LOWORD(lParam), HIWORD(lParam));
 		}
 
@@ -208,19 +206,19 @@ void CMainFrame::OnWindowPosChanging(WINDOWPOS* lpwndpos)
 static bool FUN_004331e0(CXTPImageManager* imageManager, UINT id, LPCTSTR name, XTPImageState state)
 {
 	HINSTANCE instance = AfxFindResourceHandle(name, "PNG");
-	if (instance == NULL) {
+	if (instance == nullptr) {
 		return false;
 	}
 	HRSRC resource = FindResource(instance, name, "PNG");
-	if (resource == NULL) {
+	if (resource == nullptr) {
 		return false;
 	}
 	HGLOBAL global = LoadResource(instance, resource);
-	if (global == NULL) {
+	if (global == nullptr) {
 		return false;
 	}
 	const G3D::uint8* data = static_cast<const G3D::uint8*>(LockResource(global));
-	if (data == NULL) {
+	if (data == nullptr) {
 		return false;
 	}
 
@@ -384,7 +382,7 @@ void CMainFrame::onEvent(const RBX::FillToolColor* source, RBX::BrickColor event
 	CXTPControlPopupColor* control =
 		static_cast<CXTPControlPopupColor*>(GetCommandBars()->FindControl(xtpControlPopup, 0x8040, TRUE, TRUE));
 
-	if (control != NULL) {
+	if (control != nullptr) {
 		control->SetColor(rgb);
 	}
 }
@@ -403,7 +401,7 @@ void CMainFrame::FUN_00433d50()
 {
 	CXTPCommandBars* commandBars = GetCommandBars();
 
-	if (commandBars != NULL) {
+	if (commandBars != nullptr) {
 		CXTPCustomizeSheet sheet(commandBars);
 
 		CXTPCustomizeOptionsPage options(&sheet);
@@ -444,7 +442,7 @@ int CMainFrame::OnCreateControl(LPCREATECONTROLSTRUCT lpCreateControl)
 {
 	if (lpCreateControl->bToolBar) {
 		CXTPToolBar* pToolBar = DYNAMIC_DOWNCAST(CXTPToolBar, lpCreateControl->pCommandBar);
-		if (pToolBar == NULL) {
+		if (pToolBar == nullptr) {
 			return FALSE;
 		}
 
@@ -502,7 +500,7 @@ void CMainFrame::RestoreResolution()
 {
 	RBX::ScopedAssign<bool> restoring(m_unk0xe1, true);
 
-	if (m_unk0xe4 == NULL) {
+	if (m_unk0xe4 == nullptr) {
 		RBX::StandardOut::singleton()->print(RBX::MESSAGE_ERROR, "CMainFrame::RestoreResolution hm is NULL");
 		return;
 	}
@@ -513,7 +511,7 @@ void CMainFrame::RestoreResolution()
 	if (GetMonitorInfo(m_unk0xe4, &info)) {
 		ShowWindow(SW_HIDE);
 
-		LONG result = ChangeDisplaySettingsEx(info.szDevice, NULL, NULL, 0, NULL);
+		LONG result = ChangeDisplaySettingsEx(info.szDevice, nullptr, nullptr, 0, nullptr);
 		if (result != DISP_CHANGE_SUCCESSFUL) {
 			RBX::StandardOut::singleton()->print(
 				RBX::MESSAGE_ERROR, "CMainFrame::RestoreResolution ChangeDisplaySettings == %d", result
@@ -528,7 +526,7 @@ void CMainFrame::getMonitorInfo()
 {
 	m_unk0xe4 = MonitorFromWindow(m_hWnd, MONITOR_DEFAULTTONEAREST);
 
-	if (m_unk0xe4 == NULL) {
+	if (m_unk0xe4 == nullptr) {
 		RBX::StandardOut::singleton()->print(
 			RBX::MESSAGE_WARNING, "CMainFrameFrameWnd::getMonitorInfo MonitorFromWindow returned NULL"
 		);
@@ -550,34 +548,34 @@ bool CMainFrame::FUN_00434970(bool p_unk0x04)
 	CXTPCommandBars* commandBars = GetCommandBars();
 
 	CXTPCommandBar* menuBar = commandBars->SetMenu("Menu Bar", 128);
-	if (menuBar == NULL) {
+	if (menuBar == nullptr) {
 		return false;
 	}
 
 	menuBar->SetFlags(xtpFlagIgnoreSetMenuMessage | xtpFlagHideMDIButtons);
 
 	CXTPToolBar* standard = commandBars->Add("Standard", xtpBarTop);
-	if (standard == NULL || !standard->LoadToolBar(128, p_unk0x04)) {
+	if (standard == nullptr || !standard->LoadToolBar(128, p_unk0x04)) {
 		return false;
 	}
 
 	CXTPToolBar* mouse = commandBars->Add("Mouse", xtpBarTop);
-	if (mouse == NULL || !mouse->LoadToolBar(0x87, p_unk0x04)) {
+	if (mouse == nullptr || !mouse->LoadToolBar(0x87, p_unk0x04)) {
 		return false;
 	}
 
 	CXTPToolBar* test = commandBars->Add("Test", xtpBarTop);
-	if (test == NULL || !test->LoadToolBar(0x89, p_unk0x04)) {
+	if (test == nullptr || !test->LoadToolBar(0x89, p_unk0x04)) {
 		return false;
 	}
 
 	CXTPToolBar* camera = commandBars->Add("Camera", xtpBarTop);
-	if (camera == NULL || !camera->LoadToolBar(0x91, p_unk0x04)) {
+	if (camera == nullptr || !camera->LoadToolBar(0x91, p_unk0x04)) {
 		return false;
 	}
 
 	CXTPToolBar* command = commandBars->Add("Command", xtpBarBottom);
-	if (command == NULL || !command->LoadToolBar(0x96, p_unk0x04)) {
+	if (command == nullptr || !command->LoadToolBar(0x96, p_unk0x04)) {
 		return false;
 	}
 
@@ -849,7 +847,7 @@ LRESULT CMainFrame::FUN_004357f0(WPARAM wParam, LPARAM lParam)
 
 void CMainFrame::ChangeResolution()
 {
-	if (m_unk0xe4 == NULL) {
+	if (m_unk0xe4 == nullptr) {
 		RBX::StandardOut::singleton()->print(RBX::MESSAGE_ERROR, "CMainFrame::ChangeResolution hm is NULL");
 		return;
 	}
@@ -867,14 +865,16 @@ void CMainFrame::ChangeResolution()
 	G3D::Vector2int16 size = CRenderSettings::singleton().FUN_00448300();
 	DEVMODE mode = FUN_00434ec0(info.szDevice, size.x * size.y);
 
-	LONG result = ChangeDisplaySettingsEx(info.szDevice, &mode, NULL, CDS_FULLSCREEN, NULL);
+	LONG result = ChangeDisplaySettingsEx(info.szDevice, &mode, nullptr, CDS_FULLSCREEN, nullptr);
 	if (result == DISP_CHANGE_SUCCESSFUL) {
 		ModifyStyle(WS_CAPTION | WS_THICKFRAME, 0);
 
 		CRect rect = XTPMultiMonitor()->GetScreenArea(this);
 		int cx = GetSystemMetrics(SM_CXBORDER);
 		int cy = GetSystemMetrics(SM_CYBORDER);
-		SetWindowPos(NULL, rect.left - cx, rect.top - cy, rect.Width() + 2 * cx, rect.Height() + 2 * cy, SWP_NOZORDER);
+		SetWindowPos(
+			nullptr, rect.left - cx, rect.top - cy, rect.Width() + 2 * cx, rect.Height() + 2 * cy, SWP_NOZORDER
+		);
 	}
 	else {
 		RBX::StandardOut::singleton()->print(RBX::MESSAGE_ERROR, "ChangeDisplaySettings == %d", result);
@@ -900,7 +900,7 @@ void CMainFrame::FUN_00435e00(bool p_unk0x04)
 		CRect rect(m_unk0xf4.rcNormalPosition);
 		if (!rect.IsRectEmpty()) {
 			SetWindowPos(
-				NULL,
+				nullptr,
 				rect.left,
 				rect.top,
 				rect.Width(),
@@ -978,7 +978,7 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	CXTPCommandBars* commandBars = GetCommandBars();
 
-	if (commandBars != NULL) {
+	if (commandBars != nullptr) {
 		commandBars->GetImageManager()->SetIcons(0x91);
 		m_unk0x120.SetAlphaDockingContext(TRUE);
 		m_unk0x120.SetShowDockingContextStickers(TRUE);
@@ -1010,46 +1010,46 @@ BEGIN_MESSAGE_MAP(CMainFrame, CXTPMDIFrameWnd)
 	ON_WM_GETMINMAXINFO()
 	ON_WM_ACTIVATEAPP()
 	ON_WM_CREATE()
-	ON_COMMAND(0x88b9, FUN_00433d50)
-	ON_MESSAGE(XTPWM_DOCKINGPANE_NOTIFY, FUN_004357f0)
+	ON_COMMAND(0x88b9, &CMainFrame::FUN_00433d50)
+	ON_MESSAGE(XTPWM_DOCKINGPANE_NOTIFY, &CMainFrame::FUN_004357f0)
 	ON_WM_CLOSE()
 	ON_WM_PAINT()
-	ON_COMMAND(0x809f, FUN_00433d10)
-	ON_UPDATE_COMMAND_UI(0x809f, FUN_00453eb0)
-	ON_COMMAND(0x8042, FUN_00433ce0)
-	ON_UPDATE_COMMAND_UI(0x8042, FUN_00453eb0)
-	ON_COMMAND(0x8018, FUN_00432650)
-	ON_UPDATE_COMMAND_UI(0x8018, FUN_00453eb0)
-	ON_COMMAND(0x800f, FUN_00432680)
-	ON_UPDATE_COMMAND_UI(0x800f, FUN_00453eb0)
+	ON_COMMAND(0x809f, &CMainFrame::FUN_00433d10)
+	ON_UPDATE_COMMAND_UI(0x809f, &CMainFrame::FUN_00453eb0)
+	ON_COMMAND(0x8042, &CMainFrame::FUN_00433ce0)
+	ON_UPDATE_COMMAND_UI(0x8042, &CMainFrame::FUN_00453eb0)
+	ON_COMMAND(0x8018, &CMainFrame::FUN_00432650)
+	ON_UPDATE_COMMAND_UI(0x8018, &CMainFrame::FUN_00453eb0)
+	ON_COMMAND(0x800f, &CMainFrame::FUN_00432680)
+	ON_UPDATE_COMMAND_UI(0x800f, &CMainFrame::FUN_00453eb0)
 	ON_XTP_CREATECOMMANDBAR()
 	ON_XTP_CREATECONTROL()
-	ON_XTP_EXECUTE(0x8d, FUN_00435570)
-	ON_UPDATE_COMMAND_UI(0x8d, FUN_00434d90)
-	ON_XTP_EXECUTE(0x26dd, FUN_00435460)
-	ON_UPDATE_COMMAND_UI(0x26dd, FUN_00453eb0)
+	ON_XTP_EXECUTE(0x8d, &CMainFrame::FUN_00435570)
+	ON_UPDATE_COMMAND_UI(0x8d, &CMainFrame::FUN_00434d90)
+	ON_XTP_EXECUTE(0x26dd, &CMainFrame::FUN_00435460)
+	ON_UPDATE_COMMAND_UI(0x26dd, &CMainFrame::FUN_00453eb0)
 	ON_WM_DESTROY()
-	ON_COMMAND(0x80bf, FUN_00432980)
-	ON_UPDATE_COMMAND_UI(0x80bf, FUN_00453eb0)
-	ON_UPDATE_COMMAND_UI(0xbb, FUN_00432990)
-	ON_UPDATE_COMMAND_UI(0xbe, FUN_00432990)
-	ON_UPDATE_COMMAND_UI(0xbd, FUN_004329b0)
-	ON_UPDATE_COMMAND_UI(0xbc, FUN_00432a80)
-	ON_COMMAND(0x80ff, FUN_00434ea0)
-	ON_COMMAND(0x80dd, FUN_00432b50)
-	ON_UPDATE_COMMAND_UI(0x80dd, FUN_00453eb0)
-	ON_COMMAND(0x80f3, FUN_00432b60)
-	ON_UPDATE_COMMAND_UI(0x80f3, FUN_00453eb0)
-	ON_UPDATE_COMMAND_UI(0x80f5, FUN_00432b90)
-	ON_COMMAND(0x80f5, FUN_004357d0)
-	ON_COMMAND(0x80f4, FUN_00435fa0)
-	ON_UPDATE_COMMAND_UI(0x80f4, FUN_00432bc0)
+	ON_COMMAND(0x80bf, &CMainFrame::FUN_00432980)
+	ON_UPDATE_COMMAND_UI(0x80bf, &CMainFrame::FUN_00453eb0)
+	ON_UPDATE_COMMAND_UI(0xbb, &CMainFrame::FUN_00432990)
+	ON_UPDATE_COMMAND_UI(0xbe, &CMainFrame::FUN_00432990)
+	ON_UPDATE_COMMAND_UI(0xbd, &CMainFrame::FUN_004329b0)
+	ON_UPDATE_COMMAND_UI(0xbc, &CMainFrame::FUN_00432a80)
+	ON_COMMAND(0x80ff, &CMainFrame::FUN_00434ea0)
+	ON_COMMAND(0x80dd, &CMainFrame::FUN_00432b50)
+	ON_UPDATE_COMMAND_UI(0x80dd, &CMainFrame::FUN_00453eb0)
+	ON_COMMAND(0x80f3, &CMainFrame::FUN_00432b60)
+	ON_UPDATE_COMMAND_UI(0x80f3, &CMainFrame::FUN_00453eb0)
+	ON_UPDATE_COMMAND_UI(0x80f5, &CMainFrame::FUN_00432b90)
+	ON_COMMAND(0x80f5, &CMainFrame::FUN_004357d0)
+	ON_COMMAND(0x80f4, &CMainFrame::FUN_00435fa0)
+	ON_UPDATE_COMMAND_UI(0x80f4, &CMainFrame::FUN_00432bc0)
 	ON_WM_WINDOWPOSCHANGING()
 END_MESSAGE_MAP()
 // clang-format on
 
 CMainFrame::CMainFrame()
-	: m_unk0xe0(false), m_unk0xe1(false), m_unk0xe4(NULL), m_unk0xe8(NULL), m_unk0xec(false), m_unk0xed(false)
+	: m_unk0xe0(false), m_unk0xe1(false), m_unk0xe4(nullptr), m_unk0xe8(nullptr), m_unk0xec(false), m_unk0xed(false)
 {
 	{
 		DWORD value = 0;
@@ -1063,7 +1063,7 @@ CMainFrame::CMainFrame()
 		RBX::Accoutrement::writeUnlocked = g_unk0x0095391d;
 	}
 
-	std::string directory = RBX::FileSystem::getUserAppDataDirectory(true, NULL);
+	std::string directory = RBX::FileSystem::getUserAppDataDirectory(true, nullptr);
 
 	if (directory.size() > 0) {
 		m_unk0xf0.Format("%s\\IDESettings.xml", directory.c_str());

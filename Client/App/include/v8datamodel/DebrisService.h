@@ -17,7 +17,7 @@ class TimerService;
 class DebrisService : public DescribedCreatable<DebrisService, Instance, sDebrisService>, public Service
 {
 private:
-	std::queue<std::weak_ptr<Instance> > queue;
+	std::queue<std::weak_ptr<Instance>> queue;
 	int maxItems;
 	TimerService* timer;
 
@@ -30,7 +30,7 @@ public:
 	int getMaxItems() const { return maxItems; }
 
 protected:
-	virtual void onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider);
+	void onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider) override;
 
 private:
 	void cleanup();

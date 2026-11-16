@@ -52,7 +52,7 @@ public:
 		: eventType(eventType), userInput(userInput), mousePosition(position), mouseDelta(0, 0), windowSize(size)
 	{
 	}
-	UIEvent() : eventType(NO_EVENT), userInput(NULL) {}
+	UIEvent() : eventType(NO_EVENT), userInput(nullptr) {}
 
 	bool isMouseEvent() const
 	{

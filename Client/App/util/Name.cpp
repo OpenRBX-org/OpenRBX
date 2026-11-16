@@ -47,13 +47,13 @@ Name::NamMap& Name::namMap()
 
 const Name& Name::declare(const char* sName, int dictionaryIndex)
 {
-	if (sName == NULL) {
+	if (sName == nullptr) {
 		return getNullName();
 	}
 
 	std::call_once(flag, initMoo);
 
-	std::lock_guard<std::recursive_mutex> lock(moo2());
+	std::scoped_lock lock(moo2());
 	NamMap::iterator iter = namMap().find(std::string(sName));
 
 	if (iter != namMap().end()) {
@@ -76,7 +76,7 @@ const Name& Name::getNullName()
 {
 	std::call_once(flag, initMoo);
 
-	std::lock_guard<std::recursive_mutex> lock(moo2());
+	std::scoped_lock lock(moo2());
 	static const Name* nullName = &declare("", 0);
 
 	return *nullName;
@@ -86,7 +86,7 @@ const Name& Name::lookup(const std::string& sName)
 {
 	std::call_once(flag, initMoo);
 
-	std::lock_guard<std::recursive_mutex> lock(moo2());
+	std::scoped_lock lock(moo2());
 	NamMap::iterator iter = namMap().find(sName);
 
 	if (iter != namMap().end()) {
@@ -98,7 +98,7 @@ const Name& Name::lookup(const std::string& sName)
 
 const Name& Name::lookup(const char* sName)
 {
-	if (sName == NULL) {
+	if (sName == nullptr) {
 		return getNullName();
 	}
 

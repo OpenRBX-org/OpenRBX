@@ -17,7 +17,7 @@ class ThumbnailGenerator : public RBX::DescribedCreatable<ThumbnailGenerator, RB
 {
 public:
 	ThumbnailGenerator();
-	virtual ~ThumbnailGenerator() {}
+	~ThumbnailGenerator() override = default;
 
 	std::string click(std::string fileType, int cx, int cy, bool hideSky);
 	std::string clickTexture(std::string textureId, std::string fileType, int cx, int cy);

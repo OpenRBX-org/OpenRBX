@@ -1,7 +1,6 @@
 #include "reflection/reflection.h"
 
-namespace RBX {
-namespace Reflection {
+namespace RBX::Reflection {
 
 bool ClassDescriptor::lockedDown;
 
@@ -16,8 +15,9 @@ bool ClassDescriptor::operator!=(const ClassDescriptor& other) const
 }
 
 ClassDescriptor::ClassDescriptor()
-	: Descriptor("<<<ROOT>>>"), MemberDescriptorContainer<PropertyDescriptor>(NULL),
-	  MemberDescriptorContainer<SignalDescriptor>(NULL), MemberDescriptorContainer<FunctionDescriptor>(NULL), base(NULL)
+	: Descriptor("<<<ROOT>>>"), MemberDescriptorContainer<PropertyDescriptor>(nullptr),
+	  MemberDescriptorContainer<SignalDescriptor>(nullptr), MemberDescriptorContainer<FunctionDescriptor>(nullptr),
+	  base(nullptr)
 {
 }
 
@@ -26,7 +26,7 @@ ClassDescriptor::ClassDescriptor(ClassDescriptor& base, const char* name)
 	  MemberDescriptorContainer<SignalDescriptor>(&base), MemberDescriptorContainer<FunctionDescriptor>(&base),
 	  base(&base)
 {
-	std::lock_guard<std::recursive_mutex> lock(sync());
+	std::scoped_lock lock(sync());
 
 	base.derivedClasses.push_back(this);
 }
@@ -52,5 +52,4 @@ bool MemberDescriptor::isMemberOf(const DescribedBase* instance) const
 template class MemberDescriptorContainer<FunctionDescriptor>;
 template class MemberDescriptorContainer<PropertyDescriptor>;
 
-} // namespace Reflection
-} // namespace RBX
+} // namespace RBX::Reflection

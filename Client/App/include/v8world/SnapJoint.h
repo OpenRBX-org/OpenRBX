@@ -18,12 +18,12 @@ public:
 	{
 	}
 
-	virtual ~SnapJoint() {}
+	~SnapJoint() override = default;
 
 	static SnapJoint* canBuildJoint(Primitive* prim0, Primitive* prim1, NormalId normalId0, NormalId normalId1);
 
 private:
-	virtual JointType getJointType() const { return SNAP_JOINT; }
+	JointType getJointType() const override { return SNAP_JOINT; }
 
 	static bool compatibleSurfaces(Primitive* prim0, Primitive* prim1, NormalId normalId0, NormalId normalId1);
 };

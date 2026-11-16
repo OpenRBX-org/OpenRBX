@@ -22,7 +22,7 @@ public:
 	{
 		T* pT = static_cast<T*>(this);
 
-		if (pdwSupportedOptions == NULL || pdwEnabledOptions == NULL) {
+		if (pdwSupportedOptions == nullptr || pdwEnabledOptions == nullptr) {
 			return E_POINTER;
 		}
 
@@ -123,7 +123,7 @@ public:
 			hr = FUN_0041e6b0(url, zone);
 			if (hr != S_OK) {
 				CString message;
-				message.Format("Untrusted Site: %s", CString(url));
+				message.Format("Untrusted Site: %s", static_cast<LPCTSTR>(CString(url)));
 				return LogManager::ReportCOMError(T::GetObjectCLSID(), message, hr);
 			}
 		}

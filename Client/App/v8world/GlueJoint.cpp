@@ -80,7 +80,7 @@ GlueJoint* GlueJoint::canBuildJoint(Primitive* p0, Primitive* p1, NormalId nId0,
 		}
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 void GlueJoint::putInKernel(Kernel* _kernel)

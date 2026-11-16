@@ -16,7 +16,7 @@
 #include <OgreSubMesh.h>
 #include <OgreTechnique.h>
 #include <algorithm>
-#include <string.h>
+#include <cstring>
 
 namespace Ogre {
 
@@ -91,7 +91,7 @@ RbxEntity::RbxEntity()
 	mInitialised = true;
 	m_unk0x244 = true;
 	m_unk0x246 = true;
-	m_unk0x240 = 0;
+	m_unk0x240 = nullptr;
 	m_unk0x26c = 888;
 }
 
@@ -160,7 +160,7 @@ void RbxEntity::FUN_00676870(Camera* cam)
 		sphere.setCenter(sphere.getCenter() + offset);
 
 		if (m_unk0x244) {
-			visible = cam->isVisible(sphere, NULL);
+			visible = cam->isVisible(sphere, nullptr);
 		}
 		subEntity->setVisible(visible);
 
@@ -355,7 +355,7 @@ void RbxEntity::FUN_006772d0(Camera* camera, const Light* light, std::vector<Sha
 				volList = &light->_getFrustumClipVolumes(camera);
 			}
 			else {
-				volList = NULL;
+				volList = nullptr;
 			}
 		}
 	}

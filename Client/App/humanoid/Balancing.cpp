@@ -17,7 +17,7 @@ HitTestFilter::Result Balancing::filterResult(const Primitive* testMe) const
 	Result result = INCLUDE_PRIM;
 
 	// clang-format off
-	if (testMe->getDragging() || !testMe->getCanCollide() || (torsoPrimitive != NULL && torsoPrimitive->getAssembly() == testMe->getAssembly())) {
+	if (testMe->getDragging() || !testMe->getCanCollide() || (torsoPrimitive != nullptr && torsoPrimitive->getAssembly() == testMe->getAssembly())) {
 		result = IGNORE_PRIM;
 	}
 	// clang-format on
@@ -29,17 +29,17 @@ PartInstance* Balancing::tryFloor(const G3D::Ray& ray, float maxDistance)
 {
 	float distance;
 	Primitive* hit = humanoid->getWorld()->getContactManager().getHitLegacy(
-		ray, NULL, this, floorTouchInWorld, distance, maxDistance
+		ray, nullptr, this, floorTouchInWorld, distance, maxDistance
 	);
 
-	return hit ? PartInstance::fromPrimitive(hit) : NULL;
+	return hit ? PartInstance::fromPrimitive(hit) : nullptr;
 }
 
 G3D::Vector3 Balancing::getYAxis() const
 {
 	Body* body = humanoid->getTorsoBody();
 
-	if (body != NULL) {
+	if (body != nullptr) {
 		G3D::Vector3 yAxis = body->getPV().position.vectorToObjectSpace(G3D::Vector3::unitY());
 		return yAxis;
 	}
@@ -123,7 +123,7 @@ PartInstance* Balancing::findFloor(bool existingFloor)
 		}
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 Balancing::Balancing(Humanoid* humanoid, const float kP, const float kD)
@@ -133,13 +133,13 @@ Balancing::Balancing(Humanoid* humanoid, const float kP, const float kD)
 
 Humanoid::State* Balancing::onStep(const float stepDt, Controller& controller)
 {
-	if (humanoid->getTorsoBody() != NULL) {
-		floorPart = shared_from(findFloor(floorPart != NULL));
+	if (humanoid->getTorsoBody() != nullptr) {
+		floorPart = shared_from(findFloor(floorPart != nullptr));
 
 		return this;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 } // namespace RBX

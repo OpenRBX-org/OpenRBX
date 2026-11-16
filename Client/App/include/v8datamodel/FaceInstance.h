@@ -21,7 +21,7 @@ public:
 	void setFace(NormalId value);
 
 protected:
-	virtual bool askSetParent(const Instance* instance) const;
+	bool askSetParent(const Instance* instance) const override;
 
 private:
 	NormalId face;

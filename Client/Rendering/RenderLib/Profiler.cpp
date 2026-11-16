@@ -7,10 +7,9 @@
 #include <string>
 #include <windows.h>
 
-namespace RBX {
-namespace Render {
+namespace RBX::Render {
 
-typedef void (*DelayFunction)(unsigned int uiParameter);
+using DelayFunction = void (*)(unsigned int uiParameter);
 
 static float getShaderModel();
 static int getCPUSpeed();
@@ -156,5 +155,4 @@ SpecData::SpecData()
 {
 }
 
-} // namespace Render
-} // namespace RBX
+} // namespace RBX::Render

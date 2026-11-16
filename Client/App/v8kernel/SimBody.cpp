@@ -105,8 +105,6 @@ void SimBody::step(float dt)
 	pv.velocity.linear += denormFix;
 }
 
-SimBody::~SimBody()
-{
-}
+SimBody::~SimBody() = default;
 
 } // namespace RBX

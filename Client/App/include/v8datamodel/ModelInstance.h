@@ -50,21 +50,21 @@ private:
 		FlagHeight.setDirty();
 	}
 
-	virtual bool shouldRender3dAdorn() const;
-	virtual void render3dAdorn(Adorn* adorn);
-	virtual void render3dSelect(Adorn* adorn, SelectState selectState);
+	bool shouldRender3dAdorn() const override;
+	void render3dAdorn(Adorn* adorn) override;
+	void render3dSelect(Adorn* adorn, SelectState selectState) override;
 
 protected:
-	virtual void onDescendentAdded(Instance* instance);
-	virtual void onDescendentRemoving(const shared_ptr<Instance>& instance);
-	virtual bool askSetParent(const Instance* instance) const;
+	void onDescendentAdded(Instance* instance) override;
+	void onDescendentRemoving(const shared_ptr<Instance>& instance) override;
+	bool askSetParent(const Instance* instance) const override;
 
 private:
-	virtual void onLastChildRemoved();
+	void onLastChildRemoved() override;
 
 public:
 	ModelInstance();
-	virtual ~ModelInstance();
+	~ModelInstance() override;
 
 	PartInstance* getPrimaryPartInternal() const;
 	void setPrimaryPart(PartInstance* value);
@@ -72,21 +72,21 @@ public:
 	const CoordinateFrame& getModelInPrimary() const { return modelInPrimary; }
 	void setModelInPrimary(const CoordinateFrame& set) { modelInPrimary = set; }
 
-	virtual void onExtentsChanged() const;
+	void onExtentsChanged() const override;
 
-	virtual const Primitive* getBiggestPrimitive() const;
-	virtual bool hitTest(const G3D::Ray& worldRay, G3D::Vector3& worldHitPoint);
+	const Primitive* getBiggestPrimitive() const override;
+	bool hitTest(const G3D::Ray& worldRay, G3D::Vector3& worldHitPoint) override;
 
-	virtual Extents getExtentsWorld() const;
-	virtual Extents getExtentsLocal() const;
+	Extents getExtentsWorld() const override;
+	Extents getExtentsLocal() const override;
 
-	virtual const CoordinateFrame getLocation() const;
+	const CoordinateFrame getLocation() const override;
 
-	virtual void onCameraNear(float distance);
-	virtual void getCameraIgnorePrimitives(std::vector<const Primitive*>& primitives);
+	void onCameraNear(float distance) override;
+	void getCameraIgnorePrimitives(std::vector<const Primitive*>& primitives) override;
 
-	virtual PartInstance* getPrimaryPart();
-	virtual const PartInstance* getPrimaryPartConst() const;
+	PartInstance* getPrimaryPart() override;
+	const PartInstance* getPrimaryPartConst() const override;
 	void setFrontAndTop(const G3D::Vector3&);
 	void destroyIfNoParts(const ModelInstance*);
 
@@ -96,7 +96,7 @@ public:
 	float computeLargestMoment() const;
 
 protected:
-	virtual void legacyTraverseState(const CoordinateFrame& parentState);
+	void legacyTraverseState(const CoordinateFrame& parentState) override;
 
 public:
 };

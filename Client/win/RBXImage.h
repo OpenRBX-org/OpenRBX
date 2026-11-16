@@ -12,11 +12,11 @@ public:
 	};
 
 	RBXImage();
-	virtual ~RBXImage() throw();
+	virtual ~RBXImage() noexcept;
 
 	void* FUN_00445c40(int x, int y);
 	int FUN_00445c70();
-	BOOL FUN_00445dd0(int width, int height, int bpp, DWORD compression, const DWORD* masks, DWORD flags) throw();
+	BOOL FUN_00445dd0(int width, int height, int bpp, DWORD compression, const DWORD* masks, DWORD flags) noexcept;
 	BOOL FUN_00445f50(int width, int height, int bpp, DWORD flags);
 	operator HBITMAP();
 

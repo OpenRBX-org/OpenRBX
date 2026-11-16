@@ -15,14 +15,14 @@ class EventDataBase
 {
 public:
 	virtual void VTable0x00() = 0;
-	virtual ~EventDataBase() {}
+	virtual ~EventDataBase() = default;
 };
 
 class CMarshalWindow : public CWindowImpl<CMarshalWindow>
 {
 public:
 	CMarshalWindow(DWORD threadId);
-	~CMarshalWindow() {}
+	~CMarshalWindow() override = default;
 
 	// clang-format off
 	BEGIN_MSG_MAP(CMarshalWindow)
@@ -31,7 +31,7 @@ public:
 	END_MSG_MAP()
 	// clang-format on
 
-	virtual void OnFinalMessage(HWND hWnd) { delete this; }
+	void OnFinalMessage(HWND hWnd) override { delete this; }
 
 	void FUN_00436b00(EventDataBase* data);
 

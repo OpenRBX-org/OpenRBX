@@ -1,7 +1,6 @@
 #include "renderlib/Material.h"
 
-namespace RBX {
-namespace Render {
+namespace RBX::Render {
 
 bool Material::veryTransparent() const
 {
@@ -28,9 +27,7 @@ Material::Level::Level(
 	}
 }
 
-Material::Level::~Level()
-{
-}
+Material::Level::~Level() = default;
 
 void Material::Level::configureRenderDevice(G3D::RenderDevice* renderDevice) const
 {
@@ -40,9 +37,7 @@ void Material::Level::configureRenderDevice(G3D::RenderDevice* renderDevice) con
 	renderDevice->setTexture(0, baseTexture(renderDevice));
 }
 
-Material::~Material()
-{
-}
+Material::~Material() = default;
 
 const Material::Level& Material::appendEmptyLevel()
 {
@@ -59,9 +54,6 @@ const Material::Level& Material::appendLevel(
 	return levels.last();
 }
 
-Material::Material()
-{
-}
+Material::Material() = default;
 
-} // namespace Render
-} // namespace RBX
+} // namespace RBX::Render

@@ -6,14 +6,13 @@
 #include <G3D/Vector3.h>
 #include <vector>
 
-namespace RBX {
-namespace Render {
+namespace RBX::Render {
 
 class Clusterer
 {
 public:
-	typedef Chunk Sample;
-	typedef std::vector<Sample*> Samples;
+	using Sample = Chunk;
+	using Samples = std::vector<Sample*>;
 
 	class Cluster
 	{
@@ -27,7 +26,7 @@ public:
 		float getDistanceFromCentroid(Sample* sample) { return (sample->cframe().translation - centroid).length(); }
 	};
 
-	typedef std::vector<Cluster> Clusters;
+	using Clusters = std::vector<Cluster>;
 
 private:
 	unsigned int sampleSize;
@@ -55,7 +54,6 @@ public:
 	Clusters* go(unsigned int maxSteps);
 };
 
-} // namespace Render
-} // namespace RBX
+} // namespace RBX::Render
 
 #endif // RENDERLIB_CLUSTERER_H

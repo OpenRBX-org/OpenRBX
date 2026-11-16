@@ -25,7 +25,7 @@ class CRobloxCommandLineInfo : public CCommandLineInfo
 public:
 	CRobloxCommandLineInfo();
 
-	virtual void ParseParam(const TCHAR* pszParam, BOOL bFlag, BOOL bLast);
+	void ParseParam(const TCHAR* pszParam, BOOL bFlag, BOOL bLast) override;
 
 	bool m_unk0x24;
 	bool m_unk0x25;
@@ -42,12 +42,12 @@ class CRobloxApp : public CWinApp
 {
 public:
 	CRobloxApp();
-	~CRobloxApp();
+	~CRobloxApp() override;
 
-	virtual BOOL InitInstance();
-	virtual int Run();
-	virtual int ExitInstance();
-	virtual BOOL OnIdle(LONG lCount);
+	BOOL InitInstance() override;
+	int Run() override;
+	int ExitInstance() override;
+	BOOL OnIdle(LONG lCount) override;
 
 	BOOL FUN_0044dac0(bool p_unk0x04);
 	BOOL FUN_0044e180(std::string script);
@@ -103,13 +103,13 @@ public:
 	void SetColor(COLORREF clr);
 
 protected:
-	CSize GetSize(CDC* pDC);
-	void Draw(CDC* pDC);
-	void OnMouseMove(CPoint point);
-	BOOL OnSetSelected(int bSelected);
-	void OnClick(BOOL bKeyboard = FALSE, CPoint pt = CPoint(0, 0));
-	void OnExecute();
-	void OnLButtonUp(CPoint point);
+	CSize GetSize(CDC* pDC) override;
+	void Draw(CDC* pDC) override;
+	void OnMouseMove(CPoint point) override;
+	BOOL OnSetSelected(int bSelected) override;
+	void OnClick(BOOL bKeyboard = FALSE, CPoint pt = CPoint(0, 0)) override;
+	void OnExecute() override;
+	void OnLButtonUp(CPoint point) override;
 
 private:
 	friend class CPropertyGridItemBrickColor;
@@ -131,10 +131,10 @@ public:
 	CRobloxDHtmlDialog(UINT nIDTemplate, const char* url, CWnd* pParentWnd);
 	CRobloxDHtmlDialog(UINT nIDTemplate, UINT nHtmlResID, CWnd* pParentWnd);
 
-	virtual BOOL OnInitDialog();
+	BOOL OnInitDialog() override;
 
 protected:
-	virtual BOOL IsExternalDispatchSafe() { return TRUE; }
+	BOOL IsExternalDispatchSafe() override { return TRUE; }
 
 	void OnBeforeNavigate2(
 		LPDISPATCH pDisp,

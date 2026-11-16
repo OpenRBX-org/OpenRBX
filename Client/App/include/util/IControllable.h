@@ -8,7 +8,7 @@ class __declspec(novtable) IControllable
 public:
 	IControllable() {}
 
-	virtual ~IControllable() {}
+	virtual ~IControllable() = default;
 	virtual bool isControllable() const = 0;
 };
 

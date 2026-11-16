@@ -67,7 +67,7 @@ void World::onPrimitiveContactParametersChanged(Primitive* p)
 {
 	Contact* c = p->getFirstContact();
 
-	while (c != NULL) {
+	while (c != nullptr) {
 		c->onPrimitiveContactParametersChanged();
 		c = p->getNextContact(c);
 	}
@@ -139,7 +139,7 @@ void World::ticklePrimitive(Primitive* p, bool recursive)
 {
 	Assembly* assembly = p->getAssembly();
 
-	if (assembly != NULL) {
+	if (assembly != nullptr) {
 		getSleepStage()->onWakeUpRequest(assembly, recursive);
 	}
 }
@@ -220,7 +220,7 @@ void World::insertPrimitive(Primitive* p)
 
 static bool inIgnoreGroup(std::set<Primitive*>* ignoreGroup, Primitive* p)
 {
-	return ignoreGroup != NULL && ignoreGroup->find(p) != ignoreGroup->end();
+	return ignoreGroup != nullptr && ignoreGroup->contains(p);
 }
 
 inline void World::destroyJoint(Joint* joint)
@@ -316,10 +316,10 @@ void World::insertJoint(Joint* j)
 	Primitive* p0 = j->getPrimitive(0);
 	Primitive* p1 = j->getPrimitive(1);
 
-	if (p0 != NULL && p1 != NULL) {
+	if (p0 != nullptr && p1 != nullptr) {
 		Joint* existing = Primitive::getJoint(p0, p1);
 
-		if (existing != NULL) {
+		if (existing != nullptr) {
 			destroyJoint(existing);
 		}
 	}
@@ -337,7 +337,7 @@ void World::destroyJoints(Primitive* p, std::set<Primitive*>* ignoreGroup)
 {
 	Joint* j = p->getFirstJoint();
 
-	while (j != NULL) {
+	while (j != nullptr) {
 		Joint* joint = j;
 		j = p->getNextJoint(j);
 
@@ -353,7 +353,7 @@ void World::destroyJoints(Primitive* p, std::set<Primitive*>* ignoreGroup)
 
 void World::destroyJoints(Primitive* p)
 {
-	destroyJoints(p, NULL);
+	destroyJoints(p, nullptr);
 }
 
 void World::createJoints(Primitive* p, std::set<Primitive*>* ignoreGroup)
@@ -368,11 +368,11 @@ void World::createJoints(Primitive* p, std::set<Primitive*>* ignoreGroup)
 
 		Primitive* other = tempPrimitives[i];
 
-		if (!inIgnoreGroup(ignoreGroup, other) && Primitive::getJoint(p, other) == NULL) {
+		if (!inIgnoreGroup(ignoreGroup, other) && Primitive::getJoint(p, other) == nullptr) {
 
 			Joint* joint = JointBuilder::canJoin(p, other);
 
-			if (joint != NULL) {
+			if (joint != nullptr) {
 
 				insertJoint(joint);
 
@@ -386,7 +386,7 @@ void World::createJoints(Primitive* p, std::set<Primitive*>* ignoreGroup)
 
 void World::createJoints(Primitive* p)
 {
-	createJoints(p, NULL);
+	createJoints(p, nullptr);
 }
 
 World::~World()
@@ -422,11 +422,11 @@ void World::removePrimitive(Primitive* p)
 
 	primitives.fastRemove(p);
 
-	p->world = NULL;
+	p->world = nullptr;
 }
 
 World::World()
-	: contactManager(new ContactManager(this)), jointStage(new JointStage(NULL, this)), canThrottle(true),
+	: contactManager(new ContactManager(this)), jointStage(new JointStage(nullptr, this)), canThrottle(true),
 	  inStepCode(false), inJointNotification(false), worldStepId(0), numJoints(0), numContacts(0), numLinkCalls(0),
 	  profilingWorldStep(new Profiling::CodeProfiler("World Step")),
 	  profilingUiStep(new Profiling::CodeProfiler("UI Step")),

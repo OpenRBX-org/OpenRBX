@@ -22,8 +22,8 @@ public:
 
 	PV() {}
 	PV(const CoordinateFrame& position, const Velocity& velocity) : position(position), velocity(velocity) {}
-	PV(const PV& other) : position(other.position), velocity(other.velocity) {}
-	~PV() {}
+	PV(const PV& other) = default;
+	~PV() = default;
 
 	PV inverse() const;
 	PV toObjectSpace(const PV&) const;

@@ -1,8 +1,7 @@
 #include "appdraw/Part.h"
 #include "reflection/enumconverter.h"
 
-namespace RBX {
-namespace Reflection {
+namespace RBX::Reflection {
 
 template <>
 EnumDesc<Part::PartType>::EnumDesc() : EnumDescriptor("PartType", typeid(Part::PartType))
@@ -12,5 +11,4 @@ EnumDesc<Part::PartType>::EnumDesc() : EnumDescriptor("PartType", typeid(Part::P
 	addPair(Part::CYLINDER_PART, "Cylinder");
 }
 
-} // namespace Reflection
-} // namespace RBX
+} // namespace RBX::Reflection

@@ -30,7 +30,7 @@ public:
 	CRobloxTreeCtrlNode* FUN_00426e00(const std::shared_ptr<RBX::Instance>& instance);
 
 protected:
-	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
+	BOOL PreCreateWindow(CREATESTRUCT& cs) override;
 
 	afx_msg void FUN_004221f0(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void FUN_00422210(NMHDR* pNMHDR, LRESULT* pResult);

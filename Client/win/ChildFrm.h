@@ -7,10 +7,10 @@ class CChildFrame : public CMDIChildWnd
 
 public:
 	CChildFrame();
-	virtual ~CChildFrame();
+	~CChildFrame() override;
 
-	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
-	virtual void ActivateFrame(int nCmdShow = -1);
+	BOOL PreCreateWindow(CREATESTRUCT& cs) override;
+	void ActivateFrame(int nCmdShow = -1) override;
 
 protected:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);

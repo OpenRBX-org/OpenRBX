@@ -38,11 +38,11 @@ void SpatialHash::removeNodeFromPrimitive(SpatialNode* remove)
 	SpatialNode* next = remove->nextPrimitiveLink;
 	SpatialNode* prev = remove->prevPrimitiveLink;
 
-	if (next != NULL) {
+	if (next != nullptr) {
 		next->prevPrimitiveLink = prev;
 	}
 
-	if (prev != NULL) {
+	if (prev != nullptr) {
 		prev->nextPrimitiveLink = next;
 	}
 	else {
@@ -127,8 +127,8 @@ SpatialNode* SpatialHash::findNode(Primitive* p, const Vector3int32& grid)
 
 bool SpatialHash::shareCommonGrid(Primitive* me, Primitive* other)
 {
-	for (SpatialNode* node = me->spatialNodes; node != NULL; node = node->nextPrimitiveLink) {
-		for (SpatialNode* hashNode = nodes[node->hashId]; hashNode != NULL; hashNode = hashNode->nextHashLink) {
+	for (SpatialNode* node = me->spatialNodes; node != nullptr; node = node->nextPrimitiveLink) {
+		for (SpatialNode* hashNode = nodes[node->hashId]; hashNode != nullptr; hashNode = hashNode->nextHashLink) {
 			if (hashNode->primitive == other && hashNode->gridId == node->gridId) {
 				return true;
 			}
@@ -155,12 +155,12 @@ void SpatialHash::destroyNode(SpatialNode* destroy)
 
 	SpatialNode* node = nodes[destroy->hashId];
 
-	while (node != NULL) {
+	while (node != nullptr) {
 		if (node->gridId == destroyGrid) {
 			Primitive* me = destroy->primitive;
 			Primitive* other = node->primitive;
 
-			if (Primitive::getContact(me, other) != NULL) {
+			if (Primitive::getContact(me, other) != nullptr) {
 				if (!shareCommonGrid(me, other)) {
 					contactManager->onReleasePair(me, other);
 				}
@@ -177,7 +177,7 @@ SpatialNode* SpatialHash::newNode()
 {
 	nodesOut++;
 
-	if (extraNodes != NULL) {
+	if (extraNodes != nullptr) {
 		SpatialNode* node = extraNodes;
 
 		extraNodes = node->nextHashLink;
@@ -199,9 +199,9 @@ void SpatialHash::insertNodeToPrimitive(SpatialNode* node, Primitive* p, const V
 	p->spatialNodes = node;
 
 	node->nextPrimitiveLink = first;
-	node->prevPrimitiveLink = NULL;
+	node->prevPrimitiveLink = nullptr;
 
-	if (first != NULL) {
+	if (first != nullptr) {
 		first->prevPrimitiveLink = node;
 	}
 }
@@ -221,13 +221,13 @@ void SpatialHash::addNode(Primitive* p, const Vector3int32& grid)
 
 	int numNodes = 1;
 
-	while (other != NULL) {
+	while (other != nullptr) {
 		Primitive* otherPrimitive = other->primitive;
 
 		numNodes++;
 
 		if (otherPrimitive != p && other->gridId == grid) {
-			if (Primitive::getContact(p, otherPrimitive) == NULL) {
+			if (Primitive::getContact(p, otherPrimitive) == nullptr) {
 				contactManager->onNewPair(p, otherPrimitive);
 			}
 		}
@@ -316,7 +316,7 @@ void SpatialHash::primitiveExtentsChanged(Primitive* p)
 
 void SpatialHash::onPrimitiveRemoved(Primitive* p)
 {
-	while (p->spatialNodes != NULL) {
+	while (p->spatialNodes != nullptr) {
 		destroyNode(p->spatialNodes);
 	}
 }
@@ -347,7 +347,7 @@ void SpatialHash::getPrimitivesInGrid(const Vector3int32& grid, G3D::Array<Primi
 
 	SpatialNode* node = nodes[hash];
 
-	while (node != NULL) {
+	while (node != nullptr) {
 		if (node->gridId == grid) {
 			found.append(node->primitive);
 		}
@@ -389,8 +389,8 @@ void SpatialHash::getPrimitivesTouchingExtents(
 SpatialHash::~SpatialHash()
 {
 	for (unsigned int i = 0; i < numBuckets(); i++) {
-		if (nodes[i] != NULL) {
-			while (nodes[i] != NULL) {
+		if (nodes[i] != nullptr) {
+			while (nodes[i] != nullptr) {
 				SpatialNode* temp = nodes[i];
 
 				nodes[i] = nodes[i]->nextHashLink;
@@ -402,7 +402,7 @@ SpatialHash::~SpatialHash()
 		}
 	}
 
-	while (extraNodes != NULL) {
+	while (extraNodes != nullptr) {
 		SpatialNode* temp = extraNodes;
 
 		extraNodes = temp->nextHashLink;
@@ -412,9 +412,9 @@ SpatialHash::~SpatialHash()
 }
 
 SpatialHash::SpatialHash(World* world, ContactManager* contactManager)
-	: world(world), contactManager(contactManager), extraNodes(NULL), nodesOut(0), maxBucket(0)
+	: world(world), contactManager(contactManager), extraNodes(nullptr), nodesOut(0), maxBucket(0)
 {
-	std::vector<SpatialNode*> temp(numBuckets(), NULL);
+	std::vector<SpatialNode*> temp(numBuckets(), nullptr);
 
 	nodes.swap(temp);
 }
@@ -423,7 +423,7 @@ unsigned int FUN_0061c870(SpatialNode* node)
 {
 	std::set<Vector3int32> grids;
 
-	for (; node != NULL; node = node->nextHashLink) {
+	for (; node != nullptr; node = node->nextHashLink) {
 		grids.insert(node->gridId);
 	}
 

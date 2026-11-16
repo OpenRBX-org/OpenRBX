@@ -6,8 +6,8 @@
 #include <G3D/g3dmath.h>
 #include <OgreDataStream.h>
 #include <OgreTextureManager.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 
 namespace Ogre {
 

@@ -25,7 +25,7 @@ public:
 	virtual void render3dAdorn(Adorn* adorn) {}
 	virtual void render3dSelect(Adorn* adorn, SelectState selectState) {}
 
-	IRenderable() : index2d(-1), index3d(-1), bucket(NULL) {}
+	IRenderable() : index2d(-1), index3d(-1), bucket(nullptr) {}
 
 	~IRenderable();
 

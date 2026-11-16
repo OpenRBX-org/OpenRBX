@@ -20,8 +20,7 @@ class Unknown00671c70;
 class VisualEngine;
 } // namespace Ogre
 
-namespace RBX {
-namespace RenderNew {
+namespace RBX::RenderNew {
 
 class Chunk;
 class RenderScene;
@@ -29,8 +28,8 @@ class RenderScene;
 class Mesh : public G3D::ReferenceCountedObject
 {
 public:
-	typedef unsigned int IndexType;
-	typedef G3D::Array<int> VertexList;
+	using IndexType = unsigned int;
+	using VertexList = G3D::Array<int>;
 
 	class Level : public G3D::ReferenceCountedObject
 	{
@@ -44,18 +43,18 @@ public:
 		Level();
 
 		Level(G3D::RenderDevice::Primitive primitive)
-			: primitive(primitive), m_unk0x1c(true), m_unk0x20(-1), m_unk0x24(NULL)
+			: primitive(primitive), m_unk0x1c(true), m_unk0x20(-1), m_unk0x24(nullptr)
 		{
 		}
 
-		virtual ~Level();
+		~Level() override;
 
 		void FUN_005322f0();
 		void makeHWSubMesh(Ogre::VisualEngine* engine, Ogre::AxisAlignedBox& box);
 		void FUN_00533160(Ogre::VisualEngine* engine, Ogre::AxisAlignedBox& box);
 	};
 
-	typedef G3D::ReferenceCountedPointer<Level> LevelRef;
+	using LevelRef = G3D::ReferenceCountedPointer<Level>;
 
 	G3D::Vector3& getVertex(int index)
 	{
@@ -124,13 +123,13 @@ public:
 	void FUN_005324e0(Ogre::VisualEngine* engine);
 
 	static G3D::ReferenceCountedPointer<Mesh> aggregate(
-		const std::vector<G3D::ReferenceCountedPointer<Chunk> >& chunkArray,
+		const std::vector<G3D::ReferenceCountedPointer<Chunk>>& chunkArray,
 		G3D::CoordinateFrame& outCFrame,
 		float& outBoundingRadius
 	);
 	static unsigned int findVertex(const G3D::Vector3&, const G3D::Vector3&, const G3D::Vector2&);
 
-	virtual ~Mesh();
+	~Mesh() override;
 
 	static void freeVertex(unsigned int index);
 
@@ -151,7 +150,6 @@ public:
 	static void flushVAR();
 };
 
-} // namespace RenderNew
-} // namespace RBX
+} // namespace RBX::RenderNew
 
 #endif // RENDERLIBNEW_MESH_H

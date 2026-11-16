@@ -7,8 +7,7 @@
 #include <string>
 #include <vector>
 
-namespace RBX {
-namespace LDraw2Lua {
+namespace RBX::LDraw2Lua {
 
 class LDrawCommand;
 
@@ -26,8 +25,7 @@ public:
 	std::vector<LuaObjectWriter*> m_unk0x20;
 };
 
-} // namespace LDraw2Lua
-} // namespace RBX
+} // namespace RBX::LDraw2Lua
 
 int FUN_004742e0(const std::string& p_unk0x04, const std::string& p_unk0x08);
 

@@ -173,7 +173,7 @@ RBX::Reflection::EnumDesc<CRenderSettings::ShadowMode>::EnumDesc()
 CRenderSettings::CRenderSettings()
 	: m_unk0xf8(c_graphicsModeUnk0x1), m_unk0xfc(c_bevelModeUnk0x0), m_unk0x100(c_antialiasingModeUnk0x2),
 	  m_unk0x104(c_shadowModeUnk0x0), m_unk0x108(c_frameRateManagerModeUnk0x0), m_unk0x10c(g_unk0x008094f8),
-	  m_unk0x110(g_unk0x008094fc), m_unk0x114(g_unk0x00809500), m_unk0x118(g_unk0x00809504), m_unk0x11c(1),
+	  m_unk0x110(g_unk0x008094fc), m_unk0x114(g_unk0x00809500), m_unk0x118(g_unk0x00809504), m_unk0x11c(true),
 	  m_unk0x13c(defaultFullscreenSize()), m_unk0x140(g_unk0x0091a2ec)
 {
 	setName("Rendering");
@@ -320,5 +320,5 @@ template class RBX::FactoryProduct<CRenderSettings, RBX::GlobalSettings::Item, s
 template class RBX::Reflection::Described<
 	CRenderSettings,
 	sRenderSettings,
-	RBX::FactoryProduct<CRenderSettings, RBX::GlobalSettings::Item, sRenderSettings> >;
+	RBX::FactoryProduct<CRenderSettings, RBX::GlobalSettings::Item, sRenderSettings>>;
 template class RBX::DescribedCreatable<CRenderSettings, RBX::GlobalSettings::Item, sRenderSettings>;

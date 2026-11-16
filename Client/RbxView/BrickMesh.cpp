@@ -240,8 +240,7 @@ static void appendTriangles(RBX::Render::Mesh::Level& level, int a, int b, int c
 	);
 }
 
-namespace RBX {
-namespace View {
+namespace RBX::View {
 
 BrickMesh::BrickMesh(const G3D::Vector3& size, RenderSurfaceTypes surfaceTypes, BrickColor color)
 {
@@ -342,5 +341,4 @@ G3D::ReferenceCountedPointer<Render::Mesh> BrickMesh::create(
 	return result;
 }
 
-} // namespace View
-} // namespace RBX
+} // namespace RBX::View

@@ -11,14 +11,14 @@ extern const char sSeated[];
 class Seated : public Named<Humanoid::State, sSeated>
 {
 private:
-	virtual State* onStep(const float stepDt, Controller& controller);
+	State* onStep(const float stepDt, Controller& controller) override;
 
-	virtual void onComputeForce(const float dt) {}
+	void onComputeForce(const float dt) override {}
 
 public:
 	Seated(Humanoid* humanoid);
 
-	virtual ~Seated();
+	~Seated() override;
 };
 
 } // namespace RBX

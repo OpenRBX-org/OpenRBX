@@ -16,7 +16,7 @@ const char* Bridge<std::shared_ptr<ThreadRef::Node>, 1>::className = "shared_ptr
 
 void ThreadRef::addRef()
 {
-	if (L != NULL) {
+	if (L != nullptr) {
 		lua_pushthread(L);
 
 		threadId = luaL_ref(L, LUA_REGISTRYINDEX);
@@ -25,40 +25,40 @@ void ThreadRef::addRef()
 
 void ThreadRef::addToNode()
 {
-	if (node != NULL) {
+	if (node != nullptr) {
 		ThreadRef* first = node->first;
 
-		if (first != NULL) {
+		if (first != nullptr) {
 			next = first;
 			first->previous = this;
 		}
 		else {
-			next = NULL;
+			next = nullptr;
 		}
 
-		previous = NULL;
+		previous = nullptr;
 		node->first = this;
 	}
 }
 
 void ThreadRef::removeRef()
 {
-	if (L != NULL) {
+	if (L != nullptr) {
 		luaL_unref(L, LUA_REGISTRYINDEX, threadId);
 
 		threadId = 0;
-		L = NULL;
+		L = nullptr;
 	}
 }
 
 void ThreadRef::removeFromNode()
 {
-	if (node != NULL) {
-		if (next != NULL) {
+	if (node != nullptr) {
+		if (next != nullptr) {
 			next->previous = previous;
 		}
 
-		if (previous != NULL) {
+		if (previous != nullptr) {
 			previous->next = next;
 		}
 
@@ -66,9 +66,9 @@ void ThreadRef::removeFromNode()
 			node->first = next;
 		}
 
-		next = NULL;
-		previous = NULL;
-		node = NULL;
+		next = nullptr;
+		previous = nullptr;
+		node = nullptr;
 	}
 }
 
@@ -95,7 +95,7 @@ void lua_pushfunction(lua_State* L, const FunctionRef& function)
 
 void FunctionRef::removeRef()
 {
-	if (functionId != 0 && thread() != NULL) {
+	if (functionId != 0 && thread() != nullptr) {
 		luaL_unref(thread(), LUA_REGISTRYINDEX, functionId);
 
 		functionId = 0;
@@ -132,9 +132,10 @@ const Type& Type::singleton<Lua::FunctionRef>()
 
 namespace Lua {
 
-ThreadRef::ThreadRef(lua_State* L) : sync(syncSingleton), node(NULL), previous(NULL), next(NULL), L(L), threadId(0)
+ThreadRef::ThreadRef(lua_State* L)
+	: sync(syncSingleton), node(nullptr), previous(nullptr), next(nullptr), L(L), threadId(0)
 {
-	std::lock_guard<std::recursive_mutex> lock(*sync);
+	std::scoped_lock lock(*sync);
 
 	node = Node::get(L).get();
 
@@ -145,7 +146,7 @@ ThreadRef::ThreadRef(lua_State* L) : sync(syncSingleton), node(NULL), previous(N
 
 ThreadRef::ThreadRef(const ThreadRef& other) : sync(syncSingleton), node(other.node), L(other.L)
 {
-	std::lock_guard<std::recursive_mutex> lock(*sync);
+	std::scoped_lock lock(*sync);
 
 	addRef();
 
@@ -154,7 +155,7 @@ ThreadRef::ThreadRef(const ThreadRef& other) : sync(syncSingleton), node(other.n
 
 void ThreadRef::reset()
 {
-	std::lock_guard<std::recursive_mutex> lock(*sync);
+	std::scoped_lock lock(*sync);
 
 	removeFromNode();
 
@@ -164,7 +165,7 @@ void ThreadRef::reset()
 ThreadRef& ThreadRef::operator=(const ThreadRef& other)
 {
 	if (L != other.L) {
-		std::lock_guard<std::recursive_mutex> lock(*sync);
+		std::scoped_lock lock(*sync);
 
 		removeRef();
 
@@ -174,7 +175,7 @@ ThreadRef& ThreadRef::operator=(const ThreadRef& other)
 	}
 
 	if (node != other.node) {
-		std::lock_guard<std::recursive_mutex> lock(*sync);
+		std::scoped_lock lock(*sync);
 
 		removeFromNode();
 
@@ -188,18 +189,18 @@ ThreadRef& ThreadRef::operator=(const ThreadRef& other)
 
 void ThreadRef::Node::eraseAllRefs()
 {
-	std::lock_guard<std::recursive_mutex> lock(*sync);
+	std::scoped_lock lock(*sync);
 
 	ThreadRef* ref = first;
 
-	while (ref != NULL) {
+	while (ref != nullptr) {
 		ref->removeRef();
-		ref->node = NULL;
+		ref->node = nullptr;
 
 		ref = ref->next;
 	}
 
-	first = NULL;
+	first = nullptr;
 }
 
 ThreadRef::Node::~Node()
@@ -209,13 +210,13 @@ ThreadRef::Node::~Node()
 
 FunctionRef& FunctionRef::operator=(const FunctionRef& other)
 {
-	if (thread() != NULL) {
+	if (thread() != nullptr) {
 		luaL_unref(thread(), LUA_REGISTRYINDEX, functionId);
 	}
 
 	ThreadRef::operator=(other);
 
-	if (thread() == NULL) {
+	if (thread() == nullptr) {
 		functionId = 0;
 	}
 	else {
@@ -241,14 +242,14 @@ FunctionRef::FunctionRef(lua_State* L, int index) : ThreadRef(L)
 
 FunctionRef::~FunctionRef()
 {
-	if (functionId != 0 && thread() != NULL) {
+	if (functionId != 0 && thread() != nullptr) {
 		luaL_unref(thread(), LUA_REGISTRYINDEX, functionId);
 	}
 }
 
 FunctionRef::FunctionRef(const FunctionRef& other) : ThreadRef(other)
 {
-	if (thread() == NULL) {
+	if (thread() == nullptr) {
 		functionId = 0;
 	}
 	else {

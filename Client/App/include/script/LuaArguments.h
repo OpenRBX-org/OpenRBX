@@ -12,8 +12,7 @@
 #include <string>
 #include <vector>
 
-namespace RBX {
-namespace Lua {
+namespace RBX::Lua {
 
 class LuaArguments : public Reflection::FunctionDescriptor::Arguments
 {
@@ -23,7 +22,7 @@ class LuaArguments : public Reflection::FunctionDescriptor::Arguments
 public:
 	LuaArguments(lua_State* L, int offset) : offset(offset), L(L) {}
 
-	virtual unsigned int size() const { return lua_gettop(L) - 1; }
+	unsigned int size() const override { return lua_gettop(L) - 1; }
 
 	static bool get(lua_State* L, int luaIndex, Reflection::Value& value)
 	{
@@ -96,7 +95,7 @@ public:
 		return true;
 	}
 
-	virtual void get(int index, Reflection::Value& value) const { get(L, offset + index, value); }
+	void get(int index, Reflection::Value& value) const override { get(L, offset + index, value); }
 
 	template <class Iterator>
 	static int pushTable(Iterator _First, Iterator _Last, lua_State* const L)
@@ -175,26 +174,26 @@ public:
 			return 1;
 		}
 
-		if (value.isType<std::shared_ptr<Instance> >()) {
+		if (value.isType<std::shared_ptr<Instance>>()) {
 			SharedPtrBridge<Reflection::DescribedBase>::push(L, value.cast<const std::shared_ptr<Instance>&>());
 			return 1;
 		}
 
-		if (value.isType<std::shared_ptr<Reflection::DescribedBase> >()) {
+		if (value.isType<std::shared_ptr<Reflection::DescribedBase>>()) {
 			SharedPtrBridge<Reflection::DescribedBase>::push(
 				L, value.cast<const std::shared_ptr<Reflection::DescribedBase>&>()
 			);
 			return 1;
 		}
 
-		if (value.isType<std::vector<Reflection::Value> >()) {
+		if (value.isType<std::vector<Reflection::Value>>()) {
 			const std::vector<Reflection::Value>& values = value.cast<const std::vector<Reflection::Value>&>();
 			return pushTable(values.begin(), values.end(), L);
 		}
 
-		if (value.isType<std::shared_ptr<const std::vector<std::shared_ptr<Instance> > > >()) {
-			std::shared_ptr<const std::vector<std::shared_ptr<Instance> > > instances =
-				value.cast<std::shared_ptr<const std::vector<std::shared_ptr<Instance> > > >();
+		if (value.isType<std::shared_ptr<const std::vector<std::shared_ptr<Instance>>>>()) {
+			std::shared_ptr<const std::vector<std::shared_ptr<Instance>>> instances =
+				value.cast<std::shared_ptr<const std::vector<std::shared_ptr<Instance>>>>();
 			if (instances) {
 				return pushTable(instances->begin(), instances->end(), L);
 			}
@@ -209,7 +208,6 @@ public:
 	int pushReturnValue() const { return push(returnValue); }
 };
 
-} // namespace Lua
-} // namespace RBX
+} // namespace RBX::Lua
 
 #endif // SCRIPT_LUAARGUMENTS_H

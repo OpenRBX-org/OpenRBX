@@ -32,7 +32,7 @@ struct RaiseRange
 			}
 
 			range = range->previous;
-		} while (range != NULL);
+		} while (range != nullptr);
 	}
 };
 
@@ -44,7 +44,7 @@ protected:
 
 	virtual void onEvent(const Source* source, Event event) = 0;
 	Listener& operator=(const Listener&);
-	virtual ~Listener() {}
+	virtual ~Listener() = default;
 };
 
 template <class Source, class Event>
@@ -55,10 +55,10 @@ private:
 	mutable RaiseRange* raiseRange;
 
 protected:
-	Notifier() : raiseRange(NULL) {}
+	Notifier() : raiseRange(nullptr) {}
 	Notifier(const Notifier&);
 	Notifier& operator=(const Notifier&);
-	virtual ~Notifier() {}
+	virtual ~Notifier() = default;
 
 public:
 	void addListener(Listener<Source, Event>* listener) const;
@@ -68,7 +68,7 @@ protected:
 	bool hasListeners() const { return !listeners.empty(); }
 
 	void raise(Event event, Listener<Source, Event>* listener) const;
-	void raise(Event event) const throw();
+	void raise(Event event) const noexcept;
 	void raise() const;
 
 	virtual void onAddListener(Listener<Source, Event>* listener) const {}
@@ -93,7 +93,7 @@ void Notifier<Source, Event>::removeListener(Listener<Source, Event>* listener) 
 	if (found != listeners.end()) {
 		onRemoveListener(listener);
 
-		if (raiseRange != NULL) {
+		if (raiseRange != nullptr) {
 			raiseRange->removeIndex(found - listeners.begin());
 		}
 
@@ -129,7 +129,7 @@ void Notifier<Source, Event>::raise(Event event, Listener<Source, Event>* listen
 }
 
 template <class Source, class Event>
-void Notifier<Source, Event>::raise(Event event) const throw()
+void Notifier<Source, Event>::raise(Event event) const noexcept
 {
 	RaiseRange range;
 

@@ -99,12 +99,12 @@ public:
 	);
 
 protected:
-	virtual void buildTop(Purpose purpose);
-	virtual void buildBottom(Purpose purpose);
-	virtual void buildLeft(Purpose purpose);
-	virtual void buildRight(Purpose purpose);
-	virtual void buildFront(Purpose purpose);
-	virtual void buildBack(Purpose purpose);
+	void buildTop(Purpose purpose) override;
+	void buildBottom(Purpose purpose) override;
+	void buildLeft(Purpose purpose) override;
+	void buildRight(Purpose purpose) override;
+	void buildFront(Purpose purpose) override;
+	void buildBack(Purpose purpose) override;
 };
 
 PBBBuilder::PBBBuilder(
@@ -163,8 +163,7 @@ void PBBBuilder::buildBack(Purpose purpose)
 	buildFace<RBX::NORM_Z>(Side(), 1, 1, purpose);
 }
 
-namespace RBX {
-namespace View {
+namespace RBX::View {
 
 PBBMesh::PBBMesh(const G3D::Vector3& size, NormalId decalFace)
 {
@@ -215,5 +214,4 @@ template PBBMesh* MeshFactory<PBBMesh, 4>::createDecal(const G3D::Vector3&, Norm
 
 template PBBMesh* MeshFactory<PBBMesh, 4>::createTexture(const G3D::Vector3&, NormalId, const G3D::Vector2&);
 
-} // namespace View
-} // namespace RBX
+} // namespace RBX::View

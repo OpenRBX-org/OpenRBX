@@ -126,8 +126,8 @@ CoordinateFrame Feature::computeLocalCoordinateFrame() const
 
 void VelocityMotor::setPart(int i, Feature* feature)
 {
-	PartInstance* part = feature ? dynamic_cast<PartInstance*>(feature->getParent()) : NULL;
-	Primitive* primitive = part ? part->getPrimitive() : NULL;
+	PartInstance* part = feature ? dynamic_cast<PartInstance*>(feature->getParent()) : nullptr;
+	Primitive* primitive = part ? part->getPrimitive() : nullptr;
 	CoordinateFrame c = feature ? feature->computeLocalCoordinateFrame() : CoordinateFrame();
 
 	if (motorJoint()->getPrimitive(i) != primitive) {
@@ -150,8 +150,8 @@ void VelocityMotor::onAncestorChanged(const AncestorChanged& event)
 	if (oldWorld != newWorld) {
 		if (oldWorld) {
 			oldWorld->removeJoint(joint);
-			setPart(0, NULL);
-			setPart(1, NULL);
+			setPart(0, nullptr);
+			setPart(1, nullptr);
 		}
 
 		if (newWorld) {
@@ -165,9 +165,7 @@ void VelocityMotor::onEvent_HoleAncestorChanged()
 	setPart(1, hole.get());
 }
 
-Feature::~Feature()
-{
-}
+Feature::~Feature() = default;
 
 bool Feature::getRenderCoord(CoordinateFrame& c) const
 {
@@ -205,9 +203,7 @@ void MotorFeature::render3dAdorn(Adorn* adorn)
 	}
 }
 
-VelocityMotor::~VelocityMotor()
-{
-}
+VelocityMotor::~VelocityMotor() = default;
 
 namespace Reflection {
 
@@ -353,24 +349,24 @@ template void RBX::Name::callDoDeclare<RBX::sFeature>();
 
 template class RBX::FactoryProduct<RBX::Hole, RBX::Feature, RBX::sHole>;
 template class RBX::Reflection::
-	Described<RBX::Hole, RBX::sHole, RBX::FactoryProduct<RBX::Hole, RBX::Feature, RBX::sHole> >;
+	Described<RBX::Hole, RBX::sHole, RBX::FactoryProduct<RBX::Hole, RBX::Feature, RBX::sHole>>;
 template class RBX::DescribedCreatable<RBX::Hole, RBX::Feature, RBX::sHole>;
 
 template class RBX::FactoryProduct<RBX::MotorFeature, RBX::Feature, RBX::sMotorFeature>;
 template class RBX::Reflection::Described<
 	RBX::MotorFeature,
 	RBX::sMotorFeature,
-	RBX::FactoryProduct<RBX::MotorFeature, RBX::Feature, RBX::sMotorFeature> >;
+	RBX::FactoryProduct<RBX::MotorFeature, RBX::Feature, RBX::sMotorFeature>>;
 template class RBX::DescribedCreatable<RBX::MotorFeature, RBX::Feature, RBX::sMotorFeature>;
 
 template class RBX::NonFactoryProduct<RBX::Instance, RBX::sFeature>;
 template class RBX::Reflection::
-	Described<RBX::Feature, RBX::sFeature, RBX::NonFactoryProduct<RBX::Instance, RBX::sFeature> >;
+	Described<RBX::Feature, RBX::sFeature, RBX::NonFactoryProduct<RBX::Instance, RBX::sFeature>>;
 template class RBX::DescribedNonCreatable<RBX::Feature, RBX::Instance, RBX::sFeature>;
 
 template class RBX::FactoryProduct<RBX::VelocityMotor, RBX::JointInstance, RBX::sVelocityMotor>;
 template class RBX::Reflection::Described<
 	RBX::VelocityMotor,
 	RBX::sVelocityMotor,
-	RBX::FactoryProduct<RBX::VelocityMotor, RBX::JointInstance, RBX::sVelocityMotor> >;
+	RBX::FactoryProduct<RBX::VelocityMotor, RBX::JointInstance, RBX::sVelocityMotor>>;
 template class RBX::DescribedCreatable<RBX::VelocityMotor, RBX::JointInstance, RBX::sVelocityMotor>;

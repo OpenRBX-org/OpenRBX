@@ -1,7 +1,6 @@
 #include "QuadVolume.h"
 
-namespace RBX {
-namespace ViewNew {
+namespace RBX::ViewNew {
 
 void LevelBuilder::buildFace(NormalId normalId, Purpose purpose)
 {
@@ -95,5 +94,4 @@ void LevelBuilder::appendQuadFromIndexArray(int a, int b, int c, int d)
 	appendQuadFromVertexIndices(level->indexArray[a], level->indexArray[b], level->indexArray[c], level->indexArray[d]);
 }
 
-} // namespace ViewNew
-} // namespace RBX
+} // namespace RBX::ViewNew

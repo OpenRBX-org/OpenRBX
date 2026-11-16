@@ -21,7 +21,7 @@ void Seat::unseatCharacter()
 	sleepTime = G3D::System::getLocalTime();
 
 	if (weld) {
-		weld->setParent(NULL);
+		weld->setParent(nullptr);
 		weld.reset();
 	}
 }
@@ -74,10 +74,10 @@ void Seat::onEvent_seatTouched(std::shared_ptr<Instance> other)
 
 	Instance* parent = other->getParent();
 
-	if (parent != NULL) {
+	if (parent != nullptr) {
 		Humanoid* humanoid = parent->findFirstChildOfType<Humanoid>();
 
-		if (humanoid != NULL && humanoid->getTorso() != NULL && humanoid->canSit()) {
+		if (humanoid != nullptr && humanoid->getTorso() != nullptr && humanoid->canSit()) {
 			humanoid->setSit(true);
 			seatCharacter(humanoid);
 			humanoidJumped =
@@ -90,13 +90,13 @@ void Seat::onServiceProvider(const ServiceProvider* oldProvider, const ServicePr
 {
 	Instance::onServiceProvider(oldProvider, newProvider);
 
-	if (oldProvider == NULL) {
+	if (oldProvider == nullptr) {
 		seatTouched = PartInstance::event_Touched.connect(
 			this, [this](const std::shared_ptr<Instance>& other) { onEvent_seatTouched(other); }, 10
 		);
 	}
 
-	if (newProvider == NULL) {
+	if (newProvider == nullptr) {
 		seatTouched.disconnect();
 	}
 }
@@ -110,5 +110,5 @@ Seat::Seat() : sleepTime(0.0)
 
 template class RBX::FactoryProduct<RBX::Seat, RBX::PartInstance, RBX::sSeat>;
 template class RBX::Reflection::
-	Described<RBX::Seat, RBX::sSeat, RBX::FactoryProduct<RBX::Seat, RBX::PartInstance, RBX::sSeat> >;
+	Described<RBX::Seat, RBX::sSeat, RBX::FactoryProduct<RBX::Seat, RBX::PartInstance, RBX::sSeat>>;
 template class RBX::DescribedCreatable<RBX::Seat, RBX::PartInstance, RBX::sSeat>;

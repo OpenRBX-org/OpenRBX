@@ -9,8 +9,7 @@
 
 #include <vector>
 
-namespace RBX {
-namespace Reflection {
+namespace RBX::Reflection {
 
 class ClassDescriptor : public Descriptor,
 						public MemberDescriptorContainer<PropertyDescriptor>,
@@ -132,7 +131,6 @@ protected:
 	const ClassDescriptor* descriptor;
 };
 
-} // namespace Reflection
-} // namespace RBX
+} // namespace RBX::Reflection
 
 #endif // REFLECTION_OBJECT_H

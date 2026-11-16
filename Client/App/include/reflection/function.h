@@ -4,8 +4,7 @@
 #include "reflection/member.h"
 #include "reflection/type.h"
 
-namespace RBX {
-namespace Reflection {
+namespace RBX::Reflection {
 
 class DescribedBase;
 class Function;
@@ -22,8 +21,8 @@ public:
 		Value returnValue;
 	};
 
-	typedef Function ConstMember;
-	typedef Function Member;
+	using ConstMember = Function;
+	using Member = Function;
 
 	enum Security
 	{
@@ -46,7 +45,7 @@ protected:
 class Function
 {
 public:
-	Function(const Function& other) : descriptor(other.descriptor), instance(other.instance) {}
+	Function(const Function& other) = default;
 	Function(const FunctionDescriptor& descriptor, const DescribedBase* instance)
 		: descriptor(&descriptor), instance(instance)
 	{
@@ -63,7 +62,6 @@ protected:
 	const DescribedBase* instance;
 };
 
-} // namespace Reflection
-} // namespace RBX
+} // namespace RBX::Reflection
 
 #endif // REFLECTION_FUNCTION_H

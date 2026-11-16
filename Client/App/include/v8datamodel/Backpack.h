@@ -11,7 +11,7 @@ extern const char sBackpack[];
 class Backpack : public DescribedCreatable<Backpack, Hopper, sBackpack>, public IScriptOwner
 {
 private:
-	virtual IScriptOwner* scriptShouldRun(Script* script);
+	IScriptOwner* scriptShouldRun(Script* script) override;
 
 public:
 	Backpack();

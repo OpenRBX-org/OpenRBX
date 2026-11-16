@@ -11,26 +11,26 @@ private:
 	Matrix3 getMomentSolid(float mass) const;
 	G3D::Matrix3 getMomentHollow(float) const;
 
-	virtual void onSetSize();
+	void onSetSize() override;
 
 public:
-	virtual bool hitTest(const Ray& ray, Vector3& hitPoint, bool& inside);
+	bool hitTest(const Ray& ray, Vector3& hitPoint, bool& inside) override;
 
-	virtual GeometryType getGeometryType() const { return GEOMETRY_BALL; }
+	GeometryType getGeometryType() const override { return GEOMETRY_BALL; }
 
-	virtual float getRadius() const { return realRadius; }
+	float getRadius() const override { return realRadius; }
 
-	virtual Vector3 getCenterToCorner(const Matrix3& rotation) const
+	Vector3 getCenterToCorner(const Matrix3& rotation) const override
 	{
 		return Vector3(realRadius, realRadius, realRadius);
 	}
 
-	virtual Matrix3 getMoment(float mass) const { return getMomentSolid(mass); }
+	Matrix3 getMoment(float mass) const override { return getMomentSolid(mass); }
 
-	virtual float getGridVolume() const;
+	float getGridVolume() const override;
 
 	Ball() : realRadius(0) {}
-	virtual ~Ball() {}
+	~Ball() override = default;
 
 private:
 	float realRadius;

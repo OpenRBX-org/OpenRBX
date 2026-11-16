@@ -14,7 +14,7 @@ public:
 	Freefall(Humanoid* humanoid);
 
 private:
-	virtual State* onStep(const float stepDt, Controller& controller);
+	State* onStep(const float stepDt, Controller& controller) override;
 };
 
 } // namespace RBX

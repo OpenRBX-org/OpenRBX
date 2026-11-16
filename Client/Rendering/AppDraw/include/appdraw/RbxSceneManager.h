@@ -6,11 +6,9 @@
 #include <OgreSceneManager.h>
 #include <OgreSceneManagerEnumerator.h>
 
-namespace RBX {
-namespace ViewNew {
+namespace RBX::ViewNew {
 class View;
-} // namespace ViewNew
-} // namespace RBX
+} // namespace RBX::ViewNew
 
 namespace Ogre {
 
@@ -24,11 +22,11 @@ public:
 
 	public:
 		SceneMgrQueuedRenderableVisitor() : transparentShadowCastersMode(false) {}
-		~SceneMgrQueuedRenderableVisitor() {}
+		~SceneMgrQueuedRenderableVisitor() override = default;
 
-		void visit(const Renderable* r);
-		bool visit(const Pass* p);
-		void visit(const RenderablePass* rp);
+		void visit(const Renderable* r) override;
+		bool visit(const Pass* p) override;
+		void visit(const RenderablePass* rp) override;
 
 		RbxSceneManager* targetSceneMgr;
 		bool transparentShadowCastersMode;
@@ -49,7 +47,8 @@ public:
 
 	public:
 		ShadowCasterSceneQueryListener(SceneManager* sm)
-			: mSceneMgr(sm), mCasterList(NULL), mIsLightInFrustum(false), mLightClipVolumeList(NULL), mCamera(NULL)
+			: mSceneMgr(sm), mCasterList(nullptr), mIsLightInFrustum(false), mLightClipVolumeList(nullptr),
+			  mCamera(nullptr)
 		{
 		}
 
@@ -70,8 +69,8 @@ public:
 			mFarDistSquared = farDistSquared;
 		}
 
-		bool queryResult(MovableObject* object);
-		bool queryResult(SceneQuery::WorldFragment* fragment) { return true; }
+		bool queryResult(MovableObject* object) override;
+		bool queryResult(SceneQuery::WorldFragment* fragment) override { return true; }
 	};
 
 protected:
@@ -110,7 +109,7 @@ protected:
 	void fireShadowTexturesPreCaster(Light* light, Camera* camera);
 	void fireShadowTexturesPreReceiver(Light* light, Frustum* f);
 	void useRenderableViewProjMode(const Renderable* pRend);
-	void resetViewProjMode(void);
+	void resetViewProjMode();
 	const Pass* deriveShadowCasterPass(const Pass* pass);
 	const Pass* deriveShadowReceiverPass(const Pass* pass);
 	void renderShadowVolumeObjects(
@@ -141,247 +140,235 @@ public:
 	const ShadowCasterList& getShadowCasterList() const { return mShadowCasterList; }
 
 	RbxSceneManager(const String& name);
-	~RbxSceneManager();
+	~RbxSceneManager() override;
 
-	const String& getTypeName() const;
+	const String& getTypeName() const override;
 
-	void clearScene();
-	void destroyAllCameras();
+	void clearScene() override;
+	void destroyAllCameras() override;
 
-	virtual void setViewport(Viewport* vp);
-	virtual void renderObjects(
+	void setViewport(Viewport* vp) override;
+	void renderObjects(
 		const QueuedRenderableCollection& objs,
 		QueuedRenderableCollection::OrganisationMode om,
 		bool doLightIteration,
-		const LightList* manualLightList = 0
-	);
-	virtual bool hasCamera(const String& name) const;
-	virtual Light* createLight(const String& name);
-	virtual Light* getLight(const String& name) const;
-	virtual bool hasLight(const String& name) const;
-	virtual void destroyLight(const String& name);
-	virtual void destroyLight(Light* light);
-	virtual void destroyAllLights(void);
-	virtual void _notifyLightsDirty(void);
-	virtual const LightList& _getLightsAffectingFrustum(void) const;
+		const LightList* manualLightList = nullptr
+	) override;
+	bool hasCamera(const String& name) const override;
+	Light* createLight(const String& name) override;
+	Light* getLight(const String& name) const override;
+	bool hasLight(const String& name) const override;
+	void destroyLight(const String& name) override;
+	void destroyLight(Light* light) override;
+	void destroyAllLights() override;
+	void _notifyLightsDirty() override;
+	const LightList& _getLightsAffectingFrustum() const override;
 	virtual Entity* createEntity(const String& entityName, PrefabType ptype);
-	virtual SceneNode* getRootSceneNode(void) const;
-	virtual bool hasSceneNode(const String& name) const;
-	virtual Entity* getEntity(const String& name) const;
-	virtual bool hasEntity(const String& name) const;
-	virtual void destroyEntity(Entity* ent);
-	virtual void destroyEntity(const String& name);
-	virtual void destroyAllEntities(void);
-	virtual ManualObject* createManualObject(const String& name);
-	virtual ManualObject* getManualObject(const String& name) const;
-	virtual bool hasManualObject(const String& name) const;
-	virtual void destroyManualObject(ManualObject* obj);
-	virtual void destroyManualObject(const String& name);
-	virtual void destroyAllManualObjects(void);
-	virtual BillboardChain* createBillboardChain(const String& name);
-	virtual BillboardChain* getBillboardChain(const String& name) const;
-	virtual bool hasBillboardChain(const String& name) const;
-	virtual void destroyBillboardChain(BillboardChain* obj);
-	virtual void destroyBillboardChain(const String& name);
-	virtual void destroyAllBillboardChains(void);
-	virtual RibbonTrail* createRibbonTrail(const String& name);
-	virtual RibbonTrail* getRibbonTrail(const String& name) const;
-	virtual bool hasRibbonTrail(const String& name) const;
-	virtual void destroyRibbonTrail(RibbonTrail* obj);
-	virtual void destroyRibbonTrail(const String& name);
-	virtual void destroyAllRibbonTrails(void);
-	virtual ParticleSystem* getParticleSystem(const String& name) const;
-	virtual bool hasParticleSystem(const String& name) const;
-	virtual void destroyParticleSystem(ParticleSystem* obj);
-	virtual void destroyParticleSystem(const String& name);
-	virtual void destroyAllParticleSystems(void);
-	virtual void _updateSceneGraph(Camera* cam);
-	virtual void _findVisibleObjects(Camera* cam, VisibleObjectsBoundsInfo* visibleBounds, bool onlyShadowCasters);
-	virtual void _renderVisibleObjects(void);
-	virtual bool isSkyPlaneEnabled(void) const { return mSkyPlaneEnabled; }
-	virtual SceneNode* getSkyPlaneNode(void) const { return mSkyPlaneNode; }
-	virtual const SkyPlaneGenParameters& getSkyPlaneGenParameters(void) const { return mSkyPlaneGenParameters; }
-	virtual bool isSkyBoxEnabled(void) const { return mSkyBoxEnabled; }
-	virtual SceneNode* getSkyBoxNode(void) const { return mSkyBoxNode; }
-	virtual const SkyBoxGenParameters& getSkyBoxGenParameters(void) const { return mSkyBoxGenParameters; }
-	virtual bool isSkyDomeEnabled(void) const { return mSkyDomeEnabled; }
-	virtual SceneNode* getSkyDomeNode(void) const { return mSkyDomeNode; }
-	virtual const SkyDomeGenParameters& getSkyDomeGenParameters(void) const { return mSkyDomeGenParameters; }
-	virtual const ColourValue& getFogColour(void) const;
-	virtual Real getFogStart(void) const;
-	virtual Real getFogEnd(void) const;
-	virtual Real getFogDensity(void) const;
-	virtual BillboardSet* getBillboardSet(const String& name) const;
-	virtual bool hasBillboardSet(const String& name) const;
-	virtual void destroyBillboardSet(BillboardSet* set);
-	virtual void destroyBillboardSet(const String& name);
-	virtual void destroyAllBillboardSets(void);
-	virtual void setDisplaySceneNodes(bool display);
-	virtual bool getDisplaySceneNodes(void) const { return mDisplayNodes; }
-	virtual AnimationState* getAnimationState(const String& animName) const;
-	virtual bool hasAnimationState(const String& name) const;
-	virtual void destroyAnimationState(const String& name);
-	virtual void destroyAllAnimationStates(void);
-	virtual RenderQueue* getRenderQueue(void);
-	virtual void addRenderQueueListener(RenderQueueListener* newListener);
-	virtual void addSpecialCaseRenderQueue(uint8 qid);
-	virtual void removeSpecialCaseRenderQueue(uint8 qid);
-	virtual void clearSpecialCaseRenderQueues(void);
-	virtual void setSpecialCaseRenderQueueMode(SpecialCaseRenderQueueMode mode);
-	virtual SpecialCaseRenderQueueMode getSpecialCaseRenderQueueMode(void);
-	virtual void setWorldGeometryRenderQueue(uint8 qid);
-	virtual uint8 getWorldGeometryRenderQueue(void);
-	virtual void showBoundingBoxes(bool bShow);
-	virtual bool getShowBoundingBoxes() const;
-	virtual void _notifyAutotrackingSceneNode(SceneNode* node, bool autoTrack);
-	virtual AxisAlignedBoxSceneQuery* createAABBQuery(const AxisAlignedBox& box, unsigned long mask = 0xFFFFFFFF);
-	virtual SphereSceneQuery* createSphereQuery(const Sphere& sphere, unsigned long mask = 0xFFFFFFFF);
-	virtual PlaneBoundedVolumeListSceneQuery* createPlaneBoundedVolumeQuery(
+	SceneNode* getRootSceneNode() const override;
+	bool hasSceneNode(const String& name) const override;
+	Entity* getEntity(const String& name) const override;
+	bool hasEntity(const String& name) const override;
+	void destroyEntity(Entity* ent) override;
+	void destroyEntity(const String& name) override;
+	void destroyAllEntities() override;
+	ManualObject* createManualObject(const String& name) override;
+	ManualObject* getManualObject(const String& name) const override;
+	bool hasManualObject(const String& name) const override;
+	void destroyManualObject(ManualObject* obj) override;
+	void destroyManualObject(const String& name) override;
+	void destroyAllManualObjects() override;
+	BillboardChain* createBillboardChain(const String& name) override;
+	BillboardChain* getBillboardChain(const String& name) const override;
+	bool hasBillboardChain(const String& name) const override;
+	void destroyBillboardChain(BillboardChain* obj) override;
+	void destroyBillboardChain(const String& name) override;
+	void destroyAllBillboardChains() override;
+	RibbonTrail* createRibbonTrail(const String& name) override;
+	RibbonTrail* getRibbonTrail(const String& name) const override;
+	bool hasRibbonTrail(const String& name) const override;
+	void destroyRibbonTrail(RibbonTrail* obj) override;
+	void destroyRibbonTrail(const String& name) override;
+	void destroyAllRibbonTrails() override;
+	ParticleSystem* getParticleSystem(const String& name) const override;
+	bool hasParticleSystem(const String& name) const override;
+	void destroyParticleSystem(ParticleSystem* obj) override;
+	void destroyParticleSystem(const String& name) override;
+	void destroyAllParticleSystems() override;
+	void _updateSceneGraph(Camera* cam) override;
+	void _findVisibleObjects(Camera* cam, VisibleObjectsBoundsInfo* visibleBounds, bool onlyShadowCasters) override;
+	void _renderVisibleObjects() override;
+	bool isSkyPlaneEnabled() const override { return mSkyPlaneEnabled; }
+	SceneNode* getSkyPlaneNode() const override { return mSkyPlaneNode; }
+	const SkyPlaneGenParameters& getSkyPlaneGenParameters() const override { return mSkyPlaneGenParameters; }
+	bool isSkyBoxEnabled() const override { return mSkyBoxEnabled; }
+	SceneNode* getSkyBoxNode() const override { return mSkyBoxNode; }
+	const SkyBoxGenParameters& getSkyBoxGenParameters() const override { return mSkyBoxGenParameters; }
+	bool isSkyDomeEnabled() const override { return mSkyDomeEnabled; }
+	SceneNode* getSkyDomeNode() const override { return mSkyDomeNode; }
+	const SkyDomeGenParameters& getSkyDomeGenParameters() const override { return mSkyDomeGenParameters; }
+	const ColourValue& getFogColour() const override;
+	Real getFogStart() const override;
+	Real getFogEnd() const override;
+	Real getFogDensity() const override;
+	BillboardSet* getBillboardSet(const String& name) const override;
+	bool hasBillboardSet(const String& name) const override;
+	void destroyBillboardSet(BillboardSet* set) override;
+	void destroyBillboardSet(const String& name) override;
+	void destroyAllBillboardSets() override;
+	void setDisplaySceneNodes(bool display) override;
+	bool getDisplaySceneNodes() const override { return mDisplayNodes; }
+	AnimationState* getAnimationState(const String& animName) const override;
+	bool hasAnimationState(const String& name) const override;
+	void destroyAnimationState(const String& name) override;
+	void destroyAllAnimationStates() override;
+	RenderQueue* getRenderQueue() override;
+	void addRenderQueueListener(RenderQueueListener* newListener) override;
+	void addSpecialCaseRenderQueue(uint8 qid) override;
+	void removeSpecialCaseRenderQueue(uint8 qid) override;
+	void clearSpecialCaseRenderQueues() override;
+	void setSpecialCaseRenderQueueMode(SpecialCaseRenderQueueMode mode) override;
+	SpecialCaseRenderQueueMode getSpecialCaseRenderQueueMode() override;
+	void setWorldGeometryRenderQueue(uint8 qid) override;
+	uint8 getWorldGeometryRenderQueue() override;
+	void showBoundingBoxes(bool bShow) override;
+	bool getShowBoundingBoxes() const override;
+	void _notifyAutotrackingSceneNode(SceneNode* node, bool autoTrack) override;
+	AxisAlignedBoxSceneQuery* createAABBQuery(const AxisAlignedBox& box, unsigned long mask = 0xFFFFFFFF) override;
+	SphereSceneQuery* createSphereQuery(const Sphere& sphere, unsigned long mask = 0xFFFFFFFF) override;
+	PlaneBoundedVolumeListSceneQuery* createPlaneBoundedVolumeQuery(
 		const PlaneBoundedVolumeList& volumes, unsigned long mask = 0xFFFFFFFF
-	);
-	virtual RaySceneQuery* createRayQuery(const Ray& ray, unsigned long mask = 0xFFFFFFFF);
-	virtual IntersectionSceneQuery* createIntersectionQuery(unsigned long mask = 0xFFFFFFFF);
-	virtual void destroyQuery(SceneQuery* query);
-	virtual ShadowTechnique getShadowTechnique(void) const { return mShadowTechnique; }
-	virtual void setShowDebugShadows(bool debug) { mDebugShadows = debug; }
-	virtual bool getShowDebugShadows(void) const { return mDebugShadows; }
-	virtual const ColourValue& getShadowColour(void) const;
-	virtual void setShadowDirectionalLightExtrusionDistance(Real dist);
-	virtual Real getShadowDirectionalLightExtrusionDistance(void) const;
-	virtual void setShadowFarDistance(Real distance);
-	virtual Real getShadowFarDistance(void) const { return mShadowFarDist; }
-	virtual size_t getShadowIndexBufferSize(void) const { return mShadowIndexBufferSize; }
-	virtual void setShadowTextureConfig(
+	) override;
+	RaySceneQuery* createRayQuery(const Ray& ray, unsigned long mask = 0xFFFFFFFF) override;
+	IntersectionSceneQuery* createIntersectionQuery(unsigned long mask = 0xFFFFFFFF) override;
+	void destroyQuery(SceneQuery* query) override;
+	ShadowTechnique getShadowTechnique() const override { return mShadowTechnique; }
+	void setShowDebugShadows(bool debug) override { mDebugShadows = debug; }
+	bool getShowDebugShadows() const override { return mDebugShadows; }
+	const ColourValue& getShadowColour() const override;
+	void setShadowDirectionalLightExtrusionDistance(Real dist) override;
+	Real getShadowDirectionalLightExtrusionDistance() const override;
+	void setShadowFarDistance(Real distance) override;
+	Real getShadowFarDistance() const override { return mShadowFarDist; }
+	size_t getShadowIndexBufferSize() const override { return mShadowIndexBufferSize; }
+	void setShadowTextureConfig(
 		size_t shadowIndex, unsigned short width, unsigned short height, PixelFormat format
-	);
-	virtual void setShadowDirLightTextureOffset(Real offset) { mShadowTextureOffset = offset; }
-	virtual Real getShadowDirLightTextureOffset(void) const { return mShadowTextureOffset; }
-	virtual void setShadowTextureFadeStart(Real fadeStart) { mShadowTextureFadeStart = fadeStart; }
-	virtual void setShadowTextureFadeEnd(Real fadeEnd) { mShadowTextureFadeEnd = fadeEnd; }
-	virtual void setShadowTextureSelfShadow(bool selfShadow);
-	virtual bool getShadowTextureSelfShadow(void) const { return mShadowTextureSelfShadow; }
-	virtual void setShadowCasterRenderBackFaces(bool bf) { mShadowCasterRenderBackFaces = bf; }
-	virtual bool getShadowCasterRenderBackFaces() const { return mShadowCasterRenderBackFaces; }
-	virtual const ShadowCameraSetupPtr& getShadowCameraSetup() const;
-	virtual void setShadowUseInfiniteFarPlane(bool enable) { mShadowUseInfiniteFarPlane = enable; }
-	virtual bool isShadowTechniqueStencilBased(void) const
-	{
-		return (mShadowTechnique & SHADOWDETAILTYPE_STENCIL) != 0;
-	}
-	virtual bool isShadowTechniqueTextureBased(void) const
-	{
-		return (mShadowTechnique & SHADOWDETAILTYPE_TEXTURE) != 0;
-	}
-	virtual bool isShadowTechniqueModulative(void) const
-	{
-		return (mShadowTechnique & SHADOWDETAILTYPE_MODULATIVE) != 0;
-	}
-	virtual bool isShadowTechniqueAdditive(void) const { return (mShadowTechnique & SHADOWDETAILTYPE_ADDITIVE) != 0; }
-	virtual bool isShadowTechniqueIntegrated(void) const
-	{
-		return (mShadowTechnique & SHADOWDETAILTYPE_INTEGRATED) != 0;
-	}
-	virtual bool isShadowTechniqueInUse(void) const { return mShadowTechnique != SHADOWTYPE_NONE; }
-	virtual void addShadowListener(ShadowListener* s);
-	virtual bool hasStaticGeometry(const String& name) const;
-	virtual void destroyStaticGeometry(StaticGeometry* geom);
-	virtual void destroyInstancedGeometry(InstancedGeometry* geom);
-	virtual void destroyMovableObject(MovableObject* m);
-	virtual void injectMovableObject(MovableObject* m);
-	virtual void extractMovableObject(MovableObject* m);
-	virtual void extractAllMovableObjectsByType(const String& typeName);
-	virtual void setVisibilityMask(uint32 vmask) { mVisibilityMask = vmask; }
-	virtual uint32 getVisibilityMask(void) { return mVisibilityMask; }
-	virtual void setFindVisibleObjects(bool find) { mFindVisibleObjects = find; }
-	virtual bool getFindVisibleObjects(void) { return mFindVisibleObjects; }
-	virtual void _injectRenderWithPass(Pass* pass, Renderable* rend, bool shadowDerivation = true);
-	virtual void _suppressRenderStateChanges(bool suppress);
-	virtual bool _areRenderStateChangesSuppressed(void) const { return mSuppressRenderStateChanges; }
-	virtual void _suppressShadows(bool suppress);
-	virtual bool _areShadowsSuppressed(void) const { return mSuppressShadows; }
+	) override;
+	void setShadowDirLightTextureOffset(Real offset) override { mShadowTextureOffset = offset; }
+	Real getShadowDirLightTextureOffset() const override { return mShadowTextureOffset; }
+	void setShadowTextureFadeStart(Real fadeStart) override { mShadowTextureFadeStart = fadeStart; }
+	void setShadowTextureFadeEnd(Real fadeEnd) override { mShadowTextureFadeEnd = fadeEnd; }
+	void setShadowTextureSelfShadow(bool selfShadow) override;
+	bool getShadowTextureSelfShadow() const override { return mShadowTextureSelfShadow; }
+	void setShadowCasterRenderBackFaces(bool bf) override { mShadowCasterRenderBackFaces = bf; }
+	bool getShadowCasterRenderBackFaces() const override { return mShadowCasterRenderBackFaces; }
+	const ShadowCameraSetupPtr& getShadowCameraSetup() const override;
+	void setShadowUseInfiniteFarPlane(bool enable) override { mShadowUseInfiniteFarPlane = enable; }
+	bool isShadowTechniqueStencilBased() const override { return (mShadowTechnique & SHADOWDETAILTYPE_STENCIL) != 0; }
+	bool isShadowTechniqueTextureBased() const override { return (mShadowTechnique & SHADOWDETAILTYPE_TEXTURE) != 0; }
+	bool isShadowTechniqueModulative() const override { return (mShadowTechnique & SHADOWDETAILTYPE_MODULATIVE) != 0; }
+	bool isShadowTechniqueAdditive() const override { return (mShadowTechnique & SHADOWDETAILTYPE_ADDITIVE) != 0; }
+	bool isShadowTechniqueIntegrated() const override { return (mShadowTechnique & SHADOWDETAILTYPE_INTEGRATED) != 0; }
+	bool isShadowTechniqueInUse() const override { return mShadowTechnique != SHADOWTYPE_NONE; }
+	void addShadowListener(ShadowListener* s) override;
+	bool hasStaticGeometry(const String& name) const override;
+	void destroyStaticGeometry(StaticGeometry* geom) override;
+	void destroyInstancedGeometry(InstancedGeometry* geom) override;
+	void destroyMovableObject(MovableObject* m) override;
+	void injectMovableObject(MovableObject* m) override;
+	void extractMovableObject(MovableObject* m) override;
+	void extractAllMovableObjectsByType(const String& typeName) override;
+	void setVisibilityMask(uint32 vmask) override { mVisibilityMask = vmask; }
+	uint32 getVisibilityMask() override { return mVisibilityMask; }
+	void setFindVisibleObjects(bool find) override { mFindVisibleObjects = find; }
+	bool getFindVisibleObjects() override { return mFindVisibleObjects; }
+	void _injectRenderWithPass(Pass* pass, Renderable* rend, bool shadowDerivation = true) override;
+	void _suppressRenderStateChanges(bool suppress) override;
+	bool _areRenderStateChangesSuppressed() const override { return mSuppressRenderStateChanges; }
+	void _suppressShadows(bool suppress) override;
+	bool _areShadowsSuppressed() const override { return mSuppressShadows; }
 
-	virtual void initRenderQueue(void);
-	virtual void renderVisibleObjectsDefaultSequence(void);
-	virtual void renderVisibleObjectsCustomSequence(RenderQueueInvocationSequence* s);
-	virtual void prepareRenderQueue(void);
-	virtual void renderSingleObject(
-		const Renderable* rend, const Pass* pass, bool doLightIteration, const LightList* manualLightList = 0
-	);
-	virtual void findLightsAffectingFrustum(const Camera* camera);
-	virtual void initShadowVolumeMaterials(void);
-	virtual void ensureShadowTexturesCreated();
-	virtual void destroyShadowTextures(void);
-	virtual void prepareShadowTextures(Camera* cam, Viewport* vp);
-	virtual void renderShadowVolumesToStencil(const Light* light, const Camera* cam);
-	virtual void setShadowVolumeStencilState(bool secondpass, bool zfail, bool twosided);
-	virtual const ShadowCasterList& findShadowCastersForLight(const Light* light, const Camera* camera);
-	virtual void renderBasicQueueGroupObjects(
+	void initRenderQueue() override;
+	void renderVisibleObjectsDefaultSequence() override;
+	void renderVisibleObjectsCustomSequence(RenderQueueInvocationSequence* s) override;
+	void prepareRenderQueue() override;
+	void renderSingleObject(
+		const Renderable* rend, const Pass* pass, bool doLightIteration, const LightList* manualLightList = nullptr
+	) override;
+	void findLightsAffectingFrustum(const Camera* camera) override;
+	void initShadowVolumeMaterials() override;
+	void ensureShadowTexturesCreated() override;
+	void destroyShadowTextures() override;
+	void prepareShadowTextures(Camera* cam, Viewport* vp) override;
+	void renderShadowVolumesToStencil(const Light* light, const Camera* cam) override;
+	void setShadowVolumeStencilState(bool secondpass, bool zfail, bool twosided) override;
+	const ShadowCasterList& findShadowCastersForLight(const Light* light, const Camera* camera) override;
+	void renderBasicQueueGroupObjects(
 		RenderQueueGroup* pGroup, QueuedRenderableCollection::OrganisationMode om
-	);
-	virtual void renderAdditiveStencilShadowedQueueGroupObjects(
+	) override;
+	void renderAdditiveStencilShadowedQueueGroupObjects(
 		RenderQueueGroup* group, QueuedRenderableCollection::OrganisationMode om
-	);
-	virtual void renderModulativeStencilShadowedQueueGroupObjects(
+	) override;
+	void renderModulativeStencilShadowedQueueGroupObjects(
 		RenderQueueGroup* group, QueuedRenderableCollection::OrganisationMode om
-	);
-	virtual void renderTextureShadowCasterQueueGroupObjects(
+	) override;
+	void renderTextureShadowCasterQueueGroupObjects(
 		RenderQueueGroup* group, QueuedRenderableCollection::OrganisationMode om
-	);
-	virtual void renderTextureShadowReceiverQueueGroupObjects(
+	) override;
+	void renderTextureShadowReceiverQueueGroupObjects(
 		RenderQueueGroup* group, QueuedRenderableCollection::OrganisationMode om
-	);
-	virtual void renderModulativeTextureShadowedQueueGroupObjects(
+	) override;
+	void renderModulativeTextureShadowedQueueGroupObjects(
 		RenderQueueGroup* group, QueuedRenderableCollection::OrganisationMode om
-	);
-	virtual void renderAdditiveTextureShadowedQueueGroupObjects(
+	) override;
+	void renderAdditiveTextureShadowedQueueGroupObjects(
 		RenderQueueGroup* group, QueuedRenderableCollection::OrganisationMode om
-	);
-	virtual void renderTransparentShadowCasterObjects(
+	) override;
+	void renderTransparentShadowCasterObjects(
 		const QueuedRenderableCollection& objs,
 		QueuedRenderableCollection::OrganisationMode om,
 		bool doLightIteration,
-		const LightList* manualLightList = 0
-	);
-	virtual void updateRenderQueueSplitOptions(void);
-	virtual void updateRenderQueueGroupSplitOptions(
+		const LightList* manualLightList = nullptr
+	) override;
+	void updateRenderQueueSplitOptions() override;
+	void updateRenderQueueGroupSplitOptions(
 		RenderQueueGroup* group, bool suppressShadows, bool suppressRenderState
-	);
-	virtual Camera* createCamera(const String& name);
-	virtual Camera* getCamera(const String& name) const;
-	virtual void destroyCamera(Camera* cam);
-	virtual void destroyCamera(const String& name);
-	virtual void _populateLightList(const Vector3& position, Real radius, LightList& destList);
-	virtual SceneNode* createSceneNode(void);
-	virtual SceneNode* createSceneNode(const String& name);
-	virtual void destroySceneNode(const String& name);
-	virtual SceneNode* getSceneNode(const String& name) const;
-	virtual size_t estimateWorldGeometry(const String& filename) { return 0; }
-	virtual size_t estimateWorldGeometry(DataStreamPtr& stream, const String& typeName = StringUtil::BLANK)
+	) override;
+	Camera* createCamera(const String& name) override;
+	Camera* getCamera(const String& name) const override;
+	void destroyCamera(Camera* cam) override;
+	void destroyCamera(const String& name) override;
+	void _populateLightList(const Vector3& position, Real radius, LightList& destList) override;
+	SceneNode* createSceneNode() override;
+	SceneNode* createSceneNode(const String& name) override;
+	void destroySceneNode(const String& name) override;
+	SceneNode* getSceneNode(const String& name) const override;
+	size_t estimateWorldGeometry(const String& filename) override { return 0; }
+	size_t estimateWorldGeometry(DataStreamPtr& stream, const String& typeName = StringUtil::BLANK) override
 	{
 		return 0;
 	}
-	virtual bool setOption(const String& strKey, const void* pValue) { return false; }
-	virtual bool getOption(const String& strKey, void* pDestValue) { return false; }
-	virtual bool hasOption(const String& strKey) const { return false; }
-	virtual bool getOptionValues(const String& strKey, StringVector& refValueList) { return false; }
-	virtual bool getOptionKeys(StringVector& refKeys) { return false; }
-	virtual void _setDestinationRenderSystem(RenderSystem* sys);
-	virtual FogMode getFogMode(void) const;
-	virtual void setShadowCameraSetup(const ShadowCameraSetupPtr& shadowSetup);
-	virtual Entity* createEntity(const String& entityName, const String& meshName);
-	virtual ParticleSystem* createParticleSystem(const String& name, const String& templateName);
-	virtual ParticleSystem* createParticleSystem(
+	bool setOption(const String& strKey, const void* pValue) override { return false; }
+	bool getOption(const String& strKey, void* pDestValue) override { return false; }
+	bool hasOption(const String& strKey) const override { return false; }
+	bool getOptionValues(const String& strKey, StringVector& refValueList) override { return false; }
+	bool getOptionKeys(StringVector& refKeys) override { return false; }
+	void _setDestinationRenderSystem(RenderSystem* sys) override;
+	FogMode getFogMode() const override;
+	void setShadowCameraSetup(const ShadowCameraSetupPtr& shadowSetup) override;
+	Entity* createEntity(const String& entityName, const String& meshName) override;
+	ParticleSystem* createParticleSystem(const String& name, const String& templateName) override;
+	ParticleSystem* createParticleSystem(
 		const String& name,
 		size_t quota = 500,
 		const String& resourceGroup = ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME
-	);
-	virtual void setWorldGeometry(const String& filename);
-	virtual void setWorldGeometry(DataStreamPtr& stream, const String& typeName = StringUtil::BLANK);
-	virtual ViewPoint getSuggestedViewpoint(bool random = false);
-	virtual void _applySceneAnimations(void);
-	virtual void _renderScene(Camera* camera, Viewport* vp, bool includeOverlays);
-	virtual void _queueSkiesForRendering(Camera* cam);
-	virtual void setSkyPlane(
+	) override;
+	void setWorldGeometry(const String& filename) override;
+	void setWorldGeometry(DataStreamPtr& stream, const String& typeName = StringUtil::BLANK) override;
+	ViewPoint getSuggestedViewpoint(bool random = false) override;
+	void _applySceneAnimations() override;
+	void _renderScene(Camera* camera, Viewport* vp, bool includeOverlays) override;
+	void _queueSkiesForRendering(Camera* cam) override;
+	void setSkyPlane(
 		bool enable,
 		const Plane& plane,
 		const String& materialName,
@@ -392,16 +379,16 @@ public:
 		int xsegments = 1,
 		int ysegments = 1,
 		const String& groupName = ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME
-	);
-	virtual void setSkyBox(
+	) override;
+	void setSkyBox(
 		bool enable,
 		const String& materialName,
 		Real distance = 5000,
 		bool drawFirst = true,
 		const Quaternion& orientation = Quaternion::IDENTITY,
 		const String& groupName = ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME
-	);
-	virtual void setSkyDome(
+	) override;
+	void setSkyDome(
 		bool enable,
 		const String& materialName,
 		Real curvature = 10,
@@ -413,15 +400,15 @@ public:
 		int ysegments = 16,
 		int ysegments_keep = -1,
 		const String& groupName = ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME
-	);
-	virtual BillboardSet* createBillboardSet(const String& name, unsigned int poolSize = 20);
-	virtual Animation* createAnimation(const String& name, Real length);
-	virtual Animation* getAnimation(const String& name) const;
-	virtual bool hasAnimation(const String& name) const;
-	virtual void destroyAnimation(const String& name);
-	virtual void destroyAllAnimations(void);
-	virtual AnimationState* createAnimationState(const String& animName);
-	virtual void manualRender(
+	) override;
+	BillboardSet* createBillboardSet(const String& name, unsigned int poolSize = 20) override;
+	Animation* createAnimation(const String& name, Real length) override;
+	Animation* getAnimation(const String& name) const override;
+	bool hasAnimation(const String& name) const override;
+	void destroyAnimation(const String& name) override;
+	void destroyAllAnimations() override;
+	AnimationState* createAnimationState(const String& animName) override;
+	void manualRender(
 		RenderOperation* rend,
 		Pass* pass,
 		Viewport* vp,
@@ -429,57 +416,57 @@ public:
 		const Matrix4& viewMatrix,
 		const Matrix4& projMatrix,
 		bool doBeginEndFrame = false
-	);
-	virtual void removeRenderQueueListener(RenderQueueListener* delListener);
-	virtual bool isRenderQueueToBeProcessed(uint8 qid);
-	virtual void setShadowTechnique(ShadowTechnique technique);
-	virtual void setShadowColour(const ColourValue& colour);
-	virtual void setShadowIndexBufferSize(size_t size);
-	virtual void setShadowTextureSize(unsigned short size);
-	virtual void setShadowTextureConfig(size_t shadowIndex, const ShadowTextureConfig& config);
-	virtual void setShadowTexturePixelFormat(PixelFormat fmt);
-	virtual void setShadowTextureCount(size_t count);
-	size_t getShadowTextureCount(void) const { return mShadowTextureConfigList.size(); }
-	virtual void setShadowTextureSettings(unsigned short size, unsigned short count, PixelFormat fmt = PF_X8R8G8B8);
-	virtual const TexturePtr& getShadowTexture(size_t shadowIndex);
-	virtual void setShadowTextureCasterMaterial(const String& name);
-	virtual void setShadowTextureReceiverMaterial(const String& name);
-	virtual void removeShadowListener(ShadowListener* s);
-	virtual StaticGeometry* createStaticGeometry(const String& name);
-	virtual StaticGeometry* getStaticGeometry(const String& name) const;
-	virtual void destroyStaticGeometry(const String& name);
-	virtual void destroyAllStaticGeometry(void);
-	virtual InstancedGeometry* createInstancedGeometry(const String& name);
-	virtual InstancedGeometry* getInstancedGeometry(const String& name) const;
-	virtual void destroyInstancedGeometry(const String& name);
-	virtual void destroyAllInstancedGeometry(void);
-	virtual MovableObject* createMovableObject(
-		const String& name, const String& typeName, const NameValuePairList* params = 0
-	);
-	virtual void destroyMovableObject(const String& name, const String& typeName);
-	virtual void destroyAllMovableObjectsByType(const String& typeName);
-	virtual void destroyAllMovableObjects(void);
-	virtual MovableObject* getMovableObject(const String& name, const String& typeName) const;
-	virtual bool hasMovableObject(const String& name, const String& typeName) const;
-	virtual void extractMovableObject(const String& name, const String& typeName);
-	virtual MovableObjectIterator getMovableObjectIterator(const String& typeName);
-	virtual const Pass* _setPass(const Pass* pass, bool evenIfSuppressed = false, bool shadowDerivation = true);
-	virtual void _renderQueueGroupObjects(RenderQueueGroup* group, QueuedRenderableCollection::OrganisationMode om);
+	) override;
+	void removeRenderQueueListener(RenderQueueListener* delListener) override;
+	bool isRenderQueueToBeProcessed(uint8 qid) override;
+	void setShadowTechnique(ShadowTechnique technique) override;
+	void setShadowColour(const ColourValue& colour) override;
+	void setShadowIndexBufferSize(size_t size) override;
+	void setShadowTextureSize(unsigned short size) override;
+	void setShadowTextureConfig(size_t shadowIndex, const ShadowTextureConfig& config) override;
+	void setShadowTexturePixelFormat(PixelFormat fmt) override;
+	void setShadowTextureCount(size_t count) override;
+	size_t getShadowTextureCount() const { return mShadowTextureConfigList.size(); }
+	void setShadowTextureSettings(unsigned short size, unsigned short count, PixelFormat fmt = PF_X8R8G8B8) override;
+	const TexturePtr& getShadowTexture(size_t shadowIndex) override;
+	void setShadowTextureCasterMaterial(const String& name) override;
+	void setShadowTextureReceiverMaterial(const String& name) override;
+	void removeShadowListener(ShadowListener* s) override;
+	StaticGeometry* createStaticGeometry(const String& name) override;
+	StaticGeometry* getStaticGeometry(const String& name) const override;
+	void destroyStaticGeometry(const String& name) override;
+	void destroyAllStaticGeometry() override;
+	InstancedGeometry* createInstancedGeometry(const String& name) override;
+	InstancedGeometry* getInstancedGeometry(const String& name) const override;
+	void destroyInstancedGeometry(const String& name) override;
+	void destroyAllInstancedGeometry() override;
+	MovableObject* createMovableObject(
+		const String& name, const String& typeName, const NameValuePairList* params = nullptr
+	) override;
+	void destroyMovableObject(const String& name, const String& typeName) override;
+	void destroyAllMovableObjectsByType(const String& typeName) override;
+	void destroyAllMovableObjects() override;
+	MovableObject* getMovableObject(const String& name, const String& typeName) const override;
+	bool hasMovableObject(const String& name, const String& typeName) const override;
+	void extractMovableObject(const String& name, const String& typeName) override;
+	MovableObjectIterator getMovableObjectIterator(const String& typeName) override;
+	const Pass* _setPass(const Pass* pass, bool evenIfSuppressed = false, bool shadowDerivation = true) override;
+	void _renderQueueGroupObjects(RenderQueueGroup* group, QueuedRenderableCollection::OrganisationMode om) override;
 };
 
 class RbxSceneManagerFactory : public SceneManagerFactory
 {
 protected:
-	void initMetaData() const;
+	void initMetaData() const override;
 
 public:
 	RbxSceneManagerFactory() {}
-	~RbxSceneManagerFactory() {}
+	~RbxSceneManagerFactory() override = default;
 
 	static const String FACTORY_TYPE_NAME;
 
-	SceneManager* createInstance(const String& instanceName);
-	void destroyInstance(SceneManager* instance);
+	SceneManager* createInstance(const String& instanceName) override;
+	void destroyInstance(SceneManager* instance) override;
 };
 
 } // namespace Ogre

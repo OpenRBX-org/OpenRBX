@@ -8,8 +8,7 @@
 #include <G3D/ReferenceCount.h>
 #include <map>
 
-namespace RBX {
-namespace View {
+namespace RBX::View {
 
 class MaterialFactory
 {
@@ -54,13 +53,12 @@ private:
 
 	G3D::ReferenceCountedPointer<Render::TextureProxy> getSurfacesTexture(G3D::Color3 tint);
 
-	typedef std::map<Attributes, G3D::WeakReferenceCountedPointer<Render::Material> > Database;
+	using Database = std::map<Attributes, G3D::WeakReferenceCountedPointer<Render::Material>>;
 
 	Database database;
 	Database megaDatabase;
 };
 
-} // namespace View
-} // namespace RBX
+} // namespace RBX::View
 
 #endif // RBXVIEW_MATERIALFACTORY_H

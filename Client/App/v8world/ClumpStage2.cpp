@@ -46,8 +46,8 @@ int biggerJointGuid(const Joint* j0, const Joint* j1)
 {
 	const Guid* guid0 = &j0->getPrimitive(0)->getGuid();
 	const Guid* other0 = &j1->getPrimitive(0)->getGuid();
-	const Guid* guid1 = j0->getPrimitive(1) != NULL ? &j0->getPrimitive(1)->getGuid() : NULL;
-	const Guid* other1 = j1->getPrimitive(1) != NULL ? &j1->getPrimitive(1)->getGuid() : NULL;
+	const Guid* guid1 = j0->getPrimitive(1) != nullptr ? &j0->getPrimitive(1)->getGuid() : nullptr;
+	const Guid* other1 = j1->getPrimitive(1) != nullptr ? &j1->getPrimitive(1)->getGuid() : nullptr;
 
 	return Guid::compare(guid0, guid1, other0, other1);
 }
@@ -56,7 +56,7 @@ Joint* getJoint(Primitive* p, Joint::JointType jointType)
 {
 	Joint* joint = p->getFirstJoint();
 
-	while (joint != NULL) {
+	while (joint != nullptr) {
 		if (joint->getJointType() == jointType) {
 			return joint;
 		}
@@ -64,20 +64,20 @@ Joint* getJoint(Primitive* p, Joint::JointType jointType)
 		joint = p->getNextJoint(joint);
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 int biggerJointSize(const Joint* j0, const Joint* j1)
 {
 	float size0 = getPrimitiveSize(j0->getPrimitive(0));
 
-	if (j0->getPrimitive(1) != NULL) {
+	if (j0->getPrimitive(1) != nullptr) {
 		size0 = G3D::max(size0, getPrimitiveSize(j0->getPrimitive(1)));
 	}
 
 	float size1 = getPrimitiveSize(j1->getPrimitive(0));
 
-	if (j1->getPrimitive(1) != NULL) {
+	if (j1->getPrimitive(1) != nullptr) {
 		size1 = G3D::max(size1, getPrimitiveSize(j1->getPrimitive(1)));
 	}
 
@@ -194,7 +194,7 @@ void ClumpStage::onPrimitiveRemovedAnchor(Primitive* p)
 
 int TreeStage::getClumpDepth(Primitive* p)
 {
-	return p != NULL ? p->getClumpDepth() : 0;
+	return p != nullptr ? p->getClumpDepth() : 0;
 }
 
 void TreeStage::dirtyAssembly(Assembly* a)
@@ -224,14 +224,14 @@ Primitive* TreeStage::heavyParent(int testSide, Primitive* p, Joint*& answer, in
 {
 	Joint* joint = p->getFirstJoint();
 
-	while (joint != NULL) {
+	while (joint != nullptr) {
 		if (joint->getActive()) {
 			Primitive* other = p == joint->getPrimitive(0) ? joint->getPrimitive(1) : joint->getPrimitive(0);
 
-			int depth = other != NULL ? other->getClumpDepth() : 0;
+			int depth = other != nullptr ? other->getClumpDepth() : 0;
 
 			if (depth == p->getClumpDepth() - 1) {
-				if (answer == NULL || JointSort::lighterJoint(answer, joint)) {
+				if (answer == nullptr || JointSort::lighterJoint(answer, joint)) {
 					answer = joint;
 					heavySide = testSide;
 				}
@@ -243,7 +243,7 @@ Primitive* TreeStage::heavyParent(int testSide, Primitive* p, Joint*& answer, in
 		joint = p->getNextJoint(joint);
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 void TreeStage::cleanAssembly(Assembly* a)
@@ -321,8 +321,8 @@ void TreeStage::findHeaviestUpstream(Primitive* p0, Primitive* p1, Joint*& answe
 		return;
 	}
 
-	Primitive* next0 = p0 != NULL ? heavyParent(0, p0, answer, heavySide) : NULL;
-	Primitive* next1 = p1 != NULL ? heavyParent(1, p1, answer, heavySide) : NULL;
+	Primitive* next0 = p0 != nullptr ? heavyParent(0, p0, answer, heavySide) : nullptr;
+	Primitive* next1 = p1 != nullptr ? heavyParent(1, p1, answer, heavySide) : nullptr;
 
 	findHeaviestUpstream(next0, next1, answer, heavySide);
 }
@@ -355,11 +355,11 @@ void TreeStage::buildDownstreamTree(Primitive* p, std::set<Primitive*>& tree)
 {
 	Joint* j = p->getFirstJoint();
 
-	while (j != NULL) {
+	while (j != nullptr) {
 		if (j->getActive() && Joint::isJoint(j) && j->getJointType() >= Joint::ANCHOR_JOINT) {
 			Primitive* other = j->otherPrimitive(p);
 
-			if (other != NULL && other->getClumpDepth() == p->getClumpDepth() + 1) {
+			if (other != nullptr && other->getClumpDepth() == p->getClumpDepth() + 1) {
 				tree.insert(other);
 				buildDownstreamTree(other, tree);
 			}
@@ -403,9 +403,7 @@ void ClumpStage::onPrimitiveCanSleepChanged(Primitive* p)
 	}
 }
 
-TreeStage::~TreeStage()
-{
-}
+TreeStage::~TreeStage() = default;
 
 void TreeStage::stepWorld(int worldStepId, int uiStepId, bool throttling)
 {
@@ -419,10 +417,10 @@ void TreeStage::dirtyAssemblies(Joint* j)
 	for (int i = 0; i < 2; i++) {
 		Primitive* p = j->getPrimitive(i);
 
-		if (p != NULL) {
+		if (p != nullptr) {
 			Assembly* a = p->getAssembly();
 
-			if (a != NULL) {
+			if (a != nullptr) {
 				dirtyAssembly(a);
 			}
 		}
@@ -466,7 +464,7 @@ void TreeStage::rebuildClump(Joint* joint, Primitive* parent)
 	Primitive* child = joint->otherPrimitive(parent);
 
 	Clump* clump = child->getClump();
-	bool isRoot = clump != NULL && clump->getClumpPrimitive() == child;
+	bool isRoot = clump != nullptr && clump->getClumpPrimitive() == child;
 
 	if (RigidJoint::isRigidJoint(joint)) {
 		if (isRoot) {
@@ -510,7 +508,7 @@ Joint* TreeStage::findLightestDownstream(Primitive* p, Primitive*& newParent)
 
 	buildDownstreamTree(p, downstreamTree);
 
-	Joint* answer = NULL;
+	Joint* answer = nullptr;
 
 	std::set<Primitive*>::iterator it;
 
@@ -519,12 +517,12 @@ Joint* TreeStage::findLightestDownstream(Primitive* p, Primitive*& newParent)
 
 		Joint* j = p->getFirstJoint();
 
-		while (j != NULL) {
+		while (j != nullptr) {
 			if (!j->getActive() && Joint::isJoint(j) && j->getJointType() >= Joint::ANCHOR_JOINT) {
 				Primitive* other = j->otherPrimitive(p);
 
-				if (other == NULL || downstreamTree.find(other) == downstreamTree.end()) {
-					if (answer == NULL || JointSort::lighterJoint(j, answer)) {
+				if (other == nullptr || !downstreamTree.contains(other)) {
+					if (answer == nullptr || JointSort::lighterJoint(j, answer)) {
 						answer = j;
 						newParent = other;
 					}
@@ -546,12 +544,12 @@ void TreeStage::traverse(Joint* joint, Primitive* parent)
 
 	Edge* e = child->getFirstEdge();
 
-	while (e != NULL) {
+	while (e != nullptr) {
 		if (Joint::isJoint(e) && static_cast<Joint*>(e)->getJointType() >= Joint::ANCHOR_JOINT) {
 			if (static_cast<Joint*>(e)->getActive()) {
 				Primitive* other = e->otherPrimitive(child);
 
-				if (other != NULL && other != parent) {
+				if (other != nullptr && other != parent) {
 					traverse(static_cast<Joint*>(e), child);
 				}
 			}
@@ -566,16 +564,16 @@ void TreeStage::traverse(Joint* joint, Primitive* parent)
 
 void TreeStage::swap(Joint* deactivate, Joint* activate, Primitive* newParent)
 {
-	if (deactivate != NULL) {
+	if (deactivate != nullptr) {
 		dirtyAssemblies(deactivate);
 		deactivate->setActive(false);
 
-		if (activate == NULL) {
+		if (activate == nullptr) {
 			destroyAssembly(deactivate->getPrimitive(0)->getClump());
 			return;
 		}
 	}
-	else if (activate == NULL) {
+	else if (activate == nullptr) {
 		return;
 	}
 
@@ -587,11 +585,11 @@ void TreeStage::swap(Joint* deactivate, Joint* activate, Primitive* newParent)
 void TreeStage::insertJoint(Joint* j)
 {
 	int heavySide = 0;
-	Joint* deActivate = NULL;
+	Joint* deActivate = nullptr;
 
 	findHeaviestUpstream(j->getPrimitive(0), j->getPrimitive(1), deActivate, heavySide);
 
-	if (deActivate == NULL || JointSort::lighterJoint(j, deActivate)) {
+	if (deActivate == nullptr || JointSort::lighterJoint(j, deActivate)) {
 		swap(deActivate, j, j->getPrimitive((heavySide + 1) % 2));
 		dirty = true;
 	}
@@ -618,7 +616,7 @@ void TreeStage::onEdgeRemoving(Edge* e)
 		if (joint->getActive()) {
 			Primitive* downstream = Primitive::downstreamPrimitive(joint);
 
-			Primitive* newParent = NULL;
+			Primitive* newParent = nullptr;
 			Joint* lightest = findLightestDownstream(downstream, newParent);
 
 			swap(joint, lightest, newParent);

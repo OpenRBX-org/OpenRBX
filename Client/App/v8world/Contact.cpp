@@ -52,12 +52,12 @@ bool Contact::computeIsAdjacent(float spaceAllowed)
 
 void Contact::deleteConnector(ContactConnector*& c)
 {
-	if (c != NULL) {
+	if (c != nullptr) {
 		getKernel()->removeConnector(c);
 
 		delete c;
 
-		c = NULL;
+		c = nullptr;
 	}
 }
 
@@ -97,7 +97,7 @@ bool BallBallContact::stepContact()
 
 		if (inKernel()) {
 
-			if (ballBallConnector == NULL) {
+			if (ballBallConnector == nullptr) {
 				ballBallConnector = createConnector();
 			}
 
@@ -160,7 +160,7 @@ bool BallBlockContact::stepContact()
 
 		if (inKernel()) {
 
-			if (ballBlockConnector == NULL) {
+			if (ballBlockConnector == nullptr) {
 				ballBlockConnector = createConnector();
 			}
 

@@ -25,7 +25,7 @@ public:
 	CHINTERNET& operator=(const CHINTERNET&) = delete;
 
 	CHINTERNET(HINTERNET handle) : handle(handle) {}
-	CHINTERNET() : handle(NULL) {}
+	CHINTERNET() : handle(nullptr) {}
 
 	CHINTERNET& operator=(HINTERNET handle)
 	{
@@ -33,7 +33,7 @@ public:
 		return *this;
 	}
 
-	operator bool() { return handle != NULL; }
+	operator bool() { return handle != nullptr; }
 	operator void*() { return handle; }
 
 	~CHINTERNET() { InternetCloseHandle(handle); }
@@ -278,12 +278,12 @@ void ThrowIfFailure(bool success, const char* message)
 		char buffer[256];
 		if (!FormatMessage(
 				FORMAT_MESSAGE_FROM_SYSTEM,
-				NULL,
+				nullptr,
 				error,
 				MAKELANGID(LANG_NEUTRAL, SUBLANG_SYS_DEFAULT),
 				buffer,
 				256,
-				NULL
+				nullptr
 			)) {
 			throw std::runtime_error(G3D::format("%s, err=0x%X", message, error));
 		}
@@ -362,7 +362,7 @@ static std::mutex trustCheckMutex;
 bool Http::trustCheck(const char* url)
 {
 	{
-		std::lock_guard<std::mutex> lock(trustCheckMutex);
+		std::scoped_lock lock(trustCheckMutex);
 		static std::unique_ptr<bool> skipTrustCheck;
 		if (!skipTrustCheck) {
 			DWORD value = 0;
@@ -445,7 +445,7 @@ static void httpGetPost(
 		throw std::runtime_error(G3D::format("'%s' is missing a hostName", url.c_str()));
 	}
 
-	CHINTERNET session(InternetOpen("Roblox", INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0));
+	CHINTERNET session(InternetOpen("Roblox", INTERNET_OPEN_TYPE_PRECONFIG, nullptr, nullptr, 0));
 	CHINTERNET connection(InternetConnect(
 		session, u.GetHostName(), u.GetPortNumber(), u.GetUserName(), u.GetPassword(), INTERNET_SERVICE_HTTP, 0, 1
 	));
@@ -457,9 +457,9 @@ static void httpGetPost(
 		connection,
 		isPost ? "POST" : "GET",
 		s,
-		NULL,
-		NULL,
-		NULL,
+		nullptr,
+		nullptr,
+		nullptr,
 		INTERNET_FLAG_EXISTING_CONNECT | INTERNET_FLAG_KEEP_CONNECTION | INTERNET_FLAG_NEED_FILE,
 		1
 	));
@@ -479,7 +479,7 @@ static void httpGetPost(
 	}
 
 	if (!isPost) {
-		if (!HttpSendRequest(request, NULL, 0, NULL, 0)) {
+		if (!HttpSendRequest(request, nullptr, 0, nullptr, 0)) {
 			ThrowIfFailure(false, "HttpSendRequest failed");
 		}
 	}
@@ -536,7 +536,7 @@ static void httpGetPost(
 		buffer.dwStructSize = sizeof(INTERNET_BUFFERS);
 		buffer.dwBufferTotal = uploadSize;
 
-		if (!HttpSendRequestEx(request, &buffer, NULL, 0, 0)) {
+		if (!HttpSendRequestEx(request, &buffer, nullptr, 0, 0)) {
 			throw std::runtime_error("HttpSendRequestEx failed");
 		}
 
@@ -551,11 +551,11 @@ static void httpGetPost(
 			}
 		}
 		catch (...) {
-			HttpEndRequest(request, NULL, 0, 0);
+			HttpEndRequest(request, nullptr, 0, 0);
 			throw;
 		}
 
-		if (!HttpEndRequest(request, NULL, 0, 0)) {
+		if (!HttpEndRequest(request, nullptr, 0, 0)) {
 			ThrowIfFailure(false, "HttpEndRequest failed");
 		}
 	}
@@ -565,7 +565,7 @@ static void httpGetPost(
 		{
 			char szBuffer[80];
 			DWORD dwLen = 80;
-			if (!HttpQueryInfo(request, HTTP_QUERY_STATUS_CODE, szBuffer, &dwLen, NULL)) {
+			if (!HttpQueryInfo(request, HTTP_QUERY_STATUS_CODE, szBuffer, &dwLen, nullptr)) {
 				ThrowIfFailure(false, "HttpQueryInfo failed");
 			}
 
@@ -577,7 +577,7 @@ static void httpGetPost(
 		{
 			char buffer[256];
 			DWORD length = 256;
-			if (HttpQueryInfo(request, HTTP_QUERY_CONTENT_ENCODING, buffer, &length, NULL)) {
+			if (HttpQueryInfo(request, HTTP_QUERY_CONTENT_ENCODING, buffer, &length, nullptr)) {
 				gzip = std::string(buffer) == "gzip";
 			}
 		}
@@ -610,7 +610,7 @@ static void httpGetPost(
 void Http::post(std::istream& input, bool compress, std::string& response)
 {
 	if (additionalHeaders.empty()) {
-		httpGetPost(true, url, input, compress, NULL, response);
+		httpGetPost(true, url, input, compress, nullptr, response);
 	}
 	else {
 		httpGetPost(true, url, input, compress, additionalHeaders.c_str(), response);
@@ -619,7 +619,7 @@ void Http::post(std::istream& input, bool compress, std::string& response)
 
 void Http::get(std::string& response)
 {
-	const char* h = NULL;
+	const char* h = nullptr;
 	if (!additionalHeaders.empty()) {
 		h = additionalHeaders.c_str();
 	}

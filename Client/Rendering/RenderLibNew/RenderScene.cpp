@@ -25,10 +25,9 @@
 #include <OgreTextureManager.h>
 #include <OgreTextureUnitState.h>
 #include <OgreTimer.h>
-#include <stdio.h>
+#include <cstdio>
 
-namespace RBX {
-namespace RenderNew {
+namespace RBX::RenderNew {
 
 static int g_unk0x00958700;
 
@@ -200,11 +199,11 @@ void SceneManager::addToScene(const G3D::ReferenceCountedPointer<Chunk>& chunk)
 }
 
 RenderScene::RenderScene()
-	: m_unk0x04(NULL), shadingQuality(-1.0f), meshDetail(-1.0f), shadows(false), cameraDistance((float) G3D::inf()),
+	: m_unk0x04(nullptr), shadingQuality(-1.0f), meshDetail(-1.0f), shadows(false), cameraDistance((float) G3D::inf()),
 	  debugShadowVolumes(false), colorClearValue(0.5f, 0.5f, 1.0f, 1.0f)
 {
 	desiredLighting = lighting = G3D::Lighting::create();
-	m_unk0x00 = NULL;
+	m_unk0x00 = nullptr;
 }
 
 void RenderScene::render(G3D::RenderDevice* rd, const G3D::GCamera& camera)
@@ -232,7 +231,7 @@ void RenderScene::render(G3D::RenderDevice* rd, const G3D::GCamera& camera)
 	Ogre::Timer timer;
 	timer.reset();
 
-	if (m_unk0x00 == NULL) {
+	if (m_unk0x00 == nullptr) {
 		m_unk0x00 = new Ogre::RbxSceneNode(engine->m_unk0x04, "rbxroot");
 		engine->m_unk0x04->getRootSceneNode()->addChild(m_unk0x00);
 	}
@@ -248,7 +247,7 @@ void RenderScene::render(G3D::RenderDevice* rd, const G3D::GCamera& camera)
 		m_unk0x14 = Ogre::MeshManager::getSingleton().createOrRetrieve("rbxdummymesh", "General").first;
 	}
 
-	if (m_unk0x04 == NULL && chunkArray.size() != 0) {
+	if (m_unk0x04 == nullptr && chunkArray.size() != 0) {
 		m_unk0x04 = new Ogre::RbxEntity();
 		m_unk0x00->attachObject(m_unk0x04);
 		m_unk0x04->FUN_00674e40(m_unk0x14);
@@ -272,7 +271,7 @@ void RenderScene::render(G3D::RenderDevice* rd, const G3D::GCamera& camera)
 
 	for (int i = 0; i < chunkArray.size(); i++) {
 		Chunk* chunk = chunkArray[i].getPointer();
-		if (chunk == NULL) {
+		if (chunk == nullptr) {
 			continue;
 		}
 
@@ -283,12 +282,12 @@ void RenderScene::render(G3D::RenderDevice* rd, const G3D::GCamera& camera)
 		}
 
 		const Material::Level* materialLevel = chunk->getMaterial()->detailLevel(0.0f);
-		if (materialLevel == NULL) {
+		if (materialLevel == nullptr) {
 			continue;
 		}
 
 		G3D::ReferenceCountedPointer<Mesh> mesh = chunk->getMesh();
-		if (effectSettings.stencilShadows() && mesh->m_unk0x38 == NULL) {
+		if (effectSettings.stencilShadows() && mesh->m_unk0x38 == nullptr) {
 			mesh->FUN_005324e0(engine);
 		}
 
@@ -331,7 +330,7 @@ void RenderScene::render(G3D::RenderDevice* rd, const G3D::GCamera& camera)
 			Ogre::Sphere sphere(box.getCenter(), radius);
 			Ogre::SubMesh* subMesh = !meshLevel->m_unk0x1c && meshLevel->m_unk0x20 >= 0
 										 ? Mesh::g_unk0x0095877c->getSubMesh(meshLevel->m_unk0x20)
-										 : NULL;
+										 : nullptr;
 			m_unk0x00->FUN_0067b2b0(subMesh, sphere);
 			rebuilt = true;
 		}
@@ -404,7 +403,7 @@ void RenderScene::render(G3D::RenderDevice* rd, const G3D::GCamera& camera)
 			updateMaterial = true;
 		}
 
-		if (chunk->m_unk0x10 == NULL) {
+		if (chunk->m_unk0x10 == nullptr) {
 			Ogre::SubMesh* subMesh;
 			Ogre::RbxSubEntity* subEntity;
 			if (hardwareMeshes) {
@@ -414,13 +413,13 @@ void RenderScene::render(G3D::RenderDevice* rd, const G3D::GCamera& camera)
 				}
 				subMesh = !meshLevel->m_unk0x1c && meshLevel->m_unk0x20 >= 0
 							  ? Mesh::g_unk0x0095877c->getSubMesh(meshLevel->m_unk0x20)
-							  : NULL;
+							  : nullptr;
 				subEntity = m_unk0x04->FUN_00676680(subMesh, lod);
 				subEntity->m_unk0x128 = false;
 			}
 			else {
 				subMesh = meshLevel->m_unk0x24;
-				if (subMesh == NULL) {
+				if (subMesh == nullptr) {
 					throw std::exception("Please restart ROBLOX, if you changed your settings but have not restarted");
 				}
 				subEntity = m_unk0x04->FUN_00676680(subMesh, lod);
@@ -428,7 +427,7 @@ void RenderScene::render(G3D::RenderDevice* rd, const G3D::GCamera& camera)
 
 			subEntity->FUN_0067bcc0(chunk->VTable0x28());
 			subEntity->m_unk0x12c = mesh->m_unk0x38;
-			if (mesh->m_unk0x38 == NULL && mesh->m_unk0x3c == 1) {
+			if (mesh->m_unk0x38 == nullptr && mesh->m_unk0x3c == 1) {
 				subEntity->m_unk0x128 = false;
 			}
 			if (mesh->m_unk0x3c == 4) {
@@ -467,7 +466,7 @@ void RenderScene::render(G3D::RenderDevice* rd, const G3D::GCamera& camera)
 			}
 		}
 		else if (rebuilt || !chunk->m_unk0x10->FUN_0067b4e0(lod)) {
-			Ogre::SubMesh* subMesh = NULL;
+			Ogre::SubMesh* subMesh = nullptr;
 			if (hardwareMeshes) {
 				if (!meshLevel->m_unk0x1c && meshLevel->m_unk0x20 >= 0 &&
 					Mesh::g_unk0x0095877c->getSubMesh(meshLevel->m_unk0x20)) {
@@ -532,5 +531,4 @@ void RenderScene::render(G3D::RenderDevice* rd, const G3D::GCamera& camera)
 	}
 }
 
-} // namespace RenderNew
-} // namespace RBX
+} // namespace RBX::RenderNew

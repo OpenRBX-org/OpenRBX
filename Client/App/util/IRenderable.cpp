@@ -2,13 +2,9 @@
 
 namespace RBX {
 
-IRenderable::~IRenderable()
-{
-}
+IRenderable::~IRenderable() = default;
 
-IRenderableBucket::~IRenderableBucket()
-{
-}
+IRenderableBucket::~IRenderableBucket() = default;
 
 void IRenderableBucket::render2dItems(Adorn* adorn)
 {
@@ -62,12 +58,12 @@ void IRenderableBucket::onRemoving(IRenderable* iR)
 		renderable3ds.fastRemove(iR);
 	}
 
-	iR->bucket = NULL;
+	iR->bucket = nullptr;
 }
 
 void IRenderable::shouldRenderSetDirty()
 {
-	if (bucket != NULL) {
+	if (bucket != nullptr) {
 		bucket->recomputeShouldRender(this);
 	}
 }

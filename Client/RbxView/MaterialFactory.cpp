@@ -5,8 +5,7 @@
 #include <G3D/GImage.h>
 #include <algorithm>
 
-namespace RBX {
-namespace View {
+namespace RBX::View {
 
 static float specular = 0.9f;
 static float shiny = 50.0f;
@@ -28,7 +27,7 @@ public:
 
 	static float stripWidth();
 
-	virtual G3D::ReferenceCountedPointer<G3D::Texture> resolve(G3D::RenderDevice* rd);
+	G3D::ReferenceCountedPointer<G3D::Texture> resolve(G3D::RenderDevice* rd) override;
 };
 
 G3D::ReferenceCountedPointer<G3D::Texture> MegaTextureProxy::resolve(G3D::RenderDevice* rd)
@@ -61,7 +60,7 @@ G3D::ReferenceCountedPointer<G3D::Texture> MegaTextureProxy::resolve(G3D::Render
 
 		texture =
 			G3D::Texture::fromGImage("MegaTexture", strip, G3D::TextureFormat::RGB8, G3D::Texture::DIM_2D, params);
-		root = NULL;
+		root = nullptr;
 		loaded = true;
 	}
 
@@ -138,5 +137,4 @@ MaterialFactory::MaterialFactory(G3D::TextureManager* textureManager)
 		new MegaTextureProxy(*textureManager, ContentProvider::singleton().getAssetFile("textures\\SurfacesStrip.png"));
 }
 
-} // namespace View
-} // namespace RBX
+} // namespace RBX::View

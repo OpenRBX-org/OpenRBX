@@ -58,7 +58,7 @@ public:
 	{
 	}
 
-	virtual CFrameWnd* CreateNewFrame(CDocument* pDoc, CFrameWnd* pOther);
+	CFrameWnd* CreateNewFrame(CDocument* pDoc, CFrameWnd* pOther) override;
 };
 
 class CRbxPlayDocTemplate : public CMultiDocTemplate
@@ -67,12 +67,12 @@ public:
 	CRbxPlayDocTemplate(
 		UINT nIDResource, CRuntimeClass* pDocClass, CRuntimeClass* pFrameClass, CRuntimeClass* pViewClass
 	)
-		: CMultiDocTemplate(nIDResource, pDocClass, pFrameClass, pViewClass), m_unk0x90(NULL)
+		: CMultiDocTemplate(nIDResource, pDocClass, pFrameClass, pViewClass), m_unk0x90(nullptr)
 	{
 	}
 
-	virtual void RemoveDocument(CDocument* pDoc);
-	virtual CFrameWnd* CreateNewFrame(CDocument* pDoc, CFrameWnd* pOther);
+	void RemoveDocument(CDocument* pDoc) override;
+	CFrameWnd* CreateNewFrame(CDocument* pDoc, CFrameWnd* pOther) override;
 
 	CDocument* FUN_0044d620(LPCTSTR lpszPathName, BOOL bMakeVisible);
 	CDocument* FUN_0044f970();
@@ -87,10 +87,10 @@ class CIDEDocManager : public CDocManager
 public:
 	CIDEDocManager(bool p_unk0x04);
 
-	virtual BOOL DoPromptFileName(
+	BOOL DoPromptFileName(
 		CString& fileName, UINT nIDSTitle, DWORD lFlags, BOOL bOpenFileDialog, CDocTemplate* pTemplate
-	);
-	virtual void OnFileNew();
+	) override;
+	void OnFileNew() override;
 
 	CRbxDocTemplate* m_unk0x20;
 	CRbxPlayDocTemplate* m_unk0x24;
@@ -108,18 +108,18 @@ public:
 
 // clang-format off
 BEGIN_MESSAGE_MAP(CRobloxApp, CWinApp)
-	ON_COMMAND(ID_APP_ABOUT, OnAppAbout)
-	ON_COMMAND(ID_FILE_NEW, CWinApp::OnFileNew)
-	ON_COMMAND(ID_FILE_OPEN, CWinApp::OnFileOpen)
-	ON_COMMAND(ID_FILE_PRINT_SETUP, CWinApp::OnFilePrintSetup)
-	ON_COMMAND(ID_HELP, FUN_0044dc90)
-	ON_UPDATE_COMMAND_UI(ID_HELP, FUN_00453eb0)
-	ON_COMMAND(0x80de, FUN_0044e270)
-	ON_UPDATE_COMMAND_UI(0x80de, FUN_00453eb0)
-	ON_THREAD_MESSAGE(WM_USER + 2, FUN_0044d450)
-	ON_COMMAND(0x80f1, FUN_0044e290)
-	ON_UPDATE_COMMAND_UI(0x80f1, FUN_004510b0)
-	ON_COMMAND(0x8101, FUN_00451100)
+	ON_COMMAND(ID_APP_ABOUT, &CRobloxApp::OnAppAbout)
+	ON_COMMAND(ID_FILE_NEW, &CRobloxApp::OnFileNew)
+	ON_COMMAND(ID_FILE_OPEN, &CRobloxApp::OnFileOpen)
+	ON_COMMAND(ID_FILE_PRINT_SETUP, &CRobloxApp::OnFilePrintSetup)
+	ON_COMMAND(ID_HELP, &CRobloxApp::FUN_0044dc90)
+	ON_UPDATE_COMMAND_UI(ID_HELP, &CRobloxApp::FUN_00453eb0)
+	ON_COMMAND(0x80de, &CRobloxApp::FUN_0044e270)
+	ON_UPDATE_COMMAND_UI(0x80de, &CRobloxApp::FUN_00453eb0)
+	ON_THREAD_MESSAGE(WM_USER + 2, &CRobloxApp::FUN_0044d450)
+	ON_COMMAND(0x80f1, &CRobloxApp::FUN_0044e290)
+	ON_UPDATE_COMMAND_UI(0x80f1, &CRobloxApp::FUN_004510b0)
+	ON_COMMAND(0x8101, &CRobloxApp::FUN_00451100)
 END_MESSAGE_MAP()
 // clang-format on
 
@@ -141,9 +141,9 @@ static void FUN_0044d4a0()
 	wc.cbClsExtra = 0;
 	wc.cbWndExtra = 0;
 	wc.hInstance = AfxGetInstanceHandle();
-	wc.hIcon = LoadIcon(NULL, IDI_APPLICATION);
-	wc.hCursor = LoadCursor(NULL, IDC_ARROW);
-	wc.hbrBackground = NULL;
+	wc.hIcon = LoadIcon(nullptr, IDI_APPLICATION);
+	wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
+	wc.hbrBackground = nullptr;
 	wc.lpszMenuName = "Menu";
 	wc.lpszClassName = "ROBLOX-ATOM";
 	RegisterClass(&wc);
@@ -165,7 +165,7 @@ void CRbxPlayDocTemplate::RemoveDocument(CDocument* pDoc)
 	CMultiDocTemplate::RemoveDocument(pDoc);
 
 	if (pDoc == m_unk0x90) {
-		m_unk0x90 = NULL;
+		m_unk0x90 = nullptr;
 	}
 }
 
@@ -174,24 +174,24 @@ CDocument* CRbxPlayDocTemplate::FUN_0044d620(LPCTSTR lpszPathName, BOOL bMakeVis
 	m_unk0x94 = "";
 
 	CDocument* pDocument = CreateNewDocument();
-	if (pDocument == NULL) {
+	if (pDocument == nullptr) {
 		m_unk0x94 = "CDocTemplate::CreateNewDocument returned NULL";
 		AfxMessageBox(AFX_IDP_FAILED_TO_CREATE_DOC);
-		return NULL;
+		return nullptr;
 	}
 
 	BOOL bAutoDelete = pDocument->m_bAutoDelete;
 	pDocument->m_bAutoDelete = FALSE;
-	CFrameWnd* pFrame = CreateNewFrame(pDocument, NULL);
+	CFrameWnd* pFrame = CreateNewFrame(pDocument, nullptr);
 	pDocument->m_bAutoDelete = bAutoDelete;
-	if (pFrame == NULL) {
+	if (pFrame == nullptr) {
 		m_unk0x94 = "CreateNewFrame returned NULL";
 		AfxMessageBox(AFX_IDP_FAILED_TO_CREATE_DOC);
 		delete pDocument;
-		return NULL;
+		return nullptr;
 	}
 
-	if (lpszPathName == NULL) {
+	if (lpszPathName == nullptr) {
 		SetDefaultTitle(pDocument);
 
 		if (!bMakeVisible) {
@@ -201,7 +201,7 @@ CDocument* CRbxPlayDocTemplate::FUN_0044d620(LPCTSTR lpszPathName, BOOL bMakeVis
 		if (!pDocument->OnNewDocument()) {
 			m_unk0x94 = "CDocument::OnNewDocument returned FALSE";
 			pFrame->DestroyWindow();
-			return NULL;
+			return nullptr;
 		}
 
 		m_nUntitledCount++;
@@ -211,7 +211,7 @@ CDocument* CRbxPlayDocTemplate::FUN_0044d620(LPCTSTR lpszPathName, BOOL bMakeVis
 		if (!pDocument->OnOpenDocument(lpszPathName)) {
 			m_unk0x94 = "CDocument::OnNewDocument returned FALSE (v2)";
 			pFrame->DestroyWindow();
-			return NULL;
+			return nullptr;
 		}
 		pDocument->SetPathName(lpszPathName);
 	}
@@ -248,7 +248,7 @@ BOOL CIDEDocManager::DoPromptFileName(
 	CString& fileName, UINT nIDSTitle, DWORD lFlags, BOOL bOpenFileDialog, CDocTemplate* pTemplate
 )
 {
-	if (pTemplate == NULL) {
+	if (pTemplate == nullptr) {
 		pTemplate = m_unk0x24;
 	}
 
@@ -273,17 +273,17 @@ static void FUN_0044d9d0(RBX::Reflection::ConstProperty property)
 
 BOOL CRobloxApp::FUN_0044dac0(bool p_unk0x04)
 {
-	if (m_pMainWnd != NULL) {
+	if (m_pMainWnd != nullptr) {
 		if (!m_pMainWnd->IsWindowVisible()) {
 			static_cast<CMainFrame*>(m_pMainWnd)->FUN_00432550(m_nCmdShow);
 		}
 
-		return m_pMainWnd->m_hWnd != NULL;
+		return m_pMainWnd->m_hWnd != nullptr;
 	}
 
 	CMainFrame* frame = new CMainFrame;
 
-	if (frame == NULL) {
+	if (frame == nullptr) {
 		return FALSE;
 	}
 
@@ -319,7 +319,7 @@ void CRobloxApp::FUN_0044dc90()
 {
 	CString parameters;
 	parameters.Format("url.dll,FileProtocolHandler %s", "http://wiki.roblox.com");
-	ShellExecute(AfxGetMainWnd()->m_hWnd, "open", "rundll32.exe", parameters, NULL, SW_SHOWDEFAULT);
+	ShellExecute(AfxGetMainWnd()->m_hWnd, "open", "rundll32.exe", parameters, nullptr, SW_SHOWDEFAULT);
 }
 
 CFrameWnd* CRbxDocTemplate::CreateNewFrame(CDocument* pDoc, CFrameWnd* pOther)
@@ -349,17 +349,17 @@ BOOL CRobloxApp::FUN_0044e180(std::string script)
 
 void CRobloxApp::FUN_0044e250()
 {
-	static_cast<CIDEDocManager*>(m_pDocManager)->m_unk0x20->OpenDocumentFile(NULL);
+	static_cast<CIDEDocManager*>(m_pDocManager)->m_unk0x20->OpenDocumentFile(nullptr);
 }
 
 void CRobloxApp::FUN_0044e270()
 {
-	static_cast<CIDEDocManager*>(m_pDocManager)->m_unk0x2c->OpenDocumentFile(NULL);
+	static_cast<CIDEDocManager*>(m_pDocManager)->m_unk0x2c->OpenDocumentFile(nullptr);
 }
 
 void CRobloxApp::FUN_0044e290()
 {
-	static_cast<CRobloxDoc*>(static_cast<CIDEDocManager*>(m_pDocManager)->m_unk0x24->OpenDocumentFile(NULL))
+	static_cast<CRobloxDoc*>(static_cast<CIDEDocManager*>(m_pDocManager)->m_unk0x24->OpenDocumentFile(nullptr))
 		->FUN_00459c80();
 }
 
@@ -372,7 +372,7 @@ void CScriptDoc::FUN_0044eaf0(std::shared_ptr<RBX::Script> script)
 {
 	m_unk0x54 = script;
 	SetTitle(script->getName().c_str());
-	UpdateAllViews(NULL, 1);
+	UpdateAllViews(nullptr, 1);
 }
 
 void FUN_0044ebb0(const std::exception& e)
@@ -392,7 +392,7 @@ void FUN_0044ec70()
 void CIDEDocManager::OnFileNew()
 {
 	g_unk0x00954294.reset();
-	CDocument* document = m_unk0x24->OpenDocumentFile(NULL);
+	CDocument* document = m_unk0x24->OpenDocumentFile(nullptr);
 	try {
 		FUN_0044ec70();
 	}
@@ -427,7 +427,7 @@ int CRobloxApp::ExitInstance()
 void CRobloxApp::FUN_0044ef90(std::shared_ptr<RBX::Script> script)
 {
 	CScriptDoc* doc =
-		static_cast<CScriptDoc*>(static_cast<CIDEDocManager*>(m_pDocManager)->m_unk0x28->OpenDocumentFile(NULL));
+		static_cast<CScriptDoc*>(static_cast<CIDEDocManager*>(m_pDocManager)->m_unk0x28->OpenDocumentFile(nullptr));
 	doc->FUN_0044eaf0(script);
 }
 
@@ -435,7 +435,7 @@ CDocument* CRbxPlayDocTemplate::FUN_0044f970()
 {
 	if (!m_unk0x90) {
 		g_unk0x00954294.reset();
-		CDocument* document = FUN_0044d620(NULL, TRUE);
+		CDocument* document = FUN_0044d620(nullptr, TRUE);
 		try {
 			FUN_0044ec70();
 		}
@@ -529,16 +529,14 @@ CRobloxApp::CRobloxApp() : m_unk0xa4("Roblox")
 {
 }
 
-CRobloxApp::~CRobloxApp()
-{
-}
+CRobloxApp::~CRobloxApp() = default;
 
 void CRobloxApp::FUN_004509e0()
 {
 	SetRegistryKey("ROBLOX Corporation");
 	LoadStdProfileSettings(6);
 
-	CXTPPropExchangeXMLNode px(TRUE, NULL, "Settings");
+	CXTPPropExchangeXMLNode px(TRUE, nullptr, "Settings");
 	px.SetCompactMode(FALSE);
 
 	CString moduleFileName;
@@ -589,7 +587,7 @@ void CRobloxApp::FUN_004509e0()
 
 static void FUN_00450e30()
 {
-	std::string url = FUN_00407190() + "/Game/MachineConfiguration.ashx";
+	std::string url(FUN_00407190() + "/Game/MachineConfiguration.ashx");
 	std::string response;
 
 	try {
@@ -635,7 +633,7 @@ void CRobloxApp::FUN_00451100()
 	if (CApp::FUN_00407300()) {
 		switch (RBX::DebugSettings::singleton().getErrorReporting()) {
 		case RBX::DebugSettings::Prompt: {
-			CRobloxDHtmlDialog dialog(124, FUN_00407190() + "/Error/ReportDialog.aspx", NULL);
+			CRobloxDHtmlDialog dialog(124, FUN_00407190() + "/Error/ReportDialog.aspx", nullptr);
 			dialog.DoModal();
 			break;
 		}
@@ -979,16 +977,12 @@ CRobloxControlColorSelector::CRobloxControlColorSelector() : m_unk0x174(false)
 
 IMPLEMENT_DYNAMIC(CRobloxDHtmlDialog, CDHtmlDialog)
 
+// clang-format off
 BEGIN_EVENTSINK_MAP(CRobloxDHtmlDialog, CDHtmlDialog)
-ON_EVENT(
-	CRobloxDHtmlDialog,
-	AFX_IDC_BROWSER,
-	DISPID_BEFORENAVIGATE2,
-	OnBeforeNavigate2,
-	VTS_DISPATCH VTS_PVARIANT VTS_PVARIANT VTS_PVARIANT VTS_PVARIANT VTS_PVARIANT VTS_PBOOL
-)
-ON_EVENT(CRobloxDHtmlDialog, AFX_IDC_BROWSER, DISPID_WINDOWCLOSING, OnWindowClosing, VTS_BOOL VTS_PBOOL)
+	ON_EVENT(CRobloxDHtmlDialog, AFX_IDC_BROWSER, DISPID_BEFORENAVIGATE2, CRobloxDHtmlDialog::OnBeforeNavigate2, VTS_DISPATCH VTS_PVARIANT VTS_PVARIANT VTS_PVARIANT VTS_PVARIANT VTS_PVARIANT VTS_PBOOL)
+	ON_EVENT(CRobloxDHtmlDialog, AFX_IDC_BROWSER, DISPID_WINDOWCLOSING, CRobloxDHtmlDialog::OnWindowClosing, VTS_BOOL VTS_PBOOL)
 END_EVENTSINK_MAP()
+// clang-format on
 
 CRobloxDHtmlDialog::CRobloxDHtmlDialog(UINT nIDTemplate, const char* url, CWnd* pParentWnd)
 	: CDHtmlDialog(nIDTemplate, 114, pParentWnd), m_unk0x114(url)

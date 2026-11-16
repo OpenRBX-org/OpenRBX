@@ -10,7 +10,7 @@
 template <class T>
 static T* createService(RBX::DataModel* dataModel)
 {
-	return dataModel ? dataModel->create<T>() : NULL;
+	return dataModel ? dataModel->create<T>() : nullptr;
 }
 
 static UINT clipboardFormat()
@@ -45,7 +45,7 @@ bool PasteVerb::isEnabled() const
 		return true;
 	}
 
-	return (m_unk0x0c ? m_unk0x0c->create<RBX::Selection>() : NULL)->size() == 1;
+	return (m_unk0x0c ? m_unk0x0c->create<RBX::Selection>() : nullptr)->size() == 1;
 }
 
 void PasteVerb::doIt(RBX::IDataState* dataState)
@@ -60,7 +60,7 @@ void PasteVerb::doIt(RBX::IDataState* dataState)
 
 	HANDLE handle = GetClipboardData(clipboardFormat());
 	const char* text = static_cast<const char*>(GlobalLock(handle));
-	std::vector<std::shared_ptr<RBX::Instance> > instances;
+	std::vector<std::shared_ptr<RBX::Instance>> instances;
 	{
 		std::istringstream stream(text);
 		TextXmlParser machine(stream.rdbuf());
@@ -74,7 +74,7 @@ void PasteVerb::doIt(RBX::IDataState* dataState)
 		serializer.loadInstances(root.get(), instances);
 		m_unk0x0c->getWorkspace()->insertInstances(instances, parent, insertMode, RBX::SUPPRESS_PROMPTS);
 
-		const std::vector<std::shared_ptr<RBX::Instance> >& items = instances;
+		const std::vector<std::shared_ptr<RBX::Instance>>& items = instances;
 		selection->setSelection(items.begin(), items.end());
 	}
 
@@ -83,7 +83,7 @@ void PasteVerb::doIt(RBX::IDataState* dataState)
 
 	RBX::XmlState* undoState = new RBX::UndoState();
 	RBX::XmlState* redoState = new RBX::RedoState();
-	for (std::vector<std::shared_ptr<RBX::Instance> >::iterator iter = instances.begin(); iter != instances.end();
+	for (std::vector<std::shared_ptr<RBX::Instance>>::iterator iter = instances.begin(); iter != instances.end();
 		 ++iter) {
 		undoState->addDelete(*iter->get());
 		redoState->addParentProperty(*iter->get());

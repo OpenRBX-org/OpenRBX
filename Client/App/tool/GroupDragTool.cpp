@@ -22,7 +22,7 @@ MouseCommand* GroupDragTool::onMouseDown(const UIEvent& uiEvent)
 GroupDragTool::GroupDragTool(
 	PartInstance* mousePart,
 	const G3D::Vector3& hitPointWorld,
-	const std::vector<std::weak_ptr<PartInstance> >& partArray,
+	const std::vector<std::weak_ptr<PartInstance>>& partArray,
 	Workspace* workspace
 )
 	: Named<MouseCommand, sGroupDragTool>(workspace), dragging(false)
@@ -72,7 +72,7 @@ MouseCommand* GroupDragTool::onMouseUp(const UIEvent& uiEvent)
 	}
 
 	releaseCapture();
-	return NULL;
+	return nullptr;
 }
 
 MouseCommand* GroupDragTool::onKeyDown(const UIEvent& uiEvent)
@@ -91,12 +91,10 @@ MouseCommand* GroupDragTool::onKeyDown(const UIEvent& uiEvent)
 		return this;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
-GroupDragTool::~GroupDragTool()
-{
-}
+GroupDragTool::~GroupDragTool() = default;
 
 } // namespace RBX
 

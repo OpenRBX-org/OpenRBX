@@ -46,7 +46,7 @@ void MotorJoint::setCurrentAngle(float value)
 
 		World* world = getWorld();
 
-		if (world != NULL) {
+		if (world != nullptr) {
 			world->onMotorAngleChanged(this);
 			link->setJointAngle(value);
 		}

@@ -34,15 +34,15 @@ protected:
 	BodyMover(const char* name);
 
 public:
-	virtual ~BodyMover();
-	virtual bool askSetParent(const Instance* instance) const;
+	~BodyMover() override;
+	bool askSetParent(const Instance* instance) const override;
 
 protected:
 	virtual bool preventBodySleep() const { return true; }
 
-	virtual void onAncestorChanged(const AncestorChanged& event);
-	virtual void onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider);
-	virtual void onEvent(const RunService* source, Stepped event);
+	void onAncestorChanged(const AncestorChanged& event) override;
+	void onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider) override;
+	void onEvent(const RunService* source, Stepped event) override;
 
 private:
 	void updateWorld();
@@ -59,10 +59,10 @@ public:
 
 	static Reflection::BoundProp<G3D::Vector3, 1> prop_Force;
 
-	virtual void computeForce(float dt, bool throttling);
+	void computeForce(float dt, bool throttling) override;
 
 protected:
-	virtual bool preventBodySleep() const;
+	bool preventBodySleep() const override;
 
 private:
 	G3D::Vector3 force;
@@ -77,7 +77,7 @@ public:
 	static Reflection::BoundProp<G3D::Vector3, 1> prop_maxTorque;
 	static Reflection::BoundProp<G3D::CoordinateFrame, 1> prop_cframe;
 
-	virtual void computeForce(float dt, bool throttling);
+	void computeForce(float dt, bool throttling) override;
 
 private:
 	void computeOrientation(Body* body);
@@ -100,7 +100,7 @@ public:
 	static Reflection::BoundProp<G3D::Vector3, 1> prop_maxForce;
 	static Reflection::BoundProp<G3D::Vector3, 1> prop_position;
 
-	virtual void computeForce(float dt, bool throttling);
+	void computeForce(float dt, bool throttling) override;
 
 private:
 	float kP;
@@ -117,10 +117,10 @@ public:
 	static Reflection::BoundProp<G3D::Vector3, 1> prop_force;
 	static Reflection::BoundProp<G3D::Vector3, 1> prop_location;
 
-	virtual void computeForce(float dt, bool throttling);
+	void computeForce(float dt, bool throttling) override;
 
 protected:
-	virtual bool preventBodySleep() const;
+	bool preventBodySleep() const override;
 
 private:
 	G3D::Vector3 force;
@@ -137,10 +137,10 @@ public:
 	static Reflection::BoundProp<G3D::Vector3, 1> prop_maxForce;
 	static Reflection::BoundProp<G3D::Vector3, 1> prop_velocity;
 
-	virtual void computeForce(float dt, bool throttling);
+	void computeForce(float dt, bool throttling) override;
 
 protected:
-	virtual bool preventBodySleep() const;
+	bool preventBodySleep() const override;
 
 private:
 	float kP;
@@ -171,10 +171,10 @@ public:
 	static Reflection::BoundFuncDesc<Rocket, void(), 0> func_Abort;
 	static Reflection::SignalDesc<Rocket, void()> event_ReachedTarget;
 
-	virtual void computeForce(float dt, bool throttling);
+	void computeForce(float dt, bool throttling) override;
 
 protected:
-	virtual void onEvent(const RunService* source, Stepped event);
+	void onEvent(const RunService* source, Stepped event) override;
 
 private:
 	G3D::Vector3 turn(Body* body, const G3D::Vector3& targetDir);

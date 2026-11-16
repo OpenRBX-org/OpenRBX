@@ -29,10 +29,10 @@ private:
 public:
 	FlagStand();
 
-	virtual void onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider);
+	void onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider) override;
 
 	void AffixFlag(Flag* flag);
-	bool HasFlag() { return GetFlag() != NULL; }
+	bool HasFlag() { return GetFlag() != nullptr; }
 	Flag* GetFlag();
 
 	BrickColor teamColor;
@@ -48,7 +48,7 @@ private:
 
 public:
 	FlagStandService();
-	virtual ~FlagStandService();
+	~FlagStandService() override;
 
 	FlagStand* FindClosestEmptyStandForFlag(Flag* flag);
 	FlagStand* FindStandWithFlag(Flag* flag);

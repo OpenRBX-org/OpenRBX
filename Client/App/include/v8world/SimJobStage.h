@@ -15,12 +15,12 @@ class SimJobStage : public IWorldStage
 public:
 	SimJobStage(IStage* upstream, World* world);
 
-	virtual ~SimJobStage() {}
+	~SimJobStage() override = default;
 
-	virtual StageType getStageType() { return SIMJOB_STAGE; }
+	StageType getStageType() override { return SIMJOB_STAGE; }
 
-	virtual void onEdgeAdded(Edge* edge);
-	virtual void onEdgeRemoving(Edge* edge);
+	void onEdgeAdded(Edge* edge) override;
+	void onEdgeRemoving(Edge* edge) override;
 
 	void onAssemblyAdded(Assembly* assembly);
 	void onAssemblyRemoving(Assembly* assembly);
