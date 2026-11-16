@@ -69,8 +69,7 @@ class Marker : public DescribedNonCreatable<Marker, Reflection::DescribedBase, s
 public:
 	static boost::shared_ptr<Marker> newMarker() { return boost::shared_ptr<Marker>(new Marker()); }
 
-	long id() const { return reinterpret_cast<long>(this); }
-	static Marker* fromId(long id) { return reinterpret_cast<Marker*>(id); }
+	int id() const { return static_cast<int>(reinterpret_cast<intptr_t>(this)); }
 	void fireReturned() { event_Returned.fire(this); }
 
 	static Reflection::SignalDesc<Marker, void()> event_Returned;

@@ -75,12 +75,6 @@ LONG WINAPI CrashExceptionFilter(_EXCEPTION_POINTERS* ExceptionInfo)
 	return CrashReporter::singleton->ProcessException(ExceptionInfo);
 }
 
-LPTOP_LEVEL_EXCEPTION_FILTER WINAPI
-MyDummySetUnhandledExceptionFilter(LPTOP_LEVEL_EXCEPTION_FILTER lpTopLevelExceptionFilter)
-{
-	return NULL;
-}
-
 BOOL PreventSetUnhandledExceptionFilter()
 {
 	HMODULE hKernel32 = LoadLibrary("kernel32.dll");
@@ -93,18 +87,14 @@ BOOL PreventSetUnhandledExceptionFilter()
 		return FALSE;
 	}
 
-	unsigned char newJump[100];
-	DWORD dwOrgEntryAddr = (DWORD) pOrgEntry;
-	dwOrgEntryAddr += 5;
-	void* pNewFunc = &MyDummySetUnhandledExceptionFilter;
-	DWORD dwNewEntryAddr = (DWORD) pNewFunc;
-	DWORD dwRelativeAddr = dwNewEntryAddr - dwOrgEntryAddr;
+#ifdef _WIN64
+	static const unsigned char returnNull[] = {0x33, 0xc0, 0xc3};
+#else
+	static const unsigned char returnNull[] = {0x33, 0xc0, 0xc2, 0x04, 0x00};
+#endif
 
-	newJump[0] = 0xe9;
-	memcpy(&newJump[1], &dwRelativeAddr, sizeof(pNewFunc));
 	SIZE_T bytesWritten;
-	BOOL bRet = WriteProcessMemory(GetCurrentProcess(), pOrgEntry, newJump, sizeof(pNewFunc) + 1, &bytesWritten);
-	return bRet;
+	return WriteProcessMemory(GetCurrentProcess(), pOrgEntry, returnNull, sizeof(returnNull), &bytesWritten);
 }
 
 void CrashReporter::Start()

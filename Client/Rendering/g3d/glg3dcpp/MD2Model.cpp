@@ -697,10 +697,10 @@ void MD2Model::getGeometry(const Pose& pose, MeshAlg::Geometry& out) const {
         // Copy over vertices so we can mutate them in place
         System::memcpy(vI, v0, numFloats * sizeof(float));
 
-        alwaysAssertM(((int)v1 % 16) == 0, "SEE array not aligned to 16-bytes");
-        alwaysAssertM(((int)vI % 16) == 0, "SEE array not aligned to 16-bytes");
-        alwaysAssertM(((int)n1 % 16) == 0, "SEE array not aligned to 16-bytes");
-        alwaysAssertM(((int)nI % 16) == 0, "SEE array not aligned to 16-bytes");
+        alwaysAssertM((reinterpret_cast<uintptr_t>(v1) % 16) == 0, "SEE array not aligned to 16-bytes");
+        alwaysAssertM((reinterpret_cast<uintptr_t>(vI) % 16) == 0, "SEE array not aligned to 16-bytes");
+        alwaysAssertM((reinterpret_cast<uintptr_t>(n1) % 16) == 0, "SEE array not aligned to 16-bytes");
+        alwaysAssertM((reinterpret_cast<uintptr_t>(nI) % 16) == 0, "SEE array not aligned to 16-bytes");
 
         const int num128 = numFloats / sizeof(float);
 
@@ -713,50 +713,14 @@ void MD2Model::getGeometry(const Pose& pose, MeshAlg::Geometry& out) const {
         // Our goal:
         //   vI = vI + (v1 - vI) * alpha
         //   nI = nI + (n1 - nI) * alpha
-        __asm {
-            mov     ecx,  num128
-            movaps  xmm7, alpha128
+        const __m128* v1Vec = reinterpret_cast<const __m128*>(v1);
+        const __m128* n1Vec = reinterpret_cast<const __m128*>(n1);
+        __m128* vIVec = reinterpret_cast<__m128*>(vI);
+        __m128* nIVec = reinterpret_cast<__m128*>(nI);
 
-            // Set up source and destination registers
-            mov     edi, vI
-            mov     esi, v1
-
-            mov     edx, nI
-            mov     eax, n1
-
-        beginLoop:
-            // Load vI and nI
-            movaps  xmm0, [edi]
-            movaps  xmm2, [edx]
-
-            // Load v1 and n1
-            movaps  xmm1, [esi]
-            movaps  xmm3, [eax]
-
-            // Compute (v1 - v0) and (n1 - n0)
-            subps   xmm1, xmm0
-            subps   xmm3, xmm2
-
-            // Multiply each by alpha
-            mulps   xmm1, xmm7
-            mulps   xmm3, xmm7
-
-            // Add the totals to v0 and n0
-            addps   xmm0, xmm1
-            addps   xmm2, xmm3
-
-            // Store the results back in vI and nI
-            movaps  [edi], xmm0
-            movaps  [edx], xmm2
-
-            // Increment all pointers
-            add     edi, 16
-            add     esi, 16
-            add     edx, 16
-            add     eax, 16
-
-            dec     ecx
-            jnz     beginLoop
+        for (int i = 0; i < num128; ++i) {
+            vIVec[i] = _mm_add_ps(vIVec[i], _mm_mul_ps(_mm_sub_ps(v1Vec[i], vIVec[i]), alpha128));
+            nIVec[i] = _mm_add_ps(nIVec[i], _mm_mul_ps(_mm_sub_ps(n1Vec[i], nIVec[i]), alpha128));
         }
        
         // The last few floats may have been missed by the previous loop.

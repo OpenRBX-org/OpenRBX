@@ -411,6 +411,11 @@ endforeach()
 set(SCINTILLA "${PROJECT_SOURCE_DIR}/3rdparty/scintilla")
 set(OGRE "${PROJECT_SOURCE_DIR}/3rdparty/ogrenew")
 set(DXSDK "${PROJECT_SOURCE_DIR}/3rdparty/Microsoft DirectX 9.0 SDK (October 2004)")
+if (OPENRBX_ARCH STREQUAL "x64")
+  set(DXSDK_LIB "${DXSDK}/Lib/x64")
+else()
+  set(DXSDK_LIB "${DXSDK}/Lib")
+endif()
 
 set(OPENRBX_SCILEXER_SOURCES
   "${SCINTILLA}/src/AutoComplete.cxx"
@@ -924,7 +929,7 @@ target_include_directories(rgdx PRIVATE
 target_compile_definitions(rgdx PRIVATE WIN32 NDEBUG _WINDOWS _USRDLL OGRED3DENGINEDLL_EXPORTS _MBCS)
 target_compile_options(rgdx PRIVATE /Ox ${OPENRBX_OGRE_COMPILE_OPTIONS} /GL)
 target_link_options(rgdx PRIVATE ${OPENRBX_OGRE_LINK_OPTIONS} /SUBSYSTEM:WINDOWS /LTCG)
-target_link_directories(rgdx PRIVATE "${DXSDK}/Lib")
+target_link_directories(rgdx PRIVATE "${DXSDK_LIB}")
 target_link_libraries(rgdx PRIVATE rgmain d3d9 d3dx9 dxerr9 dxguid legacy_stdio_definitions)
 
 set_target_properties(rgmain rgpar rggl rgdx PROPERTIES

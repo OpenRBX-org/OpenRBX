@@ -578,6 +578,8 @@ void SoundService::openFmod()
 			checkResult(system->setDSPBufferSize(1024, 10));
 		}
 
+		checkResultNoThrow(system->setHardwareChannels(0, 0, 0, 0));
+
 		FMOD_RESULT result = system->init(100, FMOD_INIT_NORMAL, 0);
 		if (result == FMOD_ERR_OUTPUT_CREATEBUFFER) {
 			StandardOut::singleton()->print(

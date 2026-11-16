@@ -17,11 +17,12 @@ OpenRBX is a source port of Roblox as it was released in December 2007. It is bu
 
 ### Compiling from source
 
-For now OpenRBX builds only for 32-bit Windows. This will change as the port progresses.
+For now OpenRBX builds only for Windows. This will change as the port progresses.
 
 | Platform | Toolchain | Notes |
 |----------|-----------|-------|
 | Windows (x86) | Visual Studio 2022 or later | Builds the client and the RBXGS web service. |
+| Windows (x64) | Visual Studio 2022 or later | Builds the client and the RBXGS web service. |
 
 #### Prerequisites
 
@@ -30,7 +31,7 @@ For now OpenRBX builds only for 32-bit Windows. This will change as the port pro
 
 #### Building
 
-Open an x64_x86 Cross Tools Command Prompt from the Visual Studio start menu folder, then:
+Open an x64_x86 Cross Tools Command Prompt (x86) or an x64 Native Tools Command Prompt (x64) from the Visual Studio start menu folder, then:
 
 ```bat
 :: Clone the repo

@@ -97,13 +97,13 @@ void* FreeImage_Aligned_Malloc(size_t amount, size_t alignment) {
 	*/
 	void* mem_real = malloc(amount + 2 * alignment);
 	if(!mem_real) return NULL;
-	char* mem_align = (char*)((unsigned long)(2 * alignment - (unsigned long)mem_real % (unsigned long)alignment) + (unsigned long)mem_real);
-	*((long*)mem_align - 1) = (long)mem_real;
+	char* mem_align = (char*)((size_t)(2 * alignment - (size_t)mem_real % (size_t)alignment) + (size_t)mem_real);
+	*((void**)mem_align - 1) = mem_real;
 	return mem_align;
 }
 
 void FreeImage_Aligned_Free(void* mem) {
-	free((void*)*((long*)mem - 1));
+	free(*((void**)mem - 1));
 }
 
 // ----------------------------------------------------------

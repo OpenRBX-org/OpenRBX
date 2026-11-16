@@ -30,6 +30,7 @@
 #ifdef G3D_WIN32
 
     #include <conio.h>
+    #include <intrin.h>
     #include <sys/timeb.h>
 #   include "G3D/RegistryUtil.h"
 
@@ -304,22 +305,12 @@ void System::init() {
         // be available on every x86 processor.  This fills out
         // a string with the processor vendor tag.
         #ifdef _MSC_VER
-            __asm {
-                push eax
-                push ebx
-                push ecx
-                push edx
-                mov eax, 0
-                cpuid
-                mov eaxreg, eax
-                mov ebxreg, ebx
-                mov edxreg, edx
-                mov ecxreg, ecx
-                pop edx
-                pop ecx
-                pop ebx
-                pop eax
-            }
+            int info[4];
+            __cpuid(info, 0);
+            eaxreg = info[0];
+            ebxreg = info[1];
+            ecxreg = info[2];
+            edxreg = info[3];
         #elif defined(__GNUC__) && defined(i386)
             asm (
                 "movl $0, %%eax \n"
@@ -354,19 +345,8 @@ void System::init() {
 
         // Then we read the ext. CPUID level 0x80000000
         #ifdef _MSC_VER
-            __asm {
-                push eax
-                push ebx
-                push ecx
-                push edx
-                mov eax, 0x80000000
-                cpuid
-                mov eaxreg, eax
-                pop edx
-                pop ecx
-                pop ebx
-                pop eax
-            }
+            __cpuid(info, 0x80000000);
+            eaxreg = info[0];
         #elif defined(__GNUC__) && defined(i386)
             asm (
                 "movl $0x80000000, %%eax \n"
@@ -433,7 +413,7 @@ void System::init() {
             arch = "Unknown";
         }
 
-        uint32 maxAddr = (uint32)systemInfo.lpMaximumApplicationAddress;
+        size_t maxAddr = (size_t)systemInfo.lpMaximumApplicationAddress;
         sprintf(_cpuArchCstr, "%d x %d-bit %s processor",
                     systemInfo.dwNumberOfProcessors,
                     (int)(::log((double)maxAddr) / ::log(2.0) + 2.0),
@@ -524,24 +504,10 @@ void checkForCPUID() {
     // If we can't the processor does not support the CPUID command.
     
 #   ifdef _MSC_VER
-        __asm {
-                push eax
-                push ebx
-                pushfd
-                pushfd
-                pop   eax
-                mov   ebx, eax
-                xor   eax, 0x00200000 
-                push  eax
-                popfd
-                pushfd
-                pop   eax
-                popfd
-                xor   eax, ebx 
-                mov   bitChanged, eax
-                pop ebx
-                pop eax
-        }
+        size_t originalFlags = __readeflags();
+        __writeeflags(originalFlags ^ 0x00200000);
+        bitChanged = static_cast<unsigned long>(__readeflags() ^ originalFlags);
+        __writeeflags(originalFlags);
 
 #    elif defined(__GNUC__) && defined(i386)
         // Linux
@@ -584,20 +550,9 @@ void getStandardProcessorExtensions() {
     // useful processor features.
     #ifdef _MSC_VER
         // Windows
-
-            __asm {
-            push eax
-            push ebx
-            push ecx
-            push edx
-                    mov eax, 1
-                    cpuid
-                    mov features, edx
-            pop edx
-            pop ecx
-            pop ebx
-            pop eax
-            }
+        int info[4];
+        __cpuid(info, 1);
+        features = info[3];
 
     #elif defined(__GNUC__) && defined(i386)
         // Linux
@@ -720,128 +675,17 @@ void memcpySSE2(void* dst, const void* src, int nbytes) {
 
 #endif
 
-#if defined(G3D_WIN32) && defined(SSE)
-/** Michael Herf's fast memcpy */
-void memcpyMMX(void* dst, const void* src, int nbytes) {
-    int remainingBytes = nbytes;
-
-    if (nbytes > 64) {
-            _asm {
-                    mov esi, src 
-                    mov edi, dst 
-                    mov ecx, nbytes 
-                    shr ecx, 6 // 64 bytes per iteration 
-
-    loop1: 
-                    movq mm1,  0[ESI] // Read in source data 
-                    movq mm2,  8[ESI]
-                    movq mm3, 16[ESI]
-                    movq mm4, 24[ESI] 
-                    movq mm5, 32[ESI]
-                    movq mm6, 40[ESI]
-                    movq mm7, 48[ESI]
-                    movq mm0, 56[ESI]
-
-                    movntq  0[EDI], mm1 // Non-temporal stores 
-                    movntq  8[EDI], mm2 
-                    movntq 16[EDI], mm3 
-                    movntq 24[EDI], mm4 
-                    movntq 32[EDI], mm5 
-                    movntq 40[EDI], mm6 
-                    movntq 48[EDI], mm7 
-                    movntq 56[EDI], mm0 
-
-                    add esi, 64 
-                    add edi, 64 
-                    dec ecx 
-                    jnz loop1 
-
-                    emms
-            }
-            remainingBytes -= ((nbytes >> 6) << 6); 
-    }
-
-    if (remainingBytes > 0) {
-        // Memcpy the rest
-        memcpy((uint8*)dst + (nbytes - remainingBytes), (const uint8*)src + (nbytes - remainingBytes), remainingBytes); 
-    }
-}
-
-#else
-    // Fall back to memcpy
-    void memcpyMMX(void *dst, const void *src, int nbytes) {
-        memcpy(dst, src, nbytes);
-    }
-
-#endif
 
 
 void System::memcpy(void* dst, const void* src, size_t numBytes) {
-    if (System::hasSSE2() && System::hasMMX()) {
-        G3D::memcpyMMX(dst, src, numBytes);
-    } else if (System::hasSSE() && System::hasMMX()) {
-        G3D::memcpyMMX(dst, src, numBytes);
-    } else {
-        ::memcpy(dst, src, numBytes);
-    }
+    ::memcpy(dst, src, numBytes);
 }
 
 
-/** Michael Herf's fastest memset. n32 must be filled with the same
-    character repeated. */
-#if defined(G3D_WIN32) && defined(SSE)
-
-// On x86 processors, use MMX
-void memfill(void *dst, int n32, unsigned long i) {
-
-    int originalSize = i;
-    int bytesRemaining = i;
-
-    if (i > 16) {
-        
-        bytesRemaining = i % 16;
-        i -= bytesRemaining;
-                __asm {
-                        movq mm0, n32
-                        punpckldq mm0, mm0
-                        mov edi, dst
-
-                loopwrite:
-
-                        movntq 0[edi], mm0
-                        movntq 8[edi], mm0
-
-                        add edi, 16
-                        sub i, 16
-                        jg loopwrite
-
-                        emms
-                }
-    }
-
-    if (bytesRemaining > 0) {
-        ::memset((uint8*)dst + (originalSize - bytesRemaining), n32, bytesRemaining); 
-    }
-}
-
-#else
-
-// For non x86 processors, we fall back to the standard memset
-void memfill(void *dst, int n32, unsigned long i) {
-    ::memset(dst, n32, i);
-}
-
-#endif
 
 
 void System::memset(void* dst, uint8 value, size_t numBytes) {
-    if (System::hasSSE() && System::hasMMX()) {
-        uint32 v = value;
-        v = v + (v << 8) + (v << 16) + (v << 24); 
-        G3D::memfill(dst, v, numBytes);
-    } else {
-        ::memset(dst, value, numBytes);
-    }
+    ::memset(dst, value, numBytes);
 }
 
 
@@ -1263,7 +1107,7 @@ public:
             // In one of our heaps.
 
             // See how big the block really was
-            size_t realSize = ((uint32*)ptr)[-1];
+            size_t realSize = ((size_t*)ptr)[-1];
             if (bytes <= realSize) {
                 // The old block was big enough.
                 return ptr;
@@ -1320,42 +1164,42 @@ public:
             }
         }
 
-        bytesAllocated += 4 + bytes;
+        bytesAllocated += sizeof(size_t) + bytes;
         unlock();
 
         // Heap allocate
 
-        // Allocate 4 extra bytes for our size header (unfortunate,
+        // Allocate extra bytes for our size header (unfortunate,
         // since malloc already added its own header).
-        void* ptr = ::malloc(bytes + 4);
+        void* ptr = ::malloc(bytes + sizeof(size_t));
 
         if (ptr == NULL) {
             // Flush memory pools to try and recover space
             flushPool(smallPool, smallPoolSize);
             flushPool(medPool, medPoolSize);
-            ptr = ::malloc(bytes + 4);
+            ptr = ::malloc(bytes + sizeof(size_t));
         }
 
 
         if (ptr == NULL) {
             if ((System::outOfMemoryCallback != NULL) &&
-                (System::outOfMemoryCallback(bytes + 4, true) == true)) {
+                (System::outOfMemoryCallback(bytes + sizeof(size_t), true) == true)) {
                 // Re-attempt the malloc
-                ptr = ::malloc(bytes + 4);
+                ptr = ::malloc(bytes + sizeof(size_t));
             }
         }
 
         if (ptr == NULL) {
             if (System::outOfMemoryCallback != NULL) {
                 // Notify the application
-                System::outOfMemoryCallback(bytes + 4, false);
+                System::outOfMemoryCallback(bytes + sizeof(size_t), false);
             }
             return NULL;
         }
 
-        *(uint32*)ptr = bytes;
+        *(size_t*)ptr = bytes;
 
-        return (uint8*)ptr + 4;
+        return (uint8*)ptr + sizeof(size_t);
     }
 
 
@@ -1374,7 +1218,7 @@ public:
             return;
         }
 
-        uint32 bytes = ((uint32*)ptr)[-1];
+        size_t bytes = ((size_t*)ptr)[-1];
 
         lock();
         if (bytes <= smallBufferSize) {
@@ -1392,11 +1236,11 @@ public:
                 return;
             }
         }
-        bytesAllocated -= bytes + 4;
+        bytesAllocated -= bytes + sizeof(size_t);
         unlock();
 
         // Free; the buffer pools are full or this is too big to store.
-        ::free((uint8*)ptr - 4);
+        ::free((uint8*)ptr - sizeof(size_t));
     }
 
     std::string performance() const {

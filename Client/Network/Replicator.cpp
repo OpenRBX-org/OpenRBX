@@ -1843,7 +1843,7 @@ boost::shared_ptr<Reflection::DescribedBase> Replicator::sendMarker()
 	RakNet::BitStream bitStream;
 	bitStream << (unsigned char) ID_REQUEST_MARKER;
 
-	bitStream << (int) marker->id();
+	bitStream << marker->id();
 
 	if (NetworkSettings::singleton().printInstances) {
 		StandardOut::singleton()->print(

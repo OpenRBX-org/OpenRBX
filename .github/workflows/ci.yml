@@ -42,15 +42,16 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { name: 'MSVC (x86)',            config: 'RelWithDebInfo', targets: 'all', package: true }
-          - { name: 'MSVC (x86) clang-tidy', config: 'Debug', targets: 'app network', clang-tidy: true }
+          - { name: 'MSVC (x86)',            arch: 'amd64_x86', config: 'RelWithDebInfo', targets: 'all', package: 'win32' }
+          - { name: 'MSVC (x64)',            arch: 'amd64',     config: 'RelWithDebInfo', targets: 'all', package: 'win64' }
+          - { name: 'MSVC (x86) clang-tidy', arch: 'amd64_x86', config: 'Debug', targets: 'app network', clang-tidy: true }
     steps:
       - uses: actions/checkout@v6
 
       - name: Setup vcvars
         uses: ilammy/msvc-dev-cmd@v1
         with:
-          arch: amd64_x86
+          arch: ${{ matrix.arch }}
 
       - name: Setup ninja
         uses: ashutoshvarma/setup-ninja@master
@@ -76,9 +77,9 @@ jobs:
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force build/dist/openrbx/Roblox, build/dist/openrbx/RBXGS | Out-Null
-          Copy-Item build/Roblox.exe, build/Roblox.pdb, build/AppSettings.xml, build/ReflectionMetadata.xml, build/copyrights.txt, build/fmodex.dll, build/SciLexer.dll, build/rgmain.dll, build/rgpar.dll, build/rggl.dll, build/rgdx.dll build/dist/openrbx/Roblox
-          Copy-Item build/WebService.dll, build/WebService.pdb, build/WebService.disco, build/WebService.htm, build/fmodex.dll, build/3rdparty/OPENGL32.DLL, build/3rdparty/GLU32.DLL, build/3rdparty/OSMESA32.DLL build/dist/openrbx/RBXGS
-          Compress-Archive -Path build/dist/openrbx/* -DestinationPath build/dist/openrbx-win32.zip
+          Copy-Item build/Roblox.exe, build/Roblox.pdb, build/AppSettings.xml, build/ReflectionMetadata.xml, build/copyrights.txt, build/fmodex*.dll, build/SciLexer.dll, build/rgmain.dll, build/rgpar.dll, build/rggl.dll, build/rgdx.dll build/dist/openrbx/Roblox
+          Copy-Item build/WebService.dll, build/WebService.pdb, build/WebService.disco, build/WebService.htm, build/fmodex*.dll, build/3rdparty/OPENGL32.DLL, build/3rdparty/GLU32.DLL, build/3rdparty/OSMESA32.DLL build/dist/openrbx/RBXGS
+          Compress-Archive -Path build/dist/openrbx/* -DestinationPath build/dist/openrbx-${{ matrix.package }}.zip
 
       - name: Upload Build Artifacts
         if: ${{ matrix.package }}

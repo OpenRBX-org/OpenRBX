@@ -4,6 +4,7 @@
 #include <GLG3D/DXCaps.h>
 #include <GLG3D/GLCaps.h>
 #include <boost/lexical_cast.hpp>
+#include <intrin.h>
 #include <string>
 #include <windows.h>
 
@@ -44,32 +45,14 @@ static float getShaderModel()
 
 static __int64 GetCyclesDifference(DelayFunction DelayFunction, unsigned int uiParameter)
 {
-	unsigned int t0Lo, t0Hi;
-	unsigned int t1Lo, t1Hi;
-
 	__try {
-		__asm {
-			rdtsc
-			mov esi, eax
-			mov edi, edx
-
-			push uiParameter
-			call DelayFunction
-			pop ebx
-
-			rdtsc
-			mov t1Hi, edx
-			mov t1Lo, eax
-
-			mov t0Hi, edi
-			mov t0Lo, esi
-		}
+		unsigned __int64 t0 = __rdtsc();
+		DelayFunction(uiParameter);
+		return __rdtsc() - t0;
 	}
 	__except (1) {
 		return 0;
 	}
-
-	return (__int64) t1Hi * 0x100000000 - ((__int64) t0Hi << 32) - t0Lo + t1Lo;
 }
 
 static void Delay(unsigned int time)

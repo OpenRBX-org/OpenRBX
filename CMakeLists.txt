@@ -24,8 +24,14 @@ endif()
 
 math(EXPR bits "8 * ${CMAKE_SIZEOF_VOID_P}")
 message(STATUS "Building ${bits}-bit binaries")
-if (NOT bits EQUAL 32)
-  message(WARNING "Only 32-bit binaries are supported")
+if (bits EQUAL 64)
+  set(OPENRBX_FMOD fmodex64)
+  set(OPENRBX_ARCH x64)
+  set(OPENRBX_MIDL_ENV x64)
+else()
+  set(OPENRBX_FMOD fmodex)
+  set(OPENRBX_ARCH x86)
+  set(OPENRBX_MIDL_ENV win32)
 endif()
 
 function(add_cxx_warning WARNING)
@@ -79,11 +85,11 @@ set(OPENRBX_G3D_EXTRA_INCLUDE_DIRS
 )
 
 add_library(fmodex IMPORTED UNKNOWN)
-set_property(TARGET fmodex PROPERTY IMPORTED_LOCATION "${PROJECT_SOURCE_DIR}/Client/fmod/api/lib/fmodex_vc.lib")
+set_property(TARGET fmodex PROPERTY IMPORTED_LOCATION "${PROJECT_SOURCE_DIR}/Client/fmod/api/lib/${OPENRBX_FMOD}_vc.lib")
 set_property(TARGET fmodex PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${PROJECT_SOURCE_DIR}/Client/fmod/api/inc")
 
 set(OPENRBX_RUNTIME_FILES
-  Client/fmod/api/fmodex.dll
+  Client/fmod/api/${OPENRBX_FMOD}.dll
   Client/win/AppSettings.xml
   Client/win/ReflectionMetadata.xml
   Client/win/copyrights.txt
@@ -617,7 +623,6 @@ target_include_directories(toolkitpro PRIVATE
 )
 target_compile_options(toolkitpro PRIVATE /O2 /Ob1 /GF /Gy /Zc:wchar_t)
 set_property(TARGET toolkitpro PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
-set_property(TARGET toolkitpro PROPERTY OUTPUT_NAME "ToolkitPro1121vc140DS")
 
 set(OPENRBX_OGRE "${PROJECT_SOURCE_DIR}/Client/Rendering/OgreSDK")
 
@@ -691,7 +696,7 @@ set(OPENRBX_ROBLOX_MIDL_DIR "${CMAKE_CURRENT_BINARY_DIR}/roblox_midl")
 file(MAKE_DIRECTORY "${OPENRBX_ROBLOX_MIDL_DIR}")
 add_custom_command(
   OUTPUT "${OPENRBX_ROBLOX_MIDL_DIR}/Roblox_h.h" "${OPENRBX_ROBLOX_MIDL_DIR}/Roblox_i.c"
-  COMMAND midl /nologo /env win32 /h Roblox_h.h /iid Roblox_i.c /tlb Roblox.tlb /proxy Roblox_p.c /dlldata dlldata.c
+  COMMAND midl /nologo /env ${OPENRBX_MIDL_ENV} /h Roblox_h.h /iid Roblox_i.c /tlb Roblox.tlb /proxy Roblox_p.c /dlldata dlldata.c
           "${PROJECT_SOURCE_DIR}/Client/win/Roblox.idl"
   DEPENDS "${PROJECT_SOURCE_DIR}/Client/win/Roblox.idl"
   WORKING_DIRECTORY "${OPENRBX_ROBLOX_MIDL_DIR}"
@@ -752,7 +757,7 @@ add_executable(roblox WIN32
   "${OPENRBX_ROBLOX_MIDL_DIR}/Roblox_i.c"
 )
 openrbx_compile_defaults(roblox)
-target_compile_definitions(roblox PRIVATE ${OPENRBX_COMMON_DEFINITIONS} _AFXDLL _XTP_STATICLINK)
+target_compile_definitions(roblox PRIVATE ${OPENRBX_COMMON_DEFINITIONS} _AFXDLL _XTP_STATICLINK _XTPLIB_NOAUTOLINK)
 target_precompile_headers(roblox PRIVATE "${PROJECT_SOURCE_DIR}/Client/win/StdAfx.h")
 set_source_files_properties("${OPENRBX_ROBLOX_MIDL_DIR}/Roblox_i.c" PROPERTIES SKIP_PRECOMPILE_HEADERS ON)
 
@@ -799,11 +804,14 @@ target_link_libraries(roblox PRIVATE
   wininet
   winmm
   ws2_32
-  "${OPENRBX_3RDPARTY}/Microsoft DirectX SDK (November 2007)/Lib/x86/dinput8.lib"
-  "${OPENRBX_3RDPARTY}/Microsoft DirectX SDK (November 2007)/Lib/x86/dxguid.lib"
+  "${OPENRBX_3RDPARTY}/Microsoft DirectX SDK (November 2007)/Lib/${OPENRBX_ARCH}/dinput8.lib"
+  "${OPENRBX_3RDPARTY}/Microsoft DirectX SDK (November 2007)/Lib/${OPENRBX_ARCH}/dxguid.lib"
 )
 
 target_link_options(roblox PRIVATE "-MAP:$<TARGET_FILE_DIR:roblox>/$<TARGET_FILE_BASE_NAME:roblox>.map" "/FIXED:NO" "/MANIFEST:NO")
+if (OPENRBX_ARCH STREQUAL "x64")
+  target_link_options(roblox PRIVATE "/HIGHENTROPYVA:NO")
+endif()
 foreach(lib zlib.lib G3D.lib G3D-debug.lib GLG3D.lib GLG3D-debug.lib sdl.lib sdlmain.lib glut32.lib)
   target_link_options(roblox PRIVATE "/NODEFAULTLIB:${lib}")
 endforeach()
