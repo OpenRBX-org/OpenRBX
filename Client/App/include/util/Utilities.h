@@ -8,7 +8,7 @@
 
 namespace RBX {
 
-class __declspec(novtable) Debugable
+class Debugable
 {
 public:
 	enum AssertAction

@@ -8,6 +8,7 @@
 #include "G3D/GImage.h"
 #include "G3D/BinaryInput.h"
 #include "G3D/BinaryOutput.h"
+#include <string.h>
  
  /**
  Pick up libjpeg headers locally on Windows, but from the system on all other platforms.

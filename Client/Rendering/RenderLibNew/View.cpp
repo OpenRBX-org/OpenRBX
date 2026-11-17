@@ -11,7 +11,7 @@
 #include "appdraw/VisualEngine.h"
 #include "renderlibnew/AggregatingSceneManager.h"
 #include "util/ContentProvider.h"
-#include "util/StandardOut.h"
+#include "util/standardout.h"
 #include "v8datamodel/DataModel.h"
 #include "v8datamodel/Decal.h"
 #include "v8datamodel/Lighting.h"

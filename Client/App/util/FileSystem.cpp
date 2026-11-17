@@ -1,11 +1,19 @@
 #include "util/FileSystem.h"
 
+#ifdef _WIN32
 #include <atlpath.h>
 #include <atlstr.h>
 #include <shlobj.h>
 #include <windows.h>
+#else
+#include <cstdlib>
+#include <filesystem>
+#include <system_error>
+#endif
 
 namespace RBX {
+
+#ifdef _WIN32
 
 class VistaAPIs
 {
@@ -202,5 +210,93 @@ std::string FileSystem::getCacheDirectory(bool create)
 		return "";
 	}
 }
+
+std::string FileSystem::getContentDirectory()
+{
+	char path[MAX_PATH];
+	if (SHGetFolderPathAndSubDir(nullptr, CSIDL_COMMON_APPDATA, nullptr, 0, "Roblox\\content\\", path) == S_OK) {
+		return path;
+	}
+	else {
+		return "";
+	}
+}
+
+#else
+
+static std::string getBaseDirectory(const char* variable, const char* homeSubDirectory)
+{
+	const char* base = std::getenv(variable);
+	if (base && *base) {
+		return base;
+	}
+
+	const char* home = std::getenv("HOME");
+	if (home && *home) {
+		return std::string(home) + homeSubDirectory;
+	}
+
+	return "";
+}
+
+static bool createDirectory(const std::string& path)
+{
+	std::error_code error;
+	std::filesystem::create_directories(path, error);
+	return !error;
+}
+
+std::string FileSystem::getUserAppDataDirectory(bool create, const char* subDirectory)
+{
+	std::string base = getBaseDirectory("XDG_DATA_HOME", "/.local/share");
+	if (base.empty()) {
+		return "";
+	}
+
+	std::string path = base + "/Roblox/";
+	if (subDirectory) {
+		path += subDirectory;
+		path += '/';
+	}
+
+	if (create && !createDirectory(path)) {
+		return "";
+	}
+
+	return path;
+}
+
+std::string FileSystem::getCacheDirectory(bool create)
+{
+	std::string base = getBaseDirectory("XDG_CACHE_HOME", "/.cache");
+	if (base.empty()) {
+		return "";
+	}
+
+	std::string path = base + "/Roblox/";
+	if (create && !createDirectory(path)) {
+		return "";
+	}
+
+	return path;
+}
+
+std::string FileSystem::getContentDirectory()
+{
+	std::string base = getBaseDirectory("XDG_DATA_HOME", "/.local/share");
+	if (base.empty()) {
+		return "";
+	}
+
+	std::string path = base + "/Roblox/content/";
+	std::error_code error;
+	if (!std::filesystem::is_directory(path, error)) {
+		return "";
+	}
+
+	return path;
+}
+
+#endif
 
 } // namespace RBX

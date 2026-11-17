@@ -97,7 +97,7 @@ public:
 	ControllerType getControllerType() const override { return AI_FLEE_CONTROLLER; }
 };
 
-class __declspec(novtable) HardwareController : public Controller
+class HardwareController : public Controller
 {
 private:
 	ControllerService* controllerService;

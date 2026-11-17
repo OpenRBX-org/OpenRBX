@@ -4,10 +4,6 @@ cmake_policy(SET CMP0091 NEW)
 
 project(openrbx C CXX)
 
-if (NOT WIN32)
-  message(FATAL_ERROR "Windows is the only supported platform (for now...)")
-endif()
-
 include(CheckCXXSourceCompiles)
 include(CMakeDependentOption)
 include(CMakePushCheckState)
@@ -83,18 +79,31 @@ set(OPENRBX_G3D_EXTRA_INCLUDE_DIRS
   "${PROJECT_SOURCE_DIR}/Client/Rendering/g3d/zlib"
 )
 
-add_library(fmodex IMPORTED UNKNOWN)
-set_property(TARGET fmodex PROPERTY IMPORTED_LOCATION "${PROJECT_SOURCE_DIR}/Client/fmod/api/lib/${OPENRBX_FMOD}_vc.lib")
+if (WIN32)
+  add_library(fmodex IMPORTED UNKNOWN)
+  set_property(TARGET fmodex PROPERTY IMPORTED_LOCATION "${PROJECT_SOURCE_DIR}/Client/fmod/api/lib/${OPENRBX_FMOD}_vc.lib")
+else()
+  add_library(fmodex SHARED IMPORTED)
+  set_property(TARGET fmodex PROPERTY IMPORTED_LOCATION "${PROJECT_SOURCE_DIR}/Client/fmod/api/lib/lib${OPENRBX_FMOD}.so")
+  set_property(TARGET fmodex PROPERTY IMPORTED_NO_SONAME TRUE)
+endif()
 set_property(TARGET fmodex PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${PROJECT_SOURCE_DIR}/Client/fmod/api/inc")
 
-set(OPENRBX_RUNTIME_FILES
-  Client/fmod/api/${OPENRBX_FMOD}.dll
-  Client/win/AppSettings.xml
-  Client/win/ReflectionMetadata.xml
-  Client/win/copyrights.txt
-  WebService/WebService.disco
-  WebService/WebService.htm
-)
+if (WIN32)
+  set(OPENRBX_RUNTIME_FILES
+    Client/fmod/api/${OPENRBX_FMOD}.dll
+    Client/win/AppSettings.xml
+    Client/win/ReflectionMetadata.xml
+    Client/win/copyrights.txt
+  )
+else()
+  set(OPENRBX_RUNTIME_FILES
+    Client/fmod/api/lib/lib${OPENRBX_FMOD}.so
+  )
+
+  set(THREADS_PREFER_PTHREAD_FLAG ON)
+  find_package(Threads REQUIRED)
+endif()
 set(OPENRBX_RUNTIME_OUTPUTS)
 foreach(file ${OPENRBX_RUNTIME_FILES})
   get_filename_component(name "${file}" NAME)
@@ -108,8 +117,13 @@ add_custom_target(runtime_files DEPENDS ${OPENRBX_RUNTIME_OUTPUTS})
 
 add_subdirectory(3rdparty)
 
-set(OPENRBX_G3D_LIBS   graphics3d glg3d)
-set(OPENRBX_MESA_LIBS  opengl32 glu32 osmesa32)
+if (WIN32)
+  set(OPENRBX_G3D_LIBS   graphics3d glg3d)
+  set(OPENRBX_MESA_LIBS  opengl32 glu32 osmesa32)
+else()
+  set(OPENRBX_G3D_LIBS   glg3d graphics3d)
+  set(OPENRBX_MESA_LIBS  glu osmesa)
+endif()
 
 set(OPENRBX_APP_SOURCES
   Client/App/security/SecurityContext.cpp
@@ -309,6 +323,9 @@ set(OPENRBX_NETWORK_SOURCES
   Client/Network/Server.cpp
   Client/Network/Streaming.cpp
 )
+if (NOT WIN32)
+  list(REMOVE_ITEM OPENRBX_NETWORK_SOURCES Client/Network/CrashReporter.cpp)
+endif()
 
 set(OPENRBX_RAKNET_SOURCES
   Client/Network/raknet30/Source/BitStream.cpp
@@ -333,6 +350,10 @@ set(OPENRBX_RAKNET_SOURCES
   Client/Network/raknet30/Source/StringTable.cpp
   Client/Network/raknet30/Source/rijndael.cpp
 )
+if (NOT WIN32)
+  list(REMOVE_ITEM OPENRBX_RAKNET_SOURCES Client/Network/raknet30/Source/FileOperations.cpp)
+  list(APPEND OPENRBX_RAKNET_SOURCES Client/Network/raknet30/Source/LinuxStrings.cpp)
+endif()
 set(OPENRBX_NETWORK_CLIENT_SOURCES
   Client/Network/Player.cpp
   Client/Network/Players.cpp
@@ -462,14 +483,25 @@ set(OPENRBX_3RDPARTY_INCLUDE_DIRS
   ${OPENRBX_G3D_EXTRA_INCLUDE_DIRS}
   "${OPENRBX_SDL_INCLUDE_DIR}"
 )
+if (NOT WIN32)
+  list(APPEND OPENRBX_3RDPARTY_INCLUDE_DIRS "${OPENRBX_MESA_INCLUDE_DIR}")
+endif()
 
-set(OPENRBX_COMMON_DEFINITIONS
-  WIN32
-  NDEBUG
-  _LIB
-  _VC80_UPGRADE=0x0710
-  _MBCS
-)
+if (WIN32)
+  set(OPENRBX_COMMON_DEFINITIONS
+    WIN32
+    NDEBUG
+    _LIB
+    _VC80_UPGRADE=0x0710
+    _MBCS
+  )
+else()
+  set(OPENRBX_COMMON_DEFINITIONS
+    NDEBUG
+    _LIB
+    G3D_DEBUG_NOGUI
+  )
+endif()
 
 set(OPENRBX_ENGINE_LIBRARIES)
 
@@ -532,6 +564,10 @@ add_engine_library(app
 
 if (TARGET app)
   target_link_libraries(app PRIVATE fmodex)
+  if (NOT WIN32)
+    target_include_directories(app PRIVATE "${OPENRBX_3RDPARTY}/cpp-httplib")
+    target_link_libraries(app PRIVATE OpenSSL::SSL OpenSSL::Crypto)
+  endif()
 endif()
 
 add_engine_library(network
@@ -543,10 +579,12 @@ if (TARGET network AND OPENRBX_RAKNET_SOURCES)
     PROPERTIES COMPILE_DEFINITIONS "_CRT_SECURE_NO_WARNINGS")
 endif()
 
-add_engine_library(network_client
-  SOURCES ${OPENRBX_NETWORK_CLIENT_SOURCES}
-)
-list(REMOVE_ITEM OPENRBX_ENGINE_LIBRARIES network_client)
+if (WIN32)
+  add_engine_library(network_client
+    SOURCES ${OPENRBX_NETWORK_CLIENT_SOURCES}
+  )
+  list(REMOVE_ITEM OPENRBX_ENGINE_LIBRARIES network_client)
+endif()
 
 add_engine_library(rbxview
   DEFINITIONS _RELEASE
@@ -558,6 +596,90 @@ add_engine_library(appdraw
   SOURCES ${OPENRBX_APPDRAW_SOURCES}
 )
 
+add_engine_library(renderlib
+  SOURCES ${OPENRBX_RENDERLIB_SOURCES}
+)
+
+add_executable(webservice
+  WebService/ThumbnailGenerator.cpp
+  WebService/WebService.cpp
+)
+openrbx_compile_defaults(webservice)
+set_target_properties(webservice PROPERTIES CXX_STANDARD 23 CXX_SCAN_FOR_MODULES OFF OUTPUT_NAME "WebService")
+target_compile_definitions(webservice PRIVATE ${OPENRBX_COMMON_DEFINITIONS})
+
+target_include_directories(webservice PRIVATE
+  "${PROJECT_SOURCE_DIR}/WebService"
+  ${OPENRBX_ENGINE_INCLUDE_DIRS}
+  ${OPENRBX_3RDPARTY_INCLUDE_DIRS}
+  "${OPENRBX_MESA_INCLUDE_DIR}"
+  "${OPENRBX_3RDPARTY}/cpp-httplib"
+  "${OPENRBX_3RDPARTY}/nlohmann-json/include"
+)
+
+target_link_libraries(webservice PRIVATE
+  ${OPENRBX_ENGINE_LIBRARIES}
+  ${OPENRBX_G3D_LIBS}
+  ${OPENRBX_MESA_LIBS}
+  fmodex
+)
+add_dependencies(webservice runtime_files)
+
+if (WIN32)
+  target_sources(webservice PRIVATE WebService/WebService.rc)
+  target_link_libraries(webservice PRIVATE
+    advapi32
+    gdi32
+    ole32
+    setupapi
+    shell32
+    shlwapi
+    user32
+    version
+    wininet
+    ws2_32
+  )
+else()
+  target_link_libraries(webservice PRIVATE OpenSSL::SSL OpenSSL::Crypto Threads::Threads ${CMAKE_DL_LIBS})
+  set_target_properties(webservice PROPERTIES BUILD_RPATH "$ORIGIN" INSTALL_RPATH "$ORIGIN")
+endif()
+
+if (MSVC)
+  target_link_options(webservice PRIVATE "-MAP:$<TARGET_FILE_DIR:webservice>/$<TARGET_FILE_BASE_NAME:webservice>.map" "/OPT:REF,ICF")
+  foreach(lib zlib.lib G3D.lib G3D-debug.lib GLG3D.lib GLG3D-debug.lib sdl.lib sdlmain.lib glut32.lib)
+    target_link_options(webservice PRIVATE "/NODEFAULTLIB:${lib}")
+  endforeach()
+  set_property(TARGET webservice PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+endif()
+
+find_program(CLANGFORMAT_BIN NAMES clang-format)
+if (EXISTS "${CLANGFORMAT_BIN}")
+  execute_process(COMMAND "${CLANGFORMAT_BIN}" --version
+    OUTPUT_VARIABLE "CLANGFORMAT_VERSION_OUTPUT"
+    RESULT_VARIABLE "CLANGFORMAT_RESULT"
+  )
+  if (CLANGFORMAT_RESULT EQUAL 0 AND CLANGFORMAT_VERSION_OUTPUT MATCHES "version ([0-9\\.]+)")
+    set(CLANGFORMAT_VERSION "${CMAKE_MATCH_1}")
+    set(CLANGFORMAT_VERSION_REQUIRED "17.0")
+    message(DEBUG "Found clang-format version ${CLANGFORMAT_VERSION} (needs ${CLANGFORMAT_VERSION_REQUIRED}")
+    if (CLANGFORMAT_VERSION VERSION_GREATER_EQUAL "${CLANGFORMAT_VERSION_REQUIRED}")
+      file(GLOB_RECURSE openrbx_sources CONFIGURE_DEPENDS
+        "${PROJECT_SOURCE_DIR}/WebService/*.cpp"
+        "${PROJECT_SOURCE_DIR}/WebService/*.h"
+        "${PROJECT_SOURCE_DIR}/Client/*.cpp"
+        "${PROJECT_SOURCE_DIR}/Client/*.h"
+      )
+      string(REPLACE ";" "\n" openrbx_sources_lines "${openrbx_sources}")
+      file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/openrbx_sources.txt" "${openrbx_sources_lines}\n")
+      add_custom_target(clang-format ${CLANGFORMAT_BIN} -i "--files=${CMAKE_CURRENT_BINARY_DIR}/openrbx_sources.txt")
+    endif()
+  endif()
+endif()
+
+if (NOT WIN32)
+  return()
+endif()
+
 add_engine_library(appdraw_rbxgfx
   DEFINITIONS _RELEASE
   SOURCES ${OPENRBX_APPDRAW_RBXGFX_SOURCES}
@@ -566,10 +688,6 @@ add_engine_library(appdraw_rbxgfx
 add_engine_library(appdraw_client
   DEFINITIONS _RELEASE
   SOURCES ${OPENRBX_APPDRAW_CLIENT_SOURCES}
-)
-
-add_engine_library(renderlib
-  SOURCES ${OPENRBX_RENDERLIB_SOURCES}
 )
 
 set(OPENRBX_RENDERLIBNEW_INCLUDE_DIRS
@@ -621,73 +739,6 @@ target_compile_options(toolkitpro PRIVATE /O2 /Ob1 /GF /Gy /Zc:wchar_t)
 set_property(TARGET toolkitpro PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
 
 set(OPENRBX_OGRE "${PROJECT_SOURCE_DIR}/Client/Rendering/OgreSDK")
-
-set(OPENRBX_WEBSERVICE_SOURCES
-  WebService/ThumbnailGenerator.cpp
-  WebService/WebService.cpp
-  Client/win/ErrorUploader.cpp
-  Client/win/LogManager.cpp
-  Client/win/VersionInfo.cpp
-)
-
-add_library(webservice SHARED
-  ${OPENRBX_WEBSERVICE_SOURCES}
-)
-openrbx_compile_defaults(webservice)
-set_target_properties(webservice PROPERTIES CXX_STANDARD 23 CXX_SCAN_FOR_MODULES OFF)
-target_compile_options(webservice PRIVATE /permissive)
-target_compile_definitions(webservice PRIVATE ${OPENRBX_COMMON_DEFINITIONS} _USRDLL _ATL_NO_COM_SUPPORT)
-
-target_include_directories(webservice PRIVATE
-  "${PROJECT_SOURCE_DIR}/WebService"
-  "${PROJECT_SOURCE_DIR}/Client/win"
-  ${OPENRBX_ENGINE_INCLUDE_DIRS}
-  ${OPENRBX_3RDPARTY_INCLUDE_DIRS}
-  "${OPENRBX_MESA_INCLUDE_DIR}"
-  "${OPENRBX_3RDPARTY}/ATL Server/include"
-)
-
-
-if (OPENRBX_ENGINE_LIBRARIES)
-  target_link_libraries(webservice PRIVATE ${OPENRBX_ENGINE_LIBRARIES})
-endif()
-
-target_link_libraries(webservice PRIVATE
-  ${OPENRBX_G3D_LIBS}
-  ${OPENRBX_MESA_LIBS}
-)
-
-target_link_libraries(webservice PRIVATE fmodex)
-add_dependencies(webservice runtime_files)
-
-target_link_libraries(webservice PRIVATE
-  advapi32
-  dbghelp
-  gdi32
-  ole32
-  oleaut32
-  setupapi
-  shell32
-  shlwapi
-  user32
-  version
-  wininet
-  winmm
-  ws2_32
-)
-
-if (MSVC)
-  target_sources(webservice PRIVATE WebService/WebService.def WebService/WebService.rc)
-  target_link_options(webservice PRIVATE "-MAP:$<TARGET_FILE_DIR:webservice>/$<TARGET_FILE_BASE_NAME:webservice>.map")
-  foreach(lib zlib.lib G3D.lib G3D-debug.lib GLG3D.lib GLG3D-debug.lib sdl.lib sdlmain.lib glut32.lib)
-    target_link_options(webservice PRIVATE "/NODEFAULTLIB:${lib}")
-  endforeach()
-endif()
-
-set_property(TARGET webservice PROPERTY OUTPUT_NAME "WebService")
-set_property(TARGET webservice PROPERTY PREFIX "")
-set_property(TARGET webservice PROPERTY SUFFIX ".dll")
-
 
 set(OPENRBX_ROBLOX_MIDL_DIR "${CMAKE_CURRENT_BINARY_DIR}/roblox_midl")
 file(MAKE_DIRECTORY "${OPENRBX_ROBLOX_MIDL_DIR}")
@@ -816,30 +867,5 @@ endforeach()
 
 set_property(TARGET roblox PROPERTY OUTPUT_NAME "Roblox")
 
-target_link_options(webservice PRIVATE "/OPT:REF,ICF")
 target_link_options(roblox PRIVATE "/OPT:REF,ICF")
-set_property(TARGET webservice roblox PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
-
-find_program(CLANGFORMAT_BIN NAMES clang-format)
-if (EXISTS "${CLANGFORMAT_BIN}")
-  execute_process(COMMAND "${CLANGFORMAT_BIN}" --version
-    OUTPUT_VARIABLE "CLANGFORMAT_VERSION_OUTPUT"
-    RESULT_VARIABLE "CLANGFORMAT_RESULT"
-  )
-  if (CLANGFORMAT_RESULT EQUAL 0 AND CLANGFORMAT_VERSION_OUTPUT MATCHES "version ([0-9\\.]+)")
-    set(CLANGFORMAT_VERSION "${CMAKE_MATCH_1}")
-    set(CLANGFORMAT_VERSION_REQUIRED "17.0")
-    message(DEBUG "Found clang-format version ${CLANGFORMAT_VERSION} (needs ${CLANGFORMAT_VERSION_REQUIRED}")
-    if (CLANGFORMAT_VERSION VERSION_GREATER_EQUAL "${CLANGFORMAT_VERSION_REQUIRED}")
-      file(GLOB_RECURSE openrbx_sources CONFIGURE_DEPENDS
-        "${PROJECT_SOURCE_DIR}/WebService/*.cpp"
-        "${PROJECT_SOURCE_DIR}/WebService/*.h"
-        "${PROJECT_SOURCE_DIR}/Client/*.cpp"
-        "${PROJECT_SOURCE_DIR}/Client/*.h"
-      )
-      string(REPLACE ";" "\n" openrbx_sources_lines "${openrbx_sources}")
-      file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/openrbx_sources.txt" "${openrbx_sources_lines}\n")
-      add_custom_target(clang-format ${CLANGFORMAT_BIN} -i "--files=${CMAKE_CURRENT_BINARY_DIR}/openrbx_sources.txt")
-    endif()
-  endif()
-endif()
+set_property(TARGET roblox PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")

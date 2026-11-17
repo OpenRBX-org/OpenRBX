@@ -1,10 +1,11 @@
 #include "v8datamodel/Sky.h"
 
 #include "util/ContentProvider.h"
-#include "util/StandardOut.h"
+#include "util/standardout.h"
 
 #include <G3D/GImage.h>
 #include <GLG3D/Sky.h>
+#include <filesystem>
 #include <stdexcept>
 
 namespace RBX {
@@ -27,6 +28,11 @@ static std::string testImage(const std::string& filename, G3D::GImage& reference
 	}
 
 	return filename;
+}
+
+static std::string skyFolder()
+{
+	return ContentProvider::singleton().getAssetFile("Sky") + (char) std::filesystem::path::preferred_separator;
 }
 
 using namespace Reflection;
@@ -64,7 +70,7 @@ G3D::SkyRef Sky::getG3DSky(Sky* sky)
 				filenames[5] = testImage(ContentProvider::singleton().getFile(sky->skyLf), image);
 			}
 
-			std::string directory = ContentProvider::singleton().assetFolder() + "Sky\\";
+			std::string directory = skyFolder();
 			G3D::SkyRef g3dSky = G3D::Sky::fromFile(nullptr, directory, filenames, sky->drawCelestialBodies, 1.0);
 
 			if (g3dSky.notNull()) {
@@ -81,7 +87,7 @@ G3D::SkyRef Sky::getG3DSky(Sky* sky)
 		}
 	}
 
-	return G3D::Sky::fromFile(nullptr, ContentProvider::singleton().assetFolder() + "Sky\\", "null_plainsky512_*.jpg");
+	return G3D::Sky::fromFile(nullptr, skyFolder(), "null_plainsky512_*.jpg");
 }
 
 Sky::Sky() : drawCelestialBodies(true), numStars(3000)

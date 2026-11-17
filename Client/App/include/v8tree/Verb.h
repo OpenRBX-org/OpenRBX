@@ -19,7 +19,7 @@ namespace Reflection {
 class Property;
 }
 
-class __declspec(novtable) XmlState : public virtual Debugable
+class XmlState : public virtual Debugable
 {
 protected:
 	XmlElement root;
@@ -49,7 +49,7 @@ public:
 	void addState(XmlElement* element, Instance& instance) override;
 };
 
-class __declspec(novtable) Verb : public Debugable
+class Verb : public Debugable
 {
 private:
 	const Name& name;
@@ -96,7 +96,7 @@ private:
 	friend class Verb;
 };
 
-class __declspec(novtable) IDataState : public StateStack<XmlState>
+class IDataState : public StateStack<XmlState>
 {
 public:
 	virtual void setDirty(bool) = 0;

@@ -39,7 +39,7 @@ void GeometryService::onServiceProvider(const ServiceProvider* oldProvider, cons
 	}
 }
 
-inline GeometryService::GeometryService()
+GeometryService::GeometryService()
 	: DescribedCreatable<GeometryService, Instance, sGeometryService>(sGeometryService), workspace(nullptr)
 {
 }

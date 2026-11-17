@@ -1,57 +1,35 @@
-#define _WIN32_WINNT 0x0501
-#define _WIN32_DCOM
-
 #include "WebService.h"
 
-#include "util/Name.h"
-#include "util/Sound.h"
-#include "util/Utilities.h"
-
-namespace RBX {
-class DataModel;
-}
-
-#include "ErrorUploader.h"
-#include "LogManager.h"
 #include "ThumbnailGenerator.h"
-#include "VersionInfo.h"
+#include "Version.h"
 #include "ViewBase.h"
 #include "network/API.h"
 #include "reflection/type.h"
 #include "script/ScriptContext.h"
 #include "util/ContentProvider.h"
+#include "util/Name.h"
 #include "util/Profiling.h"
+#include "util/Sound.h"
+#include "util/Utilities.h"
 #include "util/standardout.h"
 #include "v8datamodel/DataModel.h"
 #include "v8datamodel/Workspace.h"
 #include "v8datamodel/factoryregistration.h"
-#include "v8xml/XmlSerializer.h"
 
 #include <G3D/System.h>
 #include <G3D/format.h>
-#include <atlbase.h>
-#include <atlcom.h>
-#include <atlisapi.h>
-#include <atlsoap.h>
-#include <map>
-#include <memory>
-#include <mutex>
+#include <algorithm>
+#include <csignal>
+#include <cstdio>
+#include <cstdlib>
+#include <httplib.h>
 #include <queue>
-#include <shlobj.h>
 #include <sstream>
 #include <stdexcept>
-#include <string>
-#include <vector>
 
 template const RBX::Name& RBX::Name::doDeclare<RBX::sWorkspace>();
 
-std::once_flag flagInitRoblox;
-static bool initRobloxFailed;
-static std::string dotVersion;
-
-extern "C" BOOL WINAPI TerminateExtension(DWORD flags);
-
-static std::unique_ptr<MainLogManager> mainLogManager;
+namespace Roblox {
 
 class StandardOutLog : public RBX::Listener<RBX::StandardOut, RBX::StandardOutMessage>
 {
@@ -79,6 +57,10 @@ protected:
 	{
 		std::scoped_lock lock(messagesMutex);
 
+		std::FILE* stream = event.type >= RBX::MESSAGE_WARNING ? stderr : stdout;
+		std::fprintf(stream, "%s\n", event.message.c_str());
+		std::fflush(stream);
+
 		messages.push(event);
 
 		if (messages.size() > 1000) {
@@ -87,684 +69,488 @@ protected:
 	}
 };
 
-static std::unique_ptr<StandardOutLog> standardOutLog;
+static const int maxTableDepth = 10;
 
-static void initRoblox()
+static void convert(const nlohmann::json& source, RBX::Reflection::Value& dest, int depth)
 {
-	static bool firstTime = true;
-	if (!firstTime) {
-		return;
-	}
+	switch (source.type()) {
+	case nlohmann::json::value_t::number_integer:
+	case nlohmann::json::value_t::number_unsigned:
+	case nlohmann::json::value_t::number_float:
+		dest = source.get<double>();
+		break;
 
-	firstTime = false;
-	initRobloxFailed = false;
+	case nlohmann::json::value_t::boolean:
+		dest = source.get<bool>();
+		break;
 
-	try {
-		RBX::Profiling::init(true);
+	case nlohmann::json::value_t::string:
+		dest = source.get<std::string>();
+		break;
 
-		mainLogManager.reset(new MainLogManager("Roblox Web Service"));
-
-		RobloxCrashReporter::silent = true;
-		mainLogManager->WriteCrashDump();
-
-		standardOutLog.reset(new StandardOutLog());
-		RBX::StandardOut::singleton()->print(RBX::MESSAGE_INFO, "Intializing Roblox Web Service");
-
-		RBX::ContentProvider::singleton();
-
-		char szPath[MAX_PATH] = "";
-		if (SHGetFolderPathAndSubDir(nullptr, CSIDL_COMMON_APPDATA, nullptr, 0, "Roblox\\content\\", szPath) != S_OK) {
-			RBX::StandardOut::singleton()->print(
-				RBX::MESSAGE_ERROR, "Unable to find CSIDL_COMMON_APPDATA\\Roblox\\content"
-			);
-		}
-		else {
-			RBX::ContentProvider::singleton().setAssetFolder(szPath);
-		}
-
-		static RBX::FactoryRegistrator registerFactoryObjects;
-		ThumbnailGenerator::classDescriptor();
-
-		RBX::Soundscape::SoundService::soundDisabled = true;
-		RBX::ViewBase::getShadowsEnabled() = false;
-
-		CVersionInfo vi;
-		vi.Load(ATL::_AtlBaseModule.GetModuleInstance());
-
-		std::string v = (LPCSTR) vi.GetFileVersionAsString();
-
-		RBX::Network::API::init(v.c_str());
-
-		const std::vector<std::string> tokens = RBX::tokenize(v, " ,.");
-		for (std::vector<std::string>::const_iterator token = tokens.begin(); token != tokens.end(); ++token) {
-			if (token != tokens.begin()) {
-				dotVersion += ".";
+	case nlohmann::json::value_t::array:
+		if (depth < maxTableDepth) {
+			std::vector<RBX::Reflection::Value> table(source.size());
+			for (size_t i = 0; i < source.size(); ++i) {
+				convert(source[i], table[i], depth + 1);
 			}
-			dotVersion += *token;
+			dest = table;
 		}
+		break;
 
-		static ErrorUploader errorUploader;
-		errorUploader.Upload("http://www.roblox.com/Error/Grid.ashx", true);
-	}
-	catch (...) {
-		initRobloxFailed = true;
+	default:
+		break;
 	}
 }
 
-extern "C" const __declspec(selectany) GUID __LIBID_ = {
-	0x7424937a, 0xe183, 0x3486, {0xa9, 0x8f, 0x2c, 0x3b, 0x62, 0xad, 0x01, 0xf3}
-};
-struct __declspec(uuid("7424937a-e183-3486-a98f-2c3b62ad01f3")) RobloxWebService;
-
-class CDllMainOverride : public ATL::CAtlDllModuleT<CDllMainOverride>
+static nlohmann::json convertToLua(const RBX::Reflection::Value& source, int depth)
 {
-public:
-	DECLARE_LIBID(__uuidof(RobloxWebService))
-
-	BOOL WINAPI DllMain(DWORD dwReason, LPVOID lpReserved) { return __super::DllMain(dwReason, lpReserved); }
-};
-
-extern CDllMainOverride _AtlModule;
-
-#ifndef DLLMAIN_HINSTANCE
-#ifndef _WIN32_WCE
-#define DLLMAIN_HINSTANCE HINSTANCE
-#else
-#define DLLMAIN_HINSTANCE HANDLE
-#endif
-#endif
-
-extern "C" STDAPI DllGetClassObject(REFCLSID rclsid, REFIID riid, void** ppv);
-extern "C" STDAPI DllRegisterServer(void);
-extern "C" STDAPI DllUnregisterServer(void);
-extern "C" STDAPI DllCanUnloadNow(void);
-BOOL WINAPI DllMain(DLLMAIN_HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved);
-
-CDllMainOverride _AtlModule;
-
-extern "C" STDAPI DllGetClassObject(REFCLSID rclsid, REFIID riid, void** ppv)
-{
-	return _AtlModule.DllGetClassObject(rclsid, riid, ppv);
-}
-
-extern "C" STDAPI DllRegisterServer(void)
-{
-	return _AtlModule.DllRegisterServer();
-}
-
-extern "C" STDAPI DllUnregisterServer(void)
-{
-	return _AtlModule.DllUnregisterServer();
-}
-
-extern "C" STDAPI DllCanUnloadNow(void)
-{
-	return _AtlModule.DllCanUnloadNow();
-}
-
-#pragma managed(push, off)
-BOOL WINAPI DllMain(DLLMAIN_HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved)
-{
-	hInstance;
-	return _AtlModule.DllMain(dwReason, lpReserved);
-}
-#pragma managed(pop)
-
-#if defined(_M_IX86)
-#pragma comment(linker, "/EXPORT:DllMain=_DllMain@12,PRIVATE")
-#pragma comment(linker, "/EXPORT:DllRegisterServer=_DllRegisterServer@0,PRIVATE")
-#pragma comment(linker, "/EXPORT:DllUnregisterServer=_DllUnregisterServer@0,PRIVATE")
-#pragma comment(linker, "/EXPORT:DllGetClassObject=_DllGetClassObject@12,PRIVATE")
-#pragma comment(linker, "/EXPORT:DllCanUnloadNow=_DllCanUnloadNow@0,PRIVATE")
-#elif defined(_M_IA64) || defined(_M_AMD64)
-#pragma comment(linker, "/EXPORT:DllMain,PRIVATE")
-#pragma comment(linker, "/EXPORT:DllRegisterServer,PRIVATE")
-#pragma comment(linker, "/EXPORT:DllUnregisterServer,PRIVATE")
-#pragma comment(linker, "/EXPORT:DllGetClassObject,PRIVATE")
-#pragma comment(linker, "/EXPORT:DllCanUnloadNow,PRIVATE")
-#endif
-
-namespace Roblox {
-
-CWebService::Jobs CWebService::jobs;
-std::recursive_mutex CWebService::sync;
-
-} // namespace Roblox
-
-class CRbxIsapiExtension : public ATL::CIsapiExtension<>
-{
-private:
-	const char* GetExtensionDesc() noexcept override { return "ROBLOX Web Service"; }
-};
-
-CRbxIsapiExtension theExtension;
-
-extern "C" DWORD WINAPI HttpExtensionProc(EXTENSION_CONTROL_BLOCK* lpECB)
-{
-	std::call_once(flagInitRoblox, initRoblox);
-
-	if (initRobloxFailed) {
-		return HSE_STATUS_ERROR;
+	if (source.isType<int>()) {
+		return source.cast<int>();
 	}
 
-	return theExtension.HttpExtensionProc(lpECB);
-}
-
-extern "C" BOOL WINAPI GetExtensionVersion(HSE_VERSION_INFO* pVer)
-{
-	return theExtension.GetExtensionVersion(pVer);
-}
-
-extern "C" BOOL WINAPI TerminateExtension(DWORD dwFlags)
-{
-	if (dwFlags & HSE_TERM_ADVISORY_UNLOAD && Roblox::CWebService::hasOpenEnvironments()) {
-		return FALSE;
+	if (source.isType<float>()) {
+		return source.cast<float>();
 	}
 
-	return theExtension.TerminateExtension(dwFlags);
-}
-
-namespace Roblox {
-
-HRESULT CWebService::ReportException(const std::exception& e)
-{
-	std::stringstream ss;
-	TextXmlWriter::encodedWrite(ss, e.what());
-	errorMessage = ATL::CStringW(ss.str().c_str());
-	return E_FAIL;
-}
-
-HRESULT __stdcall CWebService::GetAllJobs(Strings* result)
-{
-	std::scoped_lock lock(sync);
-
-	result->count = jobs.size();
-	result->items = allocate(result->items, result->count);
-
-	int i = 0;
-	Jobs::iterator iter = jobs.begin();
-	Jobs::iterator end = jobs.end();
-	while (iter != end) {
-		ATL::CComBSTR bstr(ATL::CStringA(iter->first.c_str()));
-		result->items[i] = bstr.Detach();
-		++iter;
-		++i;
+	if (source.isType<double>()) {
+		return source.cast<double>();
 	}
 
-	return S_OK;
-}
-
-HRESULT __stdcall CWebService::TouchJob(wchar_t* jobID, double timeout)
-{
-	try {
-		std::scoped_lock lock(sync);
-		touch(getJob(jobID)->second, timeout);
-	}
-	catch (std::exception& e) {
-		return ReportException(e);
+	if (source.isType<bool>()) {
+		return source.cast<bool>();
 	}
 
-	return S_OK;
-}
+	if (source.isType<std::string>()) {
+		return source.cast<std::string>();
+	}
 
-HRESULT __stdcall CWebService::OpenJob(wchar_t* jobID, ScriptExecution script, double timeout, LuaArguments* result)
-{
-	try {
-		std::string id(ATL::CStringA(jobID).GetString());
-		std::shared_ptr<RBX::DataModel> dataModel = RBX::DataModel::createDataModel();
-		{
-			std::scoped_lock lock(sync);
-			Job job;
-			job.dataModel = dataModel;
-			touch(job, timeout);
-			jobs[id] = job;
+	if (source.isType<RBX::ContentId>()) {
+		return source.get<std::string>();
+	}
+
+	if (depth < maxTableDepth && source.isType<std::vector<RBX::Reflection::Value>>()) {
+		const std::vector<RBX::Reflection::Value>& table = source.cast<const std::vector<RBX::Reflection::Value>&>();
+
+		nlohmann::json result = nlohmann::json::array();
+		for (const RBX::Reflection::Value& item : table) {
+			result.push_back(convertToLua(item, depth + 1));
 		}
-		RBX::StandardOut::singleton()->print(RBX::MESSAGE_INFO, "Opened Job %s", id.c_str());
-	}
-	catch (std::exception& e) {
-		return ReportException(e);
+		return result;
 	}
 
-	return Execute(jobID, script, result);
+	return nullptr;
 }
 
-HRESULT __stdcall CWebService::CloseJob(wchar_t* jobID)
+WebService::WebService(std::string version, StandardOutLog& standardOutLog)
+	: version(std::move(version)), standardOutLog(standardOutLog)
 {
-	try {
-		std::shared_ptr<RBX::DataModel> dataModel;
-		{
-			std::scoped_lock lock(sync);
-			Jobs::iterator iter = jobs.find(ATL::CStringA(jobID).GetString());
-			if (iter != jobs.end()) {
-				dataModel = iter->second.dataModel;
-				jobs.erase(iter);
-			}
-		}
-
-		if (dataModel) {
-			RBX::DataModel::closeDataModel(dataModel, true);
-			RBX::StandardOut::singleton()->print(RBX::MESSAGE_INFO, "Closed Job %s", ATL::CStringA(jobID).GetString());
-		}
-	}
-	catch (std::exception& e) {
-		return ReportException(e);
-	}
-
-	return S_OK;
 }
 
-HRESULT __stdcall CWebService::CloseTimedoutJobs(int* result)
+void WebService::touch(Job& job, double timeout)
 {
-	*result = 0;
-
-	try {
-		std::vector<std::shared_ptr<RBX::DataModel>> dataModels;
-		{
-			std::scoped_lock lock(sync);
-
-			std::map<std::string, Job> keep;
-			Jobs::iterator end = jobs.end();
-			for (Jobs::iterator iter = jobs.begin(); iter != end; ++iter) {
-				if (secondsToTimeout(iter->second) >= 0) {
-					keep.insert(*iter);
-				}
-				else {
-					dataModels.push_back(iter->second.dataModel);
-				}
-			}
-
-			jobs = keep;
-		}
-
-		std::vector<std::shared_ptr<RBX::DataModel>>::iterator iter = dataModels.begin();
-		std::vector<std::shared_ptr<RBX::DataModel>>::iterator end = dataModels.end();
-		while (iter != end) {
-			RBX::DataModel::closeDataModel(*iter, true);
-			(*result)++;
-			++iter;
-		}
-	}
-	catch (std::exception& e) {
-		return ReportException(e);
-	}
-
-	return S_OK;
+	job.expiration = G3D::System::getLocalTime() + timeout;
 }
 
-HRESULT __stdcall CWebService::CloseOrphanedJobs(Strings activeJobs, int* result)
+double WebService::secondsToTimeout(const Job& job)
 {
-	*result = 0;
-
-	try {
-		std::vector<std::shared_ptr<RBX::DataModel>> dataModels;
-		{
-			std::map<std::string, Job> keep;
-			std::scoped_lock lock(sync);
-			Jobs::iterator end = jobs.end();
-			for (Jobs::iterator iter = jobs.begin(); iter != end; ++iter) {
-				bool found = false;
-				for (int i = 0; i < activeJobs.count; ++i) {
-					if (iter->first == ATL::CStringA(activeJobs.items[i]).GetString()) {
-						keep.insert(*iter);
-						found = true;
-						break;
-					}
-				}
-				if (!found) {
-					dataModels.push_back(iter->second.dataModel);
-				}
-			}
-
-			jobs = keep;
-		}
-
-		std::vector<std::shared_ptr<RBX::DataModel>>::iterator iter = dataModels.begin();
-		std::vector<std::shared_ptr<RBX::DataModel>>::iterator end = dataModels.end();
-		while (iter != end) {
-			RBX::DataModel::closeDataModel(*iter, true);
-			(*result)++;
-			++iter;
-		}
-	}
-	catch (std::exception& e) {
-		return ReportException(e);
-	}
-
-	return S_OK;
+	return job.expiration - G3D::System::getLocalTime();
 }
 
-HRESULT __stdcall CWebService::CloseAllJobs()
+WebService::Jobs::iterator WebService::getJob(const std::string& jobID)
 {
-	try {
-		std::scoped_lock lock(sync);
-
-		Jobs::iterator end = jobs.end();
-		for (Jobs::iterator iter = jobs.begin(); iter != end; ++iter) {
-			RBX::DataModel::closeDataModel(iter->second.dataModel, true);
-			RBX::StandardOut::singleton()->print(RBX::MESSAGE_INFO, "Closed Job %s", iter->first.c_str());
-		}
-
-		jobs.clear();
-	}
-	catch (std::exception& e) {
-		return ReportException(e);
-	}
-
-	return S_OK;
-}
-
-HRESULT __stdcall CWebService::GetTimeout(wchar_t* jobID, double* timeout)
-{
-	try {
-		std::scoped_lock lock(sync);
-		*timeout = secondsToTimeout(getJob(jobID)->second);
-	}
-	catch (std::exception& e) {
-		return ReportException(e);
-	}
-
-	return S_OK;
-}
-
-CWebService::Jobs::iterator CWebService::getJob(wchar_t* jobID)
-{
-	Jobs::iterator job = jobs.find(ATL::CStringA(jobID).GetString());
+	Jobs::iterator job = jobs.find(jobID);
 
 	if (job == jobs.end()) {
-		throw std::runtime_error(G3D::format("Job %s not found", ATL::CStringA(jobID).GetString()));
+		throw std::runtime_error(G3D::format("Job %s not found", jobID.c_str()));
 	}
 
 	return job;
 }
 
-template <class T>
-static void convert(const T& source, RBX::Reflection::Value& dest)
+nlohmann::json WebService::getStatus()
 {
-	switch (source.type) {
-	case LUA_TNUMBER:
-		dest = std::string(ATL::CStringA(source.value));
-		dest.convert<double>();
-		break;
-
-	case LUA_TBOOLEAN:
-		dest = std::string(ATL::CStringA(source.value));
-		dest.convert<bool>();
-		break;
-
-	case LUA_TSTRING:
-		dest = std::string(ATL::CStringA(source.value));
-		break;
-
-	case LUA_TTABLE: {
-		dest = std::vector<RBX::Reflection::Value>(source.tableLength);
-
-		std::vector<RBX::Reflection::Value>& table = dest.convert<std::vector<RBX::Reflection::Value>>();
-		for (int i = 0; i < source.tableLength; ++i) {
-			convert(source.table[i], table[i]);
-		}
-		break;
-	}
-	}
-}
-
-template <class T>
-void CWebService::convertToLua(const RBX::Reflection::Value& source, T& dest)
-{
-	if (source.isType<void>()) {
-		dest.type = (LuaType) LUA_TNIL;
-		return;
-	}
-
-	if (source.isType<int>()) {
-		dest.type = (LuaType) LUA_TNUMBER;
-		ATL::CComBSTR str(source.get<std::string>().c_str());
-		dest.value = str.Detach();
-		return;
-	}
-
-	if (source.isType<float>()) {
-		dest.type = (LuaType) LUA_TNUMBER;
-		ATL::CComBSTR str(source.get<std::string>().c_str());
-		dest.value = str.Detach();
-		return;
-	}
-
-	if (source.isType<double>()) {
-		dest.type = (LuaType) LUA_TNUMBER;
-		ATL::CComBSTR str(source.get<std::string>().c_str());
-		dest.value = str.Detach();
-		return;
-	}
-
-	if (source.isType<bool>()) {
-		dest.type = (LuaType) LUA_TBOOLEAN;
-		ATL::CComBSTR str(source.get<std::string>().c_str());
-		dest.value = str.Detach();
-		return;
-	}
-
-	if (source.isType<std::string>()) {
-		dest.type = (LuaType) LUA_TSTRING;
-		ATL::CComBSTR str(source.get<std::string>().c_str());
-		dest.value = str.Detach();
-		return;
-	}
-
-	if (source.isType<RBX::ContentId>()) {
-		dest.type = (LuaType) LUA_TSTRING;
-		ATL::CComBSTR str(source.get<std::string>().c_str());
-		dest.value = str.Detach();
-		return;
-	}
-
-	if (source.isType<std::vector<RBX::Reflection::Value>>()) {
-		const std::vector<RBX::Reflection::Value>& table = source.cast<const std::vector<RBX::Reflection::Value>&>();
-
-		dest.type = (LuaType) LUA_TTABLE;
-		dest.tableLength = table.size();
-		dest.table = allocate(dest.table, table.size());
-		for (size_t i = 0; i < table.size(); ++i) {
-			convertToLua(table[i], dest.table[i]);
-		}
-		return;
-	}
-	dest.type = (LuaType) LUA_TNIL;
-}
-
-template <>
-void convert<LuaValue10>(const LuaValue10& source, RBX::Reflection::Value& dest)
-{
-	switch (source.type) {
-	case LUA_TNUMBER:
-		dest = std::string(ATL::CStringA(source.value));
-		dest.convert<double>();
-		break;
-
-	case LUA_TBOOLEAN:
-		dest = std::string(ATL::CStringA(source.value));
-		dest.convert<bool>();
-		break;
-
-	case LUA_TSTRING:
-		dest = std::string(ATL::CStringA(source.value));
-		break;
-	}
-}
-
-template <>
-void CWebService::convertToLua<LuaValue10>(const RBX::Reflection::Value& source, LuaValue10& dest)
-{
-	if (source.isType<void>()) {
-		dest.type = (LuaType) LUA_TNIL;
-		return;
-	}
-
-	if (source.isType<int>()) {
-		dest.type = (LuaType) LUA_TNUMBER;
-		ATL::CComBSTR str(source.get<std::string>().c_str());
-		dest.value = str.Detach();
-		return;
-	}
-
-	if (source.isType<float>()) {
-		dest.type = (LuaType) LUA_TNUMBER;
-		ATL::CComBSTR str(source.get<std::string>().c_str());
-		dest.value = str.Detach();
-		return;
-	}
-
-	if (source.isType<double>()) {
-		dest.type = (LuaType) LUA_TNUMBER;
-		ATL::CComBSTR str(source.get<std::string>().c_str());
-		dest.value = str.Detach();
-		return;
-	}
-
-	if (source.isType<bool>()) {
-		dest.type = (LuaType) LUA_TBOOLEAN;
-		ATL::CComBSTR str(source.get<std::string>().c_str());
-		dest.value = str.Detach();
-		return;
-	}
-
-	if (source.isType<std::string>()) {
-		dest.type = (LuaType) LUA_TSTRING;
-		ATL::CComBSTR str(source.get<std::string>().c_str());
-		dest.value = str.Detach();
-		return;
-	}
-
-	if (source.isType<RBX::ContentId>()) {
-		dest.type = (LuaType) LUA_TSTRING;
-		ATL::CComBSTR str(source.get<std::string>().c_str());
-		dest.value = str.Detach();
-		return;
-	}
-	dest.type = (LuaType) LUA_TNIL;
-}
-
-HRESULT __stdcall CWebService::Execute(wchar_t* jobID, ScriptExecution script, LuaArguments* result)
-{
-	try {
-		std::string code;
-		code = ATL::CStringA(script.script);
-		if (RBX::ContentProvider::isHttpUrl(code)) {
-			std::unique_ptr<std::istream> stream = RBX::ContentProvider::singleton().getContent(RBX::ContentId(code));
-			std::stringstream out;
-			out << stream->rdbuf();
-			code = out.str();
-		}
-
-		std::shared_ptr<RBX::DataModel> dataModel;
-		{
-			std::scoped_lock lock(sync);
-			Jobs::iterator iter = getJob(jobID);
-			dataModel = iter->second.dataModel;
-		}
-
-		std::unique_ptr<std::vector<RBX::Reflection::Value>> tuple;
-		{
-			std::vector<RBX::Reflection::Value> args(script.arguments.count);
-			for (int i = 0; i < script.arguments.count; ++i) {
-				convert(script.arguments.items[i], args[i]);
-			}
-
-			RBX::DataModel::Lock lock(dataModel);
-			RBX::ScriptContext* context = dataModel ? dataModel->create<RBX::ScriptContext>() : nullptr;
-			tuple = context->executeInNewThread(
-				RBX::Security::TrustedWebService, code.c_str(), ATL::CStringA(script.name), args
-			);
-		}
-
-		result->count = tuple->size();
-		result->items = allocate(result->items, tuple->size());
-		for (size_t i = 0; i < tuple->size(); ++i) {
-			convertToLua((*tuple)[i], result->items[i]);
-		}
-	}
-	catch (std::exception& e) {
-		return ReportException(e);
-	}
-
-	return S_OK;
-}
-
-HRESULT __stdcall CWebService::BatchJob(wchar_t* jobID, ScriptExecution script, double timeout, LuaArguments* result)
-{
-	HRESULT hr = OpenJob(jobID, script, timeout, result);
-
-	if (hr == S_OK) {
-		hr = CloseJob(jobID);
-	}
-
-	return hr;
-}
-
-HRESULT __stdcall CWebService::GetVersion(wchar_t** result)
-{
-	ATL::CComBSTR version(ATL::CStringA(dotVersion.c_str()));
-	*result = version.Detach();
-
-	return S_OK;
-}
-
-HRESULT __stdcall CWebService::GetStatus(Status* result)
-{
-	HRESULT hr = GetVersion(&result->version);
-
-	if (hr != S_OK) {
-		return hr;
-	}
-
 	std::scoped_lock lock(sync);
-	result->environmentCount = jobs.size();
-
-	return S_OK;
+	return {{"version", version}, {"environmentCount", jobs.size()}};
 }
 
-HRESULT __stdcall CWebService::Update(wchar_t* url)
+std::vector<std::string> WebService::getAllJobs()
 {
-	try {
-		throw std::runtime_error("Update not implemented");
-	}
-	catch (std::exception& e) {
-		return ReportException(e);
+	std::scoped_lock lock(sync);
+
+	std::vector<std::string> result;
+	result.reserve(jobs.size());
+	for (const auto& [id, job] : jobs) {
+		result.push_back(id);
 	}
 
-	return S_OK;
+	return result;
 }
 
-HRESULT __stdcall CWebService::GetStandardOutMessages(int maxCount, StandardOutMessages* result)
+void WebService::touchJob(const std::string& jobID, double timeout)
 {
-	try {
-		std::scoped_lock lock(standardOutLog->messagesMutex);
+	std::scoped_lock lock(sync);
+	touch(getJob(jobID)->second, timeout);
+}
 
-		while (standardOutLog->messages.size() > maxCount) {
-			standardOutLog->messages.pop();
-		}
+nlohmann::json WebService::openJob(const std::string& jobID, const nlohmann::json& script, double timeout)
+{
+	std::shared_ptr<RBX::DataModel> dataModel = RBX::DataModel::createDataModel();
+	{
+		std::scoped_lock lock(sync);
+		Job job;
+		job.dataModel = dataModel;
+		touch(job, timeout);
+		jobs[jobID] = job;
+	}
+	RBX::StandardOut::singleton()->print(RBX::MESSAGE_INFO, "Opened Job %s", jobID.c_str());
 
-		result->count = standardOutLog->messages.size();
-		result->items = allocate(result->items, result->count);
+	return execute(jobID, script);
+}
 
-		int i = 0;
-		while (standardOutLog->messages.size() > 0) {
-			const RBX::StandardOutMessage& message = standardOutLog->messages.front();
-			result->items[i].type = (MessageType) message.type;
-			result->items[i].time = message.time;
-			ATL::CComBSTR bstr(ATL::CStringA(message.message.c_str()));
-			result->items[i].text = bstr.Detach();
-			i++;
-			standardOutLog->messages.pop();
+void WebService::closeJob(const std::string& jobID)
+{
+	std::shared_ptr<RBX::DataModel> dataModel;
+	{
+		std::scoped_lock lock(sync);
+		Jobs::iterator iter = jobs.find(jobID);
+		if (iter != jobs.end()) {
+			dataModel = iter->second.dataModel;
+			jobs.erase(iter);
 		}
 	}
-	catch (std::exception& e) {
-		return ReportException(e);
+
+	if (dataModel) {
+		RBX::DataModel::closeDataModel(dataModel, true);
+		RBX::StandardOut::singleton()->print(RBX::MESSAGE_INFO, "Closed Job %s", jobID.c_str());
+	}
+}
+
+int WebService::closeTimedoutJobs()
+{
+	std::vector<std::shared_ptr<RBX::DataModel>> dataModels;
+	{
+		std::scoped_lock lock(sync);
+
+		Jobs keep;
+		for (const Jobs::value_type& job : jobs) {
+			if (secondsToTimeout(job.second) >= 0) {
+				keep.insert(job);
+			}
+			else {
+				dataModels.push_back(job.second.dataModel);
+			}
+		}
+
+		jobs = keep;
 	}
 
-	return S_OK;
+	for (const std::shared_ptr<RBX::DataModel>& dataModel : dataModels) {
+		RBX::DataModel::closeDataModel(dataModel, true);
+	}
+
+	return static_cast<int>(dataModels.size());
+}
+
+int WebService::closeOrphanedJobs(const std::vector<std::string>& activeJobs)
+{
+	std::vector<std::shared_ptr<RBX::DataModel>> dataModels;
+	{
+		Jobs keep;
+		std::scoped_lock lock(sync);
+		for (const Jobs::value_type& job : jobs) {
+			if (std::find(activeJobs.begin(), activeJobs.end(), job.first) != activeJobs.end()) {
+				keep.insert(job);
+			}
+			else {
+				dataModels.push_back(job.second.dataModel);
+			}
+		}
+
+		jobs = keep;
+	}
+
+	for (const std::shared_ptr<RBX::DataModel>& dataModel : dataModels) {
+		RBX::DataModel::closeDataModel(dataModel, true);
+	}
+
+	return static_cast<int>(dataModels.size());
+}
+
+void WebService::closeAllJobs()
+{
+	std::scoped_lock lock(sync);
+
+	for (const Jobs::value_type& job : jobs) {
+		RBX::DataModel::closeDataModel(job.second.dataModel, true);
+		RBX::StandardOut::singleton()->print(RBX::MESSAGE_INFO, "Closed Job %s", job.first.c_str());
+	}
+
+	jobs.clear();
+}
+
+double WebService::getTimeout(const std::string& jobID)
+{
+	std::scoped_lock lock(sync);
+	return secondsToTimeout(getJob(jobID)->second);
+}
+
+nlohmann::json WebService::execute(const std::string& jobID, const nlohmann::json& script)
+{
+	std::string code = script.value("script", std::string());
+	if (RBX::ContentProvider::isHttpUrl(code)) {
+		std::unique_ptr<std::istream> stream = RBX::ContentProvider::singleton().getContent(RBX::ContentId(code));
+		std::stringstream out;
+		out << stream->rdbuf();
+		code = out.str();
+	}
+
+	std::shared_ptr<RBX::DataModel> dataModel;
+	{
+		std::scoped_lock lock(sync);
+		dataModel = getJob(jobID)->second.dataModel;
+	}
+
+	std::unique_ptr<std::vector<RBX::Reflection::Value>> tuple;
+	{
+		std::vector<RBX::Reflection::Value> args;
+		if (script.contains("arguments")) {
+			const nlohmann::json& arguments = script.at("arguments");
+			args.resize(arguments.size());
+			for (size_t i = 0; i < arguments.size(); ++i) {
+				convert(arguments.at(i), args[i], 1);
+			}
+		}
+
+		const std::string name = script.value("name", std::string());
+
+		RBX::DataModel::Lock lock(dataModel);
+		RBX::ScriptContext* context = dataModel ? dataModel->create<RBX::ScriptContext>() : nullptr;
+		tuple = context->executeInNewThread(RBX::Security::TrustedWebService, code.c_str(), name.c_str(), args);
+	}
+
+	nlohmann::json result = nlohmann::json::array();
+	for (const RBX::Reflection::Value& value : *tuple) {
+		result.push_back(convertToLua(value, 1));
+	}
+
+	return result;
+}
+
+nlohmann::json WebService::batchJob(const std::string& jobID, const nlohmann::json& script, double timeout)
+{
+	nlohmann::json result = openJob(jobID, script, timeout);
+	closeJob(jobID);
+	return result;
+}
+
+nlohmann::json WebService::getStandardOutMessages(int maxCount)
+{
+	std::scoped_lock lock(standardOutLog.messagesMutex);
+
+	while (standardOutLog.messages.size() > static_cast<size_t>(maxCount)) {
+		standardOutLog.messages.pop();
+	}
+
+	nlohmann::json result = nlohmann::json::array();
+	while (!standardOutLog.messages.empty()) {
+		const RBX::StandardOutMessage& message = standardOutLog.messages.front();
+		result.push_back({{"type", message.type}, {"time", message.time}, {"text", message.message}});
+		standardOutLog.messages.pop();
+	}
+
+	return result;
 }
 
 } // namespace Roblox
+
+static std::string initRoblox(const std::string& contentFolder)
+{
+	RBX::Profiling::init(true);
+
+	RBX::StandardOut::singleton()->print(RBX::MESSAGE_INFO, "Intializing Roblox Web Service");
+
+	RBX::ContentProvider::singleton();
+
+	if (!contentFolder.empty()) {
+		RBX::ContentProvider::singleton().setAssetFolder(contentFolder.c_str());
+	}
+
+	static RBX::FactoryRegistrator registerFactoryObjects;
+	ThumbnailGenerator::classDescriptor();
+
+	RBX::Soundscape::SoundService::soundDisabled = true;
+	RBX::ViewBase::getShadowsEnabled() = false;
+
+	RBX::Network::API::init(WEBSERVICE_VERSION_STRING);
+
+	std::string dotVersion;
+	const std::vector<std::string> tokens = RBX::tokenize(WEBSERVICE_VERSION_STRING, " ,.");
+	for (std::vector<std::string>::const_iterator token = tokens.begin(); token != tokens.end(); ++token) {
+		if (token != tokens.begin()) {
+			dotVersion += ".";
+		}
+		dotVersion += *token;
+	}
+
+	return dotVersion;
+}
+
+static void reply(httplib::Response& response, const nlohmann::json& body, int status = 200)
+{
+	response.status = status;
+	response.set_content(body.dump(), "application/json");
+}
+
+template <class Handler>
+static httplib::Server::Handler route(Handler handler)
+{
+	return [handler](const httplib::Request& request, httplib::Response& response) {
+		try {
+			const nlohmann::json body =
+				request.body.empty() ? nlohmann::json::object() : nlohmann::json::parse(request.body);
+			reply(response, handler(request, body));
+		}
+		catch (const nlohmann::json::exception& e) {
+			reply(response, {{"error", e.what()}}, 400);
+		}
+		catch (const std::exception& e) {
+			reply(response, {{"error", e.what()}}, 500);
+		}
+		catch (...) {
+			reply(response, {{"error", "unknown exception"}}, 500);
+		}
+	};
+}
+
+static httplib::Server* runningServer;
+
+static void stopServer(int)
+{
+	runningServer->stop();
+}
+
+int main(int argc, char* argv[])
+{
+	std::string host = "127.0.0.1";
+	int port = 64989;
+	std::string contentFolder;
+
+	for (int i = 1; i < argc; ++i) {
+		const std::string arg = argv[i];
+
+		if (arg == "--host" && i + 1 < argc) {
+			host = argv[++i];
+		}
+		else if (arg == "--port" && i + 1 < argc) {
+			port = std::atoi(argv[++i]);
+		}
+		else if (arg == "--content" && i + 1 < argc) {
+			contentFolder = argv[++i];
+		}
+		else {
+			std::fprintf(stderr, "usage: %s [--host address] [--port number] [--content folder]\n", argv[0]);
+			return 1;
+		}
+	}
+
+	Roblox::StandardOutLog standardOutLog;
+
+	std::string dotVersion;
+	try {
+		dotVersion = initRoblox(contentFolder);
+	}
+	catch (const std::exception& e) {
+		RBX::StandardOut::singleton()->print(RBX::MESSAGE_ERROR, e);
+		return 1;
+	}
+
+	Roblox::WebService service(dotVersion, standardOutLog);
+
+	using Request = const httplib::Request&;
+	using Body = const nlohmann::json&;
+
+	httplib::Server server;
+
+	server.Get("/version", route([&](Request, Body) -> nlohmann::json { return {{"version", service.getVersion()}}; }));
+
+	server.Get("/status", route([&](Request, Body) { return service.getStatus(); }));
+
+	server.Get("/messages", route([&](Request request, Body) -> nlohmann::json {
+				   const int maxCount =
+					   request.has_param("maxCount") ? std::stoi(request.get_param_value("maxCount")) : 1000;
+				   return {{"messages", service.getStandardOutMessages(maxCount)}};
+			   }));
+
+	server.Get("/jobs", route([&](Request, Body) -> nlohmann::json { return {{"jobs", service.getAllJobs()}}; }));
+
+	server.Delete("/jobs", route([&](Request, Body) {
+					  service.closeAllJobs();
+					  return nlohmann::json::object();
+				  }));
+
+	server.Post("/jobs/close-timedout", route([&](Request, Body) -> nlohmann::json {
+					return {{"closed", service.closeTimedoutJobs()}};
+				}));
+
+	server.Post("/jobs/close-orphaned", route([&](Request, Body body) -> nlohmann::json {
+					return {
+						{"closed", service.closeOrphanedJobs(body.at("activeJobs").get<std::vector<std::string>>())}
+					};
+				}));
+
+	server.Put(
+		"/jobs/:id", route([&](Request request, Body body) -> nlohmann::json {
+			return {
+				{"result",
+				 service.openJob(request.path_params.at("id"), body.at("script"), body.at("timeout").get<double>())}
+			};
+		})
+	);
+
+	server.Delete("/jobs/:id", route([&](Request request, Body) {
+					  service.closeJob(request.path_params.at("id"));
+					  return nlohmann::json::object();
+				  }));
+
+	server.Post("/jobs/:id/execute", route([&](Request request, Body body) -> nlohmann::json {
+					return {{"result", service.execute(request.path_params.at("id"), body.at("script"))}};
+				}));
+
+	server.Post(
+		"/jobs/:id/batch", route([&](Request request, Body body) -> nlohmann::json {
+			return {
+				{"result",
+				 service.batchJob(request.path_params.at("id"), body.at("script"), body.at("timeout").get<double>())}
+			};
+		})
+	);
+
+	server.Post("/jobs/:id/touch", route([&](Request request, Body body) {
+					service.touchJob(request.path_params.at("id"), body.at("timeout").get<double>());
+					return nlohmann::json::object();
+				}));
+
+	server.Get("/jobs/:id/timeout", route([&](Request request, Body) -> nlohmann::json {
+				   return {{"timeout", service.getTimeout(request.path_params.at("id"))}};
+			   }));
+
+	runningServer = &server;
+	std::signal(SIGINT, stopServer);
+	std::signal(SIGTERM, stopServer);
+
+	if (!server.bind_to_port(host, port)) {
+		RBX::StandardOut::singleton()->print(RBX::MESSAGE_ERROR, "Unable to listen on %s:%d", host.c_str(), port);
+		return 1;
+	}
+
+	RBX::StandardOut::singleton()->print(RBX::MESSAGE_INFO, "Listening on %s:%d", host.c_str(), port);
+	server.listen_after_bind();
+
+	service.closeAllJobs();
+
+	return 0;
+}
 
 template void RBX::Name::callDoDeclare<RBX::Soundscape::sSoundService>();
 template const RBX::Name& RBX::Name::doDeclare<RBX::Soundscape::sSoundService>();

@@ -8,7 +8,7 @@ namespace RBX {
 
 using G3D::Color3;
 
-class __declspec(novtable) Controller : public G3D::ReferenceCountedObject
+class Controller : public G3D::ReferenceCountedObject
 {
 public:
 	Controller() {}

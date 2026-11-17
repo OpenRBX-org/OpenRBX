@@ -11,8 +11,8 @@
 #include "WebToolbox.h"
 #include "util/FileSystem.h"
 #include "util/Log.h"
-#include "util/StandardOut.h"
 #include "util/scopedassign.h"
+#include "util/standardout.h"
 #include "v8datamodel/Accoutrement.h"
 #include "v8datamodel/ToolsPart.h"
 

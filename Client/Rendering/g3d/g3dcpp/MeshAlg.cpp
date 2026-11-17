@@ -16,6 +16,7 @@
 #include "G3D/Box.h"
 #include "G3D/Sphere.h"
 #include "G3D/vectorMath.h"
+#include <limits.h>
 
 namespace G3D {
 

@@ -211,7 +211,9 @@ RakPeer::~RakPeer()
 	StringCompressor::RemoveReference();
 	StringTable::RemoveReference();
 
+#ifdef _WIN32
 	CloseHandle(processPacketsThreadHandle);
+#endif
 }
 
 // --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

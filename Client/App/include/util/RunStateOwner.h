@@ -55,7 +55,7 @@ public:
 	bool resetEvent();
 };
 
-class __declspec(novtable) IRunView
+class IRunView
 {
 public:
 	virtual void InvalidateRunView() = 0;

@@ -7,7 +7,7 @@ namespace RBX {
 
 class IMoving;
 
-class __declspec(novtable) IMovingManager
+class IMovingManager
 {
 public:
 	using MovingSet = std::set<IMoving*>;
@@ -38,7 +38,7 @@ struct CanAggregateChanged
 	CanAggregateChanged(bool canClump) : canClump(canClump) {}
 };
 
-class __declspec(novtable) IMoving
+class IMoving
 {
 protected:
 	virtual void onCanAggregateChanged(bool value) = 0;

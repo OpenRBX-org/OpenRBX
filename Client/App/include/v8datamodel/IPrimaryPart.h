@@ -5,7 +5,7 @@ namespace RBX {
 
 class PartInstance;
 
-class __declspec(novtable) IPrimaryPart
+class IPrimaryPart
 {
 public:
 	virtual PartInstance* getPrimaryPart() = 0;

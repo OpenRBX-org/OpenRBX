@@ -13,6 +13,7 @@
 #include <G3D/Vector3.h>
 #include <memory>
 #include <string>
+#include <type_traits>
 #include <typeinfo>
 
 class XmlElement;
@@ -30,7 +31,7 @@ class DescribedBase;
 class Property;
 class EnumDescriptor;
 
-class __declspec(novtable) PropertyDescriptor : public MemberDescriptor
+class PropertyDescriptor : public MemberDescriptor
 {
 public:
 	enum Functionality
@@ -93,7 +94,7 @@ template <class T>
 class TypedPropertyDescriptor : public PropertyDescriptor
 {
 public:
-	class __declspec(novtable) GetSet
+	class GetSet
 	{
 	public:
 		virtual bool isReadOnly() const = 0;
@@ -334,7 +335,7 @@ void TypedPropertyDescriptor<G3D::CoordinateFrame>::writeValue(
 	const DescribedBase* instance, XmlElement* element
 ) const;
 
-class __declspec(novtable) EnumPropertyDescriptor : public PropertyDescriptor
+class EnumPropertyDescriptor : public PropertyDescriptor
 {
 public:
 	const EnumDescriptor& enumDescriptor;
@@ -358,7 +359,7 @@ protected:
 	}
 };
 
-class __declspec(novtable) RefPropertyDescriptor : public PropertyDescriptor
+class RefPropertyDescriptor : public PropertyDescriptor
 {
 public:
 	virtual DescribedBase* getRefValue(const DescribedBase* instance) const = 0;
@@ -466,19 +467,17 @@ public:
 	template <class Getter, class Setter>
 	static std::unique_ptr<typename TypedPropertyDescriptor<T>::GetSet> getset(Getter get, Setter set)
 	{
-		return std::unique_ptr<typename TypedPropertyDescriptor<T>::GetSet>(new GetSetImpl<Getter, Setter>(get, set));
-	}
-
-	template <class Getter, class Setter>
-	static std::unique_ptr<typename TypedPropertyDescriptor<T>::GetSet> getset(Getter get, int set)
-	{
-		return std::unique_ptr<typename TypedPropertyDescriptor<T>::GetSet>(new GetImpl<Getter>(get));
-	}
-
-	template <class Getter, class Setter>
-	static std::unique_ptr<typename TypedPropertyDescriptor<T>::GetSet> getset(int get, Setter set)
-	{
-		return std::unique_ptr<typename TypedPropertyDescriptor<T>::GetSet>(new SetImpl<Setter>(set));
+		if constexpr (!std::is_member_function_pointer_v<Setter>) {
+			return std::unique_ptr<typename TypedPropertyDescriptor<T>::GetSet>(new GetImpl<Getter>(get));
+		}
+		else if constexpr (!std::is_member_function_pointer_v<Getter>) {
+			return std::unique_ptr<typename TypedPropertyDescriptor<T>::GetSet>(new SetImpl<Setter>(set));
+		}
+		else {
+			return std::unique_ptr<typename TypedPropertyDescriptor<T>::GetSet>(
+				new GetSetImpl<Getter, Setter>(get, set)
+			);
+		}
 	}
 
 	template <class Getter, class Setter>

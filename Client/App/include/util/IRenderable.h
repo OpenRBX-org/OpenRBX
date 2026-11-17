@@ -14,7 +14,7 @@ enum SelectState
 	SELECT_LIMIT = 1
 };
 
-class __declspec(novtable) IRenderable
+class IRenderable
 {
 protected:
 	virtual bool shouldRender2d() const { return false; }

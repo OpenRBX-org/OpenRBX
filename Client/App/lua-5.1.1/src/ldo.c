@@ -107,7 +107,7 @@ public:
 		: L(other.L), errorJmp(other.errorJmp), committed(other.committed)
 	{ other.committed = true; }
 
-	virtual const char* what() const
+	virtual const char* what() const noexcept
 	{ return lua_tostring(L, -1); }
 
 	virtual ~lua_exception()

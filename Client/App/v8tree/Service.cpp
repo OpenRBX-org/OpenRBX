@@ -1,6 +1,6 @@
 #include "v8tree/Service.h"
 
-#include <windows.h>
+#include <atomic>
 
 namespace RBX {
 
@@ -16,9 +16,9 @@ Reflection::BoundFuncDesc<ServiceProvider, std::shared_ptr<Instance>(std::string
 
 unsigned int ServiceProvider::newIndex()
 {
-	static long index = -1;
+	static std::atomic<int> index = -1;
 
-	return InterlockedIncrement(&index);
+	return ++index;
 }
 
 void ServiceProvider::onDescendentAdded(Instance* instance)

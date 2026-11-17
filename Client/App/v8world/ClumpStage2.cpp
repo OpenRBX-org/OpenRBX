@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
+#include <cstdint>
 
 namespace RBX {
 
@@ -39,7 +40,7 @@ haveArea:;
 
 	float gridArea = floor(area);
 
-	return (float) (G3D::iRound(gridArea) * (unsigned __int64) p->getSizeMultiplier());
+	return (float) (G3D::iRound(gridArea) * (std::uint64_t) p->getSizeMultiplier());
 }
 
 int biggerJointGuid(const Joint* j0, const Joint* j1)

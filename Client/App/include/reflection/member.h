@@ -205,7 +205,7 @@ MemberDescriptorContainer<T>::MemberDescriptorContainer(MemberDescriptorContaine
 	}
 }
 
-class __declspec(novtable) MemberDescriptor : public Descriptor
+class MemberDescriptor : public Descriptor
 {
 public:
 	bool isMemberOf(const ClassDescriptor& classDescriptor) const;

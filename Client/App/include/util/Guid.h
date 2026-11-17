@@ -44,7 +44,7 @@ private:
 };
 
 template <class T>
-class __declspec(novtable) GuidItem
+class GuidItem
 {
 	struct StaticData
 	{

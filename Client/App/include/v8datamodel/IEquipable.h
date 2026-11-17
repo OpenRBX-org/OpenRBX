@@ -13,7 +13,7 @@ class Workspace;
 
 using G3D::CoordinateFrame;
 
-class __declspec(novtable) IEquipable
+class IEquipable
 {
 protected:
 	std::shared_ptr<Weld> weld;

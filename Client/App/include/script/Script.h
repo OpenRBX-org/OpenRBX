@@ -70,7 +70,7 @@ public:
 
 class ScriptContext;
 
-class __declspec(novtable) IScriptOwner
+class IScriptOwner
 {
 	friend class Script;
 

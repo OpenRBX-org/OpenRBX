@@ -11,9 +11,9 @@
 #include "util/Name.h"
 #include "util/Profiling.h"
 #include "util/Quaternion.h"
-#include "util/StandardOut.h"
 #include "util/Velocity.h"
 #include "util/scopedassign.h"
+#include "util/standardout.h"
 #include "v8datamodel/Camera.h"
 #include "v8datamodel/Hopper.h"
 #include "v8datamodel/JointInstance.h"
@@ -123,7 +123,7 @@ public:
 	void update() override;
 };
 
-class __declspec(novtable) Replicator::Item
+class Replicator::Item
 {
 protected:
 	Replicator& replicator;
@@ -1560,7 +1560,7 @@ void Replicator::readInstanceNew(RakNet::BitStream& inBitstream)
 
 void Replicator::readMarker(RakNet::BitStream& inBitstream)
 {
-	long id;
+	int id;
 	inBitstream >> id;
 
 	if (NetworkSettings::singleton().printInstances) {
@@ -1778,7 +1778,7 @@ PluginReceiveResult Replicator::OnReceive(RakPeerInterface* peer, Packet* packet
 				RakNet::BitStream inBitstream(packet->data, packet->length, false);
 				inBitstream.IgnoreBits(8);
 
-				long id;
+				int id;
 				inBitstream >> id;
 
 				pendingItems.push_back(std::shared_ptr<Item>(new MarkerItem(*this, id)));
@@ -1793,7 +1793,7 @@ PluginReceiveResult Replicator::OnReceive(RakPeerInterface* peer, Packet* packet
 				inBitstream >> remoteScope;
 
 				if (Name::lookup(remoteScope) == Guid::getLocalScope()) {
-					throw std::exception("Remote peer is running in the same process");
+					throw std::runtime_error("Remote peer is running in the same process");
 				}
 
 				TopReplConts::iterator end = topReplicationContainers.end();

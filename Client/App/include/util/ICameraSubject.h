@@ -10,7 +10,7 @@ namespace RBX {
 
 class Primitive;
 
-class __declspec(novtable) ICameraSubject : public virtual ILocation
+class ICameraSubject : public virtual ILocation
 {
 public:
 	ICameraSubject() {}

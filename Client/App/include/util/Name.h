@@ -96,7 +96,7 @@ public:
 };
 
 template <class Base, const char* nameValue>
-class __declspec(novtable) Named : public Base
+class Named : public Base
 {
 public:
 	template <class A>

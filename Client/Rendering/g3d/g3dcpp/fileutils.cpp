@@ -11,6 +11,7 @@
 #include "G3D/fileutils.h"
 #include "G3D/BinaryInput.h"
 #include "G3D/g3dmath.h"
+#include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include "G3D/stringutils.h"

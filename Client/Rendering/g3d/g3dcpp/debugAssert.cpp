@@ -33,7 +33,7 @@ namespace G3D { namespace _internal {
 AssertionHook _debugHook = _handleDebugAssert_;
 AssertionHook _failureHook = _handleErrorCheck_;
 
-#ifdef G3D_LINUX
+#if defined(G3D_LINUX) && !defined(G3D_DEBUG_NOGUI)
     Display*      x11Display = NULL;
     Window        x11Window  = 0;
 #endif
@@ -252,7 +252,7 @@ void _releaseInputGrab_() {
         GetClipCursor(&oldCursorRect);
         ClipCursor(NULL);
         
-    #elif defined(G3D_LINUX)
+    #elif defined(G3D_LINUX) && !defined(G3D_DEBUG_NOGUI)
         if (x11Display != NULL) {
             XUngrabPointer(x11Display, CurrentTime);
             XUngrabKeyboard(x11Display, CurrentTime);

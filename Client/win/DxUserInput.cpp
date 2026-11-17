@@ -6,7 +6,7 @@
 #include "rbxgraphics/TextureProxyBase.h"
 #include "util/FrameInterpolator.h"
 #include "util/Rect.h"
-#include "util/StandardOut.h"
+#include "util/standardout.h"
 #include "v8datamodel/DataModel.h"
 
 #include <windowsx.h>

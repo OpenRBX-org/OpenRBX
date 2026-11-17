@@ -2,7 +2,7 @@
 #define OUTPUTVIEW_H
 
 #include "SecureHtmlView.h"
-#include "util/StandardOut.h"
+#include "util/standardout.h"
 
 #include <atlbase.h>
 #include <deque>

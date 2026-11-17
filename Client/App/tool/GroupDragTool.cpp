@@ -78,7 +78,7 @@ MouseCommand* GroupDragTool::onMouseUp(const UIEvent& uiEvent)
 MouseCommand* GroupDragTool::onKeyDown(const UIEvent& uiEvent)
 {
 	if (dragging) {
-		switch (uiEvent.key) {
+		switch (uiEvent.key()) {
 		case SDLK_r:
 			megaDragger->safeRotate(Math::matrixRotateY());
 			break;

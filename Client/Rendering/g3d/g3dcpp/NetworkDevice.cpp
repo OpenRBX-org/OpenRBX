@@ -7,6 +7,7 @@
  */
 
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 #include "G3D/platform.h"
 #include "G3D/TextOutput.h"

@@ -37,7 +37,7 @@ struct RaiseRange
 };
 
 template <class Source, class Event>
-class __declspec(novtable) Listener
+class Listener
 {
 protected:
 	friend class Notifier<Source, Event>;
@@ -48,7 +48,7 @@ protected:
 };
 
 template <class Source, class Event>
-class __declspec(novtable) Notifier
+class Notifier
 {
 private:
 	mutable std::vector<Listener<Source, Event>*> listeners;

@@ -56,10 +56,12 @@ bool operator<(const ContentId& a, const ContentId& b);
 bool operator!=(const ContentId& a, const ContentId& b);
 bool operator==(const ContentId& a, const ContentId& b);
 
-class __declspec(novtable) MD5Hasher
+class MD5Hasher
 {
 public:
 	static MD5Hasher* create();
+
+	virtual ~MD5Hasher() = default;
 
 	virtual void addData(std::istream& data) = 0;
 	virtual void addData(const std::string& data) = 0;

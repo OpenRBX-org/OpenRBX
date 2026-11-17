@@ -7,11 +7,11 @@ namespace RBX {
 
 GuiResponse KeyButton::process(const GuiEvent& p_unk0x04)
 {
-	if (p_unk0x04.eventType == UIEvent::KEY_DOWN && p_unk0x04.key == keyCode) {
+	if (p_unk0x04.eventType == UIEvent::KEY_DOWN && p_unk0x04.key() == keyCode) {
 		keyIsDown = true;
 	}
 
-	if (p_unk0x04.eventType == UIEvent::KEY_UP && p_unk0x04.key == keyCode) {
+	if (p_unk0x04.eventType == UIEvent::KEY_UP && p_unk0x04.key() == keyCode) {
 		keyIsDown = false;
 	}
 

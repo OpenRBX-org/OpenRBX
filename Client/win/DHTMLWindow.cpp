@@ -4,7 +4,7 @@
 #include "reflection/member.h"
 #include "reflection/reflection.h"
 #include "util/Name.h"
-#include "util/StandardOut.h"
+#include "util/standardout.h"
 
 #include <G3D/format.h>
 #include <exception>

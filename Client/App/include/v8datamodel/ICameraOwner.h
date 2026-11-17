@@ -16,7 +16,7 @@ class Camera;
 class PartInstance;
 class Primitive;
 
-class __declspec(novtable) ICameraOwner
+class ICameraOwner
 {
 public:
 	ICameraOwner() {}

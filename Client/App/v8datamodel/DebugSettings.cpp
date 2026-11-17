@@ -7,10 +7,15 @@
 #include "v8datamodel/Workspace.h"
 #include "v8world/World.h"
 
-#include <G3D/RegistryUtil.h>
 #include <G3D/format.h>
+
+#ifdef _WIN32
+#include <G3D/RegistryUtil.h>
 #include <setupapi.h>
 #include <windows.h>
+#else
+#include <sys/utsname.h>
+#endif
 
 namespace RBX {
 
@@ -144,6 +149,8 @@ int DebugSettings::cpuSpeed() const
 	return Render::SpecData().CPUSpeed;
 }
 
+#ifdef _WIN32
+
 std::string DebugSettings::osVer() const
 {
 	OSVERSIONINFO osvi = {0};
@@ -164,10 +171,31 @@ int DebugSettings::osPlatformId() const
 	return osvi.dwPlatformId;
 }
 
+#else
+
+std::string DebugSettings::osVer() const
+{
+	utsname name;
+	if (uname(&name) != 0) {
+		return "";
+	}
+
+	return name.release;
+}
+
+int DebugSettings::osPlatformId() const
+{
+	return 0;
+}
+
+#endif
+
 std::string DebugSettings::glVendor() const
 {
 	return Render::SpecData().glVendor;
 }
+
+#ifdef _WIN32
 
 std::string DebugSettings::gfxcard() const
 {
@@ -241,6 +269,15 @@ std::string DebugSettings::gfxcard() const
 
 	return std::string(displayDevice.DeviceString) + " drv=" + driverVersion;
 }
+
+#else
+
+std::string DebugSettings::gfxcard() const
+{
+	return Render::SpecData().gfxcard;
+}
+
+#endif
 
 std::string DebugSettings::cpu() const
 {

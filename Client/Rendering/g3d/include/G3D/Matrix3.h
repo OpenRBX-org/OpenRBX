@@ -15,6 +15,7 @@
 #define G3D_MATRIX3_H
 
 #include "G3D/platform.h"
+#include <cstring>
 #include "G3D/Vector3.h"
 #include "G3D/Vector4.h"
 #include "G3D/debugAssert.h"

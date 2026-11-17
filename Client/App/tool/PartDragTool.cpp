@@ -77,7 +77,7 @@ MouseCommand* PartDragTool::onKeyDown(const UIEvent& uiEvent)
 {
 	if (megaDragger->mousePartAlive()) {
 		if (dragging) {
-			switch (uiEvent.key) {
+			switch (uiEvent.key()) {
 			case SDLK_r:
 				RunDragger::rotatePart(megaDragger->getMousePart().lock().get());
 				break;

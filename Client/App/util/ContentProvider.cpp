@@ -2,31 +2,41 @@
 
 #include "util/FileSystem.h"
 #include "util/Http.h"
-#include "util/StandardOut.h"
 #include "util/Utilities.h"
+#include "util/standardout.h"
 #include "v8xml/SerializerV2.h"
 #include "v8xml/XmlElement.h"
 #include "v8xml/XmlSerializer.h"
 
 #include <G3D/format.h>
 #include <algorithm>
-#include <atlpath.h>
-#include <atlstr.h>
 #include <chrono>
+#include <cstdio>
+#include <filesystem>
 #include <fstream>
 #include <istream>
-#include <shlobj.h>
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <system_error>
+
+#ifdef _WIN32
 #include <wincrypt.h>
+#include <windows.h>
+#else
+#include <openssl/evp.h>
+#endif
 
 namespace RBX {
 
 class MD5HasherImpl : public MD5Hasher
 {
+#ifdef _WIN32
 	HCRYPTPROV hProv;
 	HCRYPTHASH hHash;
+#else
+	EVP_MD_CTX* context;
+#endif
 	std::string result;
 
 public:
@@ -99,6 +109,8 @@ std::string MD5Hasher::convertToLegacyHash(std::string hash)
 	return result;
 }
 
+#ifdef _WIN32
+
 MD5HasherImpl::MD5HasherImpl() : hProv(0), hHash(0)
 {
 	if (!CryptAcquireContext(&hProv, nullptr, nullptr, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT)) {
@@ -114,22 +126,15 @@ MD5HasherImpl::MD5HasherImpl() : hProv(0), hHash(0)
 	}
 }
 
-void MD5HasherImpl::addData(std::istream& data)
+MD5HasherImpl::~MD5HasherImpl()
 {
-	char buffer[1024];
-	data.clear();
-	data.seekg(0, std::ios_base::beg);
+	if (hHash) {
+		CryptDestroyHash(hHash);
+	}
 
-	do {
-		data.read(buffer, 1024);
-		addData(buffer, data.gcount());
-	} while (data.gcount() > 0);
-}
-
-std::string MD5HasherImpl::toString()
-{
-	c_str();
-	return result;
+	if (hProv) {
+		CryptReleaseContext(hProv, 0);
+	}
 }
 
 void MD5HasherImpl::addData(const std::string& data)
@@ -144,17 +149,6 @@ void MD5HasherImpl::addData(const char* data, unsigned int nBytes)
 	if (!CryptHashData(hHash, (const BYTE*) data, nBytes, 0)) {
 		StandardOut::singleton()->print(MESSAGE_ERROR, "Error during CryptHashData. GetLastError = %d", GetLastError());
 	}
-}
-
-MD5Hasher* MD5Hasher::create()
-{
-	return new MD5HasherImpl();
-}
-
-bool ContentProvider::isRequestQueueEmpty()
-{
-	std::scoped_lock lock(requestSync);
-	return requestQueue.empty();
 }
 
 const char* MD5HasherImpl::c_str()
@@ -176,8 +170,8 @@ const char* MD5HasherImpl::c_str()
 		}
 
 		for (DWORD i = 0; i < hashLength; i++) {
-			CString s;
-			s.Format("%02x", hash[i]);
+			char s[3];
+			std::snprintf(s, sizeof(s), "%02x", hash[i]);
 			result += s;
 		}
 
@@ -185,6 +179,82 @@ const char* MD5HasherImpl::c_str()
 	}
 
 	return result.c_str();
+}
+
+#else
+
+MD5HasherImpl::MD5HasherImpl() : context(EVP_MD_CTX_new())
+{
+	if (!context || !EVP_DigestInit_ex(context, EVP_md5(), nullptr)) {
+		StandardOut::singleton()->print(MESSAGE_ERROR, "Error during EVP_DigestInit_ex");
+	}
+}
+
+MD5HasherImpl::~MD5HasherImpl()
+{
+	EVP_MD_CTX_free(context);
+}
+
+void MD5HasherImpl::addData(const std::string& data)
+{
+	addData(data.c_str(), data.size());
+}
+
+void MD5HasherImpl::addData(const char* data, unsigned int nBytes)
+{
+	if (!EVP_DigestUpdate(context, data, nBytes)) {
+		StandardOut::singleton()->print(MESSAGE_ERROR, "Error during EVP_DigestUpdate");
+	}
+}
+
+const char* MD5HasherImpl::c_str()
+{
+	if (result.size() == 0) {
+		unsigned char hash[EVP_MAX_MD_SIZE];
+		unsigned int hashLength = 0;
+		if (!EVP_DigestFinal_ex(context, hash, &hashLength)) {
+			StandardOut::singleton()->print(MESSAGE_ERROR, "Error during EVP_DigestFinal_ex");
+		}
+
+		for (unsigned int i = 0; i < hashLength; i++) {
+			char s[3];
+			std::snprintf(s, sizeof(s), "%02x", hash[i]);
+			result += s;
+		}
+	}
+
+	return result.c_str();
+}
+
+#endif
+
+void MD5HasherImpl::addData(std::istream& data)
+{
+	char buffer[1024];
+	data.clear();
+	data.seekg(0, std::ios_base::beg);
+
+	do {
+		data.read(buffer, 1024);
+		addData(buffer, data.gcount());
+	} while (data.gcount() > 0);
+}
+
+std::string MD5HasherImpl::toString()
+{
+	c_str();
+	return result;
+}
+
+MD5Hasher* MD5Hasher::create()
+{
+	return new MD5HasherImpl();
+}
+
+bool ContentProvider::isRequestQueueEmpty()
+{
+	std::scoped_lock lock(requestSync);
+	return requestQueue.empty();
 }
 
 ContentProvider::FailedUrl::FailedUrl(const char* url)
@@ -214,37 +284,93 @@ bool ContentProvider::isUrlBad(const char* url)
 	return false;
 }
 
-static CPath getLocalCachePath(bool createPath)
+static std::filesystem::path getLocalCachePath(bool createPath)
 {
-	CPath result;
 	if (createPath) {
 		static std::string s = FileSystem::getCacheDirectory(true);
-		result.m_strPath = s.c_str();
+		return s;
 	}
 	else {
 		static std::string s = FileSystem::getCacheDirectory(false);
-		result.m_strPath = s.c_str();
+		return s;
 	}
-	return result;
 }
+
+static bool fileExists(const std::filesystem::path& path)
+{
+	std::error_code error;
+	return std::filesystem::exists(path, error);
+}
+
+static bool equalsIgnoreCase(std::string a, std::string b)
+{
+	toLower(a);
+	toLower(b);
+	return a == b;
+}
+
+static std::string findIgnoringCase(const std::string& folder, const std::string& relativePath)
+{
+	std::filesystem::path result(folder);
+
+	for (const std::filesystem::path& component : std::filesystem::path(relativePath)) {
+		std::filesystem::path match = component;
+
+		std::error_code error;
+		for (std::filesystem::directory_iterator iter(result, error), end; !error && iter != end;
+			 iter.increment(error)) {
+			if (equalsIgnoreCase(iter->path().filename().string(), component.string())) {
+				match = iter->path().filename();
+				break;
+			}
+		}
+
+		result /= match;
+	}
+
+	return result.string();
+}
+
+#ifdef _WIN32
 
 void ContentProvider::clearFileCache()
 {
-	CPath path = getLocalCachePath(false);
+	std::string path = getLocalCachePath(false).string();
 
-	if (path.m_strPath != "") {
+	if (path != "") {
 		WIN32_FIND_DATA FindFileData;
-		HANDLE hFind = FindFirstFile(path.m_strPath + "*.*", &FindFileData);
+		HANDLE hFind = FindFirstFile((path + "*.*").c_str(), &FindFileData);
 
 		if (hFind != INVALID_HANDLE_VALUE) {
 			do {
 				if (!(FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
-					DeleteFile(path.m_strPath + FindFileData.cFileName);
+					DeleteFile((path + FindFileData.cFileName).c_str());
 				}
 			} while (FindNextFile(hFind, &FindFileData));
+
+			FindClose(hFind);
 		}
 	}
 }
+
+#else
+
+void ContentProvider::clearFileCache()
+{
+	std::filesystem::path path = getLocalCachePath(false);
+
+	if (!path.empty()) {
+		std::error_code error;
+		for (std::filesystem::directory_iterator iter(path, error), end; !error && iter != end; iter.increment(error)) {
+			std::error_code fileError;
+			if (!iter->is_directory(fileError)) {
+				std::filesystem::remove(iter->path(), fileError);
+			}
+		}
+	}
+}
+
+#endif
 
 ContentId ContentProvider::registerContent(std::istream& content, const Name& mimeType)
 {
@@ -254,10 +380,9 @@ ContentId ContentProvider::registerContent(std::istream& content, const Name& mi
 		hasher->addData(content);
 		id = ContentId(hasher->toString(), mimeType);
 	}
-	CPath filePath = getLocalCachePath(true);
-	filePath.Append(id.c_str());
+	std::filesystem::path filePath = getLocalCachePath(true) / id.c_str();
 
-	if (!filePath.FileExists()) {
+	if (!fileExists(filePath)) {
 		std::ofstream outStream(filePath, std::ios_base::out | std::ios_base::binary);
 
 		content.clear();
@@ -275,14 +400,12 @@ ContentId ContentProvider::registerContent(std::istream& content, const Name& mi
 
 std::string ContentProvider::findHashFile(ContentId contentId)
 {
-	CPath cachePath = getLocalCachePath(true);
-	CPath filePath = cachePath;
-	filePath.Append(contentId.c_str());
+	std::filesystem::path filePath = getLocalCachePath(true) / contentId.c_str();
 
-	if (!filePath.FileExists()) {
+	if (!fileExists(filePath)) {
 		return "";
 	}
-	return (LPCSTR) filePath;
+	return filePath.string();
 }
 
 bool ContentProvider::registerFile(CachedContent* item)
@@ -318,39 +441,50 @@ void ContentProvider::clearContentCache()
 
 std::string ContentProvider::findFile(ContentId contentId)
 {
-	CPath filePath(contentId.c_str() + 7);
+	std::string filePath(contentId.c_str() + 7);
 
-	if (!filePath.FileExists()) {
+	if (!fileExists(filePath)) {
 		return "";
 	}
-	return (LPCSTR) filePath;
+	return filePath;
 }
 
 std::string ContentProvider::findAsset(ContentId contentId)
 {
-	CPath filePath((assetFolderPath + (contentId.c_str() + 11)).c_str());
+	std::string filePath = assetFolderPath + (contentId.c_str() + 11);
 
-	if (!filePath.FileExists()) {
+	if constexpr (std::filesystem::path::preferred_separator == '/') {
+		std::replace(filePath.begin(), filePath.end(), '\\', '/');
+
+		if (!fileExists(filePath)) {
+			filePath = findIgnoringCase(assetFolderPath, filePath.substr(assetFolderPath.size()));
+		}
+	}
+
+	if (!fileExists(filePath)) {
 		return "";
 	}
-	return (LPCSTR) filePath;
+	return filePath;
 }
 
 void ContentProvider::setAssetFolder(const char* sPath)
 {
 	StandardOut::singleton()->print(MESSAGE_INFO, "setAssetFolder %s", sPath);
 
-	CPath path(sPath);
-	if (path.IsRelative()) {
-		throw std::runtime_error(G3D::format("The path '%s' is a relative path", (LPCSTR) path));
+	std::filesystem::path path(sPath);
+	if (path.is_relative()) {
+		throw std::runtime_error(G3D::format("The path '%s' is a relative path", sPath));
 	}
 
-	if (!path.IsDirectory()) {
-		throw std::runtime_error(G3D::format("The path '%s' does not exist", (LPCSTR) path));
+	std::error_code error;
+	if (!std::filesystem::is_directory(path, error)) {
+		throw std::runtime_error(G3D::format("The path '%s' does not exist", sPath));
 	}
 
-	path.AddBackslash();
-	assetFolderPath = path;
+	assetFolderPath = sPath;
+	if (assetFolderPath.back() != std::filesystem::path::preferred_separator) {
+		assetFolderPath += (char) std::filesystem::path::preferred_separator;
+	}
 }
 
 worker_thread::work_result ContentProvider::processRequests()
@@ -553,8 +687,7 @@ ContentId ContentProvider::readContent(const char* id, std::istream& stream, uns
 		stream.seekg(dataLength, std::ios_base::cur);
 	}
 	else {
-		CPath filePath = getLocalCachePath(true);
-		filePath.Append(result.c_str());
+		std::filesystem::path filePath = getLocalCachePath(true) / result.c_str();
 
 		std::ofstream content;
 		content.open(filePath, std::ios_base::out | std::ios_base::binary);
@@ -581,9 +714,9 @@ void ContentProvider::load(ContentId id, std::vector<std::shared_ptr<Instance>>&
 
 ContentProvider::ContentProvider()
 {
-	char path[MAX_PATH];
-	if (SHGetFolderPathAndSubDir(nullptr, CSIDL_COMMON_APPDATA, nullptr, 0, "Roblox\\content\\", path) == S_OK) {
-		setAssetFolder(path);
+	std::string path = FileSystem::getContentDirectory();
+	if (!path.empty()) {
+		setAssetFolder(path.c_str());
 	}
 	else {
 		StandardOut::singleton()->print(MESSAGE_WARNING, "Failed to get asset folder");

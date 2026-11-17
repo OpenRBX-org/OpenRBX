@@ -46,7 +46,7 @@ private:
 	ClassDescriptor* base;
 };
 
-class __declspec(novtable) DescribedBase : public SignalSource
+class DescribedBase : public SignalSource
 {
 public:
 	static ClassDescriptor& classDescriptor() { return ClassDescriptor::rootDescriptor(); }

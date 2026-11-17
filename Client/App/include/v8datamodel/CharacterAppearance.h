@@ -18,7 +18,7 @@ extern const char sShirt[];
 
 extern const char sShirtGraphic[];
 
-class __declspec(novtable) CharacterAppearance : public Instance
+class CharacterAppearance : public Instance
 {
 private:
 	virtual void apply(Humanoid* humanoid) = 0;

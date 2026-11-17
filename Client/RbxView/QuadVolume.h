@@ -23,7 +23,7 @@ inline G3D::Vector3 uvwToObject(const G3D::Vector3& uvw)
 	return RBX::uvwToObject<face>(uvw);
 }
 
-class __declspec(novtable) LevelBuilder
+class LevelBuilder
 {
 protected:
 	const G3D::Vector3 halfSize;

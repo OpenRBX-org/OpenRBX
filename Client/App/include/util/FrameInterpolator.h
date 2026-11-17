@@ -2,6 +2,8 @@
 #define UTIL_FRAMEINTERPOLATOR_H
 
 #include <G3D/CoordinateFrame.h>
+#include <atomic>
+#include <thread>
 
 namespace RBX {
 
@@ -12,7 +14,7 @@ private:
 	static int currentFrame;
 	static float alpha;
 	static double nextStepTime;
-	static unsigned long renderThread;
+	static std::atomic<std::thread::id> renderThread;
 	static bool extraFrame;
 
 	G3D::CoordinateFrame previous;
@@ -30,7 +32,7 @@ public:
 	static void beginRender(int step, double stepTime, double period);
 	static void endRender();
 
-	static bool isRendering() { return renderThread != 0 && isRenderThread(); }
+	static bool isRendering() { return renderThread != std::thread::id() && isRenderThread(); }
 
 	static void setExtraFrame(bool value) { extraFrame = value; }
 	static bool isExtraFrame() { return extraFrame; }

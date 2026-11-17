@@ -2,7 +2,7 @@
 #define STANDARDOUTPUTVIEW_H
 
 #include "OutputView.h"
-#include "util/StandardOut.h"
+#include "util/standardout.h"
 
 #include <deque>
 #include <mutex>

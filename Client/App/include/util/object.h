@@ -100,7 +100,7 @@ protected:
 	static void operator delete(void* p) { free(p); }
 };
 
-class __declspec(novtable) ICreator
+class ICreator
 {
 public:
 	virtual std::shared_ptr<Object> create() const = 0;

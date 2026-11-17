@@ -1,7 +1,5 @@
 #include "v8datamodel/RootInstance.h"
 
-#define NOMINMAX
-
 #include "network/Player.h"
 #include "network/Players.h"
 #include "tool/DragUtilities.h"
@@ -22,7 +20,11 @@
 
 #include <G3D/GCamera.h>
 #include <algorithm>
+
+#ifdef _WIN32
+#define NOMINMAX
 #include <windows.h>
+#endif
 
 namespace RBX {
 
@@ -231,6 +233,7 @@ void RootInstance::insertIdeView(
 			return;
 		}
 
+#ifdef _WIN32
 		if (dynamic_cast<Tool*>(instance) && promptMode == ALLOW_PROMPTS) {
 			if (MessageBox(
 					nullptr,
@@ -242,6 +245,7 @@ void RootInstance::insertIdeView(
 				return;
 			}
 		}
+#endif
 	}
 
 	insertRaw(instances, this, partArray);

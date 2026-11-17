@@ -13,7 +13,7 @@ namespace Reflection {
 class DescribedBase;
 }
 
-class __declspec(novtable) IIDREF
+class IIDREF
 {
 	friend class ::ArchiveBinder;
 	friend class MergeBinder;
@@ -23,7 +23,7 @@ private:
 	// vtable+0x00
 };
 
-class __declspec(novtable) IReferenceBinder
+class IReferenceBinder
 {
 public:
 	virtual void announceID(const XmlNameValuePair* valueID, Instance* instance) = 0;

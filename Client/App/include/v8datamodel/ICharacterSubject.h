@@ -10,7 +10,7 @@ namespace RBX {
 
 class ContactManager;
 
-class __declspec(novtable) ICharacterSubject : public ICameraSubject
+class ICharacterSubject : public ICameraSubject
 {
 private:
 	Vector3ERA focusERA;
@@ -38,8 +38,8 @@ public:
 	ICharacterSubject();
 
 	virtual ContactManager* getContactManager() = 0;
-	virtual void getIgnorePrims(std::vector<const Primitive*>& prims);
-	virtual void tellCameraNear(float distance);
+	virtual void getIgnorePrims(std::vector<const Primitive*>& prims) = 0;
+	virtual void tellCameraNear(float distance) = 0;
 	virtual G3D::Vector3 getIntendedMovementVector() = 0;
 	virtual float getIntendedRotationAboutYAxis() = 0;
 	virtual void cameraSetWalkOrientation(float angle, bool value) = 0;

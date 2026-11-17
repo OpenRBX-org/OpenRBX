@@ -10,6 +10,7 @@ class FileSystem
 public:
 	static std::string getUserAppDataDirectory(bool create, const char* subDirectory);
 	static std::string getCacheDirectory(bool create);
+	static std::string getContentDirectory();
 };
 
 } // namespace RBX

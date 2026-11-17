@@ -1,4 +1,4 @@
-#include "Streaming.h"
+#include "network/Streaming.h"
 
 #include "util/Math.h"
 #include "util/Quaternion.h"
@@ -107,13 +107,6 @@ RakNet::BitStream& operator>> <int>(RakNet::BitStream& stream, int& value)
 }
 
 template <>
-RakNet::BitStream& operator>> <long>(RakNet::BitStream& stream, long& value)
-{
-	stream.Read(value);
-	return stream;
-}
-
-template <>
 RakNet::BitStream& operator>> <unsigned int>(RakNet::BitStream& stream, unsigned int& value)
 {
 	stream.Read(value);
@@ -161,7 +154,7 @@ RakNet::BitStream& operator>> <double>(RakNet::BitStream& stream, double& value)
 
 RakNet::BitStream& operator<<(RakNet::BitStream& stream, const std::string& value)
 {
-	stream.Write(value.size());
+	stream.Write(static_cast<int>(value.size()));
 
 	stringCompressor->EncodeString(value.c_str(), value.size() + 1, &stream);
 	return stream;

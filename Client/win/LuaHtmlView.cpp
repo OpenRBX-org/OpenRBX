@@ -4,7 +4,7 @@
 #include "LuaFunction.h"
 #include "Marshaller.h"
 #include "reflection/property.h"
-#include "util/StandardOut.h"
+#include "util/standardout.h"
 #include "v8datamodel/DataModel.h"
 #include "v8tree/Instance.h"
 

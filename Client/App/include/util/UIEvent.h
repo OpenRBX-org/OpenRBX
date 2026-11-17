@@ -3,6 +3,8 @@
 
 #include <G3D/Vector2int16.h>
 #include <SDL_keysym.h>
+#include <bit>
+#include <type_traits>
 
 namespace RBX {
 
@@ -29,24 +31,16 @@ public:
 
 	EventType eventType;
 	UserInputBase* userInput;
-	union {
-		struct
-		{
-			G3D::Vector2int16 mousePosition;
-			G3D::Vector2int16 mouseDelta;
-			G3D::Vector2int16 windowSize;
-		};
-		struct
-		{
-			SDLKey key;
-			SDLMod mod;
-		};
-	};
+	G3D::Vector2int16 mousePosition;
+	G3D::Vector2int16 mouseDelta;
+	G3D::Vector2int16 windowSize;
 
 	UIEvent(UserInputBase* userInput, EventType eventType, SDLKey key, SDLMod mod)
-		: eventType(eventType), userInput(userInput), key(key), mod(mod)
+		: eventType(eventType), userInput(userInput),
+		  mousePosition(std::bit_cast<G3D::Vector2int16>(static_cast<std::underlying_type_t<SDLKey>>(key))),
+		  mouseDelta(std::bit_cast<G3D::Vector2int16>(static_cast<std::underlying_type_t<SDLMod>>(mod))),
+		  windowSize(0, 0)
 	{
-		windowSize = G3D::Vector2int16(0, 0);
 	}
 	UIEvent(UserInputBase* userInput, EventType eventType, G3D::Vector2int16 position, G3D::Vector2int16 size)
 		: eventType(eventType), userInput(userInput), mousePosition(position), mouseDelta(0, 0), windowSize(size)
@@ -61,7 +55,10 @@ public:
 			   eventType == MOUSE_DELTA || eventType == MOUSE_IDLE;
 	}
 
-	bool isKeyPressedEvent(SDLKey key) const { return eventType == KEY_DOWN && this->key == key; }
+	SDLKey key() const { return static_cast<SDLKey>(std::bit_cast<std::underlying_type_t<SDLKey>>(mousePosition)); }
+	SDLMod mod() const { return static_cast<SDLMod>(std::bit_cast<std::underlying_type_t<SDLMod>>(mouseDelta)); }
+
+	bool isKeyPressedEvent(SDLKey key) const { return eventType == KEY_DOWN && this->key() == key; }
 	bool isKeyUpEvent(SDLKey key) const;
 	bool isKeyPressedWithShiftEvent(SDLKey key) const;
 	bool isKeyPressedWithShiftEvent() const;

@@ -1,18 +1,12 @@
 #include "util/Timer.h"
 
-#include <windows.h>
+#include <chrono>
 
 namespace RBX {
 
 double getRealTime()
 {
-	LARGE_INTEGER count;
-	LARGE_INTEGER frequency;
-
-	QueryPerformanceCounter(&count);
-	QueryPerformanceFrequency(&frequency);
-
-	return (double) count.QuadPart / (double) frequency.QuadPart;
+	return std::chrono::duration<double>(std::chrono::steady_clock::now().time_since_epoch()).count();
 }
 
 } // namespace RBX

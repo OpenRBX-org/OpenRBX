@@ -91,7 +91,7 @@ void Mouse::update(const UIEvent& uiEvent)
 		desc_Mouse_WheelBackward.fire(this);
 		break;
 	case UIEvent::KEY_DOWN:
-		desc_Mouse_KeyDown.fire(this, std::string(1, uiEvent.key));
+		desc_Mouse_KeyDown.fire(this, std::string(1, uiEvent.key()));
 		break;
 	}
 }

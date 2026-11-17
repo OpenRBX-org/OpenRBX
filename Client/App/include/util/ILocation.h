@@ -7,7 +7,7 @@ namespace RBX {
 
 using G3D::CoordinateFrame;
 
-class __declspec(novtable) ILocation
+class ILocation
 {
 public:
 	virtual const CoordinateFrame getLocation() const = 0;

@@ -42,7 +42,7 @@ public:
 	const SignalDescriptor& descriptor;
 };
 
-class __declspec(novtable) SignalSource
+class SignalSource
 {
 public:
 	using SignalMap = std::map<const SignalDescriptor*, std::shared_ptr<SignalInstance>>;
@@ -57,7 +57,7 @@ private:
 	std::unique_ptr<SignalMap> signals;
 };
 
-class __declspec(novtable) GenericSlotWrapper
+class GenericSlotWrapper
 {
 public:
 	virtual ~GenericSlotWrapper();
@@ -99,7 +99,7 @@ GenericSlotWrapper* GenericSlotWrapper::create(Slot slot)
 	return new TGenericSlotWrapper<Slot>(slot);
 }
 
-class __declspec(novtable) SignalDescriptor : public MemberDescriptor
+class SignalDescriptor : public MemberDescriptor
 {
 public:
 	using ConstMember = Signal;
@@ -153,7 +153,7 @@ Signals::Connection SignalInstance::connectGeneric(Slot slot, Signals::ConnectPo
 }
 
 template <class Signature>
-class __declspec(novtable) TSignalDesc : public SignalDescriptor
+class TSignalDesc : public SignalDescriptor
 {
 public:
 	class TSignalInstance : public SignalInstance, public Signals::Signal<Signature>
@@ -203,7 +203,7 @@ public:
 };
 
 template <int arity, class Signature>
-class __declspec(novtable) SignalDescImpl : public TSignalDesc<Signature>
+class SignalDescImpl : public TSignalDesc<Signature>
 {
 protected:
 	class GenericSlotAdapter
@@ -242,7 +242,7 @@ public:
 };
 
 template <class Signature>
-class __declspec(novtable) SignalDescImpl<1, Signature> : public TSignalDesc<Signature>
+class SignalDescImpl<1, Signature> : public TSignalDesc<Signature>
 {
 public:
 	void fire(SignalSource* source, ArgumentType<Signature, 0> arg1)
@@ -288,7 +288,7 @@ protected:
 };
 
 template <class Signature>
-class __declspec(novtable) SignalDescImpl<2, Signature> : public TSignalDesc<Signature>
+class SignalDescImpl<2, Signature> : public TSignalDesc<Signature>
 {
 public:
 	void fire(SignalSource* source, ArgumentType<Signature, 0> arg1, ArgumentType<Signature, 1> arg2)

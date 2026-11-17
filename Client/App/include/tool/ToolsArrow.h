@@ -45,7 +45,7 @@ public:
 
 extern char sArrowTool[];
 
-class __declspec(novtable) ArrowToolBase : public MouseCommand
+class ArrowToolBase : public MouseCommand
 {
 protected:
 	bool overInstance;

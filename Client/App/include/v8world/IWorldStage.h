@@ -8,7 +8,7 @@ namespace RBX {
 class Edge;
 class World;
 
-class __declspec(novtable) IWorldStage : public IStage
+class IWorldStage : public IStage
 {
 public:
 	enum MetricType

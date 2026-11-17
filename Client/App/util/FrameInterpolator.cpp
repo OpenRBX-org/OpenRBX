@@ -3,7 +3,6 @@
 #include "util/Timer.h"
 
 #include <G3D/g3dmath.h>
-#include <windows.h>
 
 namespace RBX {
 
@@ -13,7 +12,7 @@ int FrameInterpolator::currentStep = 0;
 int FrameInterpolator::currentFrame = 0;
 float FrameInterpolator::alpha = 1.0f;
 double FrameInterpolator::nextStepTime = 0.0;
-unsigned long FrameInterpolator::renderThread = 0;
+std::atomic<std::thread::id> FrameInterpolator::renderThread;
 bool FrameInterpolator::extraFrame = false;
 
 FrameInterpolator::FrameInterpolator() : step(0), frame(0), sampled(false)
@@ -22,7 +21,7 @@ FrameInterpolator::FrameInterpolator() : step(0), frame(0), sampled(false)
 
 bool FrameInterpolator::isRenderThread()
 {
-	return renderThread == GetCurrentThreadId();
+	return renderThread == std::this_thread::get_id();
 }
 
 void FrameInterpolator::beginRender(int step, double stepTime, double period)
@@ -31,12 +30,12 @@ void FrameInterpolator::beginRender(int step, double stepTime, double period)
 	currentFrame++;
 	nextStepTime = stepTime + period;
 	alpha = period > 0.0 ? (float) G3D::clamp((getRealTime() - stepTime) / period, 0.0, 1.0) : 1.0f;
-	renderThread = GetCurrentThreadId();
+	renderThread = std::this_thread::get_id();
 }
 
 void FrameInterpolator::endRender()
 {
-	renderThread = 0;
+	renderThread = std::thread::id();
 }
 
 const G3D::CoordinateFrame& FrameInterpolator::sample(const G3D::CoordinateFrame& current)

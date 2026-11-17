@@ -2,46 +2,42 @@
 
 #include "util/Name.h"
 
-#define NOMINMAX
-
 #include <algorithm>
+#include <atomic>
+#include <cstdint>
 #include <cstdio>
 #include <mutex>
-#include <objbase.h>
-#include <windows.h>
+#include <random>
 
 namespace RBX {
 
 static const Name* localScope;
-static long nextIndex;
+static std::atomic<int> nextIndex;
 
 void Guid::generateGUID(std::string& result)
 {
-	GUID guid;
+	std::random_device device;
+	std::uint32_t data1 = device();
+	std::uint32_t data2 = (device() & 0xffff0fff) | 0x00004000;
+	std::uint32_t data3 = (device() & 0x3fffffff) | 0x80000000;
+	std::uint32_t data4 = device();
+
+	char guid[33];
+	std::snprintf(guid, sizeof(guid), "%08X%08X%08X%08X", data1, data2, data3, data4);
 
 	result = "RBX";
-
-	CoCreateGuid(&guid);
-
-	WCHAR wszGUID[64] = L"";
-	char ansiClsid[64];
-
-	StringFromGUID2(guid, wszGUID, 64);
-	WideCharToMultiByte(CP_ACP, 0, wszGUID, 64, ansiClsid, 64, nullptr, nullptr);
-
-	result += ansiClsid;
-
-	result.erase(0x28, 1);
-	result.erase(0x1b, 1);
-	result.erase(0x16, 1);
-	result.erase(0x11, 1);
-	result.erase(0x0c, 1);
-	result.erase(0x03, 1);
+	result += guid;
 }
 
 void Guid::assign(Data data)
 {
 	this->data = data;
+}
+
+static int compareScopes(const Name* a, const Name* b)
+{
+	const int order = a->name.compare(b->name);
+	return order < 0 ? -1 : (order > 0 ? 1 : 0);
 }
 
 bool Guid::Data::operator<(const Data& other) const
@@ -51,7 +47,7 @@ bool Guid::Data::operator<(const Data& other) const
 	int order = 0;
 
 	if (thisScope != otherScope) {
-		order = thisScope->name.compare(otherScope->name);
+		order = compareScopes(thisScope, otherScope);
 
 		if (order != -1 && order != 0) {
 			return false;
@@ -81,7 +77,7 @@ int Guid::compare(const Guid* a, const Guid* b)
 		order = 0;
 	}
 	else {
-		order = scopeA->name.compare(scopeB->name);
+		order = compareScopes(scopeA, scopeB);
 	}
 
 	if (order != -1) {
@@ -146,7 +142,7 @@ const Name& Guid::getLocalScope()
 Guid::Guid()
 {
 	data.scope = &getLocalScope();
-	data.index = InterlockedIncrement(&nextIndex);
+	data.index = ++nextIndex;
 }
 
 std::string Guid::Data::readableString(int scopeLength) const

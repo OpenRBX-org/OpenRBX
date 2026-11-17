@@ -2,12 +2,14 @@
 
 #include "util/FileSystem.h"
 #include "util/Name.h"
-#include "util/StandardOut.h"
+#include "util/standardout.h"
 #include "v8xml/SerializerV2.h"
 #include "v8xml/XmlSerializer.h"
 
+#include <filesystem>
 #include <fstream>
 #include <memory>
+#include <system_error>
 
 namespace RBX {
 
@@ -20,7 +22,7 @@ static std::string FUN_00581c60()
 	std::string fileName = FileSystem::getUserAppDataDirectory(true, nullptr);
 
 	if (fileName.size() > 0) {
-		fileName += "\\GlobalSettings7.xml";
+		fileName += "GlobalSettings7.xml";
 	}
 
 	return fileName;
@@ -28,7 +30,8 @@ static std::string FUN_00581c60()
 
 void GlobalSettings::eraseSettingsStore()
 {
-	DeleteFile(FUN_00581c60().c_str());
+	std::error_code error;
+	std::filesystem::remove(FUN_00581c60(), error);
 }
 
 void GlobalSettings::loadState()

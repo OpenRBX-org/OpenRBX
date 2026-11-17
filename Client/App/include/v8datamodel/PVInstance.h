@@ -23,10 +23,10 @@ class XmlState;
 
 extern const char sPVInstance[];
 
-class __declspec(novtable) PVInstance : public Reflection::Described<PVInstance, sPVInstance, Instance>,
-										public IControllable,
-										public virtual IPrimaryPart,
-										public virtual ILocation
+class PVInstance : public Reflection::Described<PVInstance, sPVInstance, Instance>,
+				   public IControllable,
+				   public virtual IPrimaryPart,
+				   public virtual ILocation
 {
 protected:
 	ComputeProp<bool, PVInstance> IsControllable;

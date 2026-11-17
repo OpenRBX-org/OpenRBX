@@ -372,20 +372,6 @@ void GLCaps::loadExtensions(Log* debugLog) {
         LOAD_EXTENSION(wglCreatePbufferEXT);
         LOAD_EXTENSION(wglDestroyPbufferEXT);
         
-    #elif defined(G3D_LINUX)
-
-        LOAD_EXTENSION(glXJoinSwapGroupNV);
-        LOAD_EXTENSION(glXBindSwapBarrierNV);
-        LOAD_EXTENSION(glXQuerySwapGroupNV);
-        LOAD_EXTENSION(glXQueryMaxSwapGroupsNV);
-        LOAD_EXTENSION(glXQueryFrameCountNV);
-        LOAD_EXTENSION(glXResetFrameCountNV);
-
-        LOAD_EXTENSION(glXCreateGLXPbufferSGIX);
-        LOAD_EXTENSION(glXDestroyGLXPbufferSGIX);
-        LOAD_EXTENSION(glXQueryGLXPbufferSGIX);
-        LOAD_EXTENSION(glXChooseFBConfigSGIX);
-        LOAD_EXTENSION(glXCreateContextWithConfigSGIX);
     #endif
 
     // Frame buffer object

@@ -145,7 +145,7 @@ std::string StringConverter<int>::convertToString(const int& value)
 {
 	char szText[16];
 
-	_snprintf(szText, sizeof(szText), "%d", value);
+	std::snprintf(szText, sizeof(szText), "%d", value);
 
 	return szText;
 }
@@ -155,7 +155,7 @@ std::string StringConverter<unsigned int>::convertToString(const unsigned int& v
 {
 	char szText[16];
 
-	_snprintf(szText, sizeof(szText), "%u", value);
+	std::snprintf(szText, sizeof(szText), "%u", value);
 
 	return szText;
 }
@@ -175,7 +175,7 @@ std::string StringConverter<double>::convertToString(const double& value)
 		return "NAN";
 	}
 
-	_snprintf(szText, sizeof(szText), "%.9g", value);
+	std::snprintf(szText, sizeof(szText), "%.9g", value);
 
 	return szText;
 }
@@ -195,7 +195,7 @@ std::string StringConverter<float>::convertToString(const float& value)
 		return "NAN";
 	}
 
-	_snprintf(szText, sizeof(szText), "%.9g", value);
+	std::snprintf(szText, sizeof(szText), "%.9g", value);
 
 	return szText;
 }
@@ -363,7 +363,7 @@ template <>
 std::string StringConverter<G3D::Color3>::convertToString(const G3D::Color3& value)
 {
 	char szText[64];
-	_snprintf(szText, 64, "%g, %g, %g", value.r, value.g, value.b);
+	std::snprintf(szText, 64, "%g, %g, %g", value.r, value.g, value.b);
 	return szText;
 }
 

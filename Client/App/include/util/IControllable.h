@@ -3,7 +3,7 @@
 
 namespace RBX {
 
-class __declspec(novtable) IControllable
+class IControllable
 {
 public:
 	IControllable() {}

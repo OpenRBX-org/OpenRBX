@@ -20,6 +20,7 @@
 #include "GLG3D/getOpenGLState.h"
 #include "GLG3D/GLCaps.h"
 #include "G3D/BinaryInput.h"
+#include <string.h>
 
 namespace G3D {
 

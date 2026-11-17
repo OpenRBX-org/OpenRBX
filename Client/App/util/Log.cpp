@@ -1,7 +1,8 @@
 #include "util/Log.h"
 
+#include <chrono>
 #include <cstdio>
-#include <windows.h>
+#include <ctime>
 
 namespace RBX {
 
@@ -60,19 +61,35 @@ std::string Log::formatTime(double time)
 
 } // namespace RBX
 
+static std::tm localTime(int& milliseconds)
+{
+	std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+	std::time_t time = std::chrono::system_clock::to_time_t(now);
+	milliseconds = (int) (std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count() % 1000);
+
+	std::tm local;
+#ifdef _WIN32
+	localtime_s(&local, &time);
+#else
+	localtime_r(&time, &local);
+#endif
+
+	return local;
+}
+
 static void timeStamp(std::ofstream& stream, bool includeDate)
 {
-	SYSTEMTIME systemTime;
-	GetLocalTime(&systemTime);
+	int milliseconds;
+	std::tm local = localTime(milliseconds);
 
 	char s[256];
 
 	if (includeDate) {
-		sprintf(s, "%02u.%02u.%u ", systemTime.wDay, systemTime.wMonth, systemTime.wYear);
+		sprintf(s, "%02d.%02d.%d ", local.tm_mday, local.tm_mon + 1, local.tm_year + 1900);
 		stream << s;
 	}
 
-	sprintf(s, "%02u:%02u.%03u ", systemTime.wHour, systemTime.wMinute, systemTime.wMilliseconds);
+	sprintf(s, "%02d:%02d.%03d ", local.tm_hour, local.tm_min, milliseconds);
 	stream << s;
 	stream.flush();
 }
@@ -96,11 +113,11 @@ void Log::writeEntry(Severity severity, const char* message)
 {
 	std::ofstream* out = currentStream();
 
-	SYSTEMTIME now;
-	GetLocalTime(&now);
+	int milliseconds;
+	std::tm now = ::localTime(milliseconds);
 
 	char stamp[256];
-	sprintf(stamp, "%02u:%02u.%03u ", now.wHour, now.wMinute, now.wMilliseconds);
+	sprintf(stamp, "%02d:%02d.%03d ", now.tm_hour, now.tm_min, milliseconds);
 
 	*out << stamp;
 	out->flush();

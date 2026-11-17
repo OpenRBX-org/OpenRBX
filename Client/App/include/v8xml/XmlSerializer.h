@@ -15,7 +15,7 @@
 class XmlAttribute;
 class XmlElement;
 
-class __declspec(novtable) XmlWriter
+class XmlWriter
 {
 public:
 	XmlWriter(const XmlWriter&) = delete;

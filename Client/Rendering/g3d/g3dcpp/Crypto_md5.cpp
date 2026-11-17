@@ -12,6 +12,7 @@
 #include "G3D/Crypto.h"
 #include "G3D/BinaryInput.h"
 #include "G3D/BinaryOutput.h"
+#include <string.h>
 
 namespace G3D {
 

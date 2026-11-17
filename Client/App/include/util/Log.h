@@ -8,7 +8,7 @@ namespace RBX {
 
 class Log;
 
-class __declspec(novtable) ILogProvider
+class ILogProvider
 {
 public:
 	virtual Log* provideLog() = 0;

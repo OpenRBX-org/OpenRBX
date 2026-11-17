@@ -40,7 +40,7 @@ void newweaktable(lua_State* L, const char* mode);
 template <class T>
 void SharedPtrBridge<T>::registerClassLibrary(lua_State* L)
 {
-	lua_pushlightuserdata(L, &push);
+	lua_pushlightuserdata(L, (void*) push);
 	newweaktable(L, "v");
 	lua_rawset(L, LUA_REGISTRYINDEX);
 }

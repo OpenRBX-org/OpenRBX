@@ -10,6 +10,7 @@
 #include "G3D/BinaryOutput.h"
 #include "G3D/Array.h"
 #include "G3D/stringutils.h"
+#include <string.h>
 
 #if defined(G3D_LINUX) || defined(G3D_OSX)
     #include <unistd.h>

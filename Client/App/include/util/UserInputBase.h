@@ -14,7 +14,7 @@ class Adorn;
 class TextureId;
 class TextureProxyBase;
 
-class __declspec(novtable) UserInputBase
+class UserInputBase
 {
 public:
 	enum WrapMode

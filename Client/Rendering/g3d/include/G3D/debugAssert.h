@@ -34,7 +34,7 @@
 #   pragma warning (disable : 4127)
 #endif
 
-#ifdef G3D_LINUX
+#if defined(G3D_LINUX) && !defined(G3D_DEBUG_NOGUI)
     // Needed so we can define a global display
     // pointer for debugAssert.
     #include <X11/Xlib.h>
@@ -185,7 +185,7 @@ namespace _internal {
 
 namespace G3D {  namespace _internal {
 
-#ifdef G3D_LINUX
+#if defined(G3D_LINUX) && !defined(G3D_DEBUG_NOGUI)
     /**
      A pointer to the X11 display.  Initially NULL.  If set to a
      non-null value (e.g. by SDLWindow), debugAssert attempts to use

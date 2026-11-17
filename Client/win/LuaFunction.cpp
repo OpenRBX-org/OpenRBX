@@ -3,7 +3,7 @@
 #include "Content.h"
 #include "LogManager.h"
 #include "script/ScriptContext.h"
-#include "util/StandardOut.h"
+#include "util/standardout.h"
 #include "v8datamodel/DataModel.h"
 
 #include <exception>

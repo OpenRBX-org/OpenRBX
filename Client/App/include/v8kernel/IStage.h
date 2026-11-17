@@ -8,7 +8,7 @@ namespace RBX {
 class IStage;
 class Kernel;
 
-class __declspec(novtable) IStage
+class IStage
 {
 public:
 	enum StageType

@@ -9,7 +9,7 @@ class Body;
 
 using G3D::CoordinateFrame;
 
-class __declspec(novtable) Link
+class Link
 {
 public:
 	Link();

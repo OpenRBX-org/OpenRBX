@@ -17,7 +17,7 @@
 
 namespace RBX {
 
-class __declspec(novtable) Adorn
+class Adorn
 {
 public:
 	Adorn() {}

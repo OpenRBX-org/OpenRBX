@@ -162,7 +162,7 @@ float DataModel::step(float timeInterval)
 		return timeInterval;
 	}
 
-	workspace->profileRun->sample(GetCurrentThread());
+	workspace->profileRun->sample(Profiling::currentThread());
 	Profiling::Mark mark(*workspace->profileWorkspaceStep, true);
 
 	if (runService->getRunState() == RS_RUNNING) {
@@ -227,13 +227,13 @@ GuiResponse DataModel::processAccelerators(const GuiEvent& event)
 		verb = workspace->getVerb("CameraZoomOut");
 		break;
 	case UIEvent::KEY_DOWN:
-		if (event.key > SDLK_0 && event.key <= SDLK_9) {
-			if (localBackpack->onKey(event.key - SDLK_0)) {
+		if (event.key() > SDLK_0 && event.key() <= SDLK_9) {
+			if (localBackpack->onKey(event.key() - SDLK_0)) {
 				return GuiResponse::used();
 			}
 		}
 		else {
-			switch (event.key) {
+			switch (event.key()) {
 			case SDLK_ESCAPE:
 				runService->pause();
 				break;
@@ -269,7 +269,7 @@ GuiResponse DataModel::processAccelerators(const GuiEvent& event)
 				localBackpack->cycleDown();
 				break;
 			case SDLK_F1:
-				if (event.mod == KMOD_NONE) {
+				if (event.mod() == KMOD_NONE) {
 					verb = getVerb("Help");
 				}
 				else {

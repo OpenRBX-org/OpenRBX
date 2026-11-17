@@ -2,12 +2,23 @@
 #define UTIL_PROFILING_H
 
 #include <cstddef>
+#include <cstdint>
 #include <string>
-#include <windows.h>
+
+#ifndef _WIN32
+#include <pthread.h>
+#endif
 
 namespace RBX::Profiling {
 
+#ifdef _WIN32
+using ThreadHandle = void*;
+#else
+using ThreadHandle = pthread_t;
+#endif
+
 void init(bool enabled);
+ThreadHandle currentThread();
 
 struct Bucket
 {
@@ -30,8 +41,8 @@ public:
 	}
 
 	double sampleTimeSpan;
-	__int64 kernTimeSpan;
-	__int64 userTimeSpan;
+	std::int64_t kernTimeSpan;
+	std::int64_t userTimeSpan;
 	int frames;
 };
 
@@ -65,7 +76,7 @@ public:
 	CodeProfiler* parent;
 
 private:
-	void log(__int64 kern, __int64 user, bool frameTick);
+	void log(std::int64_t kern, std::int64_t user, bool frameTick);
 
 	friend class Mark;
 };
@@ -75,7 +86,7 @@ class ThreadProfiler : public Profiler
 public:
 	ThreadProfiler(const char* name);
 
-	void sample(void* thread);
+	void sample(ThreadHandle thread);
 
 private:
 	bool initialized;
@@ -87,51 +98,30 @@ public:
 	Mark(CodeProfiler& section, bool frameTick);
 	~Mark();
 
-	static DWORD markTlsIndex;
+	static bool enabled;
 
 private:
+	void begin();
+	void end();
+
 	CodeProfiler& section;
 	CodeProfiler* enclosingSection;
-	FILETIME creationTime;
-	FILETIME exitTime;
-	FILETIME kernelTime;
-	FILETIME userTime;
+	std::int64_t kernelTime;
+	std::int64_t userTime;
 	bool frameTick;
 };
 
 inline Mark::Mark(CodeProfiler& section, bool frameTick) : section(section), frameTick(frameTick)
 {
-	if (markTlsIndex != 0) {
-		enclosingSection = (CodeProfiler*) TlsGetValue(markTlsIndex);
-
-		GetThreadTimes(GetCurrentThread(), &creationTime, &exitTime, &kernelTime, &userTime);
-
-		TlsSetValue(markTlsIndex, &section);
+	if (enabled) {
+		begin();
 	}
 }
 
 inline Mark::~Mark()
 {
-	if (markTlsIndex != 0) {
-		TlsSetValue(markTlsIndex, enclosingSection);
-
-		FILETIME endKernelTime;
-		FILETIME endUserTime;
-		GetThreadTimes(GetCurrentThread(), &creationTime, &exitTime, &endKernelTime, &endUserTime);
-
-		ULARGE_INTEGER kernelStart = {kernelTime.dwLowDateTime, kernelTime.dwHighDateTime};
-		ULARGE_INTEGER kernelEnd = {endKernelTime.dwLowDateTime, endKernelTime.dwHighDateTime};
-		ULARGE_INTEGER userStart = {userTime.dwLowDateTime, userTime.dwHighDateTime};
-		ULARGE_INTEGER userEnd = {endUserTime.dwLowDateTime, endUserTime.dwHighDateTime};
-
-		__int64 kernel = kernelEnd.QuadPart - kernelStart.QuadPart;
-		__int64 user = userEnd.QuadPart - userStart.QuadPart;
-
-		section.log(kernel, user, frameTick);
-
-		if (enclosingSection != nullptr && enclosingSection != &section && enclosingSection != section.parent) {
-			enclosingSection->log(-kernel, -user, false);
-		}
+	if (enabled) {
+		end();
 	}
 }
 

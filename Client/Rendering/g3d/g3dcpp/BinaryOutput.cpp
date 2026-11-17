@@ -12,6 +12,7 @@
 #include "G3D/fileutils.h"
 #include "G3D/stringutils.h"
 #include "G3D/Array.h"
+#include <string.h>
 #ifdef G3D_WIN32
   #include "../zlib/zlib.h"
 #else

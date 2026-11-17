@@ -17,19 +17,20 @@ OpenRBX is a source port of Roblox as it was released in December 2007. It is bu
 
 ### Compiling from source
 
-For now OpenRBX builds only for Windows. This will change as the port progresses.
+The client builds only for Windows for now. The RBXGS web service also builds for Linux.
 
 | Platform | Toolchain | Notes |
 |----------|-----------|-------|
 | Windows (x86) | Visual Studio 2022 or later | Builds the client and the RBXGS web service. |
 | Windows (x64) | Visual Studio 2022 or later | Builds the client and the RBXGS web service. |
+| Linux (x64) | GCC 14 or later | Builds the RBXGS web service. |
 
-#### Prerequisites
+#### Prerequisites (Windows)
 
 * [Git](https://git-scm.com/downloads)
 * [Visual Studio](https://visualstudio.microsoft.com/) 2022 or later with the Desktop development with C++ workload and the C++ MFC and C++ ATL components. It ships CMake and Ninja.
 
-#### Building
+#### Building (Windows)
 
 Open an x64_x86 Cross Tools Command Prompt (x86) or an x64 Native Tools Command Prompt (x64) from the Visual Studio start menu folder, then:
 
@@ -43,7 +44,20 @@ cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo
 cmake --build build
 ```
 
-Once the build completes, the client (`Roblox.exe`) and the RBXGS web service (`WebService.dll`) are in the `build` folder.
+Once the build completes, the client (`Roblox.exe`) and the RBXGS web service (`WebService.exe`) are in the `build` folder.
+
+#### Building (Linux)
+
+Install Git, CMake, Ninja, Make, Perl and GCC 14 or later, then:
+
+```sh
+git clone https://github.com/OpenRBX-org/OpenRBX.git
+cd OpenRBX
+cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo
+cmake --build build
+```
+
+The web service (`WebService`) and its libraries (`libOSMesa.so`, `libfmodex64.so`) are in the `build` folder.
 
 ## Contributing
 

@@ -10,8 +10,8 @@
 #include "util/ContentProvider.h"
 #include "util/Name.h"
 #include "util/RunStateOwner.h"
-#include "util/StandardOut.h"
 #include "util/base64.hpp"
+#include "util/standardout.h"
 #include "v8datamodel/DataModel.h"
 #include "v8datamodel/Lighting.h"
 #include "v8datamodel/ModelInstance.h"
@@ -26,6 +26,7 @@
 #include <mutex>
 #include <sstream>
 #include <stdexcept>
+#include <thread>
 
 const char sThumbnailGenerator[] = "ThumbnailGenerator";
 
@@ -175,7 +176,7 @@ public:
 static void waitForContent()
 {
 	while (!RBX::ContentProvider::singleton().isRequestQueueEmpty()) {
-		Sleep(0);
+		std::this_thread::yield();
 	}
 }
 
@@ -407,16 +408,3 @@ template const RBX::FactoryProduct<RBX::Script, RBX::Instance, RBX::sScript>::Cr
 	RBX::FactoryProduct<RBX::Script, RBX::Instance, RBX::sScript>::creator;
 template const RBX::FactoryProduct<RBX::LocalScript, RBX::Script, RBX::sLocalScript>::Creator
 	RBX::FactoryProduct<RBX::LocalScript, RBX::Script, RBX::sLocalScript>::creator;
-
-template RBX::Lighting* RBX::ServiceProvider::find<RBX::Lighting>() const;
-
-template std::shared_ptr<RBX::Instance>::~shared_ptr();
-template std::shared_ptr<RBX::ModelInstance>::~shared_ptr();
-template std::shared_ptr<RBX::Selection>::~shared_ptr();
-template std::shared_ptr<RBX::RunService>::~shared_ptr();
-template std::shared_ptr<RBX::Script>::~shared_ptr();
-template std::shared_ptr<RBX::ScriptContext>::~shared_ptr();
-template std::shared_ptr<RBX::Lighting>::~shared_ptr();
-
-template G3D::ReferenceCountedPointer<G3D::Texture>::~ReferenceCountedPointer();
-template G3D::ReferenceCountedPointer<RBX::TextureProxyBase>::~ReferenceCountedPointer();

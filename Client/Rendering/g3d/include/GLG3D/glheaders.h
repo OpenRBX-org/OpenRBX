@@ -37,11 +37,7 @@
 #endif
 
 #if defined(G3D_LINUX)
-    #ifdef __glxext_h_
-    #error Picked up wrong version of glxext
-    #endif
-	#include "../GL/glxext.h"
-//	#include "../GL/glx.h"
+    #include <GL/osmesa.h>
 #endif
 
 #include "../GL/glext.h"
@@ -206,59 +202,6 @@ extern PFNGLTEXIMAGE3DEXTPROC glTexImage3DEXT;
 
 typedef BOOL (*PFNWGLENABLEGENLOCKI3D) (HDC hDCGL);
 extern PFNWGLENABLEGENLOCKI3D wglEnableGenlockI3D;
-
-#elif defined(G3D_LINUX) 
-
-typedef Bool (*PFNGLXJOINSWAPGROUPNV) (Display*, GLXDrawable, GLuint);
-typedef Bool (*PFNGLXBINDSWAPBARRIERNV) (Display *dpy, GLuint group, GLuint barrier);
-typedef Bool (*PFNGLXQUERYSWAPGROUPNV)(Display *dpy, GLXDrawable drawable,
-                                GLuint *group, GLuint *barrier);
-typedef Bool (*PFNGLXQUERYMAXSWAPGROUPSNV)(Display *dpy, int screen,
-                                    GLuint *maxGroups, GLuint *maxBarriers);
-typedef Bool (*PFNGLXQUERYFRAMECOUNTNV) (Display *dpy, int screen, GLuint *count);
-typedef Bool (*PFNGLXRESETFRAMECOUNTNV)(Display *dpy, int screen);
-
-extern PFNGLXJOINSWAPGROUPNV glXJoinSwapGroupNV;
-extern PFNGLXBINDSWAPBARRIERNV glXBindSwapBarrierNV;
-extern PFNGLXQUERYSWAPGROUPNV glXQuerySwapGroupNV;
-extern PFNGLXQUERYMAXSWAPGROUPSNV glXQueryMaxSwapGroupsNV;
-extern PFNGLXQUERYFRAMECOUNTNV glXQueryFrameCountNV;
-extern PFNGLXRESETFRAMECOUNTNV glXResetFrameCountNV;
-
-
-// PBuffer support
-/*
- * GLX resources.
- */
-typedef XID GLXContextID;
-typedef XID GLXPixmap;
-typedef XID GLXDrawable;
-typedef XID GLXPbuffer;
-typedef XID GLXWindow;
-typedef XID GLXFBConfigID;
-
-/*
- * GLXContext is a pointer to opaque data.
- */
-typedef struct __GLXcontextRec *GLXContext;
-
-/*
- * GLXFBConfig is a pointer to opaque data.
- */
-typedef struct __GLXFBConfigRec *GLXFBConfig;
-typedef struct __GLXFBConfigRec *GLXFBConfigSGIX;
-
-typedef GLXPbuffer (*PFNGLXCREATEGLXPBUFFERSGIX) (Display *dpy, GLXFBConfig config, unsigned int width, unsigned int height, const int *attrib_list);
-typedef void(*PFNGLXDESTROYGLXPBUFFERSGIX) (Display *dpy, GLXPbuffer pbuf);
-typedef void(*PFNGLXQUERYGLXPBUFFERSGIX) (Display *dpy, GLXPbuffer pbuf, int attribute, unsigned int *value);
-typedef GLXFBConfigSGIX(*PFNGLXCHOOSEFBCONFIGSGIX)(Display *dpy, int screen, const int *attrib_list, int *nelements);
-typedef GLXContext(*PFNGLXCREATECONTEXTWITHCONFIGSGIX)(Display *dpy, GLXFBConfigSGIX config, int render_type, GLXContext share_list, Bool direct);
-
-extern PFNGLXCREATEGLXPBUFFERSGIX         glXCreateGLXPbufferSGIX;
-extern PFNGLXDESTROYGLXPBUFFERSGIX       glXDestroyGLXPbufferSGIX;
-extern PFNGLXQUERYGLXPBUFFERSGIX         glXQueryGLXPbufferSGIX;
-extern PFNGLXCHOOSEFBCONFIGSGIX          glXChooseFBConfigSGIX;
-extern PFNGLXCREATECONTEXTWITHCONFIGSGIX glXCreateContextWithConfigSGIX;
 
 #endif
 

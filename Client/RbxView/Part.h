@@ -31,7 +31,7 @@ class View;
 
 float primaryComponent(const G3D::Vector3& v);
 
-class __declspec(novtable) PartChunk : public Render::Chunk
+class PartChunk : public Render::Chunk
 {
 private:
 	G3D::CoordinateFrame coordinateFrame;

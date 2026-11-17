@@ -53,7 +53,7 @@ enum EdgeState
 
 } // namespace Sim
 
-class __declspec(novtable) Edge : public IPipelined
+class Edge : public IPipelined
 {
 public:
 	enum EdgeType

@@ -1,7 +1,7 @@
 #ifndef NETWORK_REPLICATOR_H
 #define NETWORK_REPLICATOR_H
 
-#include "Streaming.h"
+#include "network/Streaming.h"
 #include "reflection/reflection.h"
 #include "util/Events.h"
 #include "util/RunStateOwner.h"

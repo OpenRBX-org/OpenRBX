@@ -9,10 +9,10 @@ namespace RBX::Reflection {
 class DescribedBase;
 class Function;
 
-class __declspec(novtable) FunctionDescriptor : public MemberDescriptor
+class FunctionDescriptor : public MemberDescriptor
 {
 public:
-	class __declspec(novtable) Arguments
+	class Arguments
 	{
 	public:
 		virtual unsigned int size() const = 0;

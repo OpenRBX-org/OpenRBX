@@ -24,8 +24,7 @@
 #include <sys/time.h>
 #include <unistd.h>
 #else
-#include <sys/time.h>
-#include <unistd.h>
+#include <time.h>
 #endif
 
 static bool initialized=false;
@@ -35,8 +34,6 @@ static LARGE_INTEGER yo;
 static HANDLE threadHandle;
 static DWORD_PTR processAffinityMask;
 static DWORD_PTR systemAffinityMask;
-#else
-static timeval tp, initialTime;
 #endif
 
 RakNetTime RakNet::GetTime( void )
@@ -59,8 +56,6 @@ RakNetTimeNS RakNet::GetTimeNS( void )
 		GetProcessAffinityMask(processHandle, &processAffinityMask, &systemAffinityMask);
 		threadHandle = GetCurrentThread();
 #else
-		gettimeofday( &initialTime, 0 );
-
 		queryCount=0;
 		initialized = true;
 #endif
@@ -101,9 +96,10 @@ RakNetTimeNS RakNet::GetTimeNS( void )
 	return curTime;
 
 #else
-	gettimeofday( &tp, 0 );
+	timespec tp;
+	clock_gettime( CLOCK_MONOTONIC, &tp );
 
-	return ( tp.tv_sec - initialTime.tv_sec ) * (RakNetTimeNS) 1000000 + ( tp.tv_usec - initialTime.tv_usec );
+	return tp.tv_sec * (RakNetTimeNS) 1000000 + tp.tv_nsec / 1000;
 
 #endif
 }

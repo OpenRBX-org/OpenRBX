@@ -24,7 +24,7 @@
 #include "util/ContentProvider.h"
 #include "util/Http.h"
 #include "util/Profiling.h"
-#include "util/StandardOut.h"
+#include "util/standardout.h"
 #include "v8datamodel/DebugSettings.h"
 #include "v8datamodel/GameSettings.h"
 #include "v8datamodel/GlobalSettings.h"

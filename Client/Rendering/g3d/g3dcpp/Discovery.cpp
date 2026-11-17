@@ -10,6 +10,7 @@
 #include "G3D/Discovery.h"
 #include "G3D/BinaryInput.h"
 #include "G3D/BinaryOutput.h"
+#include <string.h>
 
 namespace G3D {
 

@@ -3,6 +3,7 @@
 
 #include "util/Events.h"
 
+#include <cstdint>
 #include <ctime>
 #include <exception>
 #include <functional>
@@ -22,11 +23,13 @@ enum MessageType
 
 struct StandardOutMessage
 {
-	StandardOutMessage(MessageType type, const char* message) : type(type), message(message) { _time64(&time); }
+	StandardOutMessage(MessageType type, const char* message) : type(type), message(message), time(std::time(nullptr))
+	{
+	}
 
 	MessageType type;
 	std::string message;
-	__int64 time;
+	std::int64_t time;
 };
 
 class StandardOut : public std::enable_shared_from_this<StandardOut>, public Notifier<StandardOut, StandardOutMessage>

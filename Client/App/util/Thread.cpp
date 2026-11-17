@@ -1,15 +1,21 @@
 #include "util/Thread.h"
 
-#include "util/StandardOut.h"
+#include "util/standardout.h"
 
 #include <string>
+
+#ifdef _WIN32
 #include <windows.h>
+#else
+#include <sys/resource.h>
+#include <unistd.h>
+#endif
 
 namespace RBX {
 
 static thread_local std::unique_ptr<std::string> threadName;
 
-#ifdef _DEBUG
+#if defined(_DEBUG) && defined(_WIN32)
 static void SetThreadName(DWORD dwThreadID, LPCSTR szThreadName)
 {
 	struct THREADNAME_INFO
@@ -29,6 +35,9 @@ static void SetThreadName(DWORD dwThreadID, LPCSTR szThreadName)
 	}
 }
 #endif
+
+#ifdef _WIN32
+static const int backgroundPriority = THREAD_PRIORITY_BELOW_NORMAL;
 
 class ThreadPrioritySetter
 {
@@ -51,11 +60,37 @@ public:
 		}
 	}
 };
+#else
+static const int backgroundPriority = 1;
+
+class ThreadPrioritySetter
+{
+	const int old;
+	const bool success;
+
+public:
+	explicit ThreadPrioritySetter(int niceIncrement)
+		: old(getpriority(PRIO_PROCESS, gettid())),
+		  success(setpriority(PRIO_PROCESS, gettid(), old + niceIncrement) == 0)
+	{
+	}
+
+	ThreadPrioritySetter(const ThreadPrioritySetter&) = delete;
+	ThreadPrioritySetter& operator=(const ThreadPrioritySetter&) = delete;
+
+	~ThreadPrioritySetter()
+	{
+		if (success) {
+			setpriority(PRIO_PROCESS, gettid(), old);
+		}
+	}
+};
+#endif
 
 void set_thread_name(const char* name)
 {
 	threadName = std::make_unique<std::string>(name);
-#ifdef _DEBUG
+#if defined(_DEBUG) && defined(_WIN32)
 	SetThreadName(GetCurrentThreadId(), name);
 #endif
 }
@@ -69,7 +104,7 @@ static void run_in_background(const std::function<void()>& threadfunc, const std
 {
 	try {
 		set_thread_name(name.c_str());
-		ThreadPrioritySetter set(THREAD_PRIORITY_BELOW_NORMAL);
+		ThreadPrioritySetter set(backgroundPriority);
 		threadfunc();
 	}
 	catch (std::exception& e) {

@@ -30,7 +30,7 @@ private:
 	}
 };
 
-class __declspec(novtable) ISelectionBase
+class ISelectionBase
 {
 private:
 	friend class Selection;

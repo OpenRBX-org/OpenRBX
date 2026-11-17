@@ -90,9 +90,9 @@ Vector4 glGetVector4(GLenum which);
 
 #elif defined(G3D_LINUX)
 
-    typedef GLXContext GLContext;
+    typedef OSMesaContext GLContext;
     inline GLContext glGetCurrentContext() {
-        return glXGetCurrentContext();
+        return OSMesaGetCurrentContext();
     }
 
 #elif defined(G3D_OSX)
@@ -236,7 +236,7 @@ inline void * glGetProcAddress(const char * name){
     #ifdef G3D_WIN32
 	    return (void *)wglGetProcAddress(name);
     #elif defined(G3D_LINUX)
-	    return (void *)glXGetProcAddressARB((const GLubyte*)name);
+	    return (void *)OSMesaGetProcAddress(name);
     #elif defined(G3D_OSX)
 		return G3D::NSGLGetProcAddress((const char*)name);
     #else

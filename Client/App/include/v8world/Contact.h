@@ -15,7 +15,7 @@ using G3D::Vector3int16;
 
 class Kernel;
 
-class __declspec(novtable) Contact : public Edge
+class Contact : public Edge
 {
 public:
 	Contact(Primitive* p0, Primitive* p1);

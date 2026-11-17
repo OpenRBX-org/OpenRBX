@@ -11,7 +11,7 @@ namespace RBX {
 class Kernel;
 class World;
 
-class __declspec(novtable) IPipelined
+class IPipelined
 {
 private:
 	IStage* currentStage;

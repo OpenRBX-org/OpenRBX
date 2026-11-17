@@ -1,6 +1,0 @@
-LIBRARY "WebService"
-
-EXPORTS
-	GetExtensionVersion	PRIVATE
-	HttpExtensionProc	PRIVATE
-	TerminateExtension	PRIVATE

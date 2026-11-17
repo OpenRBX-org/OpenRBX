@@ -1,17 +1,24 @@
 #include "renderlib/Profiler.h"
 
+#include <GLG3D/GLCaps.h>
+#include <string>
+
+#ifdef _WIN32
 #include <G3D/RegistryUtil.h>
 #include <GLG3D/DXCaps.h>
-#include <GLG3D/GLCaps.h>
 #include <intrin.h>
-#include <string>
 #include <windows.h>
+#else
+#include <cstdlib>
+#include <cstring>
+#include <fstream>
+#include <sys/sysinfo.h>
+#endif
 
 namespace RBX::Render {
 
-using DelayFunction = void (*)(unsigned int uiParameter);
-
 static float getShaderModel();
+static int getVideoMemory();
 static int getCPUSpeed();
 static std::string getCPUMake();
 static std::string getMaxRes();
@@ -40,6 +47,10 @@ static float getShaderModel()
 
 	return 1.0f;
 }
+
+#ifdef _WIN32
+
+using DelayFunction = void (*)(unsigned int uiParameter);
 
 static __int64 GetCyclesDifference(DelayFunction DelayFunction, unsigned int uiParameter)
 {
@@ -81,6 +92,11 @@ static void DelayOverhead(unsigned int time)
 			QueryPerformanceCounter(&EndCounter);
 		} while ((EndCounter.QuadPart - StartCounter.QuadPart) == ticks);
 	}
+}
+
+static int getVideoMemory()
+{
+	return (int) (G3D::DXCaps::videoMemorySize() / (1024 * 1024));
 }
 
 static std::string getCPUMake()
@@ -147,9 +163,74 @@ static int getRam()
 	return (int) memoryStatus.dwTotalPhys / (1024 * 1024);
 }
 
+#else
+
+static std::string readCPUInfo(const char* key)
+{
+	std::ifstream cpuinfo("/proc/cpuinfo");
+	std::string line;
+
+	while (std::getline(cpuinfo, line)) {
+		if (line.compare(0, std::strlen(key), key) == 0) {
+			std::size_t colon = line.find(':');
+
+			if (colon != std::string::npos) {
+				std::size_t value = line.find_first_not_of(' ', colon + 1);
+				return value == std::string::npos ? std::string() : line.substr(value);
+			}
+		}
+	}
+
+	return std::string();
+}
+
+static int getVideoMemory()
+{
+	return 0;
+}
+
+static std::string getCPUMake()
+{
+	std::string cpu_name = readCPUInfo("model name");
+
+	if (!cpu_name.empty()) {
+		return cpu_name;
+	}
+
+	return "Could not determine CPU name";
+}
+
+static int getCPUSpeed()
+{
+	int speed = std::atoi(readCPUInfo("cpu MHz").c_str());
+
+	if (speed > 300) {
+		return speed;
+	}
+
+	return 1400;
+}
+
+static std::string getMaxRes()
+{
+	return "0x0";
+}
+
+static int getRam()
+{
+	struct sysinfo info;
+
+	if (sysinfo(&info) != 0) {
+		return 0;
+	}
+
+	return (int) ((unsigned long long) info.totalram * info.mem_unit / (1024 * 1024));
+}
+
+#endif
+
 SpecData::SpecData()
-	: shaderModel(glLoaded ? getShaderModel() : 0.0f),
-	  videoMemory((int) (G3D::DXCaps::videoMemorySize() / (1024 * 1024))), CPUSpeed(getCPUSpeed()),
+	: shaderModel(glLoaded ? getShaderModel() : 0.0f), videoMemory(getVideoMemory()), CPUSpeed(getCPUSpeed()),
 	  glVendor(glLoaded ? G3D::GLCaps::vendor() : "?"), gfxcard(glLoaded ? G3D::GLCaps::renderer() : "?"),
 	  cpu(getCPUMake()), ram(getRam()), resolution(getMaxRes())
 {

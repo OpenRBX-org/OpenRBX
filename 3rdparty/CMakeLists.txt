@@ -9,18 +9,27 @@ endif()
 
 set(G3D "${PROJECT_SOURCE_DIR}/Client/Rendering/g3d")
 
-file(GLOB OPENRBX_GRAPHICS3D_SOURCES "${G3D}/g3dcpp/*.cpp" "${G3D}/ijg/*.c" "${G3D}/png/*.c")
-file(GLOB OPENRBX_GLG3D_SOURCES "${G3D}/glg3dcpp/*.cpp" "${G3D}/zlib/*.c")
+file(GLOB OPENRBX_GRAPHICS3D_SOURCES "${G3D}/g3dcpp/*.cpp" "${G3D}/IJG/*.c" "${G3D}/png/*.c" "${G3D}/zlib/*.c")
+file(GLOB OPENRBX_GLG3D_SOURCES "${G3D}/glg3dcpp/*.cpp")
+if (NOT WIN32)
+  list(REMOVE_ITEM OPENRBX_GLG3D_SOURCES "${G3D}/glg3dcpp/SDLWindow.cpp")
+endif()
 
 add_library(graphics3d STATIC ${OPENRBX_GRAPHICS3D_SOURCES})
 add_library(glg3d STATIC ${OPENRBX_GLG3D_SOURCES})
 
 foreach(name graphics3d glg3d)
   target_include_directories(${name} PRIVATE
-    "${G3D}/include" "${G3D}/png" "${G3D}/zlib" "${G3D}/ijg"
+    "${G3D}/include" "${G3D}/png" "${G3D}/zlib" "${G3D}/IJG"
     "${PROJECT_SOURCE_DIR}/Client/Rendering/SDL-1.2.6/include"
   )
-  target_compile_definitions(${name} PRIVATE WIN32 NDEBUG _LIB G3D_BUILDING_LIBRARY_DLL _VC80_UPGRADE=0x0710 _MBCS)
+  if (WIN32)
+    target_compile_definitions(${name} PRIVATE WIN32 NDEBUG _LIB G3D_BUILDING_LIBRARY_DLL _VC80_UPGRADE=0x0710 _MBCS)
+  else()
+    target_include_directories(${name} PRIVATE "${PROJECT_SOURCE_DIR}/Client/Rendering/Mesa-6.5/include")
+    target_compile_definitions(${name} PRIVATE NDEBUG _LIB G3D_DEBUG_NOGUI)
+    set_target_properties(${name} PROPERTIES C_STANDARD 99)
+  endif()
   if (MSVC)
     target_compile_options(${name} PRIVATE /O2 /Ob1 /GF /EHsc /Gy)
   endif()
@@ -298,70 +307,141 @@ set(OPENRBX_MESA_GLU_SOURCES
   "${MESA}/src/glu/sgi/libutil/registry.c"
 )
 
-set(OPENRBX_MESA_LINK_OPTIONS "/INCREMENTAL:NO")
+if (WIN32)
+  set(OPENRBX_MESA_LINK_OPTIONS "/INCREMENTAL:NO")
 
-set(OPENRBX_MESA_COMPILE_OPTIONS "/O2" "/Ob1" "/GF" "/Gy" "/Zm1000" "/W0")
+  set(OPENRBX_MESA_COMPILE_OPTIONS "/O2" "/Ob1" "/GF" "/Gy" "/Zm1000" "/W0")
 
-add_library(mesa_core STATIC ${OPENRBX_MESA_CORE_SOURCES})
-set_target_properties(mesa_core PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded")
-target_include_directories(mesa_core PRIVATE
-  "${MESA}/include" "${MESA}/src/mesa" "${MESA}/src/mesa/glapi" "${MESA}/src/mesa/main"
-  "${MESA}/src/mesa/shader" "${MESA}/src/mesa/shader/slang" "${MESA}/src/mesa/shader/grammar"
-)
-target_compile_definitions(mesa_core PRIVATE NDEBUG WIN32 _MBCS _LIB _DLL BUILD_GL32 MESA_MINWARN)
-target_compile_options(mesa_core PRIVATE ${OPENRBX_MESA_COMPILE_OPTIONS})
+  add_library(mesa_core STATIC ${OPENRBX_MESA_CORE_SOURCES})
+  set_target_properties(mesa_core PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded")
+  target_include_directories(mesa_core PRIVATE
+    "${MESA}/include" "${MESA}/src/mesa" "${MESA}/src/mesa/glapi" "${MESA}/src/mesa/main"
+    "${MESA}/src/mesa/shader" "${MESA}/src/mesa/shader/slang" "${MESA}/src/mesa/shader/grammar"
+  )
+  target_compile_definitions(mesa_core PRIVATE NDEBUG WIN32 _MBCS _LIB _DLL BUILD_GL32 MESA_MINWARN)
+  target_compile_options(mesa_core PRIVATE ${OPENRBX_MESA_COMPILE_OPTIONS})
 
-add_library(opengl32 SHARED ${OPENRBX_MESA_GDI_SOURCES})
-set_target_properties(opengl32 PROPERTIES OUTPUT_NAME "OPENGL32" SUFFIX ".DLL"
-  MSVC_RUNTIME_LIBRARY "MultiThreaded")
-target_include_directories(opengl32 PRIVATE
-  "${MESA}/windows/VC7/main" "${MESA}/include" "${MESA}/src/mesa" "${MESA}/src/mesa/main"
-  "${MESA}/src/mesa/glapi" "${MESA}/src/mesa/swrast" "${MESA}/src/mesa/shader"
-)
-target_compile_definitions(opengl32 PRIVATE
-  NDEBUG WIN32 _WINDOWS _MBCS _USRDLL GDI_EXPORTS _DLL BUILD_GL32 MESA_MINWARN)
-target_compile_options(opengl32 PRIVATE ${OPENRBX_MESA_COMPILE_OPTIONS})
-target_link_libraries(opengl32 PRIVATE mesa_core winmm msvcrt kernel32 user32 gdi32 advapi32)
-target_link_options(opengl32 PRIVATE ${OPENRBX_MESA_LINK_OPTIONS}
-  "/DEF:${MESA}/src/mesa/drivers/windows/gdi/mesa.def")
+  add_library(opengl32 SHARED ${OPENRBX_MESA_GDI_SOURCES})
+  set_target_properties(opengl32 PROPERTIES OUTPUT_NAME "OPENGL32" SUFFIX ".DLL"
+    MSVC_RUNTIME_LIBRARY "MultiThreaded")
+  target_include_directories(opengl32 PRIVATE
+    "${MESA}/windows/VC7/main" "${MESA}/include" "${MESA}/src/mesa" "${MESA}/src/mesa/main"
+    "${MESA}/src/mesa/glapi" "${MESA}/src/mesa/swrast" "${MESA}/src/mesa/shader"
+  )
+  target_compile_definitions(opengl32 PRIVATE
+    NDEBUG WIN32 _WINDOWS _MBCS _USRDLL GDI_EXPORTS _DLL BUILD_GL32 MESA_MINWARN)
+  target_compile_options(opengl32 PRIVATE ${OPENRBX_MESA_COMPILE_OPTIONS})
+  target_link_libraries(opengl32 PRIVATE mesa_core winmm msvcrt kernel32 user32 gdi32 advapi32)
+  target_link_options(opengl32 PRIVATE ${OPENRBX_MESA_LINK_OPTIONS}
+    "/DEF:${MESA}/src/mesa/drivers/windows/gdi/mesa.def")
 
-add_library(osmesa32 SHARED ${OPENRBX_MESA_OSMESA_SOURCES})
-set_target_properties(osmesa32 PROPERTIES OUTPUT_NAME "OSMESA32" SUFFIX ".DLL"
-  MSVC_RUNTIME_LIBRARY "MultiThreaded")
-target_include_directories(osmesa32 PRIVATE
-  "${MESA}/include" "${MESA}/src/mesa" "${MESA}/src/mesa/main" "${MESA}/src/mesa/glapi"
-  "${MESA}/src/mesa/swrast" "${MESA}/src/mesa/shader"
-)
-target_compile_definitions(osmesa32 PRIVATE
-  WIN32 NDEBUG _WINDOWS _MBCS _USRDLL OSMESA_EXPORTS)
-target_compile_options(osmesa32 PRIVATE ${OPENRBX_MESA_COMPILE_OPTIONS})
-target_link_libraries(osmesa32 PRIVATE opengl32 winmm msvcrt kernel32 user32 gdi32 advapi32)
-target_link_options(osmesa32 PRIVATE ${OPENRBX_MESA_LINK_OPTIONS}
-  "/DEF:${MESA}/src/mesa/drivers/osmesa/osmesa.def")
+  add_library(osmesa32 SHARED ${OPENRBX_MESA_OSMESA_SOURCES})
+  set_target_properties(osmesa32 PROPERTIES OUTPUT_NAME "OSMESA32" SUFFIX ".DLL"
+    MSVC_RUNTIME_LIBRARY "MultiThreaded")
+  target_include_directories(osmesa32 PRIVATE
+    "${MESA}/include" "${MESA}/src/mesa" "${MESA}/src/mesa/main" "${MESA}/src/mesa/glapi"
+    "${MESA}/src/mesa/swrast" "${MESA}/src/mesa/shader"
+  )
+  target_compile_definitions(osmesa32 PRIVATE
+    WIN32 NDEBUG _WINDOWS _MBCS _USRDLL OSMESA_EXPORTS)
+  target_compile_options(osmesa32 PRIVATE ${OPENRBX_MESA_COMPILE_OPTIONS})
+  target_link_libraries(osmesa32 PRIVATE opengl32 winmm msvcrt kernel32 user32 gdi32 advapi32)
+  target_link_options(osmesa32 PRIVATE ${OPENRBX_MESA_LINK_OPTIONS}
+    "/DEF:${MESA}/src/mesa/drivers/osmesa/osmesa.def")
 
-add_library(glu32 SHARED ${OPENRBX_MESA_GLU_SOURCES})
-set_target_properties(glu32 PROPERTIES OUTPUT_NAME "GLU32" SUFFIX ".DLL"
-  MSVC_RUNTIME_LIBRARY "MultiThreaded")
-target_include_directories(glu32 PRIVATE
-  "${MESA}/include" "${MESA}/src/glu/sgi/include" "${MESA}/src/glu/sgi/libnurbs/interface"
-  "${MESA}/src/glu/sgi/libnurbs/internals" "${MESA}/src/glu/sgi/libnurbs/nurbtess"
-)
-target_compile_definitions(glu32 PRIVATE
-  WIN32 NDEBUG _WINDOWS _MBCS _USRDLL GLU_EXPORTS BUILD_GL32)
-target_compile_options(glu32 PRIVATE ${OPENRBX_MESA_COMPILE_OPTIONS})
+  add_library(glu32 SHARED ${OPENRBX_MESA_GLU_SOURCES})
+  set_target_properties(glu32 PROPERTIES OUTPUT_NAME "GLU32" SUFFIX ".DLL"
+    MSVC_RUNTIME_LIBRARY "MultiThreaded")
+  target_include_directories(glu32 PRIVATE
+    "${MESA}/include" "${MESA}/src/glu/sgi/include" "${MESA}/src/glu/sgi/libnurbs/interface"
+    "${MESA}/src/glu/sgi/libnurbs/internals" "${MESA}/src/glu/sgi/libnurbs/nurbtess"
+  )
+  target_compile_definitions(glu32 PRIVATE
+    WIN32 NDEBUG _WINDOWS _MBCS _USRDLL GLU_EXPORTS BUILD_GL32)
+  target_compile_options(glu32 PRIVATE ${OPENRBX_MESA_COMPILE_OPTIONS})
 
-set(OPENRBX_MESA_GLU_NURBS_SOURCES ${OPENRBX_MESA_GLU_SOURCES})
-list(FILTER OPENRBX_MESA_GLU_NURBS_SOURCES INCLUDE REGEX "[.]cc$")
-set_source_files_properties(${OPENRBX_MESA_GLU_NURBS_SOURCES} DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-  PROPERTIES COMPILE_OPTIONS "/EHs-c-" COMPILE_DEFINITIONS "LIBRARYBUILD")
-target_link_libraries(glu32 PRIVATE msvcrt winmm opengl32 kernel32 user32 gdi32 advapi32)
-target_link_options(glu32 PRIVATE ${OPENRBX_MESA_LINK_OPTIONS}
-  "/DEF:${MESA}/src/glu/sgi/glu.def")
+  set(OPENRBX_MESA_GLU_NURBS_SOURCES ${OPENRBX_MESA_GLU_SOURCES})
+  list(FILTER OPENRBX_MESA_GLU_NURBS_SOURCES INCLUDE REGEX "[.]cc$")
+  set_source_files_properties(${OPENRBX_MESA_GLU_NURBS_SOURCES} DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+    PROPERTIES COMPILE_OPTIONS "/EHs-c-" COMPILE_DEFINITIONS "LIBRARYBUILD")
+  target_link_libraries(glu32 PRIVATE msvcrt winmm opengl32 kernel32 user32 gdi32 advapi32)
+  target_link_options(glu32 PRIVATE ${OPENRBX_MESA_LINK_OPTIONS}
+    "/DEF:${MESA}/src/glu/sgi/glu.def")
+else()
+  set(OPENRBX_MESA_INCLUDE_DIRS
+    "${MESA}/include" "${MESA}/src/mesa" "${MESA}/src/mesa/glapi" "${MESA}/src/mesa/main"
+    "${MESA}/src/mesa/swrast" "${MESA}/src/mesa/shader" "${MESA}/src/mesa/shader/slang"
+    "${MESA}/src/mesa/shader/grammar"
+  )
 
-foreach(name graphics3d glg3d mesa_core opengl32 osmesa32 glu32)
-  set_target_properties(${name} PROPERTIES
-    C_CLANG_TIDY "" CXX_CLANG_TIDY "" CXX_INCLUDE_WHAT_YOU_USE "")
+  add_library(mesa_core STATIC ${OPENRBX_MESA_CORE_SOURCES})
+  set_target_properties(mesa_core PROPERTIES POSITION_INDEPENDENT_CODE ON)
+  target_include_directories(mesa_core PRIVATE ${OPENRBX_MESA_INCLUDE_DIRS})
+  target_compile_definitions(mesa_core PRIVATE NDEBUG PTHREADS)
+
+  add_library(osmesa SHARED ${OPENRBX_MESA_OSMESA_SOURCES})
+  set_target_properties(osmesa PROPERTIES OUTPUT_NAME "OSMesa" LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
+  target_include_directories(osmesa PRIVATE ${OPENRBX_MESA_INCLUDE_DIRS})
+  target_compile_definitions(osmesa PRIVATE NDEBUG PTHREADS)
+  target_link_libraries(osmesa PRIVATE mesa_core Threads::Threads m)
+  target_link_options(osmesa PRIVATE "LINKER:-Bsymbolic")
+
+  add_library(glu STATIC ${OPENRBX_MESA_GLU_SOURCES})
+  target_include_directories(glu PRIVATE
+    "${MESA}/include" "${MESA}/src/glu/sgi/include" "${MESA}/src/glu/sgi/libnurbs/interface"
+    "${MESA}/src/glu/sgi/libnurbs/internals" "${MESA}/src/glu/sgi/libnurbs/nurbtess"
+  )
+  target_compile_definitions(glu PRIVATE NDEBUG)
+
+  set(OPENRBX_MESA_GLU_NURBS_SOURCES ${OPENRBX_MESA_GLU_SOURCES})
+  list(FILTER OPENRBX_MESA_GLU_NURBS_SOURCES INCLUDE REGEX "[.]cc$")
+  set_source_files_properties(${OPENRBX_MESA_GLU_NURBS_SOURCES} DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+    PROPERTIES COMPILE_DEFINITIONS "LIBRARYBUILD")
+
+  set_target_properties(mesa_core osmesa glu PROPERTIES C_STANDARD 99)
+endif()
+
+foreach(name graphics3d glg3d mesa_core opengl32 osmesa32 glu32 osmesa glu)
+  if (TARGET ${name})
+    set_target_properties(${name} PROPERTIES
+      C_CLANG_TIDY "" CXX_CLANG_TIDY "" CXX_INCLUDE_WHAT_YOU_USE "")
+  endif()
 endforeach()
+
+if (NOT WIN32)
+  include(ExternalProject)
+  cmake_host_system_information(RESULT OPENRBX_JOBS QUERY NUMBER_OF_LOGICAL_CORES)
+
+  set(OPENSSL_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/openssl")
+  ExternalProject_Add(openssl_build
+    SOURCE_DIR "${PROJECT_SOURCE_DIR}/3rdparty/openssl"
+    BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/openssl-build"
+    INSTALL_DIR "${OPENSSL_PREFIX}"
+    CONFIGURE_COMMAND perl <SOURCE_DIR>/Configure no-shared no-tests no-docs no-apps --prefix=<INSTALL_DIR> --libdir=lib
+    BUILD_COMMAND make -j${OPENRBX_JOBS} build_libs
+    INSTALL_COMMAND make install_dev
+    BUILD_BYPRODUCTS "${OPENSSL_PREFIX}/lib/libssl.a" "${OPENSSL_PREFIX}/lib/libcrypto.a"
+  )
+  file(MAKE_DIRECTORY "${OPENSSL_PREFIX}/include")
+
+  add_library(OpenSSL::Crypto STATIC IMPORTED GLOBAL)
+  set_target_properties(OpenSSL::Crypto PROPERTIES
+    IMPORTED_LOCATION "${OPENSSL_PREFIX}/lib/libcrypto.a"
+    INTERFACE_INCLUDE_DIRECTORIES "${OPENSSL_PREFIX}/include"
+    INTERFACE_LINK_LIBRARIES "Threads::Threads;${CMAKE_DL_LIBS}"
+  )
+  add_dependencies(OpenSSL::Crypto openssl_build)
+
+  add_library(OpenSSL::SSL STATIC IMPORTED GLOBAL)
+  set_target_properties(OpenSSL::SSL PROPERTIES
+    IMPORTED_LOCATION "${OPENSSL_PREFIX}/lib/libssl.a"
+    INTERFACE_INCLUDE_DIRECTORIES "${OPENSSL_PREFIX}/include"
+    INTERFACE_LINK_LIBRARIES OpenSSL::Crypto
+  )
+  add_dependencies(OpenSSL::SSL openssl_build)
+
+  return()
+endif()
 
 set(SCINTILLA "${PROJECT_SOURCE_DIR}/3rdparty/scintilla")
 set(OGRE "${PROJECT_SOURCE_DIR}/3rdparty/ogrenew")

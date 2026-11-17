@@ -9,11 +9,12 @@
 #include "v8xml/XmlElement.h"
 
 #include <memory>
+#include <type_traits>
 
 namespace RBX::Reflection {
 
 template <class T, const char* sName, class Base>
-class __declspec(novtable) Described : public Base
+class Described : public Base
 {
 public:
 	Described() { this->descriptor = &classDescriptor(); }
@@ -242,13 +243,12 @@ private:
 	template <class R>
 	void call(Class* o, Value& returnValue) const
 	{
-		returnValue = (o->*function)();
-	}
-
-	template <>
-	void call<void>(Class* o, Value& returnValue) const
-	{
-		(o->*function)();
+		if constexpr (std::is_void_v<R>) {
+			(o->*function)();
+		}
+		else {
+			returnValue = (o->*function)();
+		}
 	}
 
 	void declareSignature() { this->signature.resultType = &Type::singleton<result_type>(); }
@@ -287,13 +287,12 @@ private:
 	template <class R>
 	void call(Class* o, Value& returnValue, Value& arg1) const
 	{
-		returnValue = (o->*function)(arg1.convert<Arg1>());
-	}
-
-	template <>
-	void call<void>(Class* o, Value& returnValue, Value& arg1) const
-	{
-		(o->*function)(arg1.convert<Arg1>());
+		if constexpr (std::is_void_v<R>) {
+			(o->*function)(arg1.convert<Arg1>());
+		}
+		else {
+			returnValue = (o->*function)(arg1.convert<Arg1>());
+		}
 	}
 
 public:
@@ -349,13 +348,12 @@ private:
 	template <class R>
 	void call(Class* o, Value& returnValue, Value& arg1, Value& arg2) const
 	{
-		returnValue = (o->*function)(arg1.convert<Arg1>(), arg2.convert<Arg2>());
-	}
-
-	template <>
-	void call<void>(Class* o, Value& returnValue, Value& arg1, Value& arg2) const
-	{
-		(o->*function)(arg1.convert<Arg1>(), arg2.convert<Arg2>());
+		if constexpr (std::is_void_v<R>) {
+			(o->*function)(arg1.convert<Arg1>(), arg2.convert<Arg2>());
+		}
+		else {
+			returnValue = (o->*function)(arg1.convert<Arg1>(), arg2.convert<Arg2>());
+		}
 	}
 
 public:
@@ -435,13 +433,12 @@ private:
 	template <class R>
 	void call(Class* o, Value& returnValue, Value& arg1, Value& arg2, Value& arg3) const
 	{
-		returnValue = (o->*function)(arg1.convert<Arg1>(), arg2.convert<Arg2>(), arg3.convert<Arg3>());
-	}
-
-	template <>
-	void call<void>(Class* o, Value& returnValue, Value& arg1, Value& arg2, Value& arg3) const
-	{
-		(o->*function)(arg1.convert<Arg1>(), arg2.convert<Arg2>(), arg3.convert<Arg3>());
+		if constexpr (std::is_void_v<R>) {
+			(o->*function)(arg1.convert<Arg1>(), arg2.convert<Arg2>(), arg3.convert<Arg3>());
+		}
+		else {
+			returnValue = (o->*function)(arg1.convert<Arg1>(), arg2.convert<Arg2>(), arg3.convert<Arg3>());
+		}
 	}
 
 public:
@@ -514,14 +511,13 @@ private:
 	template <class R>
 	void call(Class* o, Value& returnValue, Value& arg1, Value& arg2, Value& arg3, Value& arg4) const
 	{
-		returnValue =
+		if constexpr (std::is_void_v<R>) {
 			(o->*function)(arg1.convert<Arg1>(), arg2.convert<Arg2>(), arg3.convert<Arg3>(), arg4.convert<Arg4>());
-	}
-
-	template <>
-	void call<void>(Class* o, Value& returnValue, Value& arg1, Value& arg2, Value& arg3, Value& arg4) const
-	{
-		(o->*function)(arg1.convert<Arg1>(), arg2.convert<Arg2>(), arg3.convert<Arg3>(), arg4.convert<Arg4>());
+		}
+		else {
+			returnValue =
+				(o->*function)(arg1.convert<Arg1>(), arg2.convert<Arg2>(), arg3.convert<Arg3>(), arg4.convert<Arg4>());
+		}
 	}
 
 public:

@@ -17,7 +17,7 @@ namespace RBX::Render {
 
 class AggregateChunk;
 
-class __declspec(novtable) Chunk : public G3D::ReferenceCountedObject
+class Chunk : public G3D::ReferenceCountedObject
 {
 public:
 	static const float DECAL_OFFSET;
