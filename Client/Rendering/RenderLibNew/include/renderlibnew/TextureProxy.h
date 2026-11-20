@@ -30,7 +30,7 @@ protected:
 	TextureProxyRef root;
 	TextureProxyRef shadeTexture;
 	G3D::Color3 shadeColor;
-	Ogre::TexturePtr m_unk0x4c;
+	Ogre::TexturePtr m_texture;
 
 	friend class RenderScene;
 

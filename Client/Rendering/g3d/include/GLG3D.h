@@ -30,12 +30,6 @@
 
     #pragma comment(lib, "opengl32.lib")
     #pragma comment(lib, "glu32.lib")
-
-    #pragma comment(lib, "sdl.lib")
-
-    #if !defined(NO_SDL_MAIN) && !defined(_CONSOLE)
-        #pragma comment(lib, "sdlmain.lib")
-    #endif
 #endif
 
 #include "GLG3D/glheaders.h"
@@ -51,34 +45,25 @@
 #include "GLG3D/GFont.h"
 #include "GLG3D/LightingParameters.h"
 #include "GLG3D/Sky.h"
-#include "GLG3D/UserInput.h"
-#include "GLG3D/ManualCameraController.h"
 #include "GLG3D/VertexProgram.h"
 #include "GLG3D/Draw.h"
 #include "GLG3D/tesselate.h"
-#include "GLG3D/GApp.h"
 #include "GLG3D/PosedModel.h"
 #include "GLG3D/IFSModel.h"
 #include "GLG3D/MD2Model.h"
 #include "GLG3D/TextureManager.h"
 #include "GLG3D/shadowVolume.h"
 #include "GLG3D/GWindow.h"
-#include "GLG3D/SDLWindow.h"
 #include "GLG3D/edgeFeatures.h"
 #include "GLG3D/Shader.h"
 #include "GLG3D/GLCaps.h"
 #include "GLG3D/Shape.h"
 #include "GLG3D/Renderbuffer.h"
 #include "GLG3D/Framebuffer.h"
-#include "GLG3D/GModule.h"
 
 #ifdef G3D_WIN32
 #include "GLG3D/Win32Window.h"
 #include "GLG3D/DXCaps.h"
-#endif
-
-#ifdef G3D_LINUX
-#include "GLG3D/X11Window.h"
 #endif
 
 

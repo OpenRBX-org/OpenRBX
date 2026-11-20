@@ -15,7 +15,7 @@ public:
 	WordList();
 	~WordList();
 
-	bool ContainsProfanity(std::string p_unk0x04);
+	bool ContainsProfanity(std::string text);
 };
 
 class ProfanityFilter
@@ -27,7 +27,7 @@ public:
 	ProfanityFilter();
 	~ProfanityFilter();
 
-	bool ContainsProfanity(std::string p_unk0x04);
+	bool ContainsProfanity(std::string text);
 };
 
 } // namespace RBX

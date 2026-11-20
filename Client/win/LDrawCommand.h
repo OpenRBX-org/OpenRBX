@@ -9,28 +9,28 @@
 namespace RBX::LDraw2Lua {
 
 class LDraw2RobloxMapRoot;
-struct Unknown00473110;
+struct RobloxPart;
 
 class LDrawCommand : public LuaObjectWriter
 {
 public:
-	LDrawCommand(LDraw2RobloxMapRoot* p_unk0x04);
+	LDrawCommand(LDraw2RobloxMapRoot* mapRoot);
 
 	~LDrawCommand() override;
-	bool VTable0x04(std::ostream& stream, std::string p_unk0x08) override;
+	bool write(std::ostream& stream, std::string parent) override;
 
-	void setFileName(std::string p_unk0x04) { m_unk0x70 = p_unk0x04; }
+	void setFileName(std::string fileName) { m_fileName = fileName; }
 
-	bool FUN_00473330(std::ostream& stream, const Unknown00473110* p_unk0x08);
-	bool FUN_00473500(std::ostream& stream);
-	bool FUN_00473550(std::ostream& stream, std::string p_unk0x08);
-	bool FUN_00473780(std::ostream& stream, std::string p_unk0x08);
+	bool writePart(std::ostream& stream, const RobloxPart* part);
+	bool writeColor(std::ostream& stream);
+	bool writeCFrame(std::ostream& stream, std::string yOffset);
+	bool writeParent(std::ostream& stream, std::string parent);
 
-	LDraw2RobloxMapRoot* m_unk0x04;
-	int m_unk0x08;
-	int m_unk0x0c;
-	double m_unk0x10[12];
-	std::string m_unk0x70;
+	LDraw2RobloxMapRoot* m_mapRoot;
+	int m_type;
+	int m_color;
+	double m_transform[12];
+	std::string m_fileName;
 };
 
 } // namespace RBX::LDraw2Lua

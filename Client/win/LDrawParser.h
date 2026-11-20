@@ -9,13 +9,13 @@ namespace RBX::LDraw2Lua {
 class LDrawParser
 {
 public:
-	LDrawParser(const char* p_unk0x04);
+	LDrawParser(const char* fileName);
 
 	virtual ~LDrawParser();
 
-	void FUN_00473a80(std::ostream& stream);
+	void writeLua(std::ostream& stream);
 
-	std::string m_unk0x04;
+	std::string m_fileName;
 };
 
 } // namespace RBX::LDraw2Lua

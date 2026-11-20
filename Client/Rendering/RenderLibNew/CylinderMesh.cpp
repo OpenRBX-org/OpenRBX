@@ -129,7 +129,7 @@ inline void CylinderBuilder::buildFront(Purpose purpose)
 
 CylinderAlongXMesh::CylinderAlongXMesh(const G3D::Vector3& size, RenderSurfaceTypes surfaceTypes)
 {
-	m_unk0x3c = 3;
+	m_meshType = 3;
 
 	levels.append(new RenderNew::Mesh::Level(G3D::RenderDevice::QUADS));
 	{
@@ -141,7 +141,7 @@ CylinderAlongXMesh::CylinderAlongXMesh(const G3D::Vector3& size, RenderSurfaceTy
 
 CylinderAlongXMesh::CylinderAlongXMesh(const G3D::Vector3& size, NormalId decalFace)
 {
-	m_unk0x3c = 3;
+	m_meshType = 3;
 
 	RenderNew::Mesh::LevelRef level = new RenderNew::Mesh::Level(G3D::RenderDevice::QUADS);
 
@@ -154,7 +154,7 @@ CylinderAlongXMesh::CylinderAlongXMesh(const G3D::Vector3& size, NormalId decalF
 
 CylinderAlongXMesh::CylinderAlongXMesh(const G3D::Vector3& size, NormalId textureFace, const G3D::Vector2& studsPerTile)
 {
-	m_unk0x3c = 3;
+	m_meshType = 3;
 
 	RenderNew::Mesh::LevelRef level = new RenderNew::Mesh::Level(G3D::RenderDevice::QUADS);
 

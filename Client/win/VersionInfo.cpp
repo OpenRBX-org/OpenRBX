@@ -1,100 +1,57 @@
 #include "VersionInfo.h"
 
-CVersionInfo::CVersionInfo()
-{
-	m_pVerData = nullptr;
-	m_pffi = nullptr;
-	m_wLangID = 0;
-	m_wCharset = 1252;
-	m_pTranslations = nullptr;
-	m_nTranslations = 0;
-}
+#ifdef _WIN32
+#include <cstdio>
+#include <vector>
+#include <windows.h>
 
-CVersionInfo::~CVersionInfo()
+std::string fileVersionString()
 {
-	Unload();
-}
+	char fileName[MAX_PATH];
+	GetModuleFileNameA(nullptr, fileName, MAX_PATH);
 
-void CVersionInfo::Unload()
-{
-	m_pffi = nullptr;
-
-	if (m_pVerData) {
-		delete[] m_pVerData;
-		m_pVerData = nullptr;
+	DWORD handle;
+	DWORD size = GetFileVersionInfoSizeA(fileName, &handle);
+	if (size == 0) {
+		return std::string();
 	}
 
-	m_wLangID = 0;
-	m_wCharset = 1252;
-	m_pTranslations = nullptr;
-	m_nTranslations = 0;
-}
-
-int CVersionInfo::Load(HINSTANCE module)
-{
-	char name[500];
-	GetModuleFileName(module, name, sizeof(name));
-
-	CString strFileName(name);
-	return Load(strFileName);
-}
-
-int CVersionInfo::Load(const CString& fileName)
-{
-	Unload();
-
-	CString sFileName(fileName);
-	DWORD dwHandle = 0;
-	int bSuccess = FALSE;
-	DWORD dwSize = GetFileVersionInfoSize(sFileName.GetBuffer(), &dwHandle);
-
-	if (dwSize) {
-		m_pVerData = new BYTE[dwSize];
-
-		if (GetFileVersionInfo(sFileName.GetBuffer(), dwHandle, dwSize, m_pVerData)) {
-			UINT nLen = 0;
-
-			if (VerQueryValue(m_pVerData, "\\", (LPVOID*) &m_pffi, &nLen)) {
-				if (VerQueryValue(m_pVerData, "\\VarFileInfo\\Translation", (LPVOID*) &m_pTranslations, &nLen) &&
-					nLen >= sizeof(TRANSLATION)) {
-					m_nTranslations = nLen / sizeof(TRANSLATION);
-					m_wLangID = m_pTranslations[0].m_wLangID;
-					m_wCharset = m_pTranslations[0].m_wCodePage;
-				}
-
-				bSuccess = TRUE;
-			}
-		}
+	std::vector<BYTE> data(size);
+	if (!GetFileVersionInfoA(fileName, handle, size, data.data())) {
+		return std::string();
 	}
 
-	if (!bSuccess) {
-		if (m_pVerData) {
-			delete[] m_pVerData;
-			m_pVerData = nullptr;
-		}
+	struct Translation
+	{
+		WORD language;
+		WORD codePage;
+	};
+
+	Translation* translations = nullptr;
+	UINT length = 0;
+	if (!VerQueryValueA(data.data(), "\\VarFileInfo\\Translation", reinterpret_cast<LPVOID*>(&translations), &length) ||
+		length < sizeof(Translation)) {
+		return std::string();
 	}
 
-	return bSuccess;
-}
+	char query[64];
+	std::snprintf(
+		query,
+		sizeof(query),
+		"\\StringFileInfo\\%04x%04x\\FileVersion",
+		translations[0].language,
+		translations[0].codePage
+	);
 
-CString CVersionInfo::GetValue(const CString& sKey)
-{
-	CString strResult;
-
-	CString sQueryValue;
-	sQueryValue.Format("\\StringFileInfo\\%04x%04x\\%s", m_wLangID, m_wCharset, static_cast<LPCTSTR>(sKey));
-
-	LPCTSTR pVal = nullptr;
-	UINT nLen = 0;
-
-	if (VerQueryValue(m_pVerData, sQueryValue.GetBuffer(), (LPVOID*) &pVal, &nLen)) {
-		strResult = pVal;
+	const char* value = nullptr;
+	if (!VerQueryValueA(data.data(), query, reinterpret_cast<LPVOID*>(const_cast<char**>(&value)), &length)) {
+		return std::string();
 	}
-
-	return strResult;
+	return value;
 }
-
-CString CVersionInfo::GetFileVersionAsString()
+#else
+std::string fileVersionString()
 {
-	return GetValue("FileVersion");
+	return "0, 3, 676, 0";
 }
+#endif

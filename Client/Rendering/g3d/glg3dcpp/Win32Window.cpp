@@ -21,7 +21,6 @@
 #include "graphics3D.h"
 #include "GLG3D/Win32Window.h"
 #include "GLG3D/glcalls.h"
-#include "GLG3D/UserInput.h"
 #include "directinput8.h"
 
 #include <time.h>
@@ -58,14 +57,8 @@ static bool hasWGLMultiSampleSupport = false;
 
 static PFNWGLCHOOSEPIXELFORMATARBPROC wglChoosePixelFormatARB = NULL;
 
-static unsigned int _sdlKeys[SDLK_LAST];
-static bool sdlKeysInitialized = false;
-
 // Prototype static helper functions at end of file
 static bool ChangeResolution(int, int, int, int);
-static void makeKeyEvent(int, int, GEvent&);
-static void mouseButton(bool, int, DWORD, GEvent&);
-static void initWin32KeyMap();
 //static LRESULT WINAPI _internal::window_proc(HWND window, UINT message, WPARAM wparam, LPARAM lparam);
 
 #if 0
@@ -86,8 +79,6 @@ Win32Window::Win32Window(const GWindow::Settings& s, bool creatingShareWindow)
 ,_diDevices(NULL)
 
 {
-    _receivedCloseEvent = false;
-
     initWGL();
 
 	_hDC = NULL;
@@ -95,10 +86,6 @@ Win32Window::Win32Window(const GWindow::Settings& s, bool creatingShareWindow)
 	_inputCapture = false;
     _windowActive = false;
 	_thread = ::GetCurrentThread();
-
-    if (!sdlKeysInitialized) {
-        initWin32KeyMap();
-    }
 
 	settings = s;
     
@@ -265,12 +252,6 @@ void Win32Window::init(HWND hwnd, bool creatingShareWindow) {
 
 	window = hwnd;
 
-    // Initialize mouse buttons to up
-    _mouseButtons[0] = _mouseButtons[1] = _mouseButtons[2] = false;
-
-    // Clear all keyboard buttons to up (not down)
-    memset(_keyboardButtons, 0, sizeof(_keyboardButtons));
- 
     // Setup the pixel format properties for the output device
     _hDC = GetDC(window);
 
@@ -444,11 +425,6 @@ std::string Win32Window::getAPIName() const {
 }
 
 
-bool Win32Window::requiresMainLoop() const {
-    return false;
-}
-
-
 void Win32Window::setIcon(const GImage& image) {
     alwaysAssertM((image.channels == 3) ||
                   (image.channels == 4), 
@@ -570,123 +546,6 @@ std::string Win32Window::caption() {
 }
 
 
-bool Win32Window::pollEvent(GEvent& e) {
-    MSG message;
-
-    while (PeekMessage(&message, window, 0, 0, PM_REMOVE)) {
-        TranslateMessage(&message);
-		DispatchMessage(&message);
-
-        if (message.hwnd == window) {
-            switch (message.message) {
-            case WM_KEYDOWN:
-            case WM_SYSKEYDOWN:
-
-				e.key.type = SDL_KEYDOWN;
-				e.key.state = SDL_PRESSED;
-
-                // Fix invalid repeat key flag
-                if (justReceivedFocus) {
-                    justReceivedFocus = false;
-                    message.lParam &= ~(0x40000000);
-                }
-
-                // Need the repeat messages to find LSHIFT and RSHIFT
-				if (!((message.lParam >> 30) & 0x01)) {
-					// This is not an autorepeat message
-					makeKeyEvent(message.wParam, message.lParam, e);
-                    _keyboardButtons[message.wParam] = true;
-					return true;
-				}
-				break;
-
-
-			case WM_KEYUP:
-            case WM_SYSKEYUP:
-				e.key.type = SDL_KEYUP;
-				e.key.state = SDL_RELEASED;
-
-				makeKeyEvent(message.wParam, message.lParam, e);
-                _keyboardButtons[message.wParam] = false;
-				return true;
-				break;
-
-
-            case WM_LBUTTONDOWN:
-				mouseButton(true, SDL_LEFT_MOUSE_KEY, message.wParam, e); 
-                _mouseButtons[0] = true;
-				return true;
-
-            case WM_MBUTTONDOWN:
-				mouseButton(true, SDL_MIDDLE_MOUSE_KEY, message.wParam, e); 
-                _mouseButtons[1] = true;
-				return true;
-
-            case WM_RBUTTONDOWN:
-				mouseButton(true, SDL_RIGHT_MOUSE_KEY, message.wParam, e); 
-                _mouseButtons[2] = true;
-				return true;
-
-            case WM_LBUTTONUP:
-				mouseButton(false, SDL_LEFT_MOUSE_KEY, message.wParam, e); 
-                _mouseButtons[0] = false;
-				return true;
-
-            case WM_MBUTTONUP:
-				mouseButton(false, SDL_MIDDLE_MOUSE_KEY, message.wParam, e); 
-                _mouseButtons[1] = false;
-				return true;
-
-            case WM_RBUTTONUP:
-				mouseButton(false, SDL_RIGHT_MOUSE_KEY, message.wParam, e); 
-                _mouseButtons[2] = false;
-				return true;
-            } // switch
-        } // if
-    } // while
-
-    // We never seem to "receive" the WM_QUIT message 
-    // so test for WM_CLOSE in the window_proc
-    if (_receivedCloseEvent) {
-
-        // Reset so SDL_QUIT is only sent once
-        _receivedCloseEvent = false;
-
-        e.type = SDL_QUIT;
-        return true;
-    }
-
-    RECT rect;
-    GetWindowRect(window, &rect);
-    settings.x = rect.left;
-    settings.y = rect.top;
-
-    GetClientRect(window, &rect);
-    settings.width = rect.right - rect.left;
-    settings.height = rect.bottom - rect.top;
-
-    clientX = settings.x;
-    clientY = settings.y;
-
-    if (settings.framed) {
-        // Add the border offset
-        clientX	+= GetSystemMetrics(settings.resizable ? SM_CXSIZEFRAME : SM_CXFIXEDFRAME);
-        clientY += GetSystemMetrics(settings.resizable ? SM_CYSIZEFRAME : SM_CYFIXEDFRAME) + GetSystemMetrics(SM_CYCAPTION);
-    }
-
-    // Check for a resize event and use only most recent
-    // Just use an array instead of used flag and variable
-    // This will be clearer in the 7.0 event system
-    if (sizeEventInjects.size() > 0) {
-        e = sizeEventInjects.last();
-        sizeEventInjects.clear();
-        return true;
-    }
-
-    return false;
-}
-
-
 void Win32Window::setMouseVisible(bool b) {
     m_mouseHideCount = b ? 0 : 1;
 
@@ -764,9 +623,9 @@ void Win32Window::getRelativeMouseState(int& x, int& y, uint8& mouseButtons) con
 
     // Clear mouseButtons and set each button bit.
 	mouseButtons ^= mouseButtons;
-    mouseButtons |= (_mouseButtons[0] ? 1 : 0) << 0;
-    mouseButtons |= (_mouseButtons[1] ? 1 : 0) << 1;
-    mouseButtons |= (_mouseButtons[2] ? 1 : 0) << 2;
+    mouseButtons |= ((GetAsyncKeyState(VK_LBUTTON) & 0x8000) ? 1 : 0) << 0;
+    mouseButtons |= ((GetAsyncKeyState(VK_MBUTTON) & 0x8000) ? 1 : 0) << 1;
+    mouseButtons |= ((GetAsyncKeyState(VK_RBUTTON) & 0x8000) ? 1 : 0) << 2;
 }
 
 
@@ -1026,224 +885,6 @@ static bool ChangeResolution(int width, int height, int bpp, int refreshRate) {
 }
 
 
-static void makeKeyEvent(int vkCode, int lParam, GEvent& e) {
-
-    // If true, we're looking at the right hand version of
-    // Fix VK_SHIFT, VK_CONTROL, VK_MENU
-    bool extended = (lParam >> 24) & 0x01;
-
-    // Check for normal letter event
-    if ((vkCode >= 'A') && (vkCode <= 'Z')) {
-
-        // Make key codes lower case canonically
-        e.key.keysym.sym = (SDLKey)(vkCode - 'A' + 'a');
-
-    } else if (vkCode == VK_SHIFT) {
-
-        e.key.keysym.sym = (SDLKey)(extended ? SDLK_RSHIFT : SDLK_LSHIFT);
-
-    } else if (vkCode == VK_CONTROL) {
-
-        e.key.keysym.sym = (SDLKey)(extended ? SDLK_RCTRL : SDLK_LCTRL);
-
-    } else if (vkCode == VK_MENU) {
-
-        e.key.keysym.sym = (SDLKey)(extended ? SDLK_RALT : SDLK_LALT);
-
-    } else {
-
-        e.key.keysym.sym = (SDLKey)_sdlKeys[iClamp(vkCode, 0, SDLK_LAST)];
-
-    }
-
-    e.key.keysym.scancode = MapVirtualKey(vkCode, 0); 
-        //(lParam >> 16) & 0x7F;
-
-    static BYTE lpKeyState[256];
-    GetKeyboardState(lpKeyState);
-
-    int mod = 0;
-    if (lpKeyState[VK_LSHIFT] & 0x80) {
-        mod = mod | KMOD_LSHIFT;
-    }
-
-    if (lpKeyState[VK_RSHIFT] & 0x80) {
-        mod = mod | KMOD_RSHIFT;
-    }
-
-    if (lpKeyState[VK_LCONTROL] & 0x80) {
-        mod = mod | KMOD_LCTRL;
-    }
-
-    if (lpKeyState[VK_RCONTROL] & 0x80) {
-        mod = mod | KMOD_RCTRL;
-    }
-
-    if (lpKeyState[VK_LMENU] & 0x80) {
-        mod = mod | KMOD_LALT;
-    }
-
-    if (lpKeyState[VK_RMENU] & 0x80) {
-        mod = mod | KMOD_RALT;
-    }
-    e.key.keysym.mod = (SDLMod)mod;
-
-    ToUnicode(vkCode, e.key.keysym.scancode, lpKeyState, (LPWSTR)&e.key.keysym.unicode, 1, 0);
-}
-
-
-/** 
- Configures a mouse up/down event
- */
-static void mouseButton(bool down, int keyEvent, DWORD flags, GEvent& e) {
-    (void)flags;
-    // TODO: process flags
-	if (down) {
-		e.key.type  = SDL_KEYDOWN;
-		e.key.state = SDL_PRESSED;
-	} else {
-		e.key.type  = SDL_KEYUP;
-		e.key.state = SDL_RELEASED;
-	}
-
-    e.key.keysym.unicode = ' ';
-	e.key.keysym.sym = (SDLKey)keyEvent;
-
-
-    e.key.keysym.scancode = 0;
-
-    static BYTE lpKeyState[256];
-    GetKeyboardState(lpKeyState);
-
-    int mod = 0;
-    if (lpKeyState[VK_LSHIFT] & 0x80) {
-        mod = mod | KMOD_LSHIFT;
-    }
-
-    if (lpKeyState[VK_RSHIFT] & 0x80) {
-        mod = mod | KMOD_RSHIFT;
-    }
-
-    if (lpKeyState[VK_LCONTROL] & 0x80) {
-        mod = mod | KMOD_LCTRL;
-    }
-
-    if (lpKeyState[VK_RCONTROL] & 0x80) {
-        mod = mod | KMOD_RCTRL;
-    }
-
-    if (lpKeyState[VK_LMENU] & 0x80) {
-        mod = mod | KMOD_LALT;
-    }
-
-    if (lpKeyState[VK_RMENU] & 0x80) {
-        mod = mod | KMOD_RALT;
-    }
-    e.key.keysym.mod = (SDLMod)mod;
-}
-
-
-/**
- Initializes SDL to Win32 key map
- */
-static void initWin32KeyMap() {
-    memset(_sdlKeys, 0, sizeof(_sdlKeys));
-
-	_sdlKeys[VK_BACK] = SDLK_BACKSPACE;
-	_sdlKeys[VK_TAB] = SDLK_TAB;
-	_sdlKeys[VK_CLEAR] = SDLK_CLEAR;
-	_sdlKeys[VK_RETURN] = SDLK_RETURN;
-	_sdlKeys[VK_PAUSE] = SDLK_PAUSE;
-	_sdlKeys[VK_ESCAPE] = SDLK_ESCAPE;
-	_sdlKeys[VK_SPACE] = SDLK_SPACE;
-	_sdlKeys[VK_APOSTROPHE] = SDLK_QUOTE;
-	_sdlKeys[VK_COMMA] = SDLK_COMMA;
-	_sdlKeys[VK_MINUS] = SDLK_MINUS;
-	_sdlKeys[VK_PERIOD] = SDLK_PERIOD;
-	_sdlKeys[VK_SLASH] = SDLK_SLASH;
-	_sdlKeys['0'] = SDLK_0;
-	_sdlKeys['1'] = SDLK_1;
-	_sdlKeys['2'] = SDLK_2;
-	_sdlKeys['3'] = SDLK_3;
-	_sdlKeys['4'] = SDLK_4;
-	_sdlKeys['5'] = SDLK_5;
-	_sdlKeys['6'] = SDLK_6;
-	_sdlKeys['7'] = SDLK_7;
-	_sdlKeys['8'] = SDLK_8;
-	_sdlKeys['9'] = SDLK_9;
-	_sdlKeys[VK_SEMICOLON] = SDLK_SEMICOLON;
-	_sdlKeys[VK_EQUALS] = SDLK_EQUALS;
-	_sdlKeys[VK_LBRACKET] = SDLK_LEFTBRACKET;
-	_sdlKeys[VK_BACKSLASH] = SDLK_BACKSLASH;
-	_sdlKeys[VK_RBRACKET] = SDLK_RIGHTBRACKET;
-	_sdlKeys[VK_GRAVE] = SDLK_BACKQUOTE;
-	_sdlKeys[VK_BACKTICK] = SDLK_BACKQUOTE;
-	_sdlKeys[VK_DELETE] = SDLK_DELETE;
-
-	_sdlKeys[VK_NUMPAD0] = SDLK_KP0;
-	_sdlKeys[VK_NUMPAD1] = SDLK_KP1;
-	_sdlKeys[VK_NUMPAD2] = SDLK_KP2;
-	_sdlKeys[VK_NUMPAD3] = SDLK_KP3;
-	_sdlKeys[VK_NUMPAD4] = SDLK_KP4;
-	_sdlKeys[VK_NUMPAD5] = SDLK_KP5;
-	_sdlKeys[VK_NUMPAD6] = SDLK_KP6;
-	_sdlKeys[VK_NUMPAD7] = SDLK_KP7;
-	_sdlKeys[VK_NUMPAD8] = SDLK_KP8;
-	_sdlKeys[VK_NUMPAD9] = SDLK_KP9;
-	_sdlKeys[VK_DECIMAL] = SDLK_KP_PERIOD;
-	_sdlKeys[VK_DIVIDE] = SDLK_KP_DIVIDE;
-	_sdlKeys[VK_MULTIPLY] = SDLK_KP_MULTIPLY;
-	_sdlKeys[VK_SUBTRACT] = SDLK_KP_MINUS;
-	_sdlKeys[VK_ADD] = SDLK_KP_PLUS;
-
-	_sdlKeys[VK_UP] = SDLK_UP;
-	_sdlKeys[VK_DOWN] = SDLK_DOWN;
-	_sdlKeys[VK_RIGHT] = SDLK_RIGHT;
-	_sdlKeys[VK_LEFT] = SDLK_LEFT;
-	_sdlKeys[VK_INSERT] = SDLK_INSERT;
-	_sdlKeys[VK_HOME] = SDLK_HOME;
-	_sdlKeys[VK_END] = SDLK_END;
-	_sdlKeys[VK_PRIOR] = SDLK_PAGEUP;
-	_sdlKeys[VK_NEXT] = SDLK_PAGEDOWN;
-
-	_sdlKeys[VK_F1] = SDLK_F1;
-	_sdlKeys[VK_F2] = SDLK_F2;
-	_sdlKeys[VK_F3] = SDLK_F3;
-	_sdlKeys[VK_F4] = SDLK_F4;
-	_sdlKeys[VK_F5] = SDLK_F5;
-	_sdlKeys[VK_F6] = SDLK_F6;
-	_sdlKeys[VK_F7] = SDLK_F7;
-	_sdlKeys[VK_F8] = SDLK_F8;
-	_sdlKeys[VK_F9] = SDLK_F9;
-	_sdlKeys[VK_F10] = SDLK_F10;
-	_sdlKeys[VK_F11] = SDLK_F11;
-	_sdlKeys[VK_F12] = SDLK_F12;
-	_sdlKeys[VK_F13] = SDLK_F13;
-	_sdlKeys[VK_F14] = SDLK_F14;
-	_sdlKeys[VK_F15] = SDLK_F15;
-
-	_sdlKeys[VK_NUMLOCK] = SDLK_NUMLOCK;
-	_sdlKeys[VK_CAPITAL] = SDLK_CAPSLOCK;
-	_sdlKeys[VK_SCROLL] = SDLK_SCROLLOCK;
-	_sdlKeys[VK_RSHIFT] = SDLK_RSHIFT;
-	_sdlKeys[VK_LSHIFT] = SDLK_LSHIFT;
-	_sdlKeys[VK_RCONTROL] = SDLK_RCTRL;
-	_sdlKeys[VK_LCONTROL] = SDLK_LCTRL;
-	_sdlKeys[VK_RMENU] = SDLK_RALT;
-	_sdlKeys[VK_LMENU] = SDLK_LALT;
-	_sdlKeys[VK_RWIN] = SDLK_RSUPER;
-	_sdlKeys[VK_LWIN] = SDLK_LSUPER;
-
-	_sdlKeys[VK_HELP] = SDLK_HELP;
-	_sdlKeys[VK_PRINT] = SDLK_PRINT;
-	_sdlKeys[VK_SNAPSHOT] = SDLK_PRINT;
-	_sdlKeys[VK_CANCEL] = SDLK_BREAK;
-	_sdlKeys[VK_APPS] = SDLK_MENU;
-
-    sdlKeysInitialized = true;
-}
-
-
 #if 0
 static void printPixelFormatDescription(int format, HDC hdc, TextOutput& out) {
 
@@ -1343,30 +984,6 @@ static LRESULT WINAPI window_proc(
             } else if ((HWND)lparam != this_window->hwnd()) {
                 this_window->_windowActive = false;
             }
-            break;
-
-        case WM_CLOSE:
-            this_window->_receivedCloseEvent = true;
-			break;
-
-        case WM_SIZE:
-            if ((wparam == SIZE_MAXIMIZED) ||
-                (wparam == SIZE_RESTORED)) {
-                this_window->injectSizeEvent(LOWORD(lparam), HIWORD(lparam));
-            }
-            break;
-
-        case WM_SETFOCUS:
-            this_window->justReceivedFocus = true;
-            break;
-
-        case WM_KILLFOCUS:
-            for (int i = 0; i < sizeof(this_window->_keyboardButtons); ++i) {
-                if (this_window->_keyboardButtons[i]) {
-                    ::PostMessage(window, WM_KEYUP, i, 0);
-                }
-            }
-            memset(this_window->_keyboardButtons, 0, sizeof(this_window->_keyboardButtons));
             break;
 
         case WM_SYSCOMMAND:

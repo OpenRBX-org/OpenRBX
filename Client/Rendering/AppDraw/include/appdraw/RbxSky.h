@@ -23,37 +23,37 @@ class VisualEngine;
 class RbxSky
 {
 public:
-	RbxSky(SceneManager* sceneManager, const String& folder, bool p_unk0x0c);
+	RbxSky(SceneManager* sceneManager, const String& folder, bool celestialBodies);
 	virtual ~RbxSky();
 
-	void FUN_00677eb0(VisualEngine* engine, const G3D::LightingParameters& parameters);
-	void FUN_00678210(VisualEngine* engine, const G3D::LightingParameters& parameters);
-	void FUN_00678540(VisualEngine* engine, const G3D::LightingParameters& parameters);
-	void FUN_00678610(Camera* cam, RenderQueue* queue, uint8 queueGroupId);
+	void updateMoon(VisualEngine* engine, const G3D::LightingParameters& parameters);
+	void updateSun(VisualEngine* engine, const G3D::LightingParameters& parameters);
+	void update(VisualEngine* engine, const G3D::LightingParameters& parameters);
+	void updateRenderQueue(Camera* cam, RenderQueue* queue, uint8 queueGroupId);
 
 private:
-	TexturePtr m_unk0x04;
-	TexturePtr m_unk0x10;
+	TexturePtr m_sunTexture;
+	TexturePtr m_moonTexture;
 	TexturePtr m_unk0x1c;
-	TexturePtr m_unk0x28;
-	BillboardSet* m_unk0x34;
-	BillboardSet* m_unk0x38;
-	BillboardSet* m_unk0x3c;
-	SceneNode* m_unk0x40;
-	SceneNode* m_unk0x44;
-	SceneNode* m_unk0x48;
-	SceneNode* m_unk0x4c;
-	MaterialPtr m_unk0x54;
-	MaterialPtr m_unk0x60;
-	MaterialPtr m_unk0x6c;
-	MaterialPtr m_unk0x78;
-	bool m_unk0x84;
-	bool m_unk0x85;
-	std::vector<Vector3> m_unk0x88;
-	std::vector<Real> m_unk0x98;
-	bool m_unk0xa8;
-	Vector3 m_unk0xac;
-	Vector3 m_unk0xb8;
+	TexturePtr m_sunRaysTexture;
+	BillboardSet* m_sun;
+	BillboardSet* m_moon;
+	BillboardSet* m_sunRays;
+	SceneNode* m_sunNode;
+	SceneNode* m_moonNode;
+	SceneNode* m_starsNode;
+	SceneNode* m_skyNode;
+	MaterialPtr m_sunMaterial;
+	MaterialPtr m_sunRaysMaterial;
+	MaterialPtr m_moonMaterial;
+	MaterialPtr m_starsMaterial;
+	bool m_sunRaysVisible;
+	bool m_starsVisible;
+	std::vector<Vector3> m_starPositions;
+	std::vector<Real> m_starBrightness;
+	bool m_celestialBodies;
+	Vector3 m_sunPosition;
+	Vector3 m_moonPosition;
 };
 
 } // namespace Ogre

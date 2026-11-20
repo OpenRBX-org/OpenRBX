@@ -5,17 +5,17 @@
 
 namespace RBX {
 
-GuiResponse KeyButton::process(const GuiEvent& p_unk0x04)
+GuiResponse KeyButton::process(const GuiEvent& event)
 {
-	if (p_unk0x04.eventType == UIEvent::KEY_DOWN && p_unk0x04.key() == keyCode) {
+	if (event.eventType == UIEvent::KEY_DOWN && event.key() == keyCode) {
 		keyIsDown = true;
 	}
 
-	if (p_unk0x04.eventType == UIEvent::KEY_UP && p_unk0x04.key() == keyCode) {
+	if (event.eventType == UIEvent::KEY_UP && event.key() == keyCode) {
 		keyIsDown = false;
 	}
 
-	return Widget::process(p_unk0x04);
+	return Widget::process(event);
 }
 
 void KeyButton::onDown(const UIEvent& event)
@@ -56,24 +56,24 @@ void ImageButton::render2d(Adorn* adorn)
 	}
 }
 
-KeyButton::KeyButton(const std::string& p_unk0x04, SDLKey p_unk0x08) : keyCode(p_unk0x08), keyIsDown(false)
+KeyButton::KeyButton(const std::string& name, SDLKey keyCode) : keyCode(keyCode), keyIsDown(false)
 {
-	setName(p_unk0x04);
+	setName(name);
 }
 
-ImageWidget::ImageWidget(Adorn* p_unk0x04, const std::string& p_unk0x08) : guiImageDraw(p_unk0x04, p_unk0x08)
+ImageWidget::ImageWidget(Adorn* adorn, const std::string& name) : guiImageDraw(adorn, name)
 {
-	setName(p_unk0x08);
+	setName(name);
 }
 
-ImageButton::ImageButton(Adorn* p_unk0x04, Verb* p_unk0x08, const std::string& p_unk0x0c)
-	: VerbWidget(p_unk0x08), guiImageDraw(p_unk0x04, p_unk0x08->getName().toString())
+ImageButton::ImageButton(Adorn* adorn, Verb* verb, const std::string& name)
+	: VerbWidget(verb), guiImageDraw(adorn, verb->getName().toString())
 {
-	setName(p_unk0x0c);
+	setName(name);
 }
 
-ImageKeyButton::ImageKeyButton(Adorn* p_unk0x04, const std::string& p_unk0x08, SDLKey p_unk0x0c)
-	: KeyButton(p_unk0x08, p_unk0x0c), imageDraw(p_unk0x04, p_unk0x08)
+ImageKeyButton::ImageKeyButton(Adorn* adorn, const std::string& name, SDLKey keyCode)
+	: KeyButton(name, keyCode), imageDraw(adorn, name)
 {
 }
 

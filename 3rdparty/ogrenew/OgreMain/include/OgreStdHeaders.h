@@ -33,14 +33,8 @@
 #include <queue>
 #include <bitset>
 
-// Note - not in the original STL, but exists in SGI STL and STLport
-#if (OGRE_COMPILER == OGRE_COMPILER_GNUC) && !defined(STLPORT)
-#   include <ext/hash_map>
-#   include <ext/hash_set>
-#else
-#   include <unordered_set>
-#   include <unordered_map>
-#endif
+#include <unordered_set>
+#include <unordered_map>
 
 // STL algorithms & functions
 #include <algorithm>

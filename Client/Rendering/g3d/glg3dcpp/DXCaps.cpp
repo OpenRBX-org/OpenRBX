@@ -154,4 +154,93 @@ uint64 DXCaps::videoMemorySize() {
 
 } // namespace G3D
 
+#elif defined(G3D_LINUX) && !defined(G3D_OSMESA)
+#include "GL/glx.h"
+#include <string.h>
+
+namespace G3D {
+
+static const GLenum GPU_MEMORY_INFO_DEDICATED_VIDMEM_NVX = 0x9047;
+static const int GLX_RENDERER_VIDEO_MEMORY_MESA = 0x8187;
+
+typedef Bool (*PFNGLXQUERYCURRENTRENDERERINTEGERMESAPROC) (int attribute, unsigned int *value);
+
+uint32 DXCaps::version() {
+    return 0;
+}
+
+static uint64 queryCurrentVideoMemory(Display* display, int screen) {
+    const char* glxExtensions = glXQueryExtensionsString(display, screen);
+    if (glxExtensions && strstr(glxExtensions, "GLX_MESA_query_renderer")) {
+        PFNGLXQUERYCURRENTRENDERERINTEGERMESAPROC query = (PFNGLXQUERYCURRENTRENDERERINTEGERMESAPROC)
+            glXGetProcAddressARB((const GLubyte*)"glXQueryCurrentRendererIntegerMESA");
+        unsigned int megabytes = 0;
+        if (query && query(GLX_RENDERER_VIDEO_MEMORY_MESA, &megabytes)) {
+            return (uint64)megabytes * 1024 * 1024;
+        }
+    }
+
+    const char* extensions = (const char*)glGetString(GL_EXTENSIONS);
+    if (extensions && strstr(extensions, "GL_NVX_gpu_memory_info")) {
+        GLint kilobytes = 0;
+        glGetIntegerv(GPU_MEMORY_INFO_DEDICATED_VIDMEM_NVX, &kilobytes);
+        return (uint64)kilobytes * 1024;
+    }
+
+    return 0;
+}
+
+uint64 DXCaps::videoMemorySize() {
+    static uint64 totalVidSize = 0;
+    static bool init = false;
+
+    if (init) {
+        return totalVidSize;
+    }
+    init = true;
+
+    Display* display = XOpenDisplay(NULL);
+    if (display == NULL) {
+        return totalVidSize;
+    }
+
+    int screen = DefaultScreen(display);
+    int attributes[] = {GLX_RGBA, None};
+    XVisualInfo* visual = glXChooseVisual(display, screen, attributes);
+    if (visual != NULL) {
+        Window root = RootWindow(display, screen);
+        XSetWindowAttributes windowAttributes;
+        windowAttributes.colormap = XCreateColormap(display, root, visual->visual, AllocNone);
+        windowAttributes.border_pixel = 0;
+        Window window = XCreateWindow(display, root, 0, 0, 1, 1, 0, visual->depth, InputOutput, visual->visual,
+            CWColormap | CWBorderPixel, &windowAttributes);
+
+        GLXContext context = glXCreateContext(display, visual, NULL, True);
+        if (context != NULL) {
+            Display* previousDisplay = glXGetCurrentDisplay();
+            GLXDrawable previousDrawable = glXGetCurrentDrawable();
+            GLXContext previousContext = glXGetCurrentContext();
+
+            if (glXMakeCurrent(display, window, context)) {
+                totalVidSize = queryCurrentVideoMemory(display, screen);
+                if (previousContext != NULL) {
+                    glXMakeCurrent(previousDisplay, previousDrawable, previousContext);
+                } else {
+                    glXMakeCurrent(display, None, NULL);
+                }
+            }
+            glXDestroyContext(display, context);
+        }
+
+        XDestroyWindow(display, window);
+        XFreeColormap(display, windowAttributes.colormap);
+        XFree(visual);
+    }
+
+    XCloseDisplay(display);
+    return totalVidSize;
+}
+
+} // namespace G3D
+
 #endif // G3D_WIN32

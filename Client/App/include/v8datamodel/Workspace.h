@@ -161,7 +161,7 @@ public:
 	int imageServerViewHack;
 
 	template <class _InIt>
-	std::shared_ptr<ModelInstance> FUN_005984c0(_InIt first, _InIt last)
+	std::shared_ptr<ModelInstance> createModel(_InIt first, _InIt last)
 	{
 		std::shared_ptr<ModelInstance> model = Creatable<Instance>::create<ModelInstance>();
 		model->setParent(this);

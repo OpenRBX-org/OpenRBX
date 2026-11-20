@@ -187,7 +187,7 @@ void checkResult(FMOD_RESULT result)
 {
 	if (result != FMOD_OK) {
 		std::string message = G3D::format("FMOD %d: %s", result, FMOD_ErrorString(result));
-		RBX::StandardOut::singleton()->print(RBX::MESSAGE_WARNING, message.c_str());
+		RBX::StandardOut::singleton()->print(RBX::MESSAGE_WARNING, "%s", message.c_str());
 		throw std::runtime_error(message);
 	}
 }

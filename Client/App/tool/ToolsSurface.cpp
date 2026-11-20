@@ -73,14 +73,14 @@ char sGameTool[] = "GameTool";
 
 char sAxisMoveTool[] = "AxisMove";
 
-void FlatTool::VTable0x40(Surface* surface)
+void FlatTool::applyTo(Surface* surface)
 {
 	surface->getPartInstance()->destroyJoints();
 	surface->flat();
 	surface->getPartInstance()->join();
 }
 
-void HingeTool::VTable0x40(Surface* surface)
+void HingeTool::applyTo(Surface* surface)
 {
 	surface->getPartInstance()->destroyJoints();
 	surface->setSurfaceType(ROTATE);
@@ -90,7 +90,7 @@ void HingeTool::VTable0x40(Surface* surface)
 	surface->getPartInstance()->join();
 }
 
-void RightMotorTool::VTable0x40(Surface* surface)
+void RightMotorTool::applyTo(Surface* surface)
 {
 	surface->getPartInstance()->destroyJoints();
 	surface->setSurfaceType(ROTATE_V);
@@ -100,7 +100,7 @@ void RightMotorTool::VTable0x40(Surface* surface)
 	surface->getPartInstance()->join();
 }
 
-void LeftMotorTool::VTable0x40(Surface* surface)
+void LeftMotorTool::applyTo(Surface* surface)
 {
 	surface->getPartInstance()->destroyJoints();
 	surface->setSurfaceType(ROTATE_V);
@@ -110,7 +110,7 @@ void LeftMotorTool::VTable0x40(Surface* surface)
 	surface->getPartInstance()->join();
 }
 
-void OscillateMotorTool::VTable0x40(Surface* surface)
+void OscillateMotorTool::applyTo(Surface* surface)
 {
 	surface->getPartInstance()->destroyJoints();
 	surface->setSurfaceType(ROTATE_V);
@@ -127,11 +127,11 @@ void SurfaceTool::render3dAdorn(Adorn* adorn)
 	}
 }
 
-void ModelSetFrontTool::VTable0x40(Surface* surface)
+void ModelSetFrontTool::applyTo(Surface* surface)
 {
 	PartInstance* part = surface->getPartInstance();
 	if (ModelInstance* model = dynamic_cast<ModelInstance*>(part->getTopLevelPVParent())) {
-		model->FUN_00565040(Math::getWorldNormal(surface->getNormalId(), part->getCoordinateFrame()));
+		model->setFront(Math::getWorldNormal(surface->getNormalId(), part->getCoordinateFrame()));
 	}
 }
 
@@ -152,18 +152,18 @@ MouseCommand* SurfaceTool::onMouseDown(const UIEvent& uiEvent)
 	if (surface) {
 		undoState.reset(new UndoState());
 		undoState->addAllProperties(*part);
-		VTable0x40(surface);
+		applyTo(surface);
 		ServiceProvider::create<Soundscape::SoundService>(workspace)->playSound(PING_SOUND);
 
 		std::unique_ptr<RedoState> redoState(new RedoState());
 		redoState->addAllProperties(*part);
-		workspace->getDataState().pushState(m_unk0x30, undoState.release(), redoState.release());
+		workspace->getDataState().pushState(m_undoName, undoState.release(), redoState.release());
 		workspace->getDataState().setDirty(true);
 	}
 	return nullptr;
 }
 
-void GlueTool::VTable0x40(Surface* surface)
+void GlueTool::applyTo(Surface* surface)
 {
 	surface->getPartInstance()->destroyJoints();
 	surface->flat();
@@ -172,7 +172,7 @@ void GlueTool::VTable0x40(Surface* surface)
 	ServiceProvider::create<Soundscape::SoundService>(workspace)->playSound(PING_SOUND);
 }
 
-void WeldTool::VTable0x40(Surface* surface)
+void WeldTool::applyTo(Surface* surface)
 {
 	surface->getPartInstance()->destroyJoints();
 	surface->flat();
@@ -181,7 +181,7 @@ void WeldTool::VTable0x40(Surface* surface)
 	ServiceProvider::create<Soundscape::SoundService>(workspace)->playSound(PING_SOUND);
 }
 
-void StudsTool::VTable0x40(Surface* surface)
+void StudsTool::applyTo(Surface* surface)
 {
 	surface->getPartInstance()->destroyJoints();
 	surface->flat();
@@ -190,7 +190,7 @@ void StudsTool::VTable0x40(Surface* surface)
 	ServiceProvider::create<Soundscape::SoundService>(workspace)->playSound(PING_SOUND);
 }
 
-void InletTool::VTable0x40(Surface* surface)
+void InletTool::applyTo(Surface* surface)
 {
 	surface->getPartInstance()->destroyJoints();
 	surface->flat();
@@ -199,32 +199,32 @@ void InletTool::VTable0x40(Surface* surface)
 	ServiceProvider::create<Soundscape::SoundService>(workspace)->playSound(PING_SOUND);
 }
 
-void FUN_00639e20(Instance* instance, const bool& value);
+void setAnchoredRecursive(Instance* instance, const bool& value);
 
-struct Unknown00639e20
+struct SetAnchored
 {
 	bool value;
 
-	Unknown00639e20(bool value) : value(value) {}
+	SetAnchored(bool value) : value(value) {}
 
-	void operator()(Instance* instance) const { FUN_00639e20(instance, value); }
+	void operator()(Instance* instance) const { setAnchoredRecursive(instance, value); }
 };
 
-void FUN_00639e20(Instance* instance, const bool& value)
+void setAnchoredRecursive(Instance* instance, const bool& value)
 {
 	bool anchored = value;
 	if (PartInstance* part = dynamic_cast<PartInstance*>(instance)) {
 		part->setAnchored(anchored);
 	}
 	else {
-		instance->for_eachChild(Unknown00639e20(anchored));
+		instance->for_eachChild(SetAnchored(anchored));
 	}
 }
 
 void ModelTool::render3dAdorn(Adorn* adorn)
 {
-	if (m_unk0x20) {
-		if (IRenderable* renderable = dynamic_cast<IRenderable*>(m_unk0x20.get())) {
+	if (m_model) {
+		if (IRenderable* renderable = dynamic_cast<IRenderable*>(m_model.get())) {
 			renderable->render3dSelect(adorn, SELECT_LIMIT);
 		}
 	}
@@ -232,8 +232,8 @@ void ModelTool::render3dAdorn(Adorn* adorn)
 
 const std::string AnchorTool::getCursorName() const
 {
-	if (m_unk0x20) {
-		if (m_unk0x28) {
+	if (m_model) {
+		if (m_anchored) {
 			return "UnAnchorCursor";
 		}
 		else {
@@ -245,8 +245,8 @@ const std::string AnchorTool::getCursorName() const
 
 const std::string LockTool::getCursorName() const
 {
-	if (m_unk0x20) {
-		if (PartInstance::getLocked(m_unk0x20.get())) {
+	if (m_model) {
+		if (PartInstance::getLocked(m_model.get())) {
 			return "UnlockCursor";
 		}
 		else {
@@ -260,7 +260,7 @@ ModelTool::ModelTool(Workspace* workspace) : MouseCommand(workspace)
 {
 }
 
-static Instance* FUN_0063a090(Instance* instance)
+static Instance* findUnanchoredPart(Instance* instance)
 {
 	PartInstance* part = dynamic_cast<PartInstance*>(instance);
 	if (part && !part->getAnchored()) {
@@ -271,7 +271,7 @@ static Instance* FUN_0063a090(Instance* instance)
 	if (children) {
 		std::vector<std::shared_ptr<Instance>>::const_iterator end = children->end();
 		for (std::vector<std::shared_ptr<Instance>>::const_iterator iter = children->begin(); iter != end; ++iter) {
-			if (FUN_0063a090(iter->get())) {
+			if (findUnanchoredPart(iter->get())) {
 				return iter->get();
 			}
 		}
@@ -283,31 +283,31 @@ void ModelTool::onMouseHover(const UIEvent& uiEvent)
 {
 	PartInstance* part = getPart(uiEvent);
 	if (part) {
-		m_unk0x20 = shared_from(Workspace::findTopInstance(part));
+		m_model = shared_from(Workspace::findTopInstance(part));
 	}
 }
 
 void AnchorTool::onMouseHover(const UIEvent& uiEvent)
 {
-	std::shared_ptr<Instance> oldInstance = m_unk0x20;
+	std::shared_ptr<Instance> oldInstance = m_model;
 	ModelTool::onMouseHover(uiEvent);
-	if (oldInstance != m_unk0x20) {
+	if (oldInstance != m_model) {
 		bool anchored;
-		if (m_unk0x20) {
-			anchored = FUN_0063a090(m_unk0x20.get()) == nullptr;
+		if (m_model) {
+			anchored = findUnanchoredPart(m_model.get()) == nullptr;
 		}
 		else {
 			anchored = false;
 		}
-		m_unk0x28 = anchored;
+		m_anchored = anchored;
 	}
 }
 
 MouseCommand* AnchorTool::onMouseDown(const UIEvent& uiEvent)
 {
-	if (m_unk0x20 && !PartInstance::getLocked(m_unk0x20.get())) {
-		bool anchored = FUN_0063a090(m_unk0x20.get()) != nullptr;
-		FUN_00639e20(m_unk0x20.get(), anchored);
+	if (m_model && !PartInstance::getLocked(m_model.get())) {
+		bool anchored = findUnanchoredPart(m_model.get()) != nullptr;
+		setAnchoredRecursive(m_model.get(), anchored);
 		ServiceProvider::create<Soundscape::SoundService>(workspace)->playSound(PING_SOUND);
 	}
 	return this;
@@ -315,9 +315,9 @@ MouseCommand* AnchorTool::onMouseDown(const UIEvent& uiEvent)
 
 MouseCommand* LockTool::onMouseDown(const UIEvent& uiEvent)
 {
-	if (m_unk0x20) {
-		bool locked = PartInstance::getLocked(m_unk0x20.get());
-		PartInstance::setLocked(m_unk0x20.get(), !locked);
+	if (m_model) {
+		bool locked = PartInstance::getLocked(m_model.get());
+		PartInstance::setLocked(m_model.get(), !locked);
 		ServiceProvider::create<Soundscape::SoundService>(workspace)->playSound(PING_SOUND);
 	}
 	return this;
@@ -325,7 +325,7 @@ MouseCommand* LockTool::onMouseDown(const UIEvent& uiEvent)
 
 const std::string ShootTool::getCursorName() const
 {
-	if (m_unk0x30 && m_unk0x2c > 10) {
+	if (m_reloadCountdown && m_reloadFrames > 10) {
 		return "GunWaitCursor";
 	}
 	return "GunCursor";
@@ -333,15 +333,15 @@ const std::string ShootTool::getCursorName() const
 
 void ShootTool::onMouseIdle(const UIEvent& uiEvent)
 {
-	if (m_unk0x30 > 0) {
-		m_unk0x30--;
+	if (m_reloadCountdown > 0) {
+		m_reloadCountdown--;
 	}
 	if (captured()) {
 		onMouseMove(uiEvent);
 	}
 }
 
-PV SlingshotTool::VTable0x44(const UIEvent& uiEvent, const CoordinateFrame& cframe)
+PV SlingshotTool::computeLaunch(const UIEvent& uiEvent, const CoordinateFrame& cframe)
 {
 	G3D::Vector3 hitWorld;
 	PartInstance* part = getPart(uiEvent, nullptr, hitWorld);
@@ -367,7 +367,7 @@ PV SlingshotTool::VTable0x44(const UIEvent& uiEvent, const CoordinateFrame& cfra
 	}
 }
 
-PV RocketTool::VTable0x44(const UIEvent& uiEvent, const CoordinateFrame& cframe)
+PV RocketTool::computeLaunch(const UIEvent& uiEvent, const CoordinateFrame& cframe)
 {
 	G3D::Vector3 hitWorld;
 	PartInstance* part = getPart(uiEvent, nullptr, hitWorld);
@@ -378,65 +378,65 @@ PV RocketTool::VTable0x44(const UIEvent& uiEvent, const CoordinateFrame& cframe)
 	return PV(frame, Velocity::zero());
 }
 
-ShootTool::ShootTool(Workspace* workspace, bool p_unk0x28, int p_unk0x2c)
-	: MouseCommand(workspace), m_unk0x28(p_unk0x28), m_unk0x2c(p_unk0x2c), m_unk0x30(0)
+ShootTool::ShootTool(Workspace* workspace, bool automatic, int reloadFrames)
+	: MouseCommand(workspace), m_automatic(automatic), m_reloadFrames(reloadFrames), m_reloadCountdown(0)
 {
 }
 
-std::shared_ptr<PartInstance> SlingshotTool::VTable0x40()
+std::shared_ptr<PartInstance> SlingshotTool::createProjectile()
 {
 	std::vector<std::shared_ptr<Instance>> instances;
 	ContentProvider::singleton().load(ContentId::fromAssets("Fonts\\SlingshotPellet.rbxm"), instances);
 	return std::static_pointer_cast<PartInstance>(instances.front());
 }
 
-std::shared_ptr<PartInstance> RocketTool::VTable0x40()
+std::shared_ptr<PartInstance> RocketTool::createProjectile()
 {
 	std::vector<std::shared_ptr<Instance>> instances;
 	ContentProvider::singleton().load(ContentId::fromAssets("Fonts\\Rocket.rbxm"), instances);
 	return std::static_pointer_cast<PartInstance>(instances.front());
 }
 
-void ShootTool::FUN_0063ab10(const UIEvent& uiEvent)
+void ShootTool::fire(const UIEvent& uiEvent)
 {
-	m_unk0x30 = m_unk0x2c;
+	m_reloadCountdown = m_reloadFrames;
 	PartInstance* head = Humanoid::getLocalHeadFromContext(workspace);
 	if (head) {
-		if (!m_unk0x20) {
-			m_unk0x20 = VTable0x40();
+		if (!m_projectile) {
+			m_projectile = createProjectile();
 		}
 
-		std::shared_ptr<PartInstance> projectile = std::static_pointer_cast<PartInstance>(m_unk0x20->clone());
+		std::shared_ptr<PartInstance> projectile = std::static_pointer_cast<PartInstance>(m_projectile->clone());
 		projectile->setParent(workspace);
-		projectile->getPrimitive()->setPV(VTable0x44(uiEvent, head->getCoordinateFrame()));
-		ServiceProvider::create<Soundscape::SoundService>(workspace)->playSound(VTable0x48());
+		projectile->getPrimitive()->setPV(computeLaunch(uiEvent, head->getCoordinateFrame()));
+		ServiceProvider::create<Soundscape::SoundService>(workspace)->playSound(fireSound());
 	}
 }
 
 MouseCommand* ShootTool::onMouseDown(const UIEvent& uiEvent)
 {
 	capture();
-	if (m_unk0x30 == 0) {
-		FUN_0063ab10(uiEvent);
+	if (m_reloadCountdown == 0) {
+		fire(uiEvent);
 	}
 	return this;
 }
 
 void ShootTool::onMouseMove(const UIEvent& uiEvent)
 {
-	if (m_unk0x28 && m_unk0x30 == 0) {
-		FUN_0063ab10(uiEvent);
+	if (m_automatic && m_reloadCountdown == 0) {
+		fire(uiEvent);
 	}
 }
 
 const std::string ResizeTool::getCursorName() const
 {
-	return m_unk0x2c ? std::string("ResizeCursor") : ArrowToolBase::getCursorName();
+	return m_overHandle ? std::string("ResizeCursor") : ArrowToolBase::getCursorName();
 }
 
-void ResizeTool::VTable0x40(XmlState* state)
+void ResizeTool::saveState(XmlState* state)
 {
-	std::shared_ptr<PVInstance> locked = m_unk0x24.lock();
+	std::shared_ptr<PVInstance> locked = m_handlePart.lock();
 	if (PartInstance* part = dynamic_cast<PartInstance*>(locked.get())) {
 		part->writeResizeData(state);
 	}
@@ -446,9 +446,9 @@ MouseCommand* ResizeTool::onMouseUp(const UIEvent& uiEvent)
 {
 	if (captured()) {
 		releaseCapture();
-		if (!m_unk0x24.expired()) {
+		if (!m_handlePart.expired()) {
 			std::unique_ptr<RedoState> redoState(new RedoState());
-			VTable0x40(redoState.get());
+			saveState(redoState.get());
 			XmlState* undo = undoState.release();
 			XmlState* redo = redoState.release();
 			IDataState& dataState = workspace->getDataState();
@@ -460,12 +460,12 @@ MouseCommand* ResizeTool::onMouseUp(const UIEvent& uiEvent)
 	return nullptr;
 }
 
-void ResizeTool::FUN_0063af80(int p_unk0x04)
+void ResizeTool::resizeBy(int amount)
 {
-	if (!m_unk0x24.expired()) {
-		PartInstance* part = static_cast<PartInstance*>(m_unk0x24.lock().get());
+	if (!m_handlePart.expired()) {
+		PartInstance* part = static_cast<PartInstance*>(m_handlePart.lock().get());
 		part->destroyJoints();
-		if (part->resize(m_unk0x30, p_unk0x04)) {
+		if (part->resize(m_handleFace, amount)) {
 			ServiceProvider::create<Soundscape::SoundService>(workspace)->playSound(CLICK_SOUND);
 		}
 		part->join();
@@ -474,39 +474,39 @@ void ResizeTool::FUN_0063af80(int p_unk0x04)
 
 void ResizeTool::onMouseMove(const UIEvent& uiEvent)
 {
-	if (!m_unk0x24.expired()) {
-		G3D::Vector3 axis = Math::getWorldNormal(m_unk0x30, m_unk0x24.lock()->getLocation());
-		G3D::Ray handleRay = G3D::Ray::fromOriginAndDirection(m_unk0x34, axis);
+	if (!m_handlePart.expired()) {
+		G3D::Vector3 axis = Math::getWorldNormal(m_handleFace, m_handlePart.lock()->getLocation());
+		G3D::Ray handleRay = G3D::Ray::fromOriginAndDirection(m_handlePoint, axis);
 		G3D::Ray mouseRay = getUnitMouseRay(uiEvent);
 		G3D::Vector3 closest = Math::closestPointOnRay(handleRay, mouseRay);
-		float distance = (closest - m_unk0x34).dot(handleRay.direction) - m_unk0x44;
+		float distance = (closest - m_handlePoint).dot(handleRay.direction) - m_studsMoved;
 		if (distance > 1.0f) {
 			int amount = G3D::iRound(floor(distance));
-			m_unk0x44 += amount;
-			FUN_0063af80(amount);
+			m_studsMoved += amount;
+			resizeBy(amount);
 		}
 		if (distance < -1.0f) {
 			int amount = -G3D::iRound(floor(-distance));
-			m_unk0x44 += amount;
-			FUN_0063af80(amount);
+			m_studsMoved += amount;
+			resizeBy(amount);
 		}
 	}
 }
 
-void ResizeTool::FUN_0063b240(const UIEvent& uiEvent)
+void ResizeTool::findHandle(const UIEvent& uiEvent)
 {
 	ServiceClient<Selection> selection(workspace);
 	std::vector<std::shared_ptr<Instance>>::const_iterator it;
 	for (it = selection->begin(); it != selection->end(); ++it) {
 		if (PartInstance* part = dynamic_cast<PartInstance*>(it->get())) {
 			G3D::Ray ray = getUnitMouseRay(uiEvent);
-			if (FUN_00662530(part->getExtentsLocal(), part->getLocation(), ray, m_unk0x34, m_unk0x30)) {
-				m_unk0x24 = shared_from(part);
+			if (hitTestHandles(part->getExtentsLocal(), part->getLocation(), ray, m_handlePoint, m_handleFace)) {
+				m_handlePart = shared_from(part);
 				return;
 			}
 		}
 	}
-	m_unk0x24.reset();
+	m_handlePart.reset();
 }
 
 void ResizeTool::render3dAdorn(Adorn* adorn)
@@ -545,25 +545,25 @@ void ResizeTool::render2d(Adorn* adorn)
 
 void ResizeTool::onMouseHover(const UIEvent& uiEvent)
 {
-	FUN_0063b240(uiEvent);
-	m_unk0x2c = !m_unk0x24.expired();
+	findHandle(uiEvent);
+	m_overHandle = !m_handlePart.expired();
 	ArrowToolBase::onMouseHover(uiEvent);
 }
 
 MouseCommand* ResizeTool::onMouseDown(const UIEvent& uiEvent)
 {
-	FUN_0063b240(uiEvent);
-	if (m_unk0x24.expired()) {
+	findHandle(uiEvent);
+	if (m_handlePart.expired()) {
 		return ArrowToolBase::onMouseDown(uiEvent);
 	}
 
-	m_unk0x40 = uiEvent.mousePosition;
-	m_unk0x44 = 0;
+	m_mouseDownPosition = uiEvent.mousePosition;
+	m_studsMoved = 0;
 	m_unk0x48 = 0;
-	m_unk0x2c = true;
+	m_overHandle = true;
 	capture();
 	undoState.reset(new UndoState());
-	VTable0x40(undoState.get());
+	saveState(undoState.get());
 	return this;
 }
 
@@ -599,12 +599,12 @@ MouseCommand* HammerTool::onMouseDown(const UIEvent& uiEvent)
 
 void LaserTool::render3dAdorn(Adorn* adorn)
 {
-	if (m_unk0x20 > 0) {
+	if (m_beamFrames > 0) {
 		if (!FrameInterpolator::isExtraFrame()) {
-			m_unk0x20--;
+			m_beamFrames--;
 		}
 		adorn->setObjectToWorldMatrix(G3D::CoordinateFrame());
-		adorn->lineSegment(G3D::LineSegment::fromTwoPoints(m_unk0x24, m_unk0x30), G3D::Color3::red(), 5.0f);
+		adorn->lineSegment(G3D::LineSegment::fromTwoPoints(m_beamStart, m_beamEnd), G3D::Color3::red(), 5.0f);
 	}
 }
 
@@ -612,7 +612,7 @@ MouseCommand* LaserTool::onMouseDown(const UIEvent& uiEvent)
 {
 	PartInstance* head = Humanoid::getLocalHeadFromContext(workspace);
 	if (head) {
-		m_unk0x24 = head->getCoordinateFrame().translation;
+		m_beamStart = head->getCoordinateFrame().translation;
 		G3D::Vector3 hitWorld;
 		PartInstance* part = getPart(uiEvent, nullptr, hitWorld);
 		if (part) {
@@ -625,7 +625,7 @@ MouseCommand* LaserTool::onMouseDown(const UIEvent& uiEvent)
 			}
 			ServiceProvider::create<Soundscape::SoundService>(workspace)->playSound(SNAP_SOUND);
 		}
-		m_unk0x20 = 4;
+		m_beamFrames = 4;
 	}
 	return this;
 }
@@ -695,7 +695,7 @@ void CloneTool::onMouseIdle(const UIEvent& uiEvent)
 	part = shared_from(getUnlockedPartByLocalCharacter(uiEvent));
 }
 
-bool GameTool::FUN_0063c2c0(PartInstance* part, const G3D::Vector3& hitWorld) const
+bool GameTool::canInteract(PartInstance* part, const G3D::Vector3& hitWorld) const
 {
 	return !part->getPartLocked() && !part->lockedInPlace() && characterCanReach(hitWorld);
 }
@@ -708,7 +708,7 @@ void GameTool::onMouseHover(const UIEvent& uiEvent)
 		if (!part) {
 			cursor = "ArrowFarCursor";
 		}
-		else if (!FUN_0063c2c0(part, hitWorld)) {
+		else if (!canInteract(part, hitWorld)) {
 			cursor = "ArrowCursor";
 		}
 		else {
@@ -721,7 +721,7 @@ MouseCommand* GameTool::onMouseDown(const UIEvent& uiEvent)
 {
 	G3D::Vector3 hitWorld;
 	PartInstance* part = getUnlockedPartByLocalCharacter(uiEvent, hitWorld);
-	if (part && FUN_0063c2c0(part, hitWorld)) {
+	if (part && canInteract(part, hitWorld)) {
 		MouseCommand* dragger = new PartDragTool(part, hitWorld, workspace);
 		return dragger->onMouseDown(uiEvent);
 	}
@@ -735,16 +735,16 @@ GameTool::GameTool(Workspace* workspace) : Named<MouseCommand, sGameTool>(worksp
 }
 
 AxisMoveTool::AxisMoveTool(Workspace* workspace)
-	: Named<ArrowToolBase, sAxisMoveTool>(workspace), cursor("ArrowCursor"), m_unk0x44(false)
+	: Named<ArrowToolBase, sAxisMoveTool>(workspace), cursor("ArrowCursor"), m_dragging(false)
 {
 }
 
 MouseCommand* AxisMoveTool::onMouseUp(const UIEvent& uiEvent)
 {
-	if (m_unk0x44) {
+	if (m_dragging) {
 		dragger->finishDragging();
 		dragger.release();
-		m_unk0x44 = false;
+		m_dragging = false;
 	}
 	releaseCapture();
 	return nullptr;
@@ -752,34 +752,34 @@ MouseCommand* AxisMoveTool::onMouseUp(const UIEvent& uiEvent)
 
 void AxisMoveTool::onMouseMove(const UIEvent& uiEvent)
 {
-	if (!m_unk0x44) {
-		if ((G3D::Vector2(uiEvent.mousePosition) - G3D::Vector2(m_unk0x46)).length() > 4.0f) {
+	if (!m_dragging) {
+		if ((G3D::Vector2(uiEvent.mousePosition) - G3D::Vector2(m_mouseDownPosition)).length() > 4.0f) {
 			ServiceClient<FilteredSelection<PVInstance>> selection(workspace);
 			dragger.reset(new MegaDragger(nullptr, selection->items(), workspace));
 			dragger->startDragging();
 			dragger->alignAndCleanParts();
-			m_unk0x44 = true;
+			m_dragging = true;
 		}
-		if (!m_unk0x44) {
+		if (!m_dragging) {
 			return;
 		}
 	}
 
 	if (dragger->anyDragPartAlive()) {
-		G3D::Vector3 closest = Math::closestPointOnRay(m_unk0x4c, getUnitMouseRay(uiEvent));
-		closest = Math::toGrid(closest, FUN_0063c5c0());
-		G3D::Vector3 delta = Math::toGrid(closest - m_unk0x6c, FUN_0063c5c0());
+		G3D::Vector3 closest = Math::closestPointOnRay(m_handleRay, getUnitMouseRay(uiEvent));
+		closest = Math::toGrid(closest, snapGrid());
+		G3D::Vector3 delta = Math::toGrid(closest - m_position, snapGrid());
 		if (delta != G3D::Vector3::zero()) {
 			dragger->continueDragging();
 			G3D::Vector3 moved = dragger->safeMoveAlongLine(delta);
 			if (moved != G3D::Vector3::zero()) {
-				m_unk0x6c = Math::toGrid(m_unk0x6c + moved, FUN_0063c5c0());
+				m_position = Math::toGrid(m_position + moved, snapGrid());
 			}
 		}
 	}
 }
 
-bool AxisMoveTool::FUN_0063cc60(Extents& extents)
+bool AxisMoveTool::computeSelectionExtents(Extents& extents)
 {
 	ServiceClient<Selection> selection(workspace);
 	std::vector<Primitive*> primitives;
@@ -794,11 +794,11 @@ bool AxisMoveTool::FUN_0063cc60(Extents& extents)
 	return false;
 }
 
-bool AxisMoveTool::FUN_0063ce30(const UIEvent& uiEvent, G3D::Vector3& hitPoint, NormalId& normalId)
+bool AxisMoveTool::hitTestSelectionHandles(const UIEvent& uiEvent, G3D::Vector3& hitPoint, NormalId& normalId)
 {
 	Extents extents;
-	if (FUN_0063cc60(extents)) {
-		if (FUN_00662700(extents, getUnitMouseRay(uiEvent), hitPoint, normalId)) {
+	if (computeSelectionExtents(extents)) {
+		if (hitTestExtentsHandles(extents, getUnitMouseRay(uiEvent), hitPoint, normalId)) {
 			return true;
 		}
 	}
@@ -809,11 +809,11 @@ MouseCommand* AxisMoveTool::onMouseDown(const UIEvent& uiEvent)
 {
 	G3D::Vector3 hitPoint;
 	NormalId normalId;
-	if (FUN_0063ce30(uiEvent, hitPoint, normalId)) {
-		m_unk0x46 = uiEvent.mousePosition;
-		m_unk0x68 = normalId % 3;
-		m_unk0x6c = Math::toGrid(hitPoint, FUN_0063c5c0());
-		m_unk0x4c = G3D::Ray::fromOriginAndDirection(m_unk0x6c, normalIdToVector3(normalId));
+	if (hitTestSelectionHandles(uiEvent, hitPoint, normalId)) {
+		m_mouseDownPosition = uiEvent.mousePosition;
+		m_axis = normalId % 3;
+		m_position = Math::toGrid(hitPoint, snapGrid());
+		m_handleRay = G3D::Ray::fromOriginAndDirection(m_position, normalIdToVector3(normalId));
 		capture();
 		return this;
 	}
@@ -824,7 +824,7 @@ MouseCommand* AxisMoveTool::onMouseDown(const UIEvent& uiEvent)
 void AxisMoveTool::render2d(Adorn* adorn)
 {
 	Extents extents;
-	if (FUN_0063cc60(extents)) {
+	if (computeSelectionExtents(extents)) {
 		CoordinateFrame location(extents.center());
 		G3D::Vector3 size = extents.size();
 		DrawAdorn::handles2d(size, location, workspace->getGCamera(), adorn, G3D::Color3::orange());
@@ -834,7 +834,7 @@ void AxisMoveTool::render2d(Adorn* adorn)
 void AxisMoveTool::render3dAdorn(Adorn* adorn)
 {
 	Extents extents;
-	if (FUN_0063cc60(extents)) {
+	if (computeSelectionExtents(extents)) {
 		CoordinateFrame location(extents.center());
 		G3D::Vector3 size = extents.size();
 		DrawAdorn::handles3d(
@@ -853,7 +853,7 @@ void AxisMoveTool::onMouseIdle(const UIEvent& uiEvent)
 
 	G3D::Vector3 hitPoint;
 	NormalId normalId;
-	if (FUN_0063ce30(uiEvent, hitPoint, normalId)) {
+	if (hitTestSelectionHandles(uiEvent, hitPoint, normalId)) {
 		cursor = "ResizeCursor";
 	}
 	else {
@@ -861,36 +861,36 @@ void AxisMoveTool::onMouseIdle(const UIEvent& uiEvent)
 	}
 }
 
-UndoVerb::UndoVerb(DataModel* dataModel) : Verb(dataModel, "Undo"), m_unk0x0c(dataModel)
+UndoVerb::UndoVerb(DataModel* dataModel) : Verb(dataModel, "Undo"), m_dataModel(dataModel)
 {
 }
 
-RedoVerb::RedoVerb(DataModel* dataModel) : Verb(dataModel, "Redo"), m_unk0x0c(dataModel)
+RedoVerb::RedoVerb(DataModel* dataModel) : Verb(dataModel, "Redo"), m_dataModel(dataModel)
 {
 }
 
 bool UndoVerb::isEnabled() const
 {
 	std::string name;
-	return m_unk0x0c->canUndo(name);
+	return m_dataModel->canUndo(name);
 }
 
 void UndoVerb::doIt(IDataState* dataState)
 {
 	SerializerV2 serializer;
-	serializer.merge(m_unk0x0c->undo()->getData(), m_unk0x0c);
+	serializer.merge(m_dataModel->undo()->getData(), m_dataModel);
 }
 
 bool RedoVerb::isEnabled() const
 {
 	std::string name;
-	return m_unk0x0c->canRedo(name);
+	return m_dataModel->canRedo(name);
 }
 
 void RedoVerb::doIt(IDataState* dataState)
 {
 	SerializerV2 serializer;
-	serializer.merge(m_unk0x0c->redo()->getData(), m_unk0x0c);
+	serializer.merge(m_dataModel->redo()->getData(), m_dataModel);
 }
 
 } // namespace RBX

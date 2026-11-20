@@ -20,7 +20,7 @@ class DataModel;
 class RunService;
 class Selection;
 
-void FUN_00597490(XmlElement* container, std::shared_ptr<Instance> instance);
+void appendInstanceXml(XmlElement* container, std::shared_ptr<Instance> instance);
 
 class FirstPersonCommand : public Verb
 {
@@ -175,9 +175,9 @@ public:
 		return false;
 	}
 
-	void doIt(IDataState* dataState) override { this->dataModel->getWorkspace()->setMouseCommand(VTable0x14()); }
+	void doIt(IDataState* dataState) override { this->dataModel->getWorkspace()->setMouseCommand(createCommand()); }
 
-	virtual MouseCommand* VTable0x14() { return new T(this->dataModel->getWorkspace()); }
+	virtual MouseCommand* createCommand() { return new T(this->dataModel->getWorkspace()); }
 };
 
 class EditSelectionVerb : public Verb
@@ -199,9 +199,9 @@ public:
 class DeleteBase : public EditSelectionVerb
 {
 protected:
-	bool m_unk0x24;
+	bool m_playDelete;
 
-	DeleteBase(DataModel* dataModel, std::string name, bool p_unk0x24);
+	DeleteBase(DataModel* dataModel, std::string name, bool playDelete);
 	DeleteBase(VerbContainer* container, DataModel* dataModel, std::string name);
 
 public:
@@ -241,7 +241,7 @@ protected:
 	virtual G3D::Matrix3 getRotationAxis() = 0;
 
 private:
-	void FUN_00598da0(const G3D::Matrix3& rotation, const std::vector<PVInstance*>& pvInstances);
+	void rotate(const G3D::Matrix3& rotation, const std::vector<PVInstance*>& pvInstances);
 
 public:
 	void doIt(IDataState* dataState) override;

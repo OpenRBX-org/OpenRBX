@@ -26,21 +26,21 @@ public:
 		bool onlyShadowCasters = false
 	) override;
 
-	virtual void FUN_0067aeb0(SubMesh* subMesh, const Matrix4& transform);
-	virtual const Matrix4& FUN_0067ac90(SubMesh* subMesh);
-	virtual bool FUN_0067ada0(SubMesh* subMesh) const;
-	virtual void FUN_0067b2b0(SubMesh* subMesh, const Sphere& sphere);
-	virtual const Sphere& FUN_0067af60(SubMesh* subMesh);
-	virtual bool FUN_0067b020(SubMesh* subMesh) const;
+	virtual void setSubMeshTransform(SubMesh* subMesh, const Matrix4& transform);
+	virtual const Matrix4& getSubMeshTransform(SubMesh* subMesh);
+	virtual bool hasSubMeshTransform(SubMesh* subMesh) const;
+	virtual void setSubMeshSphere(SubMesh* subMesh, const Sphere& sphere);
+	virtual const Sphere& getSubMeshSphere(SubMesh* subMesh);
+	virtual bool hasSubMeshSphere(SubMesh* subMesh) const;
 
-	static bool FUN_0067b070(SubMesh* subMesh);
-	static void FUN_0067b220();
+	static bool removeSubMeshSphere(SubMesh* subMesh);
+	static void createSubMeshSpheres();
 
 private:
-	std::map<const SubMesh*, Matrix4*> m_unk0x1c0;
+	std::map<const SubMesh*, Matrix4*> m_subMeshTransforms;
 };
 
-extern std::map<const SubMesh*, Sphere>* g_unk0x009613c4;
+extern std::map<const SubMesh*, Sphere>* subMeshSpheres;
 
 } // namespace Ogre
 

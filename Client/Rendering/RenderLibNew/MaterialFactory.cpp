@@ -13,8 +13,8 @@
 
 namespace RBX::ViewNew {
 
-static float g_unk0x0092b2d0 = 0.9f;
-static float g_unk0x0092b2d4 = 50.0f;
+static float megaSpecular = 0.9f;
+static float megaShininess = 50.0f;
 
 class MegaTextureProxy : public RenderNew::TextureProxy
 {
@@ -36,7 +36,7 @@ public:
 	G3D::ReferenceCountedPointer<G3D::Texture> resolve(G3D::RenderDevice* rd) override;
 };
 
-static int g_unk0x009586f4 = 0;
+static int megaTextureCounter = 0;
 
 class BadConversion : public std::runtime_error
 {
@@ -79,14 +79,14 @@ G3D::ReferenceCountedPointer<G3D::Texture> MegaTextureProxy::resolve(G3D::Render
 		}
 
 		char name[8];
-		_snprintf(name, sizeof(name), "ta%d", g_unk0x009586f4++);
+		snprintf(name, sizeof(name), "ta%d", megaTextureCounter++);
 
 		Ogre::Image ogreImage;
 		ogreImage.loadDynamicImage(strip.byte(), strip.width, strip.height, 1, Ogre::PF_B8G8R8, false, 1, 0);
 		while (true) {
 			try {
-				m_unk0x4c = Ogre::TextureManager::getSingleton().create(name, "general");
-				m_unk0x4c->loadImage(ogreImage);
+				m_texture = Ogre::TextureManager::getSingleton().create(name, "general");
+				m_texture->loadImage(ogreImage);
 				break;
 			}
 			catch (...) {
@@ -95,7 +95,7 @@ G3D::ReferenceCountedPointer<G3D::Texture> MegaTextureProxy::resolve(G3D::Render
 					break;
 				}
 
-				Ogre::TextureManager::getSingleton().remove(m_unk0x4c->getHandle());
+				Ogre::TextureManager::getSingleton().remove(m_texture->getHandle());
 				ogreImage.resize(ogreImage.getWidth() / 2, ogreImage.getHeight() / 2);
 				Ogre::LogManager::getSingleton().logMessage(
 					std::string("Error loading texture. Reduce size to ") + stringify(strip.width) + "x" +
@@ -135,8 +135,8 @@ G3D::ReferenceCountedPointer<RenderNew::Material> MaterialFactory::getMegaMateri
 			result->appendLevel(
 				megaTexture,
 				G3D::Color3::white(),
-				g_unk0x0092b2d0,
-				g_unk0x0092b2d4,
+				megaSpecular,
+				megaShininess,
 				attributes.reflectance,
 				attributes.transparency
 			);
@@ -167,8 +167,8 @@ G3D::ReferenceCountedPointer<RenderNew::Material> MaterialFactory::getMaterial(A
 			result->appendLevel(
 				texture,
 				G3D::Color3::WHITE,
-				g_unk0x0092b2d0,
-				g_unk0x0092b2d4,
+				megaSpecular,
+				megaShininess,
 				attributes.reflectance,
 				attributes.transparency
 			);

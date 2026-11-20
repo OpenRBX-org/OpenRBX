@@ -2,9 +2,9 @@
 #define GUI_ARROWPANEL_H
 
 #include "gui/GUI.h"
+#include "util/KeyCode.h"
 #include "v8world/Controller.h"
 
-#include <SDL_keysym.h>
 #include <string>
 
 namespace RBX {

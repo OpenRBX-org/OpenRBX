@@ -12,6 +12,7 @@
 #include <vector>
 
 class CRobloxWnd;
+class RobloxWindow;
 class ThumbnailGenerator;
 
 namespace RBX::Render {
@@ -52,6 +53,7 @@ public:
 
 private:
 	friend class ::CRobloxWnd;
+	friend class ::RobloxWindow;
 	friend class ::ThumbnailGenerator;
 
 	static G3D::MeshAlg::Geometry visibleGeometry;

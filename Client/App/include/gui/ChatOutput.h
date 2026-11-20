@@ -27,8 +27,8 @@ public:
 	float dieTime;
 	bool profane;
 
-	ChatLine(Network::Player* p_unk0x04, const std::string& p_unk0x08, float p_unk0x0c);
-	ChatLine(const std::string& p_unk0x04, const std::string& p_unk0x08, float p_unk0x0c);
+	ChatLine(Network::Player* player, const std::string& message, float dieTime);
+	ChatLine(const std::string& userName, const std::string& message, float dieTime);
 	~ChatLine();
 };
 
@@ -45,7 +45,7 @@ private:
 
 	void removeOldest();
 	bool frontIsOld();
-	bool ParseCommand(Network::ChatMessage p_unk0x04);
+	bool ParseCommand(Network::ChatMessage chatMessage);
 
 	void onServiceProvider(const ServiceProvider* oldProvider, const ServiceProvider* newProvider) override;
 	void onEvent(const Network::Players* source, Network::ChatMessage event) override;

@@ -103,7 +103,7 @@ void ModelInstance::updatePrimaryPart(PartInstance* set) const
 	}
 }
 
-void ModelInstance::FUN_00565040(const Vector3& front)
+void ModelInstance::setFront(const Vector3& front)
 {
 	if (primaryPart) {
 		CoordinateFrame look;

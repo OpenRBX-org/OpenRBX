@@ -29,14 +29,14 @@ public:
 	);
 };
 
-bool FUN_00662530(
+bool hitTestHandles(
 	const Extents& extents,
 	const CoordinateFrame& location,
 	const G3D::Ray& ray,
 	G3D::Vector3& hitPoint,
 	NormalId& normalId
 );
-bool FUN_00662700(const Extents& extents, const G3D::Ray& ray, G3D::Vector3& hitPoint, NormalId& normalId);
+bool hitTestExtentsHandles(const Extents& extents, const G3D::Ray& ray, G3D::Vector3& hitPoint, NormalId& normalId);
 
 } // namespace RBX
 

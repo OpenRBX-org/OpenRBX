@@ -3,59 +3,48 @@
 // Copyright 2004 by Neil Hodgson <neilh@scintilla.org>
 // The License.txt file describes the conditions under which this software may be distributed.
 
-#include <iconv.h>
-#if GTK_MAJOR_VERSION >= 2
-	typedef GIConv ConverterHandle;
-#else
-	typedef iconv_t ConverterHandle;
-#endif
-const ConverterHandle iconvhBad = (ConverterHandle)(-1);
-// Since various versions of iconv can not agree on whether the src argument
-// is char ** or const char ** provide a templatised adaptor.
-template<typename T>
-size_t iconv_adaptor(size_t(*f_iconv)(ConverterHandle, T, size_t *, char **, size_t *),
-		ConverterHandle cd, char** src, size_t *srcleft,
-		char **dst, size_t *dstleft) {
-	return f_iconv(cd, (T)src, srcleft, dst, dstleft);
-}
+#ifndef CONVERTER_H
+#define CONVERTER_H
+
+namespace Scintilla {
+
+const GIConv iconvhBad = (GIConv)(-1);
+const gsize sizeFailure = static_cast<gsize>(-1);
 /**
- * Encapsulate iconv safely and avoid iconv_adaptor complexity in client code.
+ * Encapsulate g_iconv safely.
  */
 class Converter {
-	ConverterHandle iconvh;
-	void OpenHandle(const char *fullDestination, const char *charSetSource) {
-#if GTK_MAJOR_VERSION >= 2
+	GIConv iconvh = iconvhBad;
+	void OpenHandle(const char *fullDestination, const char *charSetSource) noexcept {
 		iconvh = g_iconv_open(fullDestination, charSetSource);
-#else
-		iconvh = iconv_open(fullDestination, charSetSource);
-#endif
 	}
-	bool Succeeded() const {
+	bool Succeeded() const noexcept {
 		return iconvh != iconvhBad;
 	}
 public:
-	Converter() {
-		iconvh = iconvhBad;
-	}
+	Converter() noexcept = default;
 	Converter(const char *charSetDestination, const char *charSetSource, bool transliterations) {
-		iconvh = iconvhBad;
-	    	Open(charSetDestination, charSetSource, transliterations);
+		Open(charSetDestination, charSetSource, transliterations);
 	}
+	// Deleted so Converter objects can not be copied.
+	Converter(const Converter &) = delete;
+	Converter(Converter &&) = delete;
+	Converter &operator=(const Converter &) = delete;
+	Converter &operator=(Converter &&) = delete;
 	~Converter() {
 		Close();
 	}
-	operator bool() const {
+	operator bool() const noexcept {
 		return Succeeded();
 	}
-	void Open(const char *charSetDestination, const char *charSetSource, bool transliterations=true) {
+	void Open(const char *charSetDestination, const char *charSetSource, bool transliterations) {
 		Close();
 		if (*charSetSource) {
 			// Try allowing approximate transliterations
 			if (transliterations) {
-				char fullDest[200];
-				strcpy(fullDest, charSetDestination);
-				strcat(fullDest, "//TRANSLIT");
-				OpenHandle(fullDest, charSetSource);
+				std::string fullDest(charSetDestination);
+				fullDest.append("//TRANSLIT");
+				OpenHandle(fullDest.c_str(), charSetSource);
 			}
 			if (!Succeeded()) {
 				// Transliterations failed so try basic name
@@ -63,25 +52,21 @@ public:
 			}
 		}
 	}
-	void Close() {
+	void Close() noexcept {
 		if (Succeeded()) {
-#if GTK_MAJOR_VERSION >= 2
 			g_iconv_close(iconvh);
-#else
-			iconv_close(iconvh);
-#endif
 			iconvh = iconvhBad;
 		}
 	}
-	size_t Convert(char** src, size_t *srcleft, char **dst, size_t *dstleft) const {
+	gsize Convert(char **src, gsize *srcleft, char **dst, gsize *dstleft) const noexcept {
 		if (!Succeeded()) {
-			return (size_t)(-1);
+			return sizeFailure;
 		} else {
-#if GTK_MAJOR_VERSION >= 2
-			return iconv_adaptor(g_iconv, iconvh, src, srcleft, dst, dstleft);
-#else
-			return iconv_adaptor(iconv, iconvh, src, srcleft, dst, dstleft);
-#endif
+			return g_iconv(iconvh, src, srcleft, dst, dstleft);
 		}
 	}
 };
+
+}
+
+#endif

@@ -6,12 +6,10 @@
 
 namespace RBX {
 
-void UnifiedImageWidget::render2dMe(Adorn* p_unk0x04)
+void UnifiedImageWidget::render2dMe(Adorn* adorn)
 {
 	if (isVisible()) {
-		guiImageDraw.render2d(
-			p_unk0x04, true, const_cast<Rect&>(static_cast<const Rect&>(getMyRect())), getWidgetState()
-		);
+		guiImageDraw.render2d(adorn, true, const_cast<Rect&>(static_cast<const Rect&>(getMyRect())), getWidgetState());
 	}
 }
 
@@ -22,10 +20,10 @@ void ChatWidget::onMenuStateChanged()
 	}
 }
 
-ChatWidget::ChatWidget(const std::string& p_unk0x04, std::string p_unk0x08)
+ChatWidget::ChatWidget(const std::string& name, std::string chatCode)
 {
-	setName(p_unk0x04);
-	code = p_unk0x08;
+	setName(name);
+	code = chatCode;
 }
 
 bool ChatButton::isVisible() const
@@ -34,10 +32,10 @@ bool ChatButton::isVisible() const
 	return players != nullptr && players->getLocalPlayer() != nullptr && Network::Players::clientIsPresent(this, true);
 }
 
-GuiResponse ChatWidget::process(const GuiEvent& p_unk0x04)
+GuiResponse ChatWidget::process(const GuiEvent& event)
 {
-	if (isVisible() && p_unk0x04.isMouseEvent() && p_unk0x04.eventType == UIEvent::MOUSE_LEFT_BUTTON_UP &&
-		getMyRect().pointInRect(p_unk0x04.mousePosition)) {
+	if (isVisible() && event.isMouseEvent() && event.eventType == UIEvent::MOUSE_LEFT_BUTTON_UP &&
+		getMyRect().pointInRect(event.mousePosition)) {
 		if (Network::Players* players = ServiceProvider::find<Network::Players>(this)) {
 			ServiceProvider::create<Soundscape::SoundService>(this)->playSound(CLICK_SOUND);
 			std::string message = "/sc " + code;
@@ -46,7 +44,7 @@ GuiResponse ChatWidget::process(const GuiEvent& p_unk0x04)
 		}
 	}
 
-	return UnifiedWidget::process(p_unk0x04);
+	return UnifiedWidget::process(event);
 }
 
 } // namespace RBX

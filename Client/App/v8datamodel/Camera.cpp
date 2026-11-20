@@ -53,9 +53,9 @@ ICameraOwner* Camera::getCameraOwner()
 	return nullptr;
 }
 
-bool Camera::canZoom(int p_unk0x04) const
+bool Camera::canZoom(int units) const
 {
-	if (p_unk0x04 > 0) {
+	if (units > 0) {
 		return goalToFocusDistance() > distanceMin();
 	}
 
@@ -73,11 +73,11 @@ void Camera::lookAt(const G3D::Vector3& point)
 	cameraGoal.lookAt(point);
 }
 
-bool Camera::canTilt(int p_unk0x04) const
+bool Camera::canTilt(int units) const
 {
 	float elevation = Math::elevationAngle(cameraGoal.lookVector());
 
-	if (p_unk0x04 < 0) {
+	if (units < 0) {
 		return -1.57079637f <= elevation;
 	}
 
@@ -200,9 +200,9 @@ void Camera::setHeadingElevationDistance(float heading, float elevation, float d
 	cameraExternallyAdjusted = true;
 }
 
-bool Camera::tiltRadians(float p_unk0x04)
+bool Camera::tiltRadians(float radians)
 {
-	if (p_unk0x04 != 0.0f) {
+	if (radians != 0.0f) {
 		float heading;
 		float elevation;
 		float distance;
@@ -211,7 +211,7 @@ bool Camera::tiltRadians(float p_unk0x04)
 
 		static const float maxElevation = (float) G3D::toRadians(81.0);
 
-		float newElevation = G3D::clamp(p_unk0x04 + elevation, -maxElevation, maxElevation);
+		float newElevation = G3D::clamp(radians + elevation, -maxElevation, maxElevation);
 
 		if (newElevation != elevation) {
 			setHeadingElevationDistance(heading, newElevation, distance);
@@ -241,21 +241,21 @@ void Camera::panRadians(float angle)
 	}
 }
 
-bool Camera::tiltUnits(int p_unk0x04)
+bool Camera::tiltUnits(int units)
 {
 	float elevation = Math::elevationAngle(cameraGoal.lookVector());
 
 	float degrees = elevation * 57.2957764f;
 
-	return tiltRadians((G3D::iRound(degrees * 0.1f) + p_unk0x04) * 0.174532935f - elevation);
+	return tiltRadians((G3D::iRound(degrees * 0.1f) + units) * 0.174532935f - elevation);
 }
 
-void Camera::panUnits(int p_unk0x04)
+void Camera::panUnits(int units)
 {
 	G3D::Vector3 look = cameraGoal.lookVector();
 	float heading = atan2f(-look.z, -look.x);
 
-	panRadians(heading - G3D::iRound(heading * 1.27323949f + p_unk0x04) * 0.785398185f);
+	panRadians(heading - G3D::iRound(heading * 1.27323949f + units) * 0.785398185f);
 }
 
 bool Camera::isFirstPersonCamera() const

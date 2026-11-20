@@ -5,76 +5,82 @@
 
 #include <GLG3D/DXCaps.h>
 
-const float g_unk0x008094f8 = 20.0f;
-const float g_unk0x008094fc = 20.0f;
-const float g_unk0x00809500 = 50.0f;
-const float g_unk0x00809504 = 50.0f;
+const float defaultMinShadingQuality = 20.0f;
+const float defaultMaxShadingQuality = 20.0f;
+const float defaultMinMeshDetail = 50.0f;
+const float defaultMaxMeshDetail = 50.0f;
 
 const char sRenderSettings[] = "RenderSettings";
 
-CRenderSettings::AASamples g_unk0x0091a2e8 = CRenderSettings::c_aaSamplesUnk0x1;
-G3D::Vector2int16 g_unk0x0091a2ec(800, 600);
-CRenderSettings::GraphicsMode g_unk0x00953ae0;
+CRenderSettings::AASamples aaSamples = CRenderSettings::c_aaSamplesNone;
+G3D::Vector2int16 defaultWindowSize(800, 600);
+CRenderSettings::GraphicsMode latchedGraphicsMode;
 
-static RBX::Reflection::EnumPropDescriptor<CRenderSettings, CRenderSettings::GraphicsMode> g_unk0x00953ae4(
-	"graphicsMode", "General", &CRenderSettings::FUN_00468a60, &CRenderSettings::FUN_0044d0b0
+static RBX::Reflection::EnumPropDescriptor<CRenderSettings, CRenderSettings::GraphicsMode> prop_graphicsMode(
+	"graphicsMode", "General", &CRenderSettings::getGraphicsMode, &CRenderSettings::setGraphicsMode
 );
 
-static RBX::Reflection::EnumPropDescriptor<CRenderSettings, CRenderSettings::FrameRateManagerMode> g_unk0x00953b04(
-	"frameRateManager", "General", &CRenderSettings::FUN_00776c70, &CRenderSettings::FUN_0044d0e0
+static RBX::Reflection::EnumPropDescriptor<CRenderSettings, CRenderSettings::FrameRateManagerMode>
+	prop_frameRateManager(
+		"frameRateManager",
+		"General",
+		&CRenderSettings::getFrameRateManagerMode,
+		&CRenderSettings::setFrameRateManagerMode
+	);
+
+static RBX::Reflection::EnumPropDescriptor<CRenderSettings, CRenderSettings::BevelMode> prop_Bevels(
+	"Bevels", "General", &CRenderSettings::getBevelMode, &CRenderSettings::setBevelMode
 );
 
-static RBX::Reflection::EnumPropDescriptor<CRenderSettings, CRenderSettings::BevelMode> g_unk0x00953b24(
-	"Bevels", "General", &CRenderSettings::FUN_004482d0, &CRenderSettings::FUN_0044d110
+static RBX::Reflection::EnumPropDescriptor<CRenderSettings, CRenderSettings::ShadowMode> prop_Shadow(
+	"Shadow", "General", &CRenderSettings::getShadowMode, &CRenderSettings::setShadowMode
 );
 
-static RBX::Reflection::EnumPropDescriptor<CRenderSettings, CRenderSettings::ShadowMode> g_unk0x00953b44(
-	"Shadow", "General", &CRenderSettings::FUN_00776c60, &CRenderSettings::FUN_0044d170
+static RBX::Reflection::EnumPropDescriptor<CRenderSettings, CRenderSettings::AntialiasingMode> prop_Antialiasing(
+	"Antialiasing", "General", &CRenderSettings::getAntialiasingMode, &CRenderSettings::setAntialiasingMode
 );
 
-static RBX::Reflection::EnumPropDescriptor<CRenderSettings, CRenderSettings::AntialiasingMode> g_unk0x00953b64(
-	"Antialiasing", "General", &CRenderSettings::FUN_004482e0, &CRenderSettings::FUN_0044d140
+static RBX::Reflection::PropDescriptor<CRenderSettings, G3D::Vector2int16> prop_WindowSize(
+	"WindowSize", "Screen", &CRenderSettings::getWindowSize, &CRenderSettings::setWindowSize
 );
 
-static RBX::Reflection::PropDescriptor<CRenderSettings, G3D::Vector2int16> g_unk0x00953b84(
-	"WindowSize", "Screen", &CRenderSettings::FUN_00448310, &CRenderSettings::FUN_0044ce00
+static RBX::Reflection::PropDescriptor<CRenderSettings, G3D::Vector2int16> prop_FullscreenSize(
+	"FullscreenSize", "Screen", &CRenderSettings::getFullscreenSize, &CRenderSettings::setFullscreenSize
 );
 
-static RBX::Reflection::PropDescriptor<CRenderSettings, G3D::Vector2int16> g_unk0x00953ba0(
-	"FullscreenSize", "Screen", &CRenderSettings::FUN_00448300, &CRenderSettings::FUN_0044cdd0
+static RBX::Reflection::PropDescriptor<CRenderSettings, float> prop_minShadingQuality(
+	"minShadingQuality", "Qaulity", &CRenderSettings::getMinShadingQuality, &CRenderSettings::setMinShadingQuality
 );
 
-static RBX::Reflection::PropDescriptor<CRenderSettings, float> g_unk0x00953bbc(
-	"minShadingQuality", "Qaulity", &CRenderSettings::FUN_00448290, &CRenderSettings::FUN_0044ce30
+static RBX::Reflection::PropDescriptor<CRenderSettings, float> prop_maxShadingQuality(
+	"maxShadingQuality", "Qaulity", &CRenderSettings::getMaxShadingQuality, &CRenderSettings::setMaxShadingQuality
 );
 
-static RBX::Reflection::PropDescriptor<CRenderSettings, float> g_unk0x00953bd8(
-	"maxShadingQuality", "Qaulity", &CRenderSettings::FUN_004482a0, &CRenderSettings::FUN_0044ced0
+static RBX::Reflection::PropDescriptor<CRenderSettings, float> prop_minMeshDetail(
+	"minMeshDetail", "Qaulity", &CRenderSettings::getMinMeshDetail, &CRenderSettings::setMinMeshDetail
 );
 
-static RBX::Reflection::PropDescriptor<CRenderSettings, float> g_unk0x00953bf4(
-	"minMeshDetail", "Qaulity", &CRenderSettings::FUN_004482b0, &CRenderSettings::FUN_0044cf70
+static RBX::Reflection::PropDescriptor<CRenderSettings, float> prop_maxMeshDetail(
+	"maxMeshDetail", "Qaulity", &CRenderSettings::getMaxMeshDetail, &CRenderSettings::setMaxMeshDetail
 );
 
-static RBX::Reflection::PropDescriptor<CRenderSettings, float> g_unk0x00953c10(
-	"maxMeshDetail", "Qaulity", &CRenderSettings::FUN_004482c0, &CRenderSettings::FUN_0044cfe0
+static RBX::Reflection::PropDescriptor<CRenderSettings, float> prop_AggregateSize(
+	"_AggregateSize", "Performance", &CRenderSettings::getAggregateSize, &CRenderSettings::setAggregateSize
 );
 
-static RBX::Reflection::PropDescriptor<CRenderSettings, float> g_unk0x00953c2c(
-	"_AggregateSize", "Performance", &CRenderSettings::FUN_00448320, &CRenderSettings::FUN_0044d050
+static RBX::Reflection::EnumPropDescriptor<CRenderSettings, CRenderSettings::AASamples> prop_AASamples(
+	"AASamples", "Qaulity", &CRenderSettings::getAASamples, &CRenderSettings::setAASamples
 );
 
-static RBX::Reflection::EnumPropDescriptor<CRenderSettings, CRenderSettings::AASamples> g_unk0x00953c48(
-	"AASamples", "Qaulity", &CRenderSettings::FUN_004482f0, &CRenderSettings::FUN_0044cda0
+RBX::Reflection::BoundProp<bool, 1> prop_delaySwapBuffer(
+	"delaySwapBuffer", "Performance", &CRenderSettings::m_delaySwapBuffer
 );
 
-RBX::Reflection::BoundProp<bool, 1> g_unk0x00953c68("delaySwapBuffer", "Performance", &CRenderSettings::m_unk0x11c);
-
-static RBX::Reflection::BoundProp<std::string, 1> g_unk0x00953c84(
-	"profileName", "Qaulity", &CRenderSettings::m_unk0x120, RBX::Reflection::PropertyDescriptor::STREAMING
+static RBX::Reflection::BoundProp<std::string, 1> prop_profileName(
+	"profileName", "Qaulity", &CRenderSettings::m_profileName, RBX::Reflection::PropertyDescriptor::STREAMING
 );
 
-static const char* g_unk0x0091b48c = "profiled5";
+static const char* currentQualityProfile = "profiled5";
 
 static G3D::Vector2int16 defaultFullscreenSize()
 {
@@ -84,32 +90,32 @@ static G3D::Vector2int16 defaultFullscreenSize()
 	return G3D::Vector2int16(800, 600);
 }
 
-CRenderSettings::BevelMode CRenderSettings::FUN_004482d0() const
+CRenderSettings::BevelMode CRenderSettings::getBevelMode() const
 {
-	return m_unk0xfc;
+	return m_bevelMode;
 }
 
-CRenderSettings::AntialiasingMode CRenderSettings::FUN_004482e0() const
+CRenderSettings::AntialiasingMode CRenderSettings::getAntialiasingMode() const
 {
-	return m_unk0x100;
+	return m_antialiasingMode;
 }
 
-CRenderSettings::AASamples CRenderSettings::FUN_004482f0() const
+CRenderSettings::AASamples CRenderSettings::getAASamples() const
 {
-	return g_unk0x0091a2e8;
+	return aaSamples;
 }
 
-G3D::Vector2int16 CRenderSettings::FUN_00448300() const
+G3D::Vector2int16 CRenderSettings::getFullscreenSize() const
 {
-	return m_unk0x13c;
+	return m_fullscreenSize;
 }
 
-G3D::Vector2int16 CRenderSettings::FUN_00448310() const
+G3D::Vector2int16 CRenderSettings::getWindowSize() const
 {
-	return m_unk0x140;
+	return m_windowSize;
 }
 
-int CRenderSettings::FUN_00448320() const
+int CRenderSettings::getAggregateSize() const
 {
 	return RBX::Render::AggregatingSceneManager::aggregationSize;
 }
@@ -118,201 +124,205 @@ template <>
 RBX::Reflection::EnumDesc<CRenderSettings::AASamples>::EnumDesc()
 	: EnumDescriptor("AASamples", typeid(CRenderSettings::AASamples))
 {
-	addPair(CRenderSettings::c_aaSamplesUnk0x1, "None");
-	addPair(CRenderSettings::c_aaSamplesUnk0x4, "4");
-	addPair(CRenderSettings::c_aaSamplesUnk0x8, "8");
+	addPair(CRenderSettings::c_aaSamplesNone, "None");
+	addPair(CRenderSettings::c_aaSamples4, "4");
+	addPair(CRenderSettings::c_aaSamples8, "8");
 }
 
 template <>
 RBX::Reflection::EnumDesc<CRenderSettings::GraphicsMode>::EnumDesc()
 	: EnumDescriptor("GraphicsMode", typeid(CRenderSettings::GraphicsMode))
 {
-	addPair(CRenderSettings::c_graphicsModeUnk0x1, "Automatic");
-	addPair(CRenderSettings::c_graphicsModeUnk0x2, "OpenGL stable");
-	addPair(CRenderSettings::c_graphicsModeUnk0x3, "Direct3D experimental");
-	addPair(CRenderSettings::c_graphicsModeUnk0x4, "OpenGL experimental");
-	addPair(CRenderSettings::c_graphicsModeUnk0x5, "No Graphics");
+	addPair(CRenderSettings::c_graphicsModeAutomatic, "Automatic");
+	addPair(CRenderSettings::c_graphicsModeOpenGLStable, "OpenGL stable");
+#ifdef _WIN32
+	addPair(CRenderSettings::c_graphicsModeDirect3D, "Direct3D experimental");
+#endif
+	addPair(CRenderSettings::c_graphicsModeOpenGL, "OpenGL experimental");
+	addPair(CRenderSettings::c_graphicsModeNoGraphics, "No Graphics");
 }
 
 template <>
 RBX::Reflection::EnumDesc<CRenderSettings::FrameRateManagerMode>::EnumDesc()
 	: EnumDescriptor("Framerate Manager", typeid(CRenderSettings::FrameRateManagerMode))
 {
-	addPair(CRenderSettings::c_frameRateManagerModeUnk0x0, "Automatic");
-	addPair(CRenderSettings::c_frameRateManagerModeUnk0x1, "On");
-	addPair(CRenderSettings::c_frameRateManagerModeUnk0x2, "Off");
+	addPair(CRenderSettings::c_frameRateManagerModeAutomatic, "Automatic");
+	addPair(CRenderSettings::c_frameRateManagerModeOn, "On");
+	addPair(CRenderSettings::c_frameRateManagerModeOff, "Off");
 }
 
 template <>
 RBX::Reflection::EnumDesc<CRenderSettings::AntialiasingMode>::EnumDesc()
 	: EnumDescriptor("Antialiasing", typeid(CRenderSettings::AntialiasingMode))
 {
-	addPair(CRenderSettings::c_antialiasingModeUnk0x0, "Automatic");
-	addPair(CRenderSettings::c_antialiasingModeUnk0x2, "Off");
-	addPair(CRenderSettings::c_antialiasingModeUnk0x1, "On");
+	addPair(CRenderSettings::c_antialiasingModeAutomatic, "Automatic");
+	addPair(CRenderSettings::c_antialiasingModeOff, "Off");
+	addPair(CRenderSettings::c_antialiasingModeOn, "On");
 }
 
 template <>
 RBX::Reflection::EnumDesc<CRenderSettings::BevelMode>::EnumDesc()
 	: EnumDescriptor("Bevels", typeid(CRenderSettings::BevelMode))
 {
-	addPair(CRenderSettings::c_bevelModeUnk0x0, "Automatic");
-	addPair(CRenderSettings::c_bevelModeUnk0x1, "On");
-	addPair(CRenderSettings::c_bevelModeUnk0x2, "Off");
+	addPair(CRenderSettings::c_bevelModeAutomatic, "Automatic");
+	addPair(CRenderSettings::c_bevelModeOn, "On");
+	addPair(CRenderSettings::c_bevelModeOff, "Off");
 }
 
 template <>
 RBX::Reflection::EnumDesc<CRenderSettings::ShadowMode>::EnumDesc()
 	: EnumDescriptor("Shadow", typeid(CRenderSettings::ShadowMode))
 {
-	addPair(CRenderSettings::c_shadowModeUnk0x0, "Automatic");
-	addPair(CRenderSettings::c_shadowModeUnk0x1, "On");
-	addPair(CRenderSettings::c_shadowModeUnk0x2, "Off");
+	addPair(CRenderSettings::c_shadowModeAutomatic, "Automatic");
+	addPair(CRenderSettings::c_shadowModeOn, "On");
+	addPair(CRenderSettings::c_shadowModeOff, "Off");
 }
 
 CRenderSettings::CRenderSettings()
-	: m_unk0xf8(c_graphicsModeUnk0x1), m_unk0xfc(c_bevelModeUnk0x0), m_unk0x100(c_antialiasingModeUnk0x2),
-	  m_unk0x104(c_shadowModeUnk0x0), m_unk0x108(c_frameRateManagerModeUnk0x0), m_unk0x10c(g_unk0x008094f8),
-	  m_unk0x110(g_unk0x008094fc), m_unk0x114(g_unk0x00809500), m_unk0x118(g_unk0x00809504), m_unk0x11c(true),
-	  m_unk0x13c(defaultFullscreenSize()), m_unk0x140(g_unk0x0091a2ec)
+	: m_graphicsMode(c_graphicsModeAutomatic), m_bevelMode(c_bevelModeAutomatic),
+	  m_antialiasingMode(c_antialiasingModeOff), m_shadowMode(c_shadowModeAutomatic),
+	  m_frameRateManagerMode(c_frameRateManagerModeAutomatic), m_minShadingQuality(defaultMinShadingQuality),
+	  m_maxShadingQuality(defaultMaxShadingQuality), m_minMeshDetail(defaultMinMeshDetail),
+	  m_maxMeshDetail(defaultMaxMeshDetail), m_delaySwapBuffer(true), m_fullscreenSize(defaultFullscreenSize()),
+	  m_windowSize(defaultWindowSize)
 {
 	setName("Rendering");
 	RBX::Render::AggregatingSceneManager::aggregationSize = 1;
 }
 
-void CRenderSettings::FUN_0044cda0(AASamples p_unk0x04)
+void CRenderSettings::setAASamples(AASamples value)
 {
-	if (p_unk0x04 != g_unk0x0091a2e8) {
-		g_unk0x0091a2e8 = p_unk0x04;
-		raisePropertyChanged(g_unk0x00953c48);
+	if (value != aaSamples) {
+		aaSamples = value;
+		raisePropertyChanged(prop_AASamples);
 	}
 }
 
-void CRenderSettings::FUN_0044cdd0(G3D::Vector2int16 p_unk0x04)
+void CRenderSettings::setFullscreenSize(G3D::Vector2int16 value)
 {
-	if (p_unk0x04 != m_unk0x13c) {
-		m_unk0x13c = p_unk0x04;
-		raisePropertyChanged(g_unk0x00953ba0);
+	if (value != m_fullscreenSize) {
+		m_fullscreenSize = value;
+		raisePropertyChanged(prop_FullscreenSize);
 	}
 }
 
-void CRenderSettings::FUN_0044ce00(G3D::Vector2int16 p_unk0x04)
+void CRenderSettings::setWindowSize(G3D::Vector2int16 value)
 {
-	if (p_unk0x04 != m_unk0x140) {
-		m_unk0x140 = p_unk0x04;
-		raisePropertyChanged(g_unk0x00953b84);
+	if (value != m_windowSize) {
+		m_windowSize = value;
+		raisePropertyChanged(prop_WindowSize);
 	}
 }
 
-void CRenderSettings::FUN_0044ce30(float p_unk0x04)
+void CRenderSettings::setMinShadingQuality(float value)
 {
-	if (p_unk0x04 > m_unk0x110) {
-		FUN_0044ced0(p_unk0x04);
+	if (value > m_maxShadingQuality) {
+		setMaxShadingQuality(value);
 	}
 
-	p_unk0x04 = std::min(m_unk0x110, p_unk0x04);
-	p_unk0x04 = std::max(0.0f, p_unk0x04);
-	if (p_unk0x04 != m_unk0x10c) {
-		m_unk0x10c = p_unk0x04;
-		raisePropertyChanged(g_unk0x00953bbc);
+	value = std::min(m_maxShadingQuality, value);
+	value = std::max(0.0f, value);
+	if (value != m_minShadingQuality) {
+		m_minShadingQuality = value;
+		raisePropertyChanged(prop_minShadingQuality);
 	}
 }
 
-void CRenderSettings::FUN_0044ced0(float p_unk0x04)
+void CRenderSettings::setMaxShadingQuality(float value)
 {
-	if (p_unk0x04 < m_unk0x10c) {
-		FUN_0044ce30(p_unk0x04);
+	if (value < m_minShadingQuality) {
+		setMinShadingQuality(value);
 	}
 
-	p_unk0x04 = std::max(m_unk0x10c, p_unk0x04);
-	p_unk0x04 = std::min(100.0f, p_unk0x04);
-	if (p_unk0x04 != m_unk0x110) {
-		m_unk0x110 = p_unk0x04;
-		raisePropertyChanged(g_unk0x00953bd8);
-	}
-}
-
-void CRenderSettings::FUN_0044cf70(float p_unk0x04)
-{
-	p_unk0x04 = std::min(m_unk0x118, std::max(0.0f, p_unk0x04));
-	if (p_unk0x04 != m_unk0x114) {
-		m_unk0x114 = p_unk0x04;
-		raisePropertyChanged(g_unk0x00953bf4);
+	value = std::max(m_minShadingQuality, value);
+	value = std::min(100.0f, value);
+	if (value != m_maxShadingQuality) {
+		m_maxShadingQuality = value;
+		raisePropertyChanged(prop_maxShadingQuality);
 	}
 }
 
-void CRenderSettings::FUN_0044cfe0(float p_unk0x04)
+void CRenderSettings::setMinMeshDetail(float value)
 {
-	p_unk0x04 = std::min(100.0f, std::max(m_unk0x114, p_unk0x04));
-	if (p_unk0x04 != m_unk0x118) {
-		m_unk0x118 = p_unk0x04;
-		raisePropertyChanged(g_unk0x00953c10);
+	value = std::min(m_maxMeshDetail, std::max(0.0f, value));
+	if (value != m_minMeshDetail) {
+		m_minMeshDetail = value;
+		raisePropertyChanged(prop_minMeshDetail);
 	}
 }
 
-void CRenderSettings::FUN_0044d050(int p_unk0x04)
+void CRenderSettings::setMaxMeshDetail(float value)
 {
-	int size = std::min(1000, std::max(1, p_unk0x04));
+	value = std::min(100.0f, std::max(m_minMeshDetail, value));
+	if (value != m_maxMeshDetail) {
+		m_maxMeshDetail = value;
+		raisePropertyChanged(prop_maxMeshDetail);
+	}
+}
+
+void CRenderSettings::setAggregateSize(int value)
+{
+	int size = std::min(1000, std::max(1, value));
 	if (size != RBX::Render::AggregatingSceneManager::aggregationSize) {
 		RBX::Render::AggregatingSceneManager::aggregationSize = size;
-		raisePropertyChanged(g_unk0x00953c2c);
+		raisePropertyChanged(prop_AggregateSize);
 	}
 }
 
-void CRenderSettings::FUN_0044d0b0(GraphicsMode p_unk0x04)
+void CRenderSettings::setGraphicsMode(GraphicsMode value)
 {
-	if (p_unk0x04 != m_unk0xf8) {
-		m_unk0xf8 = p_unk0x04;
-		raisePropertyChanged(g_unk0x00953ae4);
+	if (value != m_graphicsMode) {
+		m_graphicsMode = value;
+		raisePropertyChanged(prop_graphicsMode);
 	}
 }
 
-void CRenderSettings::FUN_0044d0e0(FrameRateManagerMode p_unk0x04)
+void CRenderSettings::setFrameRateManagerMode(FrameRateManagerMode value)
 {
-	if (p_unk0x04 != m_unk0x108) {
-		m_unk0x108 = p_unk0x04;
-		raisePropertyChanged(g_unk0x00953b04);
+	if (value != m_frameRateManagerMode) {
+		m_frameRateManagerMode = value;
+		raisePropertyChanged(prop_frameRateManager);
 	}
 }
 
-void CRenderSettings::FUN_0044d110(BevelMode p_unk0x04)
+void CRenderSettings::setBevelMode(BevelMode value)
 {
-	if (p_unk0x04 != m_unk0xfc) {
-		m_unk0xfc = p_unk0x04;
-		raisePropertyChanged(g_unk0x00953b24);
+	if (value != m_bevelMode) {
+		m_bevelMode = value;
+		raisePropertyChanged(prop_Bevels);
 	}
 }
 
-void CRenderSettings::FUN_0044d140(AntialiasingMode p_unk0x04)
+void CRenderSettings::setAntialiasingMode(AntialiasingMode value)
 {
-	if (p_unk0x04 != m_unk0x100) {
-		m_unk0x100 = p_unk0x04;
-		raisePropertyChanged(g_unk0x00953b64);
+	if (value != m_antialiasingMode) {
+		m_antialiasingMode = value;
+		raisePropertyChanged(prop_Antialiasing);
 	}
 }
 
-void CRenderSettings::FUN_0044d170(ShadowMode p_unk0x04)
+void CRenderSettings::setShadowMode(ShadowMode value)
 {
-	if (p_unk0x04 != m_unk0x104) {
-		m_unk0x104 = p_unk0x04;
-		bool enabled = p_unk0x04 != c_shadowModeUnk0x0 && p_unk0x04 != c_shadowModeUnk0x2;
+	if (value != m_shadowMode) {
+		m_shadowMode = value;
+		bool enabled = value != c_shadowModeAutomatic && value != c_shadowModeOff;
 		if (enabled != RBX::ViewBase::getShadowsEnabled()) {
 			RBX::ViewBase::getShadowsEnabled() = enabled;
-			raisePropertyChanged(g_unk0x00953b44);
+			raisePropertyChanged(prop_Shadow);
 		}
 	}
 }
 
-void CRenderSettings::FUN_0044d1b0(bool p_unk0x04)
+void CRenderSettings::updateQualityProfile(bool value)
 {
-	if (p_unk0x04 || m_unk0x120 != g_unk0x0091b48c) {
-		FUN_0044cfe0(100.0f);
-		FUN_0044cf70(100.0f);
-		FUN_0044cfe0(100.0f);
-		FUN_0044ced0(100.0f);
-		FUN_0044ce30(100.0f);
-		FUN_0044ced0(100.0f);
-		g_unk0x00953c84.setValue(this, g_unk0x0091b48c);
+	if (value || m_profileName != currentQualityProfile) {
+		setMaxMeshDetail(100.0f);
+		setMinMeshDetail(100.0f);
+		setMaxMeshDetail(100.0f);
+		setMaxShadingQuality(100.0f);
+		setMinShadingQuality(100.0f);
+		setMaxShadingQuality(100.0f);
+		prop_profileName.setValue(this, currentQualityProfile);
 	}
 }
 

@@ -26,7 +26,7 @@ public:
 		float mShiny;
 		float mReflect;
 		float mTransparent;
-		mutable Ogre::MaterialPtr m_unk0x28;
+		mutable Ogre::MaterialPtr m_ogreMaterial;
 
 		Level(
 			TextureProxyRef baseTexture,

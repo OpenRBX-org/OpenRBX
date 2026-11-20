@@ -87,7 +87,7 @@ void AggregatingSceneManager::addModel(const G3D::ReferenceCountedPointer<Chunk>
 
 void AggregatingSceneManager::invalidateModel(const G3D::ReferenceCountedPointer<Chunk>& chunk, bool isSleeping)
 {
-	chunk->VTable0x20();
+	chunk->releaseEntity();
 
 	if (isSleeping) {
 		invalidSleepingModels.insert(chunk);

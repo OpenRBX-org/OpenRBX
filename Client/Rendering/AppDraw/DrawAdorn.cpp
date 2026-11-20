@@ -62,47 +62,47 @@ void DrawAdorn::partSurface(const Part& part, int surfaceId, Adorn* adorn, const
 }
 
 void DrawAdorn::handles3d(
-	const G3D::Vector3& p_unk0x04,
-	const G3D::CoordinateFrame& p_unk0x08,
-	Adorn* p_unk0x0c,
-	HandleType p_unk0x10,
-	const G3D::Vector3& p_unk0x14
+	const G3D::Vector3& size,
+	const G3D::CoordinateFrame& location,
+	Adorn* adorn,
+	HandleType handleType,
+	const G3D::Vector3& cameraPosition
 )
 {
-	G3D::Vector3 halfSize = p_unk0x04 * 0.5;
+	G3D::Vector3 halfSize = size * 0.5;
 
 	for (int posNeg = 0; posNeg < 2; posNeg++) {
 		float polarity = posNeg < 1.0f ? -1.0f : 1.0f;
 
 		for (int axis = 0; axis < 3; axis++) {
-			switch (p_unk0x10) {
+			switch (handleType) {
 			case HANDLE_RESIZE:
 			case HANDLE_VELOCITY: {
 				G3D::Vector3 handleInPart;
 				handleInPart[axis] = (halfSize[axis] + HitTest::handleOffset()) * polarity;
-				G3D::Vector3 handleInWorld = p_unk0x08.pointToWorldSpace(handleInPart);
-				float radius = HitTest::distanceToHandleRadius(p_unk0x14, handleInWorld);
-				p_unk0x0c->setObjectToWorldMatrix(G3D::CoordinateFrame(handleInWorld));
+				G3D::Vector3 handleInWorld = location.pointToWorldSpace(handleInPart);
+				float radius = HitTest::distanceToHandleRadius(cameraPosition, handleInWorld);
+				adorn->setObjectToWorldMatrix(G3D::CoordinateFrame(handleInWorld));
 				G3D::Color4 color(resizeColor(), 1.0f);
-				p_unk0x0c->sphere(G3D::Sphere(G3D::Vector3::zero(), radius), color, G3D::Color4::clear());
+				adorn->sphere(G3D::Sphere(G3D::Vector3::zero(), radius), color, G3D::Color4::clear());
 				break;
 			}
 			case HANDLE_MOVE: {
 				G3D::Ray ray;
 				ray.origin[axis] = polarity * halfSize[axis];
 				ray.direction[axis] = polarity * 3.5f;
-				G3D::Vector3 originInWorld = p_unk0x08.pointToWorldSpace(ray.origin);
-				float scale = HitTest::distanceToHandleRadius(p_unk0x14, originInWorld) * 4.0f;
-				p_unk0x0c->setObjectToWorldMatrix(p_unk0x08);
-				p_unk0x0c->ray(ray, G3D::Color4(G3D::Color3::orange(), 1.0f), scale);
+				G3D::Vector3 originInWorld = location.pointToWorldSpace(ray.origin);
+				float scale = HitTest::distanceToHandleRadius(cameraPosition, originInWorld) * 4.0f;
+				adorn->setObjectToWorldMatrix(location);
+				adorn->ray(ray, G3D::Color4(G3D::Color3::orange(), 1.0f), scale);
 				break;
 			}
 			default: {
 				G3D::Vector3 handleInPart;
 				handleInPart[axis] = (halfSize[axis] + 4.0f) * polarity;
-				G3D::Vector3 handleInWorld = p_unk0x08.translation + handleInPart;
-				p_unk0x0c->setObjectToWorldMatrix(G3D::CoordinateFrame(handleInWorld));
-				cylinder(p_unk0x0c, p_unk0x08, 0, 1.0f, 0.5f, G3D::Color3::red());
+				G3D::Vector3 handleInWorld = location.translation + handleInPart;
+				adorn->setObjectToWorldMatrix(G3D::CoordinateFrame(handleInWorld));
+				cylinder(adorn, location, 0, 1.0f, 0.5f, G3D::Color3::red());
 				break;
 			}
 			}
@@ -111,14 +111,14 @@ void DrawAdorn::handles3d(
 }
 
 void DrawAdorn::handles2d(
-	const G3D::Vector3& p_unk0x04,
-	const G3D::CoordinateFrame& p_unk0x08,
-	const G3D::GCamera& p_unk0x0c,
-	Adorn* p_unk0x10,
-	const G3D::Color3& p_unk0x14
+	const G3D::Vector3& size,
+	const G3D::CoordinateFrame& location,
+	const G3D::GCamera& camera,
+	Adorn* adorn,
+	const G3D::Color3& handleColor
 )
 {
-	G3D::Vector3 halfSize = p_unk0x04 * 0.5;
+	G3D::Vector3 halfSize = size * 0.5;
 
 	for (int posNeg = 0; posNeg < 2; posNeg++) {
 		float polarity = posNeg < 1.0f ? -1.0f : 1.0f;
@@ -126,11 +126,11 @@ void DrawAdorn::handles2d(
 		for (int axis = 0; axis < 3; axis++) {
 			G3D::Vector3 handleInPart;
 			handleInPart[axis] = (halfSize[axis] + HitTest::handleOffset()) * polarity;
-			G3D::Vector3 handleInWorld = p_unk0x08.pointToWorldSpace(handleInPart);
-			G3D::Vector2 screen = p_unk0x0c.project(handleInWorld, p_unk0x10->getViewport()).xy();
-			G3D::Color4 color(p_unk0x14, 1.0f);
+			G3D::Vector3 handleInWorld = location.pointToWorldSpace(handleInPart);
+			G3D::Vector2 screen = camera.project(handleInWorld, adorn->getViewport()).xy();
+			G3D::Color4 color(handleColor, 1.0f);
 			G3D::Rect2D rect = G3D::Rect2D::xyxy(screen - G3D::Vector2(3.0f, 3.0f), screen + G3D::Vector2(3.0f, 3.0f));
-			p_unk0x10->rect2d(rect, color);
+			adorn->rect2d(rect, color);
 		}
 	}
 }

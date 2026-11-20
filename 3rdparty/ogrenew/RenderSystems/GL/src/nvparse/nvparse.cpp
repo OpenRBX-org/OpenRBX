@@ -2,6 +2,7 @@
 # include <windows.h>
 #else
 #include <stdarg.h>
+#include <string.h>
 #define strnicmp strncasecmp
 #endif
 

@@ -8,10 +8,10 @@ namespace RBX {
 class Hash
 {
 public:
-	static unsigned int hash(const std::string& p_unk0x04);
-	static unsigned int hash(const void* p_unk0x04, unsigned int p_unk0x08);
-	static void hashAppend(unsigned int& p_unk0x04, unsigned int p_unk0x08);
-	static void hashAppend(unsigned int& p_unk0x04, const void* p_unk0x08, unsigned int p_unk0x0c);
+	static unsigned int hash(const std::string& text);
+	static unsigned int hash(const void* data, unsigned int size);
+	static void hashAppend(unsigned int& hash, unsigned int value);
+	static void hashAppend(unsigned int& hash, const void* buffer, unsigned int size);
 };
 
 } // namespace RBX

@@ -4,7 +4,7 @@
   Includes all graphics3D/GLG3D files and, uses the G3D namespace, and
   under MSVC automatically adds the required files to the library list.
   
-  This requires OpenGL and SDL headers.  If you don't want all of this,
+  This requires OpenGL headers.  If you don't want all of this,
   #include <graphics3d.h> separately.
 
   @maintainer Morgan McGuire, matrix@graphics3d.com

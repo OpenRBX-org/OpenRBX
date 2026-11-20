@@ -981,19 +981,19 @@ void PartInstance::setElasticity(float elasticity)
 	}
 }
 
-bool PartInstance::resize(NormalId p_unk0x04, int p_unk0x08)
+bool PartInstance::resize(NormalId normalId, int amount)
 {
-	if (p_unk0x08 != 0) {
+	if (amount != 0) {
 		Vector3 oldSizeXml = getPartSizeXml();
 		CoordinateFrame oldCoord = getCoordinateFrame();
 		Vector3 deltaSizeUi;
-		float posNeg = p_unk0x04 < 3 ? 1.0f : -1.0f;
+		float posNeg = normalId < 3 ? 1.0f : -1.0f;
 
 		if (partType == Part::BLOCK_PART) {
-			deltaSizeUi[p_unk0x04 % 3] = (float) p_unk0x08;
+			deltaSizeUi[normalId % 3] = (float) amount;
 		}
 		else {
-			deltaSizeUi = Vector3((float) p_unk0x08, (float) p_unk0x08, (float) p_unk0x08);
+			deltaSizeUi = Vector3((float) amount, (float) amount, (float) amount);
 		}
 
 		Vector3 newSizeUi = xmlToUiSize(oldSizeXml) + deltaSizeUi;

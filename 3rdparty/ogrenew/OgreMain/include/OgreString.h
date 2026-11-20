@@ -31,33 +31,6 @@ Torus Knot Software Ltd.
 
 #include "OgrePrerequisites.h"
 
-// If we're using the GCC 3.1 C++ Std lib
-#if OGRE_COMPILER == OGRE_COMPILER_GNUC && OGRE_COMP_VER >= 310 && !defined(STLPORT)
-
-#include <ext/hash_map>
-namespace __gnu_cxx
-{
-    template <> struct hash< Ogre::_StringBase >
-    {
-        size_t operator()( const Ogre::_StringBase _stringBase ) const
-        {
-            /* This is the PRO-STL way, but it seems to cause problems with VC7.1
-               and in some other cases (although I can't recreate it)
-            hash<const char*> H;
-            return H(_stringBase.c_str());
-            */
-            /** This is our custom way */
-            register size_t ret = 0;
-            for( Ogre::_StringBase::const_iterator it = _stringBase.begin(); it != _stringBase.end(); ++it )
-                ret = 5 * ret + *it;
-
-            return ret;
-        }
-    };
-}
-
-#endif
-
 namespace Ogre {
 
     /** Utility class for manipulating Strings.  */
@@ -152,11 +125,7 @@ namespace Ogre {
     };
 
 
-#if OGRE_COMPILER == OGRE_COMPILER_GNUC && OGRE_COMP_VER >= 310 && !defined(STLPORT)
-    typedef ::__gnu_cxx::hash< _StringBase > _StringHash;
-#else
     typedef std::hash< _StringBase > _StringHash;
-#endif
 
 } // namespace Ogre
 

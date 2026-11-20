@@ -69,9 +69,9 @@ public:
 		return c;
 	}
 	static const G3D::Color3& white();
-	static const G3D::Color3& colorFromIndex8(int p_unk0x04)
+	static const G3D::Color3& colorFromIndex8(int index)
 	{
-		switch (p_unk0x04) {
+		switch (index) {
 		case 0:
 			return red();
 		case 1:

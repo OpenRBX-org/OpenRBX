@@ -772,18 +772,18 @@ void ScriptContext::addScript(Script* script)
 	}
 }
 
-static unsigned int FUN_00407390(lua_State* thread)
+static unsigned int pushNoArguments(lua_State* thread)
 {
 	return 0;
 }
 
-static void FUN_00751160(lua_State* thread, unsigned int count)
+static void ignoreResults(lua_State* thread, unsigned int count)
 {
 }
 
 void ScriptContext::executeInNewThread(Security::Identities identity, const char* script, const char* name)
 {
-	executeInNewThread(identity, script, name, FUN_00407390, FUN_00751160);
+	executeInNewThread(identity, script, name, pushNoArguments, ignoreResults);
 }
 
 std::unique_ptr<std::vector<Reflection::Value>> ScriptContext::call(

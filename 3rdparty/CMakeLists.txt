@@ -1,8 +1,104 @@
+set(OPENRBX_QTBASE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/qtbase")
+set(OPENRBX_QTBASE_BINARY_DIR "${CMAKE_BINARY_DIR}/3rdparty/qtbase-build")
+set(OPENRBX_QTBASE_PREFIX "${OPENRBX_QTBASE_BINARY_DIR}/install")
+
+set(OPENRBX_QTBASE_OPTIONS
+  -DCMAKE_BUILD_TYPE=Release
+  -DCMAKE_INSTALL_PREFIX=${OPENRBX_QTBASE_PREFIX}
+  -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
+  -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+  -DBUILD_SHARED_LIBS=ON
+  -DQT_BUILD_TESTS=OFF
+  -DQT_BUILD_EXAMPLES=OFF
+  -DFEATURE_sql=OFF
+  -DFEATURE_network=OFF
+  -DFEATURE_testlib=OFF
+  -DFEATURE_concurrent=OFF
+  -DFEATURE_dbus=OFF
+  -DFEATURE_vulkan=OFF
+  -DFEATURE_xml=OFF
+  -DQT_GENERATE_SBOM=OFF
+)
+if (WIN32)
+  list(APPEND OPENRBX_QTBASE_OPTIONS -DFEATURE_windeployqt=OFF -DFEATURE_printsupport=OFF)
+else()
+  list(APPEND OPENRBX_QTBASE_OPTIONS
+    -DFEATURE_printsupport=ON
+    -DFEATURE_cups=ON
+    -DFEATURE_icu=OFF
+    -DFEATURE_glib=ON
+    -DFEATURE_libudev=OFF
+    -DFEATURE_evdev=OFF
+    -DFEATURE_eglfs=OFF
+    -DFEATURE_linuxfb=OFF
+    -DFEATURE_vnc=OFF
+    -DFEATURE_xcb=ON
+    -DFEATURE_system_zlib=OFF
+    -DFEATURE_system_png=OFF
+    -DFEATURE_system_jpeg=OFF
+    -DFEATURE_system_pcre2=OFF
+    -DFEATURE_system_harfbuzz=OFF
+    -DFEATURE_system_doubleconversion=OFF
+    -DFEATURE_system_libb2=OFF
+  )
+endif()
+
+if (NOT EXISTS "${OPENRBX_QTBASE_PREFIX}/lib/cmake/Qt6/Qt6Config.cmake")
+  message(STATUS "Building qtbase in ${OPENRBX_QTBASE_BINARY_DIR}")
+  execute_process(
+    COMMAND "${CMAKE_COMMAND}" -S "${OPENRBX_QTBASE_SOURCE_DIR}" -B "${OPENRBX_QTBASE_BINARY_DIR}" -G Ninja
+            ${OPENRBX_QTBASE_OPTIONS}
+    RESULT_VARIABLE result
+  )
+  if (NOT result EQUAL 0)
+    message(FATAL_ERROR "qtbase configure failed")
+  endif()
+  execute_process(COMMAND "${CMAKE_COMMAND}" --build "${OPENRBX_QTBASE_BINARY_DIR}" RESULT_VARIABLE result)
+  if (NOT result EQUAL 0)
+    message(FATAL_ERROR "qtbase build failed")
+  endif()
+  execute_process(COMMAND "${CMAKE_COMMAND}" --install "${OPENRBX_QTBASE_BINARY_DIR}" RESULT_VARIABLE result)
+  if (NOT result EQUAL 0)
+    message(FATAL_ERROR "qtbase install failed")
+  endif()
+endif()
+
+if (NOT EXISTS "${OPENRBX_QTBASE_PREFIX}/lib/cmake/Qt6Core5Compat/Qt6Core5CompatConfig.cmake")
+  set(OPENRBX_QT5COMPAT_BINARY_DIR "${CMAKE_BINARY_DIR}/3rdparty/qt5compat-build")
+  message(STATUS "Building qt5compat in ${OPENRBX_QT5COMPAT_BINARY_DIR}")
+  execute_process(
+    COMMAND "${CMAKE_COMMAND}" -S "${CMAKE_CURRENT_SOURCE_DIR}/qt5compat" -B "${OPENRBX_QT5COMPAT_BINARY_DIR}" -G Ninja
+            -DCMAKE_BUILD_TYPE=Release
+            -DCMAKE_PREFIX_PATH=${OPENRBX_QTBASE_PREFIX}
+            -DCMAKE_INSTALL_PREFIX=${OPENRBX_QTBASE_PREFIX}
+            -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
+            -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+            -DQT_BUILD_TESTS=OFF
+            -DQT_BUILD_EXAMPLES=OFF
+            -DQT_GENERATE_SBOM=OFF
+    RESULT_VARIABLE result
+  )
+  if (NOT result EQUAL 0)
+    message(FATAL_ERROR "qt5compat configure failed")
+  endif()
+  execute_process(COMMAND "${CMAKE_COMMAND}" --build "${OPENRBX_QT5COMPAT_BINARY_DIR}" RESULT_VARIABLE result)
+  if (NOT result EQUAL 0)
+    message(FATAL_ERROR "qt5compat build failed")
+  endif()
+  execute_process(COMMAND "${CMAKE_COMMAND}" --install "${OPENRBX_QT5COMPAT_BINARY_DIR}" RESULT_VARIABLE result)
+  if (NOT result EQUAL 0)
+    message(FATAL_ERROR "qt5compat install failed")
+  endif()
+endif()
+
+list(APPEND CMAKE_PREFIX_PATH "${OPENRBX_QTBASE_PREFIX}")
+set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH}" PARENT_SCOPE)
+
 if (MSVC)
   set(CMAKE_CXX_FLAGS "/nologo")
   set(CMAKE_C_FLAGS "/nologo")
-  set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "/Zi")
-  set(CMAKE_C_FLAGS_RELWITHDEBINFO "/Zi")
+  set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "")
+  set(CMAKE_C_FLAGS_RELWITHDEBINFO "")
   set(CMAKE_CXX_FLAGS_RELEASE "")
   set(CMAKE_C_FLAGS_RELEASE "")
 endif()
@@ -11,17 +107,21 @@ set(G3D "${PROJECT_SOURCE_DIR}/Client/Rendering/g3d")
 
 file(GLOB OPENRBX_GRAPHICS3D_SOURCES "${G3D}/g3dcpp/*.cpp" "${G3D}/IJG/*.c" "${G3D}/png/*.c" "${G3D}/zlib/*.c")
 file(GLOB OPENRBX_GLG3D_SOURCES "${G3D}/glg3dcpp/*.cpp")
-if (NOT WIN32)
-  list(REMOVE_ITEM OPENRBX_GLG3D_SOURCES "${G3D}/glg3dcpp/SDLWindow.cpp")
-endif()
 
 add_library(graphics3d STATIC ${OPENRBX_GRAPHICS3D_SOURCES})
 add_library(glg3d STATIC ${OPENRBX_GLG3D_SOURCES})
+set(OPENRBX_G3D_TARGETS graphics3d glg3d)
+if (NOT WIN32)
+  target_link_libraries(glg3d PUBLIC OpenGL::GL X11::X11)
 
-foreach(name graphics3d glg3d)
+  add_library(glg3d_osmesa STATIC ${OPENRBX_GLG3D_SOURCES})
+  target_compile_definitions(glg3d_osmesa PRIVATE G3D_OSMESA)
+  list(APPEND OPENRBX_G3D_TARGETS glg3d_osmesa)
+endif()
+
+foreach(name ${OPENRBX_G3D_TARGETS})
   target_include_directories(${name} PRIVATE
     "${G3D}/include" "${G3D}/png" "${G3D}/zlib" "${G3D}/IJG"
-    "${PROJECT_SOURCE_DIR}/Client/Rendering/SDL-1.2.6/include"
   )
   if (WIN32)
     target_compile_definitions(${name} PRIVATE WIN32 NDEBUG _LIB G3D_BUILDING_LIBRARY_DLL _VC80_UPGRADE=0x0710 _MBCS)
@@ -387,6 +487,7 @@ else()
   target_link_options(osmesa PRIVATE "LINKER:-Bsymbolic")
 
   add_library(glu STATIC ${OPENRBX_MESA_GLU_SOURCES})
+  set_target_properties(glu PROPERTIES POSITION_INDEPENDENT_CODE ON)
   target_include_directories(glu PRIVATE
     "${MESA}/include" "${MESA}/src/glu/sgi/include" "${MESA}/src/glu/sgi/libnurbs/interface"
     "${MESA}/src/glu/sgi/libnurbs/internals" "${MESA}/src/glu/sgi/libnurbs/nurbtess"
@@ -401,143 +502,14 @@ else()
   set_target_properties(mesa_core osmesa glu PROPERTIES C_STANDARD 99)
 endif()
 
-foreach(name graphics3d glg3d mesa_core opengl32 osmesa32 glu32 osmesa glu)
+foreach(name graphics3d glg3d glg3d_osmesa mesa_core opengl32 osmesa32 glu32 osmesa glu)
   if (TARGET ${name})
     set_target_properties(${name} PROPERTIES
       C_CLANG_TIDY "" CXX_CLANG_TIDY "" CXX_INCLUDE_WHAT_YOU_USE "")
   endif()
 endforeach()
 
-if (NOT WIN32)
-  include(ExternalProject)
-  cmake_host_system_information(RESULT OPENRBX_JOBS QUERY NUMBER_OF_LOGICAL_CORES)
-
-  set(OPENSSL_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/openssl")
-  ExternalProject_Add(openssl_build
-    SOURCE_DIR "${PROJECT_SOURCE_DIR}/3rdparty/openssl"
-    BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/openssl-build"
-    INSTALL_DIR "${OPENSSL_PREFIX}"
-    CONFIGURE_COMMAND perl <SOURCE_DIR>/Configure no-shared no-tests no-docs no-apps --prefix=<INSTALL_DIR> --libdir=lib
-    BUILD_COMMAND make -j${OPENRBX_JOBS} build_libs
-    INSTALL_COMMAND make install_dev
-    BUILD_BYPRODUCTS "${OPENSSL_PREFIX}/lib/libssl.a" "${OPENSSL_PREFIX}/lib/libcrypto.a"
-  )
-  file(MAKE_DIRECTORY "${OPENSSL_PREFIX}/include")
-
-  add_library(OpenSSL::Crypto STATIC IMPORTED GLOBAL)
-  set_target_properties(OpenSSL::Crypto PROPERTIES
-    IMPORTED_LOCATION "${OPENSSL_PREFIX}/lib/libcrypto.a"
-    INTERFACE_INCLUDE_DIRECTORIES "${OPENSSL_PREFIX}/include"
-    INTERFACE_LINK_LIBRARIES "Threads::Threads;${CMAKE_DL_LIBS}"
-  )
-  add_dependencies(OpenSSL::Crypto openssl_build)
-
-  add_library(OpenSSL::SSL STATIC IMPORTED GLOBAL)
-  set_target_properties(OpenSSL::SSL PROPERTIES
-    IMPORTED_LOCATION "${OPENSSL_PREFIX}/lib/libssl.a"
-    INTERFACE_INCLUDE_DIRECTORIES "${OPENSSL_PREFIX}/include"
-    INTERFACE_LINK_LIBRARIES OpenSSL::Crypto
-  )
-  add_dependencies(OpenSSL::SSL openssl_build)
-
-  return()
-endif()
-
-set(SCINTILLA "${PROJECT_SOURCE_DIR}/3rdparty/scintilla")
 set(OGRE "${PROJECT_SOURCE_DIR}/3rdparty/ogrenew")
-set(DXSDK "${PROJECT_SOURCE_DIR}/3rdparty/Microsoft DirectX 9.0 SDK (October 2004)")
-if (OPENRBX_ARCH STREQUAL "x64")
-  set(DXSDK_LIB "${DXSDK}/Lib/x64")
-else()
-  set(DXSDK_LIB "${DXSDK}/Lib")
-endif()
-
-set(OPENRBX_SCILEXER_SOURCES
-  "${SCINTILLA}/src/AutoComplete.cxx"
-  "${SCINTILLA}/src/CallTip.cxx"
-  "${SCINTILLA}/src/CellBuffer.cxx"
-  "${SCINTILLA}/src/CharClassify.cxx"
-  "${SCINTILLA}/src/ContractionState.cxx"
-  "${SCINTILLA}/src/Document.cxx"
-  "${SCINTILLA}/src/DocumentAccessor.cxx"
-  "${SCINTILLA}/src/Editor.cxx"
-  "${SCINTILLA}/src/ExternalLexer.cxx"
-  "${SCINTILLA}/src/Indicator.cxx"
-  "${SCINTILLA}/src/KeyMap.cxx"
-  "${SCINTILLA}/src/KeyWords.cxx"
-  "${SCINTILLA}/src/LexAda.cxx"
-  "${SCINTILLA}/src/LexAPDL.cxx"
-  "${SCINTILLA}/src/LexAsm.cxx"
-  "${SCINTILLA}/src/LexAsn1.cxx"
-  "${SCINTILLA}/src/LexAU3.cxx"
-  "${SCINTILLA}/src/LexAVE.cxx"
-  "${SCINTILLA}/src/LexBaan.cxx"
-  "${SCINTILLA}/src/LexBash.cxx"
-  "${SCINTILLA}/src/LexBasic.cxx"
-  "${SCINTILLA}/src/LexBullant.cxx"
-  "${SCINTILLA}/src/LexCaml.cxx"
-  "${SCINTILLA}/src/LexCLW.cxx"
-  "${SCINTILLA}/src/LexConf.cxx"
-  "${SCINTILLA}/src/LexCPP.cxx"
-  "${SCINTILLA}/src/LexCrontab.cxx"
-  "${SCINTILLA}/src/LexCsound.cxx"
-  "${SCINTILLA}/src/LexCSS.cxx"
-  "${SCINTILLA}/src/LexEiffel.cxx"
-  "${SCINTILLA}/src/LexErlang.cxx"
-  "${SCINTILLA}/src/LexEScript.cxx"
-  "${SCINTILLA}/src/LexFlagship.cxx"
-  "${SCINTILLA}/src/LexForth.cxx"
-  "${SCINTILLA}/src/LexFortran.cxx"
-  "${SCINTILLA}/src/LexGui4Cli.cxx"
-  "${SCINTILLA}/src/LexHaskell.cxx"
-  "${SCINTILLA}/src/LexHTML.cxx"
-  "${SCINTILLA}/src/LexInno.cxx"
-  "${SCINTILLA}/src/LexKix.cxx"
-  "${SCINTILLA}/src/LexLisp.cxx"
-  "${SCINTILLA}/src/LexLout.cxx"
-  "${SCINTILLA}/src/LexLua.cxx"
-  "${SCINTILLA}/src/LexMatlab.cxx"
-  "${SCINTILLA}/src/LexMetapost.cxx"
-  "${SCINTILLA}/src/LexMMIXAL.cxx"
-  "${SCINTILLA}/src/LexMPT.cxx"
-  "${SCINTILLA}/src/LexMSSQL.cxx"
-  "${SCINTILLA}/src/LexNsis.cxx"
-  "${SCINTILLA}/src/LexOpal.cxx"
-  "${SCINTILLA}/src/LexOthers.cxx"
-  "${SCINTILLA}/src/LexPascal.cxx"
-  "${SCINTILLA}/src/LexPB.cxx"
-  "${SCINTILLA}/src/LexPerl.cxx"
-  "${SCINTILLA}/src/LexPOV.cxx"
-  "${SCINTILLA}/src/LexPS.cxx"
-  "${SCINTILLA}/src/LexPython.cxx"
-  "${SCINTILLA}/src/LexRebol.cxx"
-  "${SCINTILLA}/src/LexRuby.cxx"
-  "${SCINTILLA}/src/LexScriptol.cxx"
-  "${SCINTILLA}/src/LexSmalltalk.cxx"
-  "${SCINTILLA}/src/LexSpecman.cxx"
-  "${SCINTILLA}/src/LexSpice.cxx"
-  "${SCINTILLA}/src/LexSQL.cxx"
-  "${SCINTILLA}/src/LexTADS3.cxx"
-  "${SCINTILLA}/src/LexTCL.cxx"
-  "${SCINTILLA}/src/LexTeX.cxx"
-  "${SCINTILLA}/src/LexVB.cxx"
-  "${SCINTILLA}/src/LexVerilog.cxx"
-  "${SCINTILLA}/src/LexVHDL.cxx"
-  "${SCINTILLA}/src/LexYAML.cxx"
-  "${SCINTILLA}/src/LineMarker.cxx"
-  "${SCINTILLA}/win32/PlatWin.cxx"
-  "${SCINTILLA}/src/PropSet.cxx"
-  "${SCINTILLA}/src/RESearch.cxx"
-  "${SCINTILLA}/src/ScintillaBase.cxx"
-  "${SCINTILLA}/win32/ScintillaWin.cxx"
-  "${SCINTILLA}/src/Style.cxx"
-  "${SCINTILLA}/src/StyleContext.cxx"
-  "${SCINTILLA}/src/UniConversion.cxx"
-  "${SCINTILLA}/src/ViewStyle.cxx"
-  "${SCINTILLA}/src/WindowAccessor.cxx"
-  "${SCINTILLA}/src/XPM.cxx"
-  "${SCINTILLA}/win32/ScintRes.rc"
-)
 
 set(OPENRBX_OGREMAIN_SOURCES
   "${OGRE}/OgreMain/src/OgreAlignedAllocator.cpp"
@@ -793,46 +765,6 @@ set(OPENRBX_GL_SOURCES
   "${OGRE}/RenderSystems/GL/src/GLSL/src/OgreGLSLProgramFactory.cpp"
 )
 
-set(OPENRBX_D3D9_SOURCES
-  "${OGRE}/RenderSystems/Direct3D9/src/OgreD3D9Driver.cpp"
-  "${OGRE}/RenderSystems/Direct3D9/src/OgreD3D9DriverList.cpp"
-  "${OGRE}/RenderSystems/Direct3D9/src/OgreD3D9EngineDll.cpp"
-  "${OGRE}/RenderSystems/Direct3D9/src/OgreD3D9GpuProgram.cpp"
-  "${OGRE}/RenderSystems/Direct3D9/src/OgreD3D9GpuProgramManager.cpp"
-  "${OGRE}/RenderSystems/Direct3D9/src/OgreD3D9HardwareBufferManager.cpp"
-  "${OGRE}/RenderSystems/Direct3D9/src/OgreD3D9HardwareIndexBuffer.cpp"
-  "${OGRE}/RenderSystems/Direct3D9/src/OgreD3D9HardwareOcclusionQuery.cpp"
-  "${OGRE}/RenderSystems/Direct3D9/src/OgreD3D9HardwarePixelBuffer.cpp"
-  "${OGRE}/RenderSystems/Direct3D9/src/OgreD3D9HardwareVertexBuffer.cpp"
-  "${OGRE}/RenderSystems/Direct3D9/src/OgreD3D9HLSLProgram.cpp"
-  "${OGRE}/RenderSystems/Direct3D9/src/OgreD3D9HLSLProgramFactory.cpp"
-  "${OGRE}/RenderSystems/Direct3D9/src/OgreD3D9Mappings.cpp"
-  "${OGRE}/RenderSystems/Direct3D9/src/OgreD3D9MultiRenderTarget.cpp"
-  "${OGRE}/RenderSystems/Direct3D9/src/OgreD3D9Plugin.cpp"
-  "${OGRE}/RenderSystems/Direct3D9/src/OgreD3D9RenderSystem.cpp"
-  "${OGRE}/RenderSystems/Direct3D9/src/OgreD3D9RenderWindow.cpp"
-  "${OGRE}/RenderSystems/Direct3D9/src/OgreD3D9Texture.cpp"
-  "${OGRE}/RenderSystems/Direct3D9/src/OgreD3D9TextureManager.cpp"
-  "${OGRE}/RenderSystems/Direct3D9/src/OgreD3D9VertexDeclaration.cpp"
-  "${OGRE}/RenderSystems/Direct3D9/src/OgreD3D9VideoMode.cpp"
-  "${OGRE}/RenderSystems/Direct3D9/src/OgreD3D9VideoModeList.cpp"
-)
-
-add_library(scilexer SHARED ${OPENRBX_SCILEXER_SOURCES})
-set_target_properties(scilexer PROPERTIES
-  OUTPUT_NAME "SciLexer"
-  MSVC_RUNTIME_LIBRARY "MultiThreaded"
-  RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}"
-)
-target_include_directories(scilexer PRIVATE "${SCINTILLA}/include" "${SCINTILLA}/src")
-target_compile_definitions(scilexer PRIVATE NDEBUG WIN32 _WINDOWS _MBCS _USRDLL SCI_LEXER)
-target_compile_options(scilexer PRIVATE /O1 /Ob1 /W4 /EHsc)
-target_link_options(scilexer PRIVATE /INCREMENTAL:NO)
-target_link_libraries(scilexer PRIVATE imm32 comctl32)
-
-set(OPENRBX_OGRE_COMPILE_OPTIONS /Ob2 /Oi /Ot /Oy /GT /GF /EHsc /GS- /Gy /fp:fast /GR /W3)
-set(OPENRBX_OGRE_LINK_OPTIONS /INCREMENTAL:NO /OPT:REF /OPT:ICF)
-
 set(FREEIMAGE "${OGRE}/Dependencies/src/FreeImage/Source")
 set(FREETYPE "${OGRE}/Dependencies/src/freetype-2.3.0")
 set(ZZIPLIB "${OGRE}/Dependencies/src/zziplib-0.13.49")
@@ -850,25 +782,8 @@ file(GLOB OPENRBX_FREEIMAGE_SOURCES
 )
 file(GLOB OPENRBX_ZZIPLIB_SOURCES "${ZZIPLIB}/zzip/*.c")
 
-add_library(zlib STATIC ${OPENRBX_ZLIB_SOURCES})
-add_library(libjpeg STATIC ${OPENRBX_LIBJPEG_SOURCES})
-add_library(libpng STATIC ${OPENRBX_LIBPNG_SOURCES})
-add_library(libtiff STATIC ${OPENRBX_LIBTIFF_SOURCES})
-add_library(libmng STATIC ${OPENRBX_LIBMNG_SOURCES})
-add_library(freeimage STATIC ${OPENRBX_FREEIMAGE_SOURCES})
-foreach(name zlib libjpeg libpng libtiff libmng)
-  target_compile_definitions(${name} PRIVATE WIN32 NDEBUG _LIB)
-  target_compile_options(${name} PRIVATE /O2 /Ob2)
-endforeach()
-target_include_directories(libpng PRIVATE "${FREEIMAGE}/ZLib")
-target_include_directories(libtiff PRIVATE "${FREEIMAGE}/ZLib")
-target_include_directories(libmng PRIVATE "${FREEIMAGE}/ZLib" "${FREEIMAGE}/LibJPEG")
-target_include_directories(freeimage PRIVATE "${FREEIMAGE}" "${FREEIMAGE}/ZLib" "${FREEIMAGE}/DeprecationManager")
-target_compile_definitions(freeimage PRIVATE WIN32 NDEBUG FREEIMAGE_LIB _SECURE_NO_DEPRECATE)
-target_compile_options(freeimage PRIVATE /O2 /Ob2 /EHsc)
-target_link_libraries(freeimage PRIVATE zlib libjpeg libpng libtiff libmng)
 
-add_library(freetype STATIC
+set(OPENRBX_FREETYPE_SOURCES
   "${FREETYPE}/src/autofit/autofit.c"
   "${FREETYPE}/src/bdf/bdf.c"
   "${FREETYPE}/src/cff/cff.c"
@@ -903,6 +818,260 @@ add_library(freetype STATIC
   "${FREETYPE}/src/type42/type42.c"
   "${FREETYPE}/src/winfonts/winfnt.c"
 )
+
+foreach(option SDL_SHARED SDL_TEST_LIBRARY SDL_TESTS SDL_EXAMPLES SDL_INSTALL SDL_UNINSTALL
+               SDL_AUDIO SDL_GPU SDL_RENDER SDL_CAMERA SDL_JOYSTICK SDL_HAPTIC SDL_HIDAPI SDL_POWER SDL_SENSOR
+               SDL_DIALOG SDL_TRAY SDL_WAYLAND SDL_KMSDRM SDL_VULKAN SDL_OPENGLES SDL_OFFSCREEN SDL_PIPEWIRE
+               SDL_LIBUDEV SDL_DBUS SDL_IBUS SDL_LIBURING SDL_FRIBIDI SDL_LIBTHAI)
+  set(${option} OFF CACHE BOOL "" FORCE)
+endforeach()
+set(SDL_STATIC ON CACHE BOOL "" FORCE)
+add_subdirectory(SDL3 EXCLUDE_FROM_ALL)
+
+find_package(Perl REQUIRED)
+
+set(OPENRBX_OPENSSL_BINARY_DIR "${CMAKE_BINARY_DIR}/3rdparty/openssl-build")
+set(OPENRBX_OPENSSL_PREFIX "${OPENRBX_OPENSSL_BINARY_DIR}/install")
+if (NOT WIN32)
+  set(ENV{PKG_CONFIG_PATH} "${OPENRBX_OPENSSL_PREFIX}/lib/pkgconfig:$ENV{PKG_CONFIG_PATH}")
+endif()
+
+if (NOT EXISTS "${OPENRBX_OPENSSL_PREFIX}/include/openssl/ssl.h")
+  message(STATUS "Building OpenSSL in ${OPENRBX_OPENSSL_BINARY_DIR}")
+  if (WIN32)
+    set(OPENRBX_OPENSSL_TARGET VC-WIN64A no-asm)
+    set(OPENRBX_OPENSSL_MAKE nmake)
+  else()
+    cmake_host_system_information(RESULT OPENRBX_JOBS QUERY NUMBER_OF_LOGICAL_CORES)
+    set(OPENRBX_OPENSSL_TARGET)
+    set(OPENRBX_OPENSSL_MAKE make -j${OPENRBX_JOBS})
+  endif()
+  file(MAKE_DIRECTORY "${OPENRBX_OPENSSL_BINARY_DIR}")
+  execute_process(
+    COMMAND "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/openssl/Configure" ${OPENRBX_OPENSSL_TARGET}
+            no-shared no-tests no-docs no-apps "--prefix=${OPENRBX_OPENSSL_PREFIX}" --libdir=lib
+    WORKING_DIRECTORY "${OPENRBX_OPENSSL_BINARY_DIR}"
+    RESULT_VARIABLE result
+  )
+  if (NOT result EQUAL 0)
+    message(FATAL_ERROR "OpenSSL configure failed")
+  endif()
+  execute_process(COMMAND ${OPENRBX_OPENSSL_MAKE} build_libs WORKING_DIRECTORY "${OPENRBX_OPENSSL_BINARY_DIR}" RESULT_VARIABLE result)
+  if (NOT result EQUAL 0)
+    message(FATAL_ERROR "OpenSSL build failed")
+  endif()
+  execute_process(COMMAND ${OPENRBX_OPENSSL_MAKE} install_dev WORKING_DIRECTORY "${OPENRBX_OPENSSL_BINARY_DIR}" RESULT_VARIABLE result)
+  if (NOT result EQUAL 0)
+    message(FATAL_ERROR "OpenSSL install failed")
+  endif()
+endif()
+
+set(OPENRBX_CURL_BINARY_DIR "${CMAKE_BINARY_DIR}/3rdparty/curl-build")
+set(OPENRBX_CURL_PREFIX "${OPENRBX_CURL_BINARY_DIR}/install")
+
+if (NOT EXISTS "${OPENRBX_CURL_PREFIX}/lib/cmake/CURL/CURLConfig.cmake")
+  message(STATUS "Building curl in ${OPENRBX_CURL_BINARY_DIR}")
+  execute_process(
+    COMMAND "${CMAKE_COMMAND}" -S "${CMAKE_CURRENT_SOURCE_DIR}/curl" -B "${OPENRBX_CURL_BINARY_DIR}" -G Ninja
+            -DCMAKE_BUILD_TYPE=Release
+            -DCMAKE_INSTALL_PREFIX=${OPENRBX_CURL_PREFIX}
+            -DCMAKE_INSTALL_LIBDIR=lib
+            -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
+            -DCMAKE_DISABLE_FIND_PACKAGE_Perl=ON
+            -DBUILD_SHARED_LIBS=OFF
+            -DBUILD_STATIC_LIBS=ON
+            -DBUILD_CURL_EXE=OFF
+            -DBUILD_TESTING=OFF
+            -DBUILD_EXAMPLES=OFF
+            -DBUILD_LIBCURL_DOCS=OFF
+            -DBUILD_MISC_DOCS=OFF
+            -DENABLE_CURL_MANUAL=OFF
+            -DCURL_USE_PKGCONFIG=OFF
+            -DCURL_USE_OPENSSL=ON
+            -DOPENSSL_ROOT_DIR=${OPENRBX_OPENSSL_PREFIX}
+            -DOPENSSL_USE_STATIC_LIBS=ON
+            -DCURL_CA_BUNDLE=none
+            -DCURL_CA_PATH=none
+            -DCURL_ZLIB=OFF
+            -DCURL_BROTLI=OFF
+            -DCURL_ZSTD=OFF
+            -DUSE_NGHTTP2=OFF
+            -DUSE_LIBIDN2=OFF
+            -DCURL_USE_LIBPSL=OFF
+            -DCURL_USE_LIBSSH2=OFF
+            -DCURL_DISABLE_LDAP=ON
+    RESULT_VARIABLE result
+  )
+  if (NOT result EQUAL 0)
+    message(FATAL_ERROR "curl configure failed")
+  endif()
+  execute_process(COMMAND "${CMAKE_COMMAND}" --build "${OPENRBX_CURL_BINARY_DIR}" RESULT_VARIABLE result)
+  if (NOT result EQUAL 0)
+    message(FATAL_ERROR "curl build failed")
+  endif()
+  execute_process(COMMAND "${CMAKE_COMMAND}" --install "${OPENRBX_CURL_BINARY_DIR}" RESULT_VARIABLE result)
+  if (NOT result EQUAL 0)
+    message(FATAL_ERROR "curl install failed")
+  endif()
+endif()
+
+set(CMAKE_FIND_PACKAGE_TARGETS_GLOBAL ON)
+set(OPENSSL_ROOT_DIR "${OPENRBX_OPENSSL_PREFIX}")
+set(OPENSSL_USE_STATIC_LIBS ON)
+find_package(OpenSSL REQUIRED)
+find_package(CURL REQUIRED CONFIG PATHS "${OPENRBX_CURL_PREFIX}" NO_DEFAULT_PATH)
+set(CMAKE_FIND_PACKAGE_TARGETS_GLOBAL OFF)
+
+if (NOT WIN32)
+  set(OPENRBX_OGRE_LINUX_DEFINITIONS NDEBUG OGRE_GUI_GLX ZZIP_OMIT_CONFIG_H _LARGEFILE64_SOURCE XTSTRINGDEFINES)
+  set(OPENRBX_ZZIP_LINUX_DEFINITIONS
+    _LARGEFILE64_SOURCE ZZIP_OMIT_CONFIG_H ZZIP_HAVE_UNISTD_H ZZIP_HAVE_STDINT_H ZZIP_HAVE_STRING_H ZZIP_HAVE_STDLIB_H
+    ZZIP_HAVE_SYS_STAT_H ZZIP_HAVE_SYS_TYPES_H ZZIP_HAVE_DIRENT_H ZZIP_HAVE_SYS_MMAN_H ZZIP_HAVE_ZLIB_H
+    ZZIP_HAVE_STRCASECMP
+  )
+
+  add_library(zlib STATIC ${OPENRBX_ZLIB_SOURCES})
+  add_library(libjpeg STATIC ${OPENRBX_LIBJPEG_SOURCES})
+  add_library(libpng STATIC ${OPENRBX_LIBPNG_SOURCES})
+  add_library(libtiff STATIC ${OPENRBX_LIBTIFF_SOURCES})
+  add_library(libmng STATIC ${OPENRBX_LIBMNG_SOURCES})
+  add_library(freeimage STATIC ${OPENRBX_FREEIMAGE_SOURCES})
+  target_include_directories(libpng PRIVATE "${FREEIMAGE}/ZLib")
+  target_compile_definitions(libpng PRIVATE PNG_NO_MMX_CODE)
+  target_include_directories(libtiff PRIVATE "${FREEIMAGE}/ZLib")
+  target_include_directories(libmng PRIVATE "${FREEIMAGE}/ZLib" "${FREEIMAGE}/LibJPEG")
+  target_compile_options(libmng PRIVATE -Wno-incompatible-pointer-types)
+  target_include_directories(freeimage PRIVATE "${FREEIMAGE}" "${FREEIMAGE}/ZLib" "${FREEIMAGE}/DeprecationManager")
+  target_compile_definitions(freeimage PRIVATE NDEBUG FREEIMAGE_LIB)
+  target_link_libraries(freeimage PRIVATE zlib libjpeg libpng libtiff libmng)
+
+  add_library(freetype STATIC ${OPENRBX_FREETYPE_SOURCES})
+  target_include_directories(freetype PRIVATE "${FREETYPE}/include")
+  target_compile_definitions(freetype PRIVATE NDEBUG FT2_BUILD_LIBRARY)
+
+  add_library(zziplib STATIC ${OPENRBX_ZZIPLIB_SOURCES})
+  target_include_directories(zziplib PRIVATE "${ZZIPLIB}" "${FREEIMAGE}/ZLib")
+  target_compile_definitions(zziplib PRIVATE NDEBUG ${OPENRBX_ZZIP_LINUX_DEFINITIONS})
+  target_link_libraries(zziplib PRIVATE zlib)
+
+  set_target_properties(zlib libjpeg libpng libtiff libmng freeimage freetype zziplib PROPERTIES
+    POSITION_INDEPENDENT_CODE ON
+    C_STANDARD 99
+    CXX_STANDARD 14
+  )
+
+  set(OPENRBX_OGREMAIN_LINUX_SOURCES ${OPENRBX_OGREMAIN_SOURCES})
+  list(FILTER OPENRBX_OGREMAIN_LINUX_SOURCES EXCLUDE REGEX "/WIN32/")
+  list(APPEND OPENRBX_OGREMAIN_LINUX_SOURCES
+    "${OGRE}/OgreMain/src/GLX/OgreConfigDialog.cpp"
+    "${OGRE}/OgreMain/src/GLX/OgreErrorDialog.cpp"
+    "${OGRE}/OgreMain/src/GLX/OgreTimer.cpp"
+    "${OGRE}/OgreMain/src/OgreSearchOps.cpp"
+  )
+  add_library(rgmain SHARED ${OPENRBX_OGREMAIN_LINUX_SOURCES})
+  target_include_directories(rgmain PRIVATE
+    "${OGRE}/OgreMain/include"
+    "${FREEIMAGE}"
+    "${FREETYPE}/include"
+    "${ZZIPLIB}"
+  )
+  target_compile_definitions(rgmain PRIVATE ${OPENRBX_OGRE_LINUX_DEFINITIONS} OGRE_NONCLIENT_BUILD FREEIMAGE_LIB)
+  target_link_libraries(rgmain PRIVATE zziplib zlib freetype freeimage X11::X11 X11::Xt X11::Xaw ${CMAKE_DL_LIBS})
+
+  add_library(rgpar SHARED ${OPENRBX_PARTICLEFX_SOURCES})
+  target_include_directories(rgpar PRIVATE
+    "${OGRE}/PlugIns/ParticleFX/include"
+    "${OGRE}/OgreMain/include"
+  )
+  target_compile_definitions(rgpar PRIVATE ${OPENRBX_OGRE_LINUX_DEFINITIONS})
+  target_link_libraries(rgpar PRIVATE rgmain)
+
+  set(OPENRBX_GL_LINUX_SOURCES ${OPENRBX_GL_SOURCES})
+  list(FILTER OPENRBX_GL_LINUX_SOURCES EXCLUDE REGEX "/OgreWin32|/win32/")
+  list(APPEND OPENRBX_GL_LINUX_SOURCES
+    "${OGRE}/RenderSystems/GL/src/GLX/OgreGLXContext.cpp"
+    "${OGRE}/RenderSystems/GL/src/GLX/OgreGLXGLSupport.cpp"
+    "${OGRE}/RenderSystems/GL/src/GLX/OgreGLXRenderTexture.cpp"
+    "${OGRE}/RenderSystems/GL/src/GLX/OgreGLXUtils.cpp"
+    "${OGRE}/RenderSystems/GL/src/GLX/OgreGLXWindow.cpp"
+  )
+  add_library(rggl SHARED ${OPENRBX_GL_LINUX_SOURCES})
+  target_include_directories(rggl PRIVATE
+    "${OGRE}/RenderSystems/GL/include"
+    "${OGRE}/RenderSystems/GL/include/GLX"
+    "${OGRE}/RenderSystems/GL/src/GLX"
+    "${OGRE}/OgreMain/include"
+    "${OGRE}/RenderSystems/GL/src/nvparse"
+    "${OGRE}/RenderSystems/GL/src/atifs/include"
+    "${OGRE}/RenderSystems/GL/src/glsl/include"
+    "${MESA}/include"
+  )
+  target_compile_definitions(rggl PRIVATE ${OPENRBX_OGRE_LINUX_DEFINITIONS})
+  target_compile_options(rggl PRIVATE -Wno-narrowing)
+  target_link_libraries(rggl PRIVATE rgmain glu OpenGL::GL X11::X11 X11::Xrandr)
+
+  set_target_properties(rgmain rgpar rggl PROPERTIES
+    PREFIX ""
+    CXX_STANDARD 14
+    LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}"
+    BUILD_WITH_INSTALL_RPATH TRUE
+    INSTALL_RPATH "$ORIGIN"
+  )
+  target_link_options(rgmain PRIVATE "LINKER:--exclude-libs,ALL")
+
+  return()
+endif()
+
+set(DXSDK "${PROJECT_SOURCE_DIR}/3rdparty/Microsoft DirectX 9.0 SDK (October 2004)")
+set(DXSDK_LIB "${DXSDK}/Lib/x64")
+
+set(OPENRBX_D3D9_SOURCES
+  "${OGRE}/RenderSystems/Direct3D9/src/OgreD3D9Driver.cpp"
+  "${OGRE}/RenderSystems/Direct3D9/src/OgreD3D9DriverList.cpp"
+  "${OGRE}/RenderSystems/Direct3D9/src/OgreD3D9EngineDll.cpp"
+  "${OGRE}/RenderSystems/Direct3D9/src/OgreD3D9GpuProgram.cpp"
+  "${OGRE}/RenderSystems/Direct3D9/src/OgreD3D9GpuProgramManager.cpp"
+  "${OGRE}/RenderSystems/Direct3D9/src/OgreD3D9HardwareBufferManager.cpp"
+  "${OGRE}/RenderSystems/Direct3D9/src/OgreD3D9HardwareIndexBuffer.cpp"
+  "${OGRE}/RenderSystems/Direct3D9/src/OgreD3D9HardwareOcclusionQuery.cpp"
+  "${OGRE}/RenderSystems/Direct3D9/src/OgreD3D9HardwarePixelBuffer.cpp"
+  "${OGRE}/RenderSystems/Direct3D9/src/OgreD3D9HardwareVertexBuffer.cpp"
+  "${OGRE}/RenderSystems/Direct3D9/src/OgreD3D9HLSLProgram.cpp"
+  "${OGRE}/RenderSystems/Direct3D9/src/OgreD3D9HLSLProgramFactory.cpp"
+  "${OGRE}/RenderSystems/Direct3D9/src/OgreD3D9Mappings.cpp"
+  "${OGRE}/RenderSystems/Direct3D9/src/OgreD3D9MultiRenderTarget.cpp"
+  "${OGRE}/RenderSystems/Direct3D9/src/OgreD3D9Plugin.cpp"
+  "${OGRE}/RenderSystems/Direct3D9/src/OgreD3D9RenderSystem.cpp"
+  "${OGRE}/RenderSystems/Direct3D9/src/OgreD3D9RenderWindow.cpp"
+  "${OGRE}/RenderSystems/Direct3D9/src/OgreD3D9Texture.cpp"
+  "${OGRE}/RenderSystems/Direct3D9/src/OgreD3D9TextureManager.cpp"
+  "${OGRE}/RenderSystems/Direct3D9/src/OgreD3D9VertexDeclaration.cpp"
+  "${OGRE}/RenderSystems/Direct3D9/src/OgreD3D9VideoMode.cpp"
+  "${OGRE}/RenderSystems/Direct3D9/src/OgreD3D9VideoModeList.cpp"
+)
+
+set(OPENRBX_OGRE_COMPILE_OPTIONS /Ob2 /Oi /Ot /Oy /GT /GF /EHsc /GS- /Gy /fp:fast /GR /W3)
+set(OPENRBX_OGRE_LINK_OPTIONS /INCREMENTAL:NO /OPT:REF /OPT:ICF)
+
+add_library(zlib STATIC ${OPENRBX_ZLIB_SOURCES})
+add_library(libjpeg STATIC ${OPENRBX_LIBJPEG_SOURCES})
+add_library(libpng STATIC ${OPENRBX_LIBPNG_SOURCES})
+add_library(libtiff STATIC ${OPENRBX_LIBTIFF_SOURCES})
+add_library(libmng STATIC ${OPENRBX_LIBMNG_SOURCES})
+add_library(freeimage STATIC ${OPENRBX_FREEIMAGE_SOURCES})
+foreach(name zlib libjpeg libpng libtiff libmng)
+  target_compile_definitions(${name} PRIVATE WIN32 NDEBUG _LIB)
+  target_compile_options(${name} PRIVATE /O2 /Ob2)
+endforeach()
+target_include_directories(libpng PRIVATE "${FREEIMAGE}/ZLib")
+target_include_directories(libtiff PRIVATE "${FREEIMAGE}/ZLib")
+target_include_directories(libmng PRIVATE "${FREEIMAGE}/ZLib" "${FREEIMAGE}/LibJPEG")
+target_include_directories(freeimage PRIVATE "${FREEIMAGE}" "${FREEIMAGE}/ZLib" "${FREEIMAGE}/DeprecationManager")
+target_compile_definitions(freeimage PRIVATE WIN32 NDEBUG FREEIMAGE_LIB _SECURE_NO_DEPRECATE)
+target_compile_options(freeimage PRIVATE /O2 /Ob2 /EHsc)
+target_link_libraries(freeimage PRIVATE zlib libjpeg libpng libtiff libmng)
+
+add_library(freetype STATIC ${OPENRBX_FREETYPE_SOURCES})
 target_include_directories(freetype PRIVATE "${FREETYPE}/include")
 target_compile_definitions(freetype PRIVATE NDEBUG WIN32 _LIB FT2_BUILD_LIBRARY)
 target_compile_options(freetype PRIVATE /O2 /Ob1)
@@ -926,7 +1095,9 @@ target_include_directories(rgmain PRIVATE
 )
 target_compile_definitions(rgmain PRIVATE WIN32 NDEBUG _USRDLL _MT OGRE_NONCLIENT_BUILD FREEIMAGE_LIB _MBCS)
 target_compile_options(rgmain PRIVATE /O2 ${OPENRBX_OGRE_COMPILE_OPTIONS})
-target_precompile_headers(rgmain PRIVATE "${OGRE}/OgreMain/include/OgreStableHeaders.h")
+if (NOT CMAKE_CXX_COMPILER_LAUNCHER)
+  target_precompile_headers(rgmain PRIVATE "${OGRE}/OgreMain/include/OgreStableHeaders.h")
+endif()
 target_link_options(rgmain PRIVATE ${OPENRBX_OGRE_LINK_OPTIONS} /SUBSYSTEM:CONSOLE)
 target_link_libraries(rgmain PRIVATE zziplib zlib freetype freeimage)
 

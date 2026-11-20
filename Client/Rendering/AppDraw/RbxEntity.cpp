@@ -20,25 +20,25 @@
 
 namespace Ogre {
 
-void RbxEntity::FUN_00674e30(VisualEngine::Unk0x18* p_unk0x240)
+void RbxEntity::setFrameRateManager(VisualEngine::FrameRateManager* frameRateManager)
 {
-	m_unk0x240 = p_unk0x240;
+	m_frameRateManager = frameRateManager;
 }
 
-void RbxEntity::FUN_00674e40(MeshPtr mesh)
+void RbxEntity::setMesh(MeshPtr mesh)
 {
 	mMesh = mesh;
 }
 
 void RbxEntity::_notifyCurrentCamera(Camera* cam)
 {
-	if (!m_unk0x245) {
-		FUN_00676870(cam);
-		m_unk0x245 = true;
+	if (!m_visibilityUpdated) {
+		updateVisibility(cam);
+		m_visibilityUpdated = true;
 	}
 }
 
-void RbxEntity::FUN_00674fd0(bool visible)
+void RbxEntity::setSubEntitiesVisible(bool visible)
 {
 	for (int i = 0; i < (int) mSubEntityList.size(); i++) {
 		mSubEntityList[i]->setVisible(visible);
@@ -70,7 +70,7 @@ void RbxEntity::_updateRenderQueue(RenderQueue* queue)
 	}
 }
 
-void RbxEntity::FUN_00675a70(RbxSubEntity* subEntity)
+void RbxEntity::removeSubEntity(RbxSubEntity* subEntity)
 {
 	SubEntityList::iterator it;
 	for (it = mSubEntityList.begin(); it != mSubEntityList.end(); ++it) {
@@ -87,15 +87,16 @@ void RbxEntity::FUN_00675a70(RbxSubEntity* subEntity)
 
 RbxEntity::RbxEntity()
 {
-	m_unk0x268 = 20.0f;
+	m_minVisiblePercent = 20.0f;
 	mInitialised = true;
-	m_unk0x244 = true;
-	m_unk0x246 = true;
-	m_unk0x240 = nullptr;
-	m_unk0x26c = 888;
+	m_frustumCull = true;
+	m_visibilityUpdated = false;
+	m_recordFrameStats = true;
+	m_frameRateManager = nullptr;
+	m_minVisibleCount = 888;
 }
 
-void RbxEntity::FUN_00675c90()
+void RbxEntity::clearSubEntities()
 {
 	mSubEntityList.clear();
 }
@@ -111,7 +112,7 @@ RbxEntity::~RbxEntity()
 	mSubEntityList.clear();
 }
 
-RbxSubEntity* RbxEntity::FUN_00676680(SubMesh* subMesh, int lodIndex)
+RbxSubEntity* RbxEntity::createSubEntity(SubMesh* subMesh, int lodIndex)
 {
 	RbxSubEntity* subEntity = new RbxSubEntity(this, subMesh, lodIndex);
 	if (subMesh->isMatInitialised()) {
@@ -121,59 +122,59 @@ RbxSubEntity* RbxEntity::FUN_00676680(SubMesh* subMesh, int lodIndex)
 	return subEntity;
 }
 
-void RbxEntity::FUN_00676730(RbxSubEntity* subEntity)
+void RbxEntity::addSubEntity(RbxSubEntity* subEntity)
 {
 	mSubEntityList.push_back(subEntity);
 }
 
-void RbxEntity::FUN_00676870(Camera* cam)
+void RbxEntity::updateVisibility(Camera* cam)
 {
 	RbxSceneNode* node = dynamic_cast<RbxSceneNode*>(getParentNode());
-	std::vector<Unknown00676870> candidates;
+	std::vector<Candidate> candidates;
 
 	bool managed;
-	if (!g_unk0x00949dd0 || !m_unk0x240) {
+	if (!frameRateManagerEnabled || !m_frameRateManager) {
 		managed = false;
 	}
 	else {
 		managed = true;
-		candidates.resize(mSubEntityList.size(), Unknown00676870());
+		candidates.resize(mSubEntityList.size(), Candidate());
 		candidates.erase(candidates.begin(), candidates.end());
 	}
 
 	if (!mSubEntityList.empty()) {
-		m_unk0x270.resize(mSubEntityList.size());
-		memset(&m_unk0x270[0], 0, m_unk0x270.size());
+		m_subEntityStates.resize(mSubEntityList.size());
+		memset(&m_subEntityStates[0], 0, m_subEntityStates.size());
 	}
 
 	for (int i = 0; i < (int) mSubEntityList.size(); i++) {
 		RbxSubEntity* subEntity = dynamic_cast<RbxSubEntity*>(mSubEntityList[i]);
-		Vector3 offset = subEntity->m_unk0xdc.getTrans();
+		Vector3 offset = subEntity->m_worldTransform.getTrans();
 		bool visible = true;
 
 		SubMesh* subMesh = subEntity->getSubMesh();
 		if (!subMesh) {
-			subMesh = subEntity->FUN_0067b4e0(1);
+			subMesh = subEntity->getLodSubMesh(1);
 		}
 
-		Sphere sphere = node->FUN_0067af60(subMesh);
+		Sphere sphere = node->getSubMeshSphere(subMesh);
 		sphere.setCenter(sphere.getCenter() + offset);
 
-		if (m_unk0x244) {
+		if (m_frustumCull) {
 			visible = cam->isVisible(sphere, nullptr);
 		}
 		subEntity->setVisible(visible);
 
 		if (!visible) {
-			m_unk0x270[i] = 2;
+			m_subEntityStates[i] = 2;
 		}
 		else {
-			m_unk0x270[i] = 1;
+			m_subEntityStates[i] = 1;
 			if (managed) {
-				Unknown00676870 candidate;
-				candidate.m_unk0x00 = i;
-				candidate.m_unk0x04 = Math::Sqrt(subEntity->getSquaredViewDepth(cam)) - sphere.getRadius() -
-									  subEntity->FUN_0067bcd0() * 1000000.0;
+				Candidate candidate;
+				candidate.m_index = i;
+				candidate.m_priority = Math::Sqrt(subEntity->getSquaredViewDepth(cam)) - sphere.getRadius() -
+									   subEntity->getRenderImportance() * 1000000.0;
 				candidates.push_back(candidate);
 			}
 		}
@@ -183,13 +184,14 @@ void RbxEntity::FUN_00676870(Camera* cam)
 		int count = candidates.size();
 		int mode = -1;
 
-		if (m_unk0x240->FUN_00671ea0() > 30) {
-			VisualEngine::Unk0x18::Unk0x08& last = m_unk0x240->FUN_00671ef0(0);
-			Real average = m_unk0x240->FUN_00672980(20);
+		if (m_frameRateManager->getFrameCount() > 30) {
+			VisualEngine::FrameRateManager::FrameStats& last = m_frameRateManager->getFrame(0);
+			Real average = m_frameRateManager->getMedianFrameTime(20);
 
-			if (!(Math::Abs((average - last.m_unk0x00) / average) <= 0.2)) {
-				if (last.m_unk0x08 < last.m_unk0x04) {
-					Real limit = (Real) candidates.size() < last.m_unk0x08 ? (Real) candidates.size() : last.m_unk0x08;
+			if (!(Math::Abs((average - last.m_frameTime) / average) <= 0.2)) {
+				if (last.m_renderedCount < last.m_visibleCount) {
+					Real limit = (Real) candidates.size() < last.m_renderedCount ? (Real) candidates.size()
+																				 : last.m_renderedCount;
 					count = limit;
 				}
 				else {
@@ -198,33 +200,33 @@ void RbxEntity::FUN_00676870(Camera* cam)
 				mode = 1;
 			}
 			else if (average > 50.0) {
-				Real budget = m_unk0x268;
+				Real budget = m_minVisiblePercent;
 				int minimum = budget / 100.0;
 				Real fraction = minimum;
 				if (average > 100.0) {
-					count = last.m_unk0x08 * fraction;
+					count = last.m_renderedCount * fraction;
 				}
 				else {
 					Real scale = 1.0f - (1.0f - fraction) * Math::Sin((average - 50.0) * Math::HALF_PI / 50.0);
-					count = last.m_unk0x08 * scale;
+					count = last.m_renderedCount * scale;
 				}
 
 				if (count < mSubEntityList.size() * fraction) {
 					count = mSubEntityList.size() * fraction;
 				}
-				if (Math::Abs(last.m_unk0x08 - count) < 40.0f) {
-					count = last.m_unk0x08;
+				if (Math::Abs(last.m_renderedCount - count) < 40.0f) {
+					count = last.m_renderedCount;
 				}
-				if (count < m_unk0x26c) {
-					count = m_unk0x26c;
+				if (count < m_minVisibleCount) {
+					count = m_minVisibleCount;
 				}
 				if (count > (int) candidates.size()) {
 					count = candidates.size();
 				}
 				mode = 2;
 			}
-			else if (last.m_unk0x04 > last.m_unk0x08) {
-				count = last.m_unk0x08;
+			else if (last.m_visibleCount > last.m_renderedCount) {
+				count = last.m_renderedCount;
 				Real growth = (50.0 - average) / average;
 				if (growth > 1.2f) {
 					growth = 1.2f;
@@ -247,8 +249,8 @@ void RbxEntity::FUN_00676870(Camera* cam)
 		if (count < (int) candidates.size()) {
 			std::sort(candidates.begin(), candidates.end());
 			for (int i = count; i < (int) candidates.size(); i++) {
-				dynamic_cast<RbxSubEntity*>(mSubEntityList[candidates[i].m_unk0x00])->setVisible(false);
-				m_unk0x270[candidates[i].m_unk0x00] = 3;
+				dynamic_cast<RbxSubEntity*>(mSubEntityList[candidates[i].m_index])->setVisible(false);
+				m_subEntityStates[candidates[i].m_index] = 3;
 			}
 
 			LogManager::getSingleton().logMessage(
@@ -257,24 +259,24 @@ void RbxEntity::FUN_00676870(Camera* cam)
 			);
 		}
 
-		if (m_unk0x246) {
-			m_unk0x240->FUN_00671eb0(VisualEngine::Unk0x18::Unk0x08());
-			VisualEngine::Unk0x18::Unk0x08& latest = m_unk0x240->FUN_00671ef0(0);
-			latest.m_unk0x04 = candidates.size();
-			latest.m_unk0x08 = count;
+		if (m_recordFrameStats) {
+			m_frameRateManager->addFrame(VisualEngine::FrameRateManager::FrameStats());
+			VisualEngine::FrameRateManager::FrameStats& latest = m_frameRateManager->getFrame(0);
+			latest.m_visibleCount = candidates.size();
+			latest.m_renderedCount = count;
 		}
 	}
 }
 
-void RbxEntity::FUN_006772d0(Camera* camera, const Light* light, std::vector<ShadowCaster*>* casters)
+void RbxEntity::findShadowCasters(Camera* camera, const Light* light, std::vector<ShadowCaster*>* casters)
 {
 	casters->clear();
-	if (!m_unk0x245) {
-		FUN_00676870(camera);
-		m_unk0x245 = true;
+	if (!m_visibilityUpdated) {
+		updateVisibility(camera);
+		m_visibilityUpdated = true;
 	}
 
-	const Vector3* corners = m_unk0x248.getAllCorners();
+	const Vector3* corners = m_bounds.getAllCorners();
 	for (int i = 0; i < 8; i++) {
 		if (camera->isVisible(corners[i])) {
 			corners[i].distance(camera->getDerivedPosition());
@@ -284,12 +286,12 @@ void RbxEntity::FUN_006772d0(Camera* camera, const Light* light, std::vector<Sha
 	Real farDistance;
 	{
 		std::vector<Plane> planes;
-		planes.push_back(Plane(Vector3(1.0f, 0.0f, 0.0f), Vector3(m_unk0x248.getMaximum().x, 0.0f, 0.0f)));
-		planes.push_back(Plane(Vector3(-1.0f, 0.0f, 0.0f), Vector3(m_unk0x248.getMinimum().x, 0.0f, 0.0f)));
-		planes.push_back(Plane(Vector3(0.0f, 1.0f, 0.0f), Vector3(0.0f, m_unk0x248.getMaximum().y, 0.0f)));
-		planes.push_back(Plane(Vector3(0.0f, -1.0f, 0.0f), Vector3(0.0f, m_unk0x248.getMinimum().y, 0.0f)));
-		planes.push_back(Plane(Vector3(0.0f, 0.0f, 1.0f), Vector3(0.0f, 0.0f, m_unk0x248.getMaximum().z)));
-		planes.push_back(Plane(Vector3(0.0f, 0.0f, -1.0f), Vector3(0.0f, 0.0f, m_unk0x248.getMinimum().z)));
+		planes.push_back(Plane(Vector3(1.0f, 0.0f, 0.0f), Vector3(m_bounds.getMaximum().x, 0.0f, 0.0f)));
+		planes.push_back(Plane(Vector3(-1.0f, 0.0f, 0.0f), Vector3(m_bounds.getMinimum().x, 0.0f, 0.0f)));
+		planes.push_back(Plane(Vector3(0.0f, 1.0f, 0.0f), Vector3(0.0f, m_bounds.getMaximum().y, 0.0f)));
+		planes.push_back(Plane(Vector3(0.0f, -1.0f, 0.0f), Vector3(0.0f, m_bounds.getMinimum().y, 0.0f)));
+		planes.push_back(Plane(Vector3(0.0f, 0.0f, 1.0f), Vector3(0.0f, 0.0f, m_bounds.getMaximum().z)));
+		planes.push_back(Plane(Vector3(0.0f, 0.0f, -1.0f), Vector3(0.0f, 0.0f, m_bounds.getMinimum().z)));
 
 		const Vector3* frustumCorners = camera->getWorldSpaceCorners();
 		Ray rays[4];
@@ -367,7 +369,7 @@ void RbxEntity::FUN_006772d0(Camera* camera, const Light* light, std::vector<Sha
 				if (subEntity->isVisible()) {
 					casters->push_back(subEntity);
 				}
-				else if (m_unk0x270[i] != 3 && (!lightInFrustum || light->getType() == Light::LT_DIRECTIONAL)) {
+				else if (m_subEntityStates[i] != 3 && (!lightInFrustum || light->getType() == Light::LT_DIRECTIONAL)) {
 					PlaneBoundedVolumeList::const_iterator pi, piend;
 					piend = volList->end();
 					for (pi = volList->begin(); pi != piend; ++pi) {

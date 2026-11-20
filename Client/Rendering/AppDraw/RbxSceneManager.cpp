@@ -48,10 +48,11 @@
 #include <OgreTextureUnitState.h>
 #include <OgreTimer.h>
 #include <OgreViewport.h>
+#include <stdexcept>
 
 namespace Ogre {
 
-bool g_unk0x00961438;
+bool findingShadowCasters;
 
 const String RbxSceneManagerFactory::FACTORY_TYPE_NAME = "RbxSceneManager";
 
@@ -917,7 +918,7 @@ void RbxSceneManager::_queueSkiesForRendering(Camera* cam)
 
 	if (mSkyBoxNode) {
 		mSkyBoxNode->setPosition(cam->getDerivedPosition());
-		m_unk0x8a90->setPosition(cam->getDerivedPosition());
+		m_skyBoxNode->setPosition(cam->getDerivedPosition());
 	}
 
 	if (mSkyDomeNode) {
@@ -939,7 +940,7 @@ void RbxSceneManager::_queueSkiesForRendering(Camera* cam)
 				mSkyBoxEntity[plane]->getSubEntity(0), qid, OGRE_RENDERABLE_DEFAULT_PRIORITY
 			);
 		}
-		m_unk0x8a84->FUN_00678610(cam, getRenderQueue(), qid);
+		m_sky->updateRenderQueue(cam, getRenderQueue(), qid);
 	}
 
 	if (mSkyDomeEnabled) {
@@ -1924,8 +1925,8 @@ void RbxSceneManager::setSkyBox(
 )
 {
 	if (enable) {
-		if (m_unk0x8a84.isNull()) {
-			m_unk0x8a84.bind(new RbxSky(this, m_unk0x8a68, true));
+		if (m_sky.isNull()) {
+			m_sky.bind(new RbxSky(this, m_skyFolder, true));
 		}
 
 		MaterialPtr m = MaterialManager::getSingleton().getByName(materialName);
@@ -1949,12 +1950,12 @@ void RbxSceneManager::setSkyBox(
 
 		if (!mSkyBoxNode) {
 			mSkyBoxNode = createSceneNode("SkyBoxNode");
-			m_unk0x8a90 = createSceneNode("SkyBoxTBNode");
-			m_unk0x8a90->setOrientation(Quaternion(Radian(Degree(-90.0)), Vector3(0.0f, 1.0f, 0.0f)));
+			m_skyBoxNode = createSceneNode("SkyBoxTBNode");
+			m_skyBoxNode->setOrientation(Quaternion(Radian(Degree(-90.0)), Vector3(0.0f, 1.0f, 0.0f)));
 		}
 		else {
 			mSkyBoxNode->detachAllObjects();
-			m_unk0x8a90->detachAllObjects();
+			m_skyBoxNode->detachAllObjects();
 		}
 
 		MaterialManager& matMgr = MaterialManager::getSingleton();
@@ -1993,7 +1994,7 @@ void RbxSceneManager::setSkyBox(
 				mSkyBoxNode->attachObject(mSkyBoxEntity[i]);
 			}
 			else {
-				m_unk0x8a90->attachObject(mSkyBoxEntity[i]);
+				m_skyBoxNode->attachObject(mSkyBoxEntity[i]);
 			}
 		}
 	}
@@ -2354,7 +2355,7 @@ void RbxSceneManager::destroySceneNode(const String& name)
 const Pass* RbxSceneManager::_setPass(const Pass* pass, bool evenIfSuppressed, bool shadowDerivation)
 {
 	if (!mSuppressRenderStateChanges || evenIfSuppressed) {
-		m_unk0x8a64 = pass->getLightingEnabled() ? true : false;
+		m_lightingEnabled = pass->getLightingEnabled() ? true : false;
 
 		if (mIlluminationStage == IRS_RENDER_TO_TEXTURE && shadowDerivation) {
 
@@ -2516,8 +2517,8 @@ const Pass* RbxSceneManager::_setPass(const Pass* pass, bool evenIfSuppressed, b
 
 void RbxSceneManager::_renderScene(Camera* camera, Viewport* vp, bool includeOverlays)
 {
-	g_unk0x00961438 = false;
-	m_unk0x8a64 = true;
+	findingShadowCasters = false;
+	m_lightingEnabled = true;
 	m_unk0x8a65 = false;
 	Root::getSingleton()._setCurrentSceneManager(this);
 	mActiveQueuedRenderableVisitor->targetSceneMgr = this;
@@ -2966,10 +2967,10 @@ const SceneManager::ShadowCasterList& RbxSceneManager::findShadowCastersForLight
 	const Light* light, const Camera* camera
 )
 {
-	if (g_unk0x00961438 == true) {
-		throw std::exception("findShadowCastersForLight call repeated");
+	if (findingShadowCasters == true) {
+		throw std::runtime_error("findShadowCastersForLight call repeated");
 	}
-	g_unk0x00961438 = true;
+	findingShadowCasters = true;
 
 	mShadowCasterList.clear();
 
@@ -2980,7 +2981,7 @@ const SceneManager::ShadowCasterList& RbxSceneManager::findShadowCastersForLight
 	else {
 		if (root->getAttachedObjectIterator().hasMoreElements()) {
 			RbxEntity* entity = dynamic_cast<RbxEntity*>(root->getAttachedObject((unsigned short) 0));
-			entity->FUN_006772d0(const_cast<Camera*>(camera), light, &mShadowCasterList);
+			entity->findShadowCasters(const_cast<Camera*>(camera), light, &mShadowCasterList);
 		}
 	}
 

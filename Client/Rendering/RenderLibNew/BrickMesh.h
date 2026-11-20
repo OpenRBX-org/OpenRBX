@@ -21,17 +21,17 @@ class BrickMesh : public RenderNew::Mesh
 private:
 	BrickMesh(const G3D::Vector3& size, RenderSurfaceTypes surfaceTypes, BrickColor color);
 
-	void FUN_00514070(const G3D::Vector3& size, RenderSurfaceTypes surfaceTypes, BrickColor color);
+	void addLevel(const G3D::Vector3& size, RenderSurfaceTypes surfaceTypes, BrickColor color);
 
 public:
-	static void FUN_00514960(
+	static void makeShadowBox(
 		const G3D::Vector3& halfSize, std::vector<G3D::Vector3>& vertices, std::vector<unsigned short>& indices
 	);
 
 	static const float widthInset;
 	static const float normalPerturbation;
 	static const float bevel;
-	static float g_unk0x00958544;
+	static float bevelSize;
 
 	static G3D::ReferenceCountedPointer<RenderNew::Mesh> create(
 		const G3D::Vector3& size, RenderSurfaceTypes surfaceTypes, BrickColor color
@@ -39,7 +39,7 @@ public:
 	static void flushCache();
 };
 
-extern bool g_unk0x0092a908;
+extern bool brickMeshBevels;
 
 } // namespace ViewNew
 } // namespace RBX

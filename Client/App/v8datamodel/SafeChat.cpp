@@ -23,7 +23,7 @@ static void deleteChatOption(ChatOption* option)
 	delete option;
 }
 
-static std::string FUN_00660930()
+static std::string safeChatFileName()
 {
 	std::string file = ContentProvider::singleton().getAssetFile("Fonts\\safechat.xml");
 	return file;
@@ -74,7 +74,7 @@ std::string SafeChat::getMessage(std::vector<std::string> path)
 
 void SafeChat::loadChatTree()
 {
-	std::string fileName = FUN_00660930();
+	std::string fileName = safeChatFileName();
 	std::ifstream stream(fileName.c_str(), std::ios_base::in | std::ios_base::binary);
 	TextXmlParser parser(stream.rdbuf());
 	std::unique_ptr<XmlElement> root = parser.parse();

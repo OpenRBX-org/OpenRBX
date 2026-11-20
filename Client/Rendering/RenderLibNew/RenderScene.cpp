@@ -26,14 +26,15 @@
 #include <OgreTextureUnitState.h>
 #include <OgreTimer.h>
 #include <cstdio>
+#include <stdexcept>
 
 namespace RBX::RenderNew {
 
-static int g_unk0x00958700;
+static int materialNameCounter;
 
-void RenderScene::FUN_0052c9b0(Ogre::VisualEngine* engine, bool p_unk0x8e)
+void RenderScene::updateLights(Ogre::VisualEngine* engine, bool useAllLightsInUnshadowedPass)
 {
-	Ogre::SceneManager* sceneManager = engine->m_unk0x04;
+	Ogre::SceneManager* sceneManager = engine->m_sceneManager;
 	float radius = 1000.0f;
 	Ogre::Vector3 center(0.0f, 0.0f, 0.0f);
 
@@ -57,8 +58,8 @@ void RenderScene::FUN_0052c9b0(Ogre::VisualEngine* engine, bool p_unk0x8e)
 		}
 		light->setCastShadows(effectSettings.stencilShadows());
 
-		if (m_unk0x04 && !m_unk0x04->m_unk0x248.isNull()) {
-			const Ogre::AxisAlignedBox& box = m_unk0x04->m_unk0x248;
+		if (m_entity && !m_entity->m_bounds.isNull()) {
+			const Ogre::AxisAlignedBox& box = m_entity->m_bounds;
 			Ogre::Vector3 size = box.getSize();
 			float extent = size.x > size.y ? size.x : size.y;
 			if (extent < size.z) {
@@ -116,7 +117,7 @@ void RenderScene::FUN_0052c9b0(Ogre::VisualEngine* engine, bool p_unk0x8e)
 				fill->setType(Ogre::Light::LT_POINT);
 			}
 			fill->setPosition(center * 2.0 - position);
-			fill->setDiffuseColour(Ogre::FUN_00671cd0(G3D::Color4(lighting->ambientBottom - average, 1.0f)));
+			fill->setDiffuseColour(Ogre::toOgreColour(G3D::Color4(lighting->ambientBottom - average, 1.0f)));
 		}
 
 		if (average != lighting->ambientTop) {
@@ -131,7 +132,7 @@ void RenderScene::FUN_0052c9b0(Ogre::VisualEngine* engine, bool p_unk0x8e)
 				fill->setType(Ogre::Light::LT_POINT);
 			}
 			fill->setPosition(Ogre::Vector3(center.x, center.y + radius, center.z));
-			fill->setDiffuseColour(Ogre::FUN_00671cd0(G3D::Color4(lighting->ambientTop - average, 1.0f)));
+			fill->setDiffuseColour(Ogre::toOgreColour(G3D::Color4(lighting->ambientTop - average, 1.0f)));
 		}
 	}
 
@@ -167,11 +168,11 @@ void RenderScene::setLighting(const G3D::ReferenceCountedPointer<G3D::Lighting>&
 
 RenderScene::~RenderScene()
 {
-	if (m_unk0x00) {
-		m_unk0x00->getCreator()->getRootSceneNode()->removeChild(m_unk0x00->getName());
-		delete m_unk0x00;
+	if (m_rootNode) {
+		m_rootNode->getCreator()->getRootSceneNode()->removeChild(m_rootNode->getName());
+		delete m_rootNode;
 	}
-	delete m_unk0x04;
+	delete m_entity;
 }
 
 void RenderScene::presetLighting(
@@ -199,58 +200,58 @@ void SceneManager::addToScene(const G3D::ReferenceCountedPointer<Chunk>& chunk)
 }
 
 RenderScene::RenderScene()
-	: m_unk0x04(nullptr), shadingQuality(-1.0f), meshDetail(-1.0f), shadows(false), cameraDistance((float) G3D::inf()),
+	: m_entity(nullptr), shadingQuality(-1.0f), meshDetail(-1.0f), shadows(false), cameraDistance((float) G3D::inf()),
 	  debugShadowVolumes(false), colorClearValue(0.5f, 0.5f, 1.0f, 1.0f)
 {
 	desiredLighting = lighting = G3D::Lighting::create();
-	m_unk0x00 = nullptr;
+	m_rootNode = nullptr;
 }
 
 void RenderScene::render(G3D::RenderDevice* rd, const G3D::GCamera& camera)
 {
 	Ogre::VisualEngine* engine = reinterpret_cast<Ogre::VisualEngine*>(rd);
-	Ogre::Camera* ogreCamera = engine->m_unk0x08;
+	Ogre::Camera* ogreCamera = engine->m_camera;
 	G3D::CoordinateFrame cameraFrame = camera.getCoordinateFrame();
 
 	if (effectSettings.stencilShadows()) {
-		engine->m_unk0x04->setShadowTechnique(Ogre::SHADOWTYPE_STENCIL_MODULATIVE);
-		engine->m_unk0x04->setShadowColour(Ogre::ColourValue(0.5f, 0.5f, 0.5f, 1.0f));
+		engine->m_sceneManager->setShadowTechnique(Ogre::SHADOWTYPE_STENCIL_MODULATIVE);
+		engine->m_sceneManager->setShadowColour(Ogre::ColourValue(0.5f, 0.5f, 0.5f, 1.0f));
 	}
 	else {
-		engine->m_unk0x04->setShadowTechnique(Ogre::SHADOWTYPE_NONE);
+		engine->m_sceneManager->setShadowTechnique(Ogre::SHADOWTYPE_NONE);
 	}
 
 	Ogre::Quaternion orientation(1.0f, 0.0f, 0.0f, 0.0f);
 	orientation.FromRotationMatrix(reinterpret_cast<const Ogre::Matrix3&>(cameraFrame.rotation));
 	ogreCamera->setOrientation(orientation);
 	ogreCamera->setPosition(cameraFrame.translation.x, cameraFrame.translation.y, cameraFrame.translation.z);
-	engine->m_unk0x08->setNearClipDistance(-camera.getNearPlaneZ());
-	engine->m_unk0x08->setFarClipDistance(-camera.getFarPlaneZ());
-	engine->m_unk0x08->setFOVy(Ogre::Radian((float) camera.getFieldOfView()));
+	engine->m_camera->setNearClipDistance(-camera.getNearPlaneZ());
+	engine->m_camera->setFarClipDistance(-camera.getFarPlaneZ());
+	engine->m_camera->setFOVy(Ogre::Radian((float) camera.getFieldOfView()));
 
 	Ogre::Timer timer;
 	timer.reset();
 
-	if (m_unk0x00 == nullptr) {
-		m_unk0x00 = new Ogre::RbxSceneNode(engine->m_unk0x04, "rbxroot");
-		engine->m_unk0x04->getRootSceneNode()->addChild(m_unk0x00);
+	if (m_rootNode == nullptr) {
+		m_rootNode = new Ogre::RbxSceneNode(engine->m_sceneManager, "rbxroot");
+		engine->m_sceneManager->getRootSceneNode()->addChild(m_rootNode);
 	}
 
-	FUN_0052c9b0(engine, effectSettings.useAllLightsInUnshadowedPass());
-	bool hardwareMeshes = engine->m_unk0x7f5;
+	updateLights(engine, effectSettings.useAllLightsInUnshadowedPass());
+	bool hardwareMeshes = engine->m_useLargeVertexBuffer;
 
-	if (m_unk0x08.isNull()) {
-		m_unk0x08 = Ogre::MaterialManager::getSingleton().getByName("BaseWhite");
+	if (m_baseWhite.isNull()) {
+		m_baseWhite = Ogre::MaterialManager::getSingleton().getByName("BaseWhite");
 	}
 
-	if (m_unk0x14.isNull()) {
-		m_unk0x14 = Ogre::MeshManager::getSingleton().createOrRetrieve("rbxdummymesh", "General").first;
+	if (m_dummyMesh.isNull()) {
+		m_dummyMesh = Ogre::MeshManager::getSingleton().createOrRetrieve("rbxdummymesh", "General").first;
 	}
 
-	if (m_unk0x04 == nullptr && chunkArray.size() != 0) {
-		m_unk0x04 = new Ogre::RbxEntity();
-		m_unk0x00->attachObject(m_unk0x04);
-		m_unk0x04->FUN_00674e40(m_unk0x14);
+	if (m_entity == nullptr && chunkArray.size() != 0) {
+		m_entity = new Ogre::RbxEntity();
+		m_rootNode->attachObject(m_entity);
+		m_entity->setMesh(m_dummyMesh);
 	}
 
 	for (int i = 0; i < chunkArray.size(); i++) {
@@ -261,9 +262,9 @@ void RenderScene::render(G3D::RenderDevice* rd, const G3D::GCamera& camera)
 	}
 
 	if (Mesh::varDirty && chunkArray.size() != 0 && hardwareMeshes) {
-		Mesh::FUN_00532380(engine);
-		m_unk0x04->FUN_00674e40(Mesh::g_unk0x0095877c);
-		m_unk0x04->FUN_0052c8b0(Mesh::g_unk0x0095877c->getBounds());
+		Mesh::updateSharedMesh(engine);
+		m_entity->setMesh(Mesh::sharedMesh);
+		m_entity->setBounds(Mesh::sharedMesh->getBounds());
 	}
 
 	G3D::CoordinateFrame viewFrame;
@@ -287,8 +288,8 @@ void RenderScene::render(G3D::RenderDevice* rd, const G3D::GCamera& camera)
 		}
 
 		G3D::ReferenceCountedPointer<Mesh> mesh = chunk->getMesh();
-		if (effectSettings.stencilShadows() && mesh->m_unk0x38 == nullptr) {
-			mesh->FUN_005324e0(engine);
+		if (effectSettings.stencilShadows() && mesh->m_shadowSubMesh == nullptr) {
+			mesh->makeShadowSubMesh(engine);
 		}
 
 		int lod = 0;
@@ -303,7 +304,7 @@ void RenderScene::render(G3D::RenderDevice* rd, const G3D::GCamera& camera)
 		Mesh::LevelRef meshLevel = mesh->detailLevel((float) lod);
 		bool rebuilt = false;
 
-		if (mesh->m_unk0x3c == 4 && !engine->m_unk0x806 && meshLevel->m_unk0x1c) {
+		if (mesh->m_meshType == 4 && !engine->m_supportDepthBias && meshLevel->m_subMeshDirty) {
 			Mesh::LevelRef base = mesh->detailLevel(0.0f);
 			if (base->primitive == G3D::RenderDevice::QUADS && base->indexArray.size() == 4) {
 				const G3D::Vector3& normal = mesh->getNormal(base->indexArray[0]);
@@ -314,43 +315,43 @@ void RenderScene::render(G3D::RenderDevice* rd, const G3D::GCamera& camera)
 		}
 
 		if (!hardwareMeshes) {
-			if (meshLevel->m_unk0x1c) {
+			if (meshLevel->m_subMeshDirty) {
 				Ogre::AxisAlignedBox box;
-				meshLevel->FUN_00533160(engine, box);
+				meshLevel->makeSubMesh(engine, box);
 				float radius = box.getHalfSize().length();
 				Ogre::Sphere sphere(box.getCenter(), radius);
-				m_unk0x00->FUN_0067b2b0(meshLevel->m_unk0x24, sphere);
+				m_rootNode->setSubMeshSphere(meshLevel->m_subMesh, sphere);
 				rebuilt = true;
 			}
 		}
-		else if (meshLevel->m_unk0x1c) {
+		else if (meshLevel->m_subMeshDirty) {
 			Ogre::AxisAlignedBox box;
 			meshLevel->makeHWSubMesh(engine, box);
 			float radius = box.getHalfSize().length();
 			Ogre::Sphere sphere(box.getCenter(), radius);
-			Ogre::SubMesh* subMesh = !meshLevel->m_unk0x1c && meshLevel->m_unk0x20 >= 0
-										 ? Mesh::g_unk0x0095877c->getSubMesh(meshLevel->m_unk0x20)
+			Ogre::SubMesh* subMesh = !meshLevel->m_subMeshDirty && meshLevel->m_sharedSubMeshIndex >= 0
+										 ? Mesh::sharedMesh->getSubMesh(meshLevel->m_sharedSubMeshIndex)
 										 : nullptr;
-			m_unk0x00->FUN_0067b2b0(subMesh, sphere);
+			m_rootNode->setSubMeshSphere(subMesh, sphere);
 			rebuilt = true;
 		}
 
 		bool updateMaterial = false;
 		materialLevel->baseTexture(rd);
 
-		if (materialLevel->m_unk0x28.isNull()) {
+		if (materialLevel->m_ogreMaterial.isNull()) {
 			char name[8];
-			_snprintf(name, sizeof(name), "m%d", g_unk0x00958700++);
-			materialLevel->m_unk0x28 = Ogre::MaterialManager::getSingleton().create(name, "General");
+			snprintf(name, sizeof(name), "m%d", materialNameCounter++);
+			materialLevel->m_ogreMaterial = Ogre::MaterialManager::getSingleton().create(name, "General");
 
 			const G3D::Color3& color = materialLevel->color();
-			Ogre::Pass* pass = materialLevel->m_unk0x28->getTechnique(0)->getPass(0);
+			Ogre::Pass* pass = materialLevel->m_ogreMaterial->getTechnique(0)->getPass(0);
 			pass->setDiffuse(color.r, color.g, color.b, 1.0f);
 			pass->setAmbient(color.r, color.g, color.b);
 			pass->setShininess(materialLevel->shiny());
 			pass->setSpecular(materialLevel->specular(), materialLevel->specular(), materialLevel->specular(), 1.0f);
 
-			const Ogre::TexturePtr& texture = materialLevel->mBaseTexture->m_unk0x4c;
+			const Ogre::TexturePtr& texture = materialLevel->mBaseTexture->m_texture;
 			if (!texture.isNull()) {
 				Ogre::TextureUnitState* unit = pass->createTextureUnitState();
 				unit->setTextureFiltering(Ogre::FO_LINEAR, Ogre::FO_LINEAR, Ogre::FO_LINEAR);
@@ -384,12 +385,12 @@ void RenderScene::render(G3D::RenderDevice* rd, const G3D::GCamera& camera)
 				if (sky.isNull()) {
 					sky = Ogre::TextureManager::getSingleton().create("skysphmap", "General");
 					Ogre::Image image;
-					std::string path = ContentProvider::singleton().assetFolder() + "Sky\\" + "skyspheremap.jpg";
+					std::string path = ContentProvider::singleton().getAssetFile("Sky\\skyspheremap.jpg");
 					image.load(path, "General");
 					sky->loadImage(image);
 				}
 
-				Ogre::Pass* reflection = materialLevel->m_unk0x28->getTechnique(0)->createPass();
+				Ogre::Pass* reflection = materialLevel->m_ogreMaterial->getTechnique(0)->createPass();
 				reflection->setDiffuse(0.0f, 0.0f, 0.0f, 1.0f);
 				reflection->setAmbient(Ogre::ColourValue(2.0f, 2.0f, 2.0f, 2.0f) * materialLevel->reflect());
 				reflection->setSceneBlending(Ogre::SBF_ONE, Ogre::SBF_ONE);
@@ -403,57 +404,61 @@ void RenderScene::render(G3D::RenderDevice* rd, const G3D::GCamera& camera)
 			updateMaterial = true;
 		}
 
-		if (chunk->m_unk0x10 == nullptr) {
+		if (chunk->m_subEntity == nullptr) {
 			Ogre::SubMesh* subMesh;
 			Ogre::RbxSubEntity* subEntity;
 			if (hardwareMeshes) {
-				if (meshLevel->m_unk0x1c || meshLevel->m_unk0x20 < 0 ||
-					!Mesh::g_unk0x0095877c->getSubMesh(meshLevel->m_unk0x20)) {
-					throw std::exception("Please restart ROBLOX, if you changed your settings but have not restarted");
+				if (meshLevel->m_subMeshDirty || meshLevel->m_sharedSubMeshIndex < 0 ||
+					!Mesh::sharedMesh->getSubMesh(meshLevel->m_sharedSubMeshIndex)) {
+					throw std::runtime_error(
+						"Please restart ROBLOX, if you changed your settings but have not restarted"
+					);
 				}
-				subMesh = !meshLevel->m_unk0x1c && meshLevel->m_unk0x20 >= 0
-							  ? Mesh::g_unk0x0095877c->getSubMesh(meshLevel->m_unk0x20)
+				subMesh = !meshLevel->m_subMeshDirty && meshLevel->m_sharedSubMeshIndex >= 0
+							  ? Mesh::sharedMesh->getSubMesh(meshLevel->m_sharedSubMeshIndex)
 							  : nullptr;
-				subEntity = m_unk0x04->FUN_00676680(subMesh, lod);
-				subEntity->m_unk0x128 = false;
+				subEntity = m_entity->createSubEntity(subMesh, lod);
+				subEntity->m_castShadows = false;
 			}
 			else {
-				subMesh = meshLevel->m_unk0x24;
+				subMesh = meshLevel->m_subMesh;
 				if (subMesh == nullptr) {
-					throw std::exception("Please restart ROBLOX, if you changed your settings but have not restarted");
+					throw std::runtime_error(
+						"Please restart ROBLOX, if you changed your settings but have not restarted"
+					);
 				}
-				subEntity = m_unk0x04->FUN_00676680(subMesh, lod);
+				subEntity = m_entity->createSubEntity(subMesh, lod);
 			}
 
-			subEntity->FUN_0067bcc0(chunk->VTable0x28());
-			subEntity->m_unk0x12c = mesh->m_unk0x38;
-			if (mesh->m_unk0x38 == nullptr && mesh->m_unk0x3c == 1) {
-				subEntity->m_unk0x128 = false;
+			subEntity->setRenderImportance(chunk->getRenderImportance());
+			subEntity->m_shadowSubMesh = mesh->m_shadowSubMesh;
+			if (mesh->m_shadowSubMesh == nullptr && mesh->m_meshType == 1) {
+				subEntity->m_castShadows = false;
 			}
-			if (mesh->m_unk0x3c == 4) {
-				subEntity->m_unk0x128 = false;
+			if (mesh->m_meshType == 4) {
+				subEntity->m_castShadows = false;
 			}
 
-			chunk->m_unk0x10 = subEntity;
-			chunk->m_unk0x0c = m_unk0x04;
+			chunk->m_subEntity = subEntity;
+			chunk->m_entity = m_entity;
 
 			const G3D::Vector3& translation = chunk->cframe().translation;
-			Ogre::AxisAlignedBox bounds(m_unk0x04->m_unk0x248);
+			Ogre::AxisAlignedBox bounds(m_entity->m_bounds);
 			if (fabs(translation.x) < 10000.0f && fabs(translation.y) < 10000.0f && fabs(translation.z) < 10000.0f) {
-				if (subMesh == meshLevel->m_unk0x24) {
+				if (subMesh == meshLevel->m_subMesh) {
 					const Ogre::AxisAlignedBox& meshBounds =
-						static_cast<Ogre::Unknown00671c70*>(meshLevel->m_unk0x24)->m_unk0x8c;
+						static_cast<Ogre::RbxSubMesh*>(meshLevel->m_subMesh)->m_bounds;
 					Ogre::Vector3 offset(translation.x, translation.y, translation.z);
 					bounds.merge(
 						Ogre::AxisAlignedBox(meshBounds.getMinimum() + offset, meshBounds.getMaximum() + offset)
 					);
-					m_unk0x04->FUN_0052c8b0(bounds);
+					m_entity->setBounds(bounds);
 				}
 				else {
-					const Ogre::Sphere& sphere = m_unk0x00->FUN_0067af60(subMesh);
+					const Ogre::Sphere& sphere = m_rootNode->getSubMeshSphere(subMesh);
 					float radius = sphere.getRadius();
 					const G3D::Vector3& position = chunk->cframe().translation;
-					Ogre::AxisAlignedBox merged(m_unk0x04->m_unk0x248);
+					Ogre::AxisAlignedBox merged(m_entity->m_bounds);
 					Ogre::Vector3 center(
 						position.x + sphere.getCenter().x,
 						position.y + sphere.getCenter().y,
@@ -461,32 +466,32 @@ void RenderScene::render(G3D::RenderDevice* rd, const G3D::GCamera& camera)
 					);
 					Ogre::Vector3 extent(radius, radius, radius);
 					merged.merge(Ogre::AxisAlignedBox(center - extent, center + extent));
-					m_unk0x04->FUN_0052c8b0(merged);
+					m_entity->setBounds(merged);
 				}
 			}
 		}
-		else if (rebuilt || !chunk->m_unk0x10->FUN_0067b4e0(lod)) {
+		else if (rebuilt || !chunk->m_subEntity->getLodSubMesh(lod)) {
 			Ogre::SubMesh* subMesh = nullptr;
 			if (hardwareMeshes) {
-				if (!meshLevel->m_unk0x1c && meshLevel->m_unk0x20 >= 0 &&
-					Mesh::g_unk0x0095877c->getSubMesh(meshLevel->m_unk0x20)) {
-					subMesh = Mesh::g_unk0x0095877c->getSubMesh(meshLevel->m_unk0x20);
+				if (!meshLevel->m_subMeshDirty && meshLevel->m_sharedSubMeshIndex >= 0 &&
+					Mesh::sharedMesh->getSubMesh(meshLevel->m_sharedSubMeshIndex)) {
+					subMesh = Mesh::sharedMesh->getSubMesh(meshLevel->m_sharedSubMeshIndex);
 				}
 			}
 			else {
-				subMesh = meshLevel->m_unk0x24;
+				subMesh = meshLevel->m_subMesh;
 			}
 			if (subMesh) {
-				chunk->m_unk0x10->FUN_0067b4c0(lod, subMesh);
+				chunk->m_subEntity->setLodSubMesh(lod, subMesh);
 			}
 		}
 
-		chunk->m_unk0x10->FUN_0067b500(lod);
+		chunk->m_subEntity->setLodIndex(lod);
 
-		Ogre::RbxSubEntity* subEntity = chunk->m_unk0x10;
-		if (updateMaterial || subEntity->getMaterial() == m_unk0x08) {
-			if (!materialLevel->m_unk0x28.isNull()) {
-				subEntity->setMaterialName(materialLevel->m_unk0x28->getName());
+		Ogre::RbxSubEntity* subEntity = chunk->m_subEntity;
+		if (updateMaterial || subEntity->getMaterial() == m_baseWhite) {
+			if (!materialLevel->m_ogreMaterial.isNull()) {
+				subEntity->setMaterialName(materialLevel->m_ogreMaterial->getName());
 			}
 		}
 
@@ -497,36 +502,36 @@ void RenderScene::render(G3D::RenderDevice* rd, const G3D::GCamera& camera)
 		transform.makeTransform(
 			Ogre::Vector3(position.x, position.y, position.z), Ogre::Vector3(1.0f, 1.0f, 1.0f), rotation
 		);
-		subEntity->m_unk0xdc = transform;
+		subEntity->m_worldTransform = transform;
 	}
 
 	if (hardwareMeshes && Mesh::varDirty) {
-		Mesh::FUN_00532380(engine);
-		if (m_unk0x04) {
-			m_unk0x04->FUN_00674e40(Mesh::g_unk0x0095877c);
+		Mesh::updateSharedMesh(engine);
+		if (m_entity) {
+			m_entity->setMesh(Mesh::sharedMesh);
 		}
 	}
 
 	timer.getMicroseconds();
 	timer.reset();
 
-	if (m_unk0x04) {
-		m_unk0x04->FUN_00674e30(&engine->m_unk0x18);
-		m_unk0x04->m_unk0x245 = false;
-		m_unk0x04->setVisible(true);
+	if (m_entity) {
+		m_entity->setFrameRateManager(&engine->m_frameRateManager);
+		m_entity->m_visibilityUpdated = false;
+		m_entity->setVisible(true);
 		if (effectSettings.stencilShadows()) {
-			m_unk0x04->m_unk0x268 = 15.0f;
-			m_unk0x04->m_unk0x26c = 600;
+			m_entity->m_minVisiblePercent = 15.0f;
+			m_entity->m_minVisibleCount = 600;
 		}
 		else {
-			m_unk0x04->m_unk0x268 = 20.0f;
-			m_unk0x04->m_unk0x26c = 650;
+			m_entity->m_minVisiblePercent = 20.0f;
+			m_entity->m_minVisibleCount = 650;
 		}
 	}
 
-	if (Ogre::g_unk0x0096134c->_fireFrameStarted()) {
-		engine->m_unk0x0c->update();
-		Ogre::g_unk0x0096134c->_fireFrameEnded();
+	if (Ogre::ogreRoot->_fireFrameStarted()) {
+		engine->m_renderWindow->update();
+		Ogre::ogreRoot->_fireFrameEnded();
 		timer.getMicroseconds();
 	}
 }

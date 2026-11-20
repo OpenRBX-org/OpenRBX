@@ -18,7 +18,7 @@ class RenderScene;
 
 namespace Ogre {
 
-class Unknown00671c70;
+class RbxSubMesh;
 
 class RbxSubEntity : public SubEntity, public ShadowCaster
 {
@@ -55,11 +55,11 @@ public:
 	RbxSubEntity(Entity* parent, SubMesh* subMesh, int lodIndex);
 	~RbxSubEntity() override;
 
-	void FUN_0067b3d0(SubMesh* subMesh);
-	void FUN_0067b4b0(const MaterialPtr& material);
-	void FUN_0067b4c0(int lodIndex, SubMesh* subMesh);
-	SubMesh* FUN_0067b4e0(int lodIndex);
-	void FUN_0067b500(int lodIndex);
+	void setSubMesh(SubMesh* subMesh);
+	void setMaterial(const MaterialPtr& material);
+	void setLodSubMesh(int lodIndex, SubMesh* subMesh);
+	SubMesh* getLodSubMesh(int lodIndex);
+	void setLodIndex(int lodIndex);
 
 	void getRenderOperation(RenderOperation& op) override;
 	void getWorldTransforms(Matrix4* xform) const override;
@@ -67,8 +67,8 @@ public:
 	const Vector3& getWorldPosition() const override;
 	Real getSquaredViewDepth(const Camera* cam) const override;
 
-	virtual void FUN_0067bcc0(Real value);
-	virtual Real FUN_0067bcd0() const;
+	virtual void setRenderImportance(Real value);
+	virtual Real getRenderImportance() const;
 
 	bool getCastShadows() const override;
 	EdgeData* getEdgeList() override;
@@ -91,13 +91,13 @@ private:
 	friend class RbxEntity;
 	friend class RBX::AdornRbxGfx;
 
-	Matrix4 m_unk0xdc;
-	SubMesh* m_unk0x11c[1];
-	int m_unk0x120;
-	Real m_unk0x124;
-	bool m_unk0x128;
-	Unknown00671c70* m_unk0x12c;
-	std::vector<ShadowRenderable*> m_unk0x130;
+	Matrix4 m_worldTransform;
+	SubMesh* m_lodSubMeshes[1];
+	int m_lodIndex;
+	Real m_renderImportance;
+	bool m_castShadows;
+	RbxSubMesh* m_shadowSubMesh;
+	std::vector<ShadowRenderable*> m_shadowRenderables;
 };
 
 } // namespace Ogre

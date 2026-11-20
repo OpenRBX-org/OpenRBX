@@ -12,7 +12,7 @@ bool Material::veryTransparent() const
 
 Material::Level::Level()
 	: emptyLevel(true), mColor(G3D::Color3::white()), mSpecular(0), mShiny(0), mReflect(0), mTransparent(0),
-	  m_unk0x28(nullptr)
+	  m_ogreMaterial(nullptr)
 {
 }
 
@@ -20,7 +20,7 @@ Material::Level::Level(
 	TextureProxyRef baseTexture, G3D::Color3 color, float specular, float shiny, float reflect, float transparent
 )
 	: emptyLevel(false), mBaseTexture(baseTexture), mColor(color), mSpecular(specular), mShiny(shiny),
-	  mReflect(reflect), mTransparent(transparent), m_unk0x28(nullptr)
+	  mReflect(reflect), mTransparent(transparent), m_ogreMaterial(nullptr)
 {
 	if (!baseTexture.isNull()) {
 		mMatte = baseTexture->alphaOnlyVersion();
@@ -29,9 +29,9 @@ Material::Level::Level(
 
 Material::Level::~Level()
 {
-	if (!m_unk0x28.isNull()) {
-		std::string name = m_unk0x28->getName();
-		Ogre::MaterialManager::getSingleton().remove(m_unk0x28->getHandle());
+	if (!m_ogreMaterial.isNull()) {
+		std::string name = m_ogreMaterial->getName();
+		Ogre::MaterialManager::getSingleton().remove(m_ogreMaterial->getHandle());
 		Ogre::LogManager::getSingleton().logMessage("RBX removed " + name);
 	}
 }

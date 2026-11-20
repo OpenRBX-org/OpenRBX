@@ -13,14 +13,14 @@ const float Chunk::TEXTURE_OFFSET = -0.1f;
 bool AggregateChunk::randomColors;
 const G3D::CoordinateFrame AggregateChunk::identity;
 
-void Chunk::VTable0x20()
+void Chunk::releaseEntity()
 {
-	if (m_unk0x10) {
-		m_unk0x0c->FUN_00675a70(m_unk0x10);
+	if (m_subEntity) {
+		m_entity->removeSubEntity(m_subEntity);
 	}
 
-	m_unk0x10 = nullptr;
-	m_unk0x0c = nullptr;
+	m_subEntity = nullptr;
+	m_entity = nullptr;
 }
 
 void AggregateChunk::makeMesh()
@@ -28,19 +28,19 @@ void AggregateChunk::makeMesh()
 	mesh = Mesh::aggregate(components, _cframe, radius);
 }
 
-Chunk::Chunk(float polygonOffset) : m_unk0x14(0.0f), polygonOffset(polygonOffset), radius(G3D::inf())
+Chunk::Chunk(float polygonOffset) : m_renderImportance(0.0f), polygonOffset(polygonOffset), radius(G3D::inf())
 {
 	RenderStats::chunkCount++;
-	m_unk0x10 = nullptr;
-	m_unk0x0c = nullptr;
+	m_subEntity = nullptr;
+	m_entity = nullptr;
 }
 
 Chunk::~Chunk()
 {
 	RenderStats::chunkCount--;
 
-	if (m_unk0x10) {
-		m_unk0x0c->FUN_00675a70(m_unk0x10);
+	if (m_subEntity) {
+		m_entity->removeSubEntity(m_subEntity);
 	}
 }
 

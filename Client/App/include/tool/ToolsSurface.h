@@ -49,13 +49,13 @@ protected:
 	std::shared_ptr<PartInstance> part;
 	Surface* surface;
 	int surfaceId;
-	std::string m_unk0x30;
+	std::string m_undoName;
 
 	void render3dAdorn(Adorn* adorn) override;
 	MouseCommand* onMouseDown(const UIEvent& uiEvent) override;
 	void onMouseHover(const UIEvent& uiEvent) override;
 
-	virtual void VTable0x40(Surface* surface) = 0;
+	virtual void applyTo(Surface* surface) = 0;
 
 public:
 	SurfaceTool(Workspace* workspace);
@@ -64,7 +64,7 @@ public:
 class FlatTool : public Named<SurfaceTool, sFlatTool>
 {
 private:
-	void VTable0x40(Surface* surface) override;
+	void applyTo(Surface* surface) override;
 
 public:
 	FlatTool(Workspace* workspace) : Named<SurfaceTool, sFlatTool>(workspace) {}
@@ -77,7 +77,7 @@ public:
 class GlueTool : public Named<SurfaceTool, sGlueTool>
 {
 private:
-	void VTable0x40(Surface* surface) override;
+	void applyTo(Surface* surface) override;
 
 public:
 	GlueTool(Workspace* workspace) : Named<SurfaceTool, sGlueTool>(workspace) {}
@@ -90,7 +90,7 @@ public:
 class WeldTool : public Named<SurfaceTool, sWeldTool>
 {
 private:
-	void VTable0x40(Surface* surface) override;
+	void applyTo(Surface* surface) override;
 
 public:
 	WeldTool(Workspace* workspace) : Named<SurfaceTool, sWeldTool>(workspace) {}
@@ -103,7 +103,7 @@ public:
 class StudsTool : public Named<SurfaceTool, sStudsTool>
 {
 private:
-	void VTable0x40(Surface* surface) override;
+	void applyTo(Surface* surface) override;
 
 public:
 	StudsTool(Workspace* workspace) : Named<SurfaceTool, sStudsTool>(workspace) {}
@@ -116,7 +116,7 @@ public:
 class InletTool : public Named<SurfaceTool, sInletTool>
 {
 private:
-	void VTable0x40(Surface* surface) override;
+	void applyTo(Surface* surface) override;
 
 public:
 	InletTool(Workspace* workspace) : Named<SurfaceTool, sInletTool>(workspace) {}
@@ -129,7 +129,7 @@ public:
 class HingeTool : public Named<SurfaceTool, sHingeTool>
 {
 private:
-	void VTable0x40(Surface* surface) override;
+	void applyTo(Surface* surface) override;
 
 public:
 	HingeTool(Workspace* workspace) : Named<SurfaceTool, sHingeTool>(workspace) {}
@@ -142,7 +142,7 @@ public:
 class RightMotorTool : public Named<SurfaceTool, sRightMotorTool>
 {
 private:
-	void VTable0x40(Surface* surface) override;
+	void applyTo(Surface* surface) override;
 
 public:
 	RightMotorTool(Workspace* workspace) : Named<SurfaceTool, sRightMotorTool>(workspace) {}
@@ -153,7 +153,7 @@ public:
 class LeftMotorTool : public Named<SurfaceTool, sLeftMotorTool>
 {
 private:
-	void VTable0x40(Surface* surface) override;
+	void applyTo(Surface* surface) override;
 
 public:
 	LeftMotorTool(Workspace* workspace) : Named<SurfaceTool, sLeftMotorTool>(workspace) {}
@@ -164,7 +164,7 @@ public:
 class OscillateMotorTool : public Named<SurfaceTool, sOscillateMotorTool>
 {
 private:
-	void VTable0x40(Surface* surface) override;
+	void applyTo(Surface* surface) override;
 
 public:
 	OscillateMotorTool(Workspace* workspace) : Named<SurfaceTool, sOscillateMotorTool>(workspace) {}
@@ -175,7 +175,7 @@ public:
 class ModelSetFrontTool : public Named<SurfaceTool, sModelSetFrontTool>
 {
 private:
-	void VTable0x40(Surface* surface) override;
+	void applyTo(Surface* surface) override;
 
 public:
 	ModelSetFrontTool(Workspace* workspace) : Named<SurfaceTool, sModelSetFrontTool>(workspace) {}
@@ -186,7 +186,7 @@ public:
 class ModelTool : public MouseCommand
 {
 protected:
-	std::shared_ptr<Instance> m_unk0x20;
+	std::shared_ptr<Instance> m_model;
 
 	void render3dAdorn(Adorn* adorn) override;
 	void onMouseHover(const UIEvent& uiEvent) override;
@@ -209,7 +209,7 @@ public:
 class AnchorTool : public Named<ModelTool, sAnchorTool>
 {
 private:
-	bool m_unk0x28;
+	bool m_anchored;
 
 	MouseCommand* onMouseDown(const UIEvent& uiEvent) override;
 	MouseCommand* onMouseUp(const UIEvent& uiEvent) override { return this; }
@@ -217,22 +217,22 @@ private:
 	const std::string getCursorName() const override;
 
 public:
-	AnchorTool(Workspace* workspace) : Named<ModelTool, sAnchorTool>(workspace), m_unk0x28(false) {}
+	AnchorTool(Workspace* workspace) : Named<ModelTool, sAnchorTool>(workspace), m_anchored(false) {}
 };
 
 class ResizeTool : public Named<ArrowToolBase, sResizeTool>
 {
 private:
-	std::weak_ptr<PVInstance> m_unk0x24;
-	bool m_unk0x2c;
-	NormalId m_unk0x30;
-	G3D::Vector3 m_unk0x34;
-	G3D::Vector2int16 m_unk0x40;
-	int m_unk0x44;
+	std::weak_ptr<PVInstance> m_handlePart;
+	bool m_overHandle;
+	NormalId m_handleFace;
+	G3D::Vector3 m_handlePoint;
+	G3D::Vector2int16 m_mouseDownPosition;
+	int m_studsMoved;
 	int m_unk0x48;
 
-	void FUN_0063af80(int p_unk0x04);
-	void FUN_0063b240(const UIEvent& uiEvent);
+	void resizeBy(int amount);
+	void findHandle(const UIEvent& uiEvent);
 
 	MouseCommand* onMouseDown(const UIEvent& uiEvent) override;
 	void onMouseHover(const UIEvent& uiEvent) override;
@@ -242,13 +242,13 @@ private:
 
 public:
 	ResizeTool(Workspace* workspace)
-		: Named<ArrowToolBase, sResizeTool>(workspace), m_unk0x2c(false), m_unk0x44(0), m_unk0x48(0)
+		: Named<ArrowToolBase, sResizeTool>(workspace), m_overHandle(false), m_studsMoved(0), m_unk0x48(0)
 	{
 	}
 
 	MouseCommand* isSticky() const override { return new ResizeTool(workspace); }
 
-	virtual void VTable0x40(XmlState* state);
+	virtual void saveState(XmlState* state);
 
 	void render2d(Adorn* adorn) override;
 	void render3dAdorn(Adorn* adorn) override;
@@ -257,12 +257,12 @@ public:
 class ShootTool : public MouseCommand
 {
 protected:
-	std::shared_ptr<PartInstance> m_unk0x20;
-	bool m_unk0x28;
-	int m_unk0x2c;
-	int m_unk0x30;
+	std::shared_ptr<PartInstance> m_projectile;
+	bool m_automatic;
+	int m_reloadFrames;
+	int m_reloadCountdown;
 
-	void FUN_0063ab10(const UIEvent& uiEvent);
+	void fire(const UIEvent& uiEvent);
 
 	MouseCommand* onMouseDown(const UIEvent& uiEvent) override;
 	void onMouseIdle(const UIEvent& uiEvent) override;
@@ -277,19 +277,19 @@ protected:
 	const std::string getCursorName() const override;
 
 public:
-	ShootTool(Workspace* workspace, bool p_unk0x28, int p_unk0x2c);
+	ShootTool(Workspace* workspace, bool automatic, int reloadFrames);
 
-	virtual std::shared_ptr<PartInstance> VTable0x40() = 0;
-	virtual PV VTable0x44(const UIEvent& uiEvent, const CoordinateFrame& cframe) = 0;
-	virtual SoundType VTable0x48() = 0;
+	virtual std::shared_ptr<PartInstance> createProjectile() = 0;
+	virtual PV computeLaunch(const UIEvent& uiEvent, const CoordinateFrame& cframe) = 0;
+	virtual SoundType fireSound() = 0;
 };
 
 class SlingshotTool : public Named<ShootTool, sSlingshotTool>
 {
 private:
-	std::shared_ptr<PartInstance> VTable0x40() override;
-	PV VTable0x44(const UIEvent& uiEvent, const CoordinateFrame& cframe) override;
-	SoundType VTable0x48() override { return RUBBERBAND_SOUND; }
+	std::shared_ptr<PartInstance> createProjectile() override;
+	PV computeLaunch(const UIEvent& uiEvent, const CoordinateFrame& cframe) override;
+	SoundType fireSound() override { return RUBBERBAND_SOUND; }
 
 public:
 	SlingshotTool(Workspace* workspace) : Named<ShootTool, sSlingshotTool>(workspace, true, 5) {}
@@ -300,9 +300,9 @@ public:
 class RocketTool : public Named<ShootTool, sRocketTool>
 {
 private:
-	std::shared_ptr<PartInstance> VTable0x40() override;
-	PV VTable0x44(const UIEvent& uiEvent, const CoordinateFrame& cframe) override;
-	SoundType VTable0x48() override { return PING_SOUND; }
+	std::shared_ptr<PartInstance> createProjectile() override;
+	PV computeLaunch(const UIEvent& uiEvent, const CoordinateFrame& cframe) override;
+	SoundType fireSound() override { return PING_SOUND; }
 
 public:
 	RocketTool(Workspace* workspace) : Named<ShootTool, sRocketTool>(workspace, false, 90) {}
@@ -329,15 +329,15 @@ public:
 class LaserTool : public Named<MouseCommand, sLaserTool>
 {
 private:
-	int m_unk0x20;
-	G3D::Vector3 m_unk0x24;
-	G3D::Vector3 m_unk0x30;
+	int m_beamFrames;
+	G3D::Vector3 m_beamStart;
+	G3D::Vector3 m_beamEnd;
 
 	void render3dAdorn(Adorn* adorn) override;
 	MouseCommand* onMouseDown(const UIEvent& uiEvent) override;
 
 public:
-	LaserTool(Workspace* workspace) : Named<MouseCommand, sLaserTool>(workspace), m_unk0x20(0) {}
+	LaserTool(Workspace* workspace) : Named<MouseCommand, sLaserTool>(workspace), m_beamFrames(0) {}
 
 	const std::string getCursorName() const override { return "GunCursor"; }
 
@@ -364,7 +364,7 @@ class GameTool : public Named<MouseCommand, sGameTool>
 private:
 	std::string cursor;
 
-	bool FUN_0063c2c0(PartInstance* part, const G3D::Vector3& hitWorld) const;
+	bool canInteract(PartInstance* part, const G3D::Vector3& hitWorld) const;
 
 	void onMouseIdle(const UIEvent& uiEvent) override { onMouseHover(uiEvent); }
 	void onMouseHover(const UIEvent& uiEvent) override;

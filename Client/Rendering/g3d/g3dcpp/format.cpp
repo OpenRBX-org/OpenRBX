@@ -133,7 +133,10 @@ std::string vformat(const char* fmt, va_list argPtr) {
     const int bufSize = 161;
     char stackBuffer[bufSize];
 
-    int numChars = vsnprintf(stackBuffer, bufSize, fmt, argPtr);
+    va_list argPtrCopy;
+    va_copy(argPtrCopy, argPtr);
+    int numChars = vsnprintf(stackBuffer, bufSize, fmt, argPtrCopy);
+    va_end(argPtrCopy);
 
     if (numChars >= bufSize) {
       // We didn't allocate a big enough string.

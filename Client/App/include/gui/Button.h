@@ -3,8 +3,8 @@
 
 #include "gui/GuiDraw.h"
 #include "gui/Widget.h"
+#include "util/KeyCode.h"
 
-#include <SDL_keysym.h>
 #include <string>
 
 namespace RBX {
@@ -22,10 +22,10 @@ protected:
 	void onDown(const UIEvent& event) override;
 	void onUp(const UIEvent& event) override;
 	bool isEnabled() override { return isVisible(); }
-	GuiResponse process(const GuiEvent& p_unk0x04) override;
+	GuiResponse process(const GuiEvent& event) override;
 
 public:
-	KeyButton(const std::string& p_unk0x04, SDLKey p_unk0x08);
+	KeyButton(const std::string& name, SDLKey keyCode);
 };
 
 class ImageKeyButton : public KeyButton
@@ -34,7 +34,7 @@ private:
 	GuiDrawImage imageDraw;
 
 public:
-	ImageKeyButton(Adorn* p_unk0x04, const std::string& p_unk0x08, SDLKey p_unk0x0c);
+	ImageKeyButton(Adorn* adorn, const std::string& name, SDLKey keyCode);
 
 	void render2d(Adorn* adorn) override;
 
@@ -47,7 +47,7 @@ private:
 	GuiDrawImage guiImageDraw;
 
 public:
-	ImageWidget(Adorn* p_unk0x04, const std::string& p_unk0x08);
+	ImageWidget(Adorn* adorn, const std::string& name);
 
 	void render2d(Adorn* adorn) override;
 
@@ -60,11 +60,11 @@ protected:
 	GuiDrawImage guiImageDraw;
 
 public:
-	ImageButton(Adorn* p_unk0x04, Verb* p_unk0x08, const std::string& p_unk0x0c);
+	ImageButton(Adorn* adorn, Verb* verb, const std::string& name);
 
 	void render2d(Adorn* adorn) override;
 
-	void setSize(const G3D::Vector2& p_unk0x04) { guiImageDraw.setImageSize(p_unk0x04); }
+	void setSize(const G3D::Vector2& size) { guiImageDraw.setImageSize(size); }
 
 	G3D::Vector2 getSize() const override { return guiImageDraw.getImageSize(); }
 };

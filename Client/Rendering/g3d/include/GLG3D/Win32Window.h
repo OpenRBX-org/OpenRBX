@@ -48,13 +48,6 @@ private:
 	bool				 _inputCapture;
     bool                 _windowActive;
 
-    bool                 _receivedCloseEvent;
-
-    /** Mouse Button State Array: false - up, true - down
-        [0] - left, [1] - middle, [2] - right */
-    bool                 _mouseButtons[3];
-    bool                 _keyboardButtons[0xFF];
-
     mutable _DirectInput*        _diDevices;
 
     G3D::Set< int >      _usedIcons;
@@ -65,18 +58,6 @@ private:
 
 	/** Only one thread allowed for use with Win32Window::makeCurrent */
 	HANDLE				 _thread;
-
-    Array<GEvent>        sizeEventInjects;
-
-    void injectSizeEvent(int width, int height) {
-        GEvent e;
-        e.type = SDL_VIDEORESIZE;
-        e.resize.w = width;
-        e.resize.h = height;
-        sizeEventInjects.append(e);
-    }
-
-    bool                justReceivedFocus;
 
     friend LRESULT WINAPI _internal::window_proc(HWND window, UINT message, WPARAM wparam, LPARAM lparam);
 	
@@ -199,8 +180,6 @@ public:
 	
     virtual void setRelativeMousePosition(const Vector2& p);
 	
-    virtual bool pollEvent(GEvent& e);
-	
     virtual void getRelativeMouseState(Vector2& position, uint8& mouseButtons) const;
 	
     virtual void getRelativeMouseState(int& x, int& y, uint8& mouseButtons) const;
@@ -216,8 +195,6 @@ public:
     virtual void setMouseVisible(bool b);
 	
     virtual bool mouseVisible() const;
-	
-    virtual bool requiresMainLoop() const;
 
 protected:
     virtual void reallyMakeCurrent() const;

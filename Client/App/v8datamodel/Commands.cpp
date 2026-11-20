@@ -54,7 +54,7 @@ template class RBX::TToolVerb<RBX::AxisMoveTool, RBX::RunStateVerb>;
 
 namespace RBX {
 
-static void FUN_00596660(DataModel* dataModel)
+static void checkEditPermission(DataModel* dataModel)
 {
 	if (Network::Players::clientIsPresent(dataModel, true) && !Network::Players::serverIsPresent(dataModel, true)) {
 		throw std::runtime_error("Insufficinet permissions");
@@ -63,7 +63,7 @@ static void FUN_00596660(DataModel* dataModel)
 
 inline void RunStateVerb::playActionSound()
 {
-	FUN_00596660(dataModel);
+	checkEditPermission(dataModel);
 }
 
 FirstPersonCommand::FirstPersonCommand(DataModel* dataModel)
@@ -97,7 +97,7 @@ ClearBackpack::ClearBackpack(DataModel* dataModel) : Verb(dataModel, "ClearBackp
 
 void ClearBackpack::doIt(IDataState* dataState)
 {
-	FUN_00596660(dataModel);
+	checkEditPermission(dataModel);
 
 	if (Network::Player* player = Network::Players::findLocalPlayer(dataModel)) {
 		player->getPlayerBackpack()->removeAllChildren();
@@ -109,12 +109,12 @@ G3D::Matrix3 RotateSelectionVerb::getRotationAxis()
 	return Math::matrixRotateY();
 }
 
-static void FUN_00596950(Controller::ControllerType controllerType, PVInstance* instance)
+static void applyControllerType(Controller::ControllerType controllerType, PVInstance* instance)
 {
 	instance->setControllerType(controllerType);
 }
 
-static bool FUN_00596960(PVInstance* instance)
+static bool isControllable(PVInstance* instance)
 {
 	return instance->isControllable();
 }
@@ -150,7 +150,7 @@ void SelectAllCommand::doIt(IDataState* dataState)
 	dataModel->getWorkspace()->selectAll();
 }
 
-static void FUN_00596ca0(std::shared_ptr<Instance> instance)
+static void lockInstance(std::shared_ptr<Instance> instance)
 {
 	PartInstance::setLocked(instance.get(), true);
 }
@@ -191,7 +191,7 @@ void EngineStatsCommand::doIt(IDataState* dataState)
 	dataModel->getWorkspace()->getWorld()->getContactManager().getSpatialHash().doStats();
 }
 
-static void FUN_00596fc0(UndoState* undoState, RedoState* redoState, std::shared_ptr<Instance> instance)
+static void recordDelete(UndoState* undoState, RedoState* redoState, std::shared_ptr<Instance> instance)
 {
 	undoState->addParentProperty(*instance);
 	redoState->addDelete(*instance);
@@ -233,12 +233,12 @@ bool ClearBackpack::isEnabled() const
 	return false;
 }
 
-static bool FUN_00597450(ModelInstance* model)
+static bool hasChildren(ModelInstance* model)
 {
 	return model->numChildren() > 0;
 }
 
-void FUN_00597490(XmlElement* container, std::shared_ptr<Instance> instance)
+void appendInstanceXml(XmlElement* container, std::shared_ptr<Instance> instance)
 {
 	XmlElement* child = instance->write();
 
@@ -266,7 +266,7 @@ bool CameraVerb::isEnabled() const
 	return true;
 }
 
-static void FUN_00597890(std::shared_ptr<Instance> instance)
+static void weldsToStuds(std::shared_ptr<Instance> instance)
 {
 	if (PartInstance* part = dynamic_cast<PartInstance*>(instance.get())) {
 		Surfaces& surfaces = part->getSurfaces();
@@ -278,24 +278,24 @@ static void FUN_00597890(std::shared_ptr<Instance> instance)
 	}
 
 	if (instance->getChildren()) {
-		std::for_each(instance->getChildren()->begin(), instance->getChildren()->end(), FUN_00597890);
+		std::for_each(instance->getChildren()->begin(), instance->getChildren()->end(), weldsToStuds);
 	}
 }
 
-class Unknown00597dd0
+class SetBoolProperty
 {
 public:
-	Unknown00597dd0(const Name& name, bool value)
-		: m_unk0x00(name), m_unk0x04(value), m_unk0x08(new UndoState()), m_unk0x0c(new RedoState())
+	SetBoolProperty(const Name& name, bool value)
+		: m_name(name), m_value(value), m_undoState(new UndoState()), m_redoState(new RedoState())
 	{
 	}
 
 	void operator()(std::shared_ptr<Instance> instance);
 
-	const Name& m_unk0x00;
-	bool m_unk0x04;
-	std::unique_ptr<UndoState> m_unk0x08;
-	std::unique_ptr<RedoState> m_unk0x0c;
+	const Name& m_name;
+	bool m_value;
+	std::unique_ptr<UndoState> m_undoState;
+	std::unique_ptr<RedoState> m_redoState;
 };
 
 EditSelectionVerb::EditSelectionVerb(std::string name, DataModel* dataModel)
@@ -324,8 +324,8 @@ DuplicateSelectionVerb::DuplicateSelectionVerb(DataModel* dataModel) : EditSelec
 {
 }
 
-DeleteBase::DeleteBase(DataModel* dataModel, std::string name, bool p_unk0x24)
-	: EditSelectionVerb(name, dataModel), m_unk0x24(p_unk0x24)
+DeleteBase::DeleteBase(DataModel* dataModel, std::string name, bool playDelete)
+	: EditSelectionVerb(name, dataModel), m_playDelete(playDelete)
 {
 }
 
@@ -357,7 +357,7 @@ bool JoinCommand::isEnabled() const
 		std::shared_ptr<Instance> first = currentSelection->front();
 		std::shared_ptr<Instance> second = currentSelection->back();
 
-		if (FUN_00617200(first.get(), second.get())) {
+		if (canJoinMotor(first.get(), second.get())) {
 			return true;
 		}
 	}
@@ -367,14 +367,14 @@ bool JoinCommand::isEnabled() const
 
 void JoinCommand::doIt(IDataState* dataState)
 {
-	FUN_00596660(dataModel);
+	checkEditPermission(dataModel);
 
 	Selection* currentSelection = dataModel ? dataModel->create<Selection>() : nullptr;
 
 	if (currentSelection->size() == 2) {
 		std::shared_ptr<Instance> first = currentSelection->front();
 		std::shared_ptr<Instance> second = currentSelection->back();
-		FUN_0061a840(first.get(), second.get());
+		joinMotor(first.get(), second.get());
 	}
 }
 
@@ -391,7 +391,7 @@ bool ClearStarterpack::isEnabled() const
 
 void ClearStarterpack::doIt(IDataState* dataState)
 {
-	FUN_00596660(dataModel);
+	checkEditPermission(dataModel);
 
 	if (dataModel) {
 		if (StarterPackService* starterPack = dataModel->find<StarterPackService>()) {
@@ -400,7 +400,7 @@ void ClearStarterpack::doIt(IDataState* dataState)
 	}
 }
 
-static void FUN_00598570(std::shared_ptr<Instance> instance)
+static void gluesToWelds(std::shared_ptr<Instance> instance)
 {
 	if (PartInstance* part = dynamic_cast<PartInstance*>(instance.get())) {
 		Surfaces& surfaces = part->getSurfaces();
@@ -412,7 +412,7 @@ static void FUN_00598570(std::shared_ptr<Instance> instance)
 	}
 
 	if (instance->getChildren()) {
-		std::for_each(instance->getChildren()->begin(), instance->getChildren()->end(), FUN_00598570);
+		std::for_each(instance->getChildren()->begin(), instance->getChildren()->end(), gluesToWelds);
 	}
 }
 
@@ -429,7 +429,7 @@ BoolPropertyVerb::BoolPropertyVerb(const std::string& name, DataModel* dataModel
 {
 }
 
-static bool FUN_00598ac0(const Name& propertyName, std::shared_ptr<const Instance> instance)
+static bool isBoolPropertySet(const Name& propertyName, std::shared_ptr<const Instance> instance)
 {
 	Reflection::MemberDescriptorContainer<Reflection::PropertyDescriptor>::ConstIterator iter =
 		instance->findProperty(propertyName);
@@ -444,23 +444,23 @@ static bool FUN_00598ac0(const Name& propertyName, std::shared_ptr<const Instanc
 	return false;
 }
 
-void Unknown00597dd0::operator()(std::shared_ptr<Instance> instance)
+void SetBoolProperty::operator()(std::shared_ptr<Instance> instance)
 {
 	Reflection::MemberDescriptorContainer<Reflection::PropertyDescriptor>::Iterator iter =
-		instance->findProperty(m_unk0x00);
+		instance->findProperty(m_name);
 
 	if (iter != instance->properties_end()) {
 		if (dynamic_cast<const Reflection::TypedPropertyDescriptor<bool>*>(&(*iter).getDescriptor())) {
-			if ((*iter).getValue<bool>() != m_unk0x04) {
-				m_unk0x08->addProperty(*iter);
-				(*iter).setValue<bool>(m_unk0x04);
-				m_unk0x0c->addProperty(*iter);
+			if ((*iter).getValue<bool>() != m_value) {
+				m_undoState->addProperty(*iter);
+				(*iter).setValue<bool>(m_value);
+				m_redoState->addProperty(*iter);
 			}
 		}
 	}
 }
 
-void RotateAxisCommand::FUN_00598da0(const G3D::Matrix3& rotation, const std::vector<PVInstance*>& pvInstances)
+void RotateAxisCommand::rotate(const G3D::Matrix3& rotation, const std::vector<PVInstance*>& pvInstances)
 {
 	if (pvInstances.size() > 0) {
 		MegaDragger dragger(nullptr, pvInstances, workspace.get());
@@ -489,10 +489,10 @@ SecondaryControllerCommand::SecondaryControllerCommand(DataModel* dataModel)
 {
 }
 
-class Unknown00598fd0
+class UngroupModel
 {
 public:
-	Unknown00598fd0(std::vector<Instance*>& newSelection, bool& changed) : m_unk0x00(newSelection), m_unk0x04(changed)
+	UngroupModel(std::vector<Instance*>& newSelection, bool& changed) : m_newSelection(newSelection), m_changed(changed)
 	{
 	}
 
@@ -500,18 +500,18 @@ public:
 	{
 		if (instance->numChildren() > 0) {
 			for (unsigned int i = 0; i < instance->numChildren(); i++) {
-				m_unk0x00.push_back(instance->getChild(i));
+				m_newSelection.push_back(instance->getChild(i));
 			}
 
 			instance->promoteChildren();
 			instance->setParent(nullptr);
-			m_unk0x04 = true;
+			m_changed = true;
 		}
 	}
 
 private:
-	std::vector<Instance*>& m_unk0x00;
-	bool& m_unk0x04;
+	std::vector<Instance*>& m_newSelection;
+	bool& m_changed;
 };
 
 EditSelectionVerb::EditSelectionVerb(VerbContainer* container, std::string name, DataModel* dataModel)
@@ -526,18 +526,18 @@ bool DuplicateSelectionVerb::isEnabled() const
 }
 
 DeleteBase::DeleteBase(VerbContainer* container, DataModel* dataModel, std::string name)
-	: EditSelectionVerb(container, name, dataModel), m_unk0x24(false)
+	: EditSelectionVerb(container, name, dataModel), m_playDelete(false)
 {
 }
 
-class Unknown00598770
+class ControllerTypeDiffers
 {
 public:
-	Unknown00598770(Controller::ControllerType controllerType) : m_unk0x00(controllerType) {}
+	ControllerTypeDiffers(Controller::ControllerType controllerType) : m_controllerType(controllerType) {}
 
-	bool operator()(PVInstance* instance) const { return instance->getControllerType() != m_unk0x00; }
+	bool operator()(PVInstance* instance) const { return instance->getControllerType() != m_controllerType; }
 
-	Controller::ControllerType m_unk0x00;
+	Controller::ControllerType m_controllerType;
 };
 
 void ControllerCommand::setController(Controller::ControllerType controllerType)
@@ -545,11 +545,12 @@ void ControllerCommand::setController(Controller::ControllerType controllerType)
 	FilteredSelection<PVInstance>* filteredSelection =
 		dataModel ? dataModel->create<FilteredSelection<PVInstance>>() : nullptr;
 
-	Controller::ControllerType newType =
-		filteredSelection->FUN_00598690(Unknown00598770(controllerType)) ? controllerType : Controller::NO_CONTROLLER;
+	Controller::ControllerType newType = filteredSelection->findFirst(ControllerTypeDiffers(controllerType))
+											 ? controllerType
+											 : Controller::NO_CONTROLLER;
 
 	std::for_each(filteredSelection->begin(), filteredSelection->end(), [newType](PVInstance* instance) {
-		FUN_00596950(newType, instance);
+		applyControllerType(newType, instance);
 	});
 }
 
@@ -563,10 +564,10 @@ void AllCanSelectCommand::doIt(IDataState* dataState)
 
 void GroupSelectionVerb::doIt(IDataState* dataState)
 {
-	FUN_00596660(dataModel);
+	checkEditPermission(dataModel);
 
 	Selection* currentSelection = dataModel ? dataModel->create<Selection>() : nullptr;
-	ModelInstance* model = workspace->FUN_005984c0(currentSelection->begin(), currentSelection->end()).get();
+	ModelInstance* model = workspace->createModel(currentSelection->begin(), currentSelection->end()).get();
 	currentSelection->setSelection(model);
 
 	(dataModel ? dataModel->create<Soundscape::SoundService>() : nullptr)->playSound(PING_SOUND);
@@ -576,7 +577,7 @@ void GroupSelectionVerb::doIt(IDataState* dataState)
 
 void UngroupSelectionVerb::doIt(IDataState* dataState)
 {
-	FUN_00596660(dataModel);
+	checkEditPermission(dataModel);
 
 	FilteredSelection<ModelInstance>* filteredSelection =
 		dataModel ? dataModel->create<FilteredSelection<ModelInstance>>() : nullptr;
@@ -591,7 +592,7 @@ void UngroupSelectionVerb::doIt(IDataState* dataState)
 
 	std::vector<Instance*> newSelection;
 	bool changed = false;
-	std::for_each(models.begin(), models.end(), Unknown00598fd0(newSelection, changed));
+	std::for_each(models.begin(), models.end(), UngroupModel(newSelection, changed));
 
 	if (changed) {
 		filteredSelection->setSelection(newSelection.begin(), newSelection.end());
@@ -604,7 +605,7 @@ void UngroupSelectionVerb::doIt(IDataState* dataState)
 
 void RotateAxisCommand::doIt(IDataState* dataState)
 {
-	FUN_00596660(dataModel);
+	checkEditPermission(dataModel);
 
 	FilteredSelection<PVInstance>* filteredSelection =
 		dataModel ? dataModel->create<FilteredSelection<PVInstance>>() : nullptr;
@@ -617,7 +618,7 @@ void RotateAxisCommand::doIt(IDataState* dataState)
 		PVInstance* pvInstance = *iter;
 	}
 
-	FUN_00598da0(getRotationAxis(), filteredSelection->items());
+	rotate(getRotationAxis(), filteredSelection->items());
 
 	(dataModel ? dataModel->create<Soundscape::SoundService>() : nullptr)->playSound(CLICK_SOUND);
 
@@ -686,7 +687,7 @@ void WatchCameraCommand::doIt(IDataState* dataState)
 
 void MoveUpSelectionVerb::doIt(IDataState* dataState)
 {
-	FUN_00596660(dataModel);
+	checkEditPermission(dataModel);
 
 	FilteredSelection<PVInstance>* filteredSelection =
 		dataModel ? dataModel->create<FilteredSelection<PVInstance>>() : nullptr;
@@ -707,7 +708,7 @@ void MoveUpSelectionVerb::doIt(IDataState* dataState)
 
 void MoveDownSelectionVerb::doIt(IDataState* dataState)
 {
-	FUN_00596660(dataModel);
+	checkEditPermission(dataModel);
 
 	FilteredSelection<PVInstance>* filteredSelection =
 		dataModel ? dataModel->create<FilteredSelection<PVInstance>>() : nullptr;
@@ -806,17 +807,17 @@ void FixedCameraCommand::doIt(IDataState* dataState)
 bool BoolPropertyVerb::isChecked() const
 {
 	return std::find_if(selection->begin(), selection->end(), [this](const std::shared_ptr<Instance>& instance) {
-			   return FUN_00598ac0(propertyName, instance);
+			   return isBoolPropertySet(propertyName, instance);
 		   }) != selection->end();
 }
 
 void BoolPropertyVerb::doIt(IDataState* dataState)
 {
-	FUN_00596660(dataModel);
+	checkEditPermission(dataModel);
 
-	Unknown00597dd0 functor(propertyName, !isChecked());
+	SetBoolProperty functor(propertyName, !isChecked());
 	std::for_each(selection->begin(), selection->end(), std::move(functor));
-	dataState->pushState(propertyName.toString(), functor.m_unk0x08.release(), functor.m_unk0x0c.release());
+	dataState->pushState(propertyName.toString(), functor.m_undoState.release(), functor.m_redoState.release());
 	dataState->setDirty(true);
 }
 
@@ -865,10 +866,10 @@ void CameraCenterCommand::doIt(IDataState* dataState)
 
 void CanNotSelectCommand::doIt(IDataState* dataState)
 {
-	FUN_00596660(dataModel);
+	checkEditPermission(dataModel);
 	FilteredSelection<PVInstance>* filteredSelection =
 		dataModel ? dataModel->create<FilteredSelection<PVInstance>>() : nullptr;
-	std::for_each(selection->begin(), selection->end(), &FUN_00596ca0);
+	std::for_each(selection->begin(), selection->end(), &lockInstance);
 	filteredSelection->clearSelection();
 	dataState->clearStack();
 	dataState->setDirty(true);
@@ -928,9 +929,9 @@ bool GroupSelectionVerb::isEnabled() const
 
 void WeldSelectionVerb::doIt(IDataState* dataState)
 {
-	FUN_00596660(dataModel);
+	checkEditPermission(dataModel);
 	Selection* currentSelection = dataModel ? dataModel->create<Selection>() : nullptr;
-	std::for_each(selection->begin(), selection->end(), FUN_00598570);
+	std::for_each(selection->begin(), selection->end(), gluesToWelds);
 	(dataModel ? dataModel->create<Soundscape::SoundService>() : nullptr)->playSound(PING_SOUND);
 	dataState->clearStack();
 	dataState->setDirty(true);
@@ -956,9 +957,9 @@ bool SnapSelectionVerb::isEnabled() const
 
 void SnapSelectionVerb::doIt(IDataState* dataState)
 {
-	FUN_00596660(dataModel);
+	checkEditPermission(dataModel);
 	Selection* currentSelection = dataModel ? dataModel->create<Selection>() : nullptr;
-	std::for_each(selection->begin(), selection->end(), FUN_00597890);
+	std::for_each(selection->begin(), selection->end(), weldsToStuds);
 	(dataModel ? dataModel->create<Soundscape::SoundService>() : nullptr)->playSound(PING_SOUND);
 	dataState->clearStack();
 	dataState->setDirty(true);
@@ -972,12 +973,12 @@ bool UngroupSelectionVerb::isEnabled() const
 
 	FilteredSelection<ModelInstance>* filteredSelection =
 		dataModel ? dataModel->create<FilteredSelection<ModelInstance>>() : nullptr;
-	return filteredSelection->FUN_00598690(&FUN_00597450) != nullptr;
+	return filteredSelection->findFirst(&hasChildren) != nullptr;
 }
 
 void DuplicateSelectionVerb::doIt(IDataState* dataState)
 {
-	FUN_00596660(dataModel);
+	checkEditPermission(dataModel);
 
 	UndoState* undoState = new UndoState();
 	RedoState* redoState = new RedoState();
@@ -986,7 +987,7 @@ void DuplicateSelectionVerb::doIt(IDataState* dataState)
 	Selection* currentSelection = dataModel ? dataModel->create<Selection>() : nullptr;
 	std::for_each(
 		selection->begin(), selection->end(), [container = root.get()](const std::shared_ptr<Instance>& instance) {
-			FUN_00597490(container, instance);
+			appendInstanceXml(container, instance);
 		}
 	);
 	SerializerV2::isolateHandles(root.get());
@@ -1012,7 +1013,7 @@ void DuplicateSelectionVerb::doIt(IDataState* dataState)
 
 void DeleteBase::doIt(IDataState* dataState)
 {
-	FUN_00596660(dataModel);
+	checkEditPermission(dataModel);
 
 	if (selection->size() > 0) {
 		Selection* currentSelection = dataModel ? dataModel->create<Selection>() : nullptr;
@@ -1022,7 +1023,7 @@ void DeleteBase::doIt(IDataState* dataState)
 
 		std::for_each(
 			selection->begin(), selection->end(), [undoState, redoState](const std::shared_ptr<Instance>& instance) {
-				FUN_00596fc0(undoState, redoState, instance);
+				recordDelete(undoState, redoState, instance);
 			}
 		);
 
@@ -1103,7 +1104,7 @@ bool ControllerCommand::isEnabled() const
 
 	FilteredSelection<PVInstance>* filteredSelection =
 		dataModel ? dataModel->create<FilteredSelection<PVInstance>>() : nullptr;
-	return filteredSelection->FUN_00598690(&FUN_00596960) != nullptr;
+	return filteredSelection->findFirst(&isControllable) != nullptr;
 }
 
 void CameraZoomExtentsCommand::doIt(IDataState* dataState)

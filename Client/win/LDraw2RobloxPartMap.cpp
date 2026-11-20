@@ -2,31 +2,31 @@
 
 namespace RBX::LDraw2Lua {
 
-const Unknown00473110* LDraw2RobloxPartMap::FUN_00472ae0() const
+const RobloxPart* LDraw2RobloxPartMap::getFirstRobloxPart() const
 {
-	if (m_unk0x5c.size() > 0) {
-		return &m_unk0x5c.at(0);
+	if (m_robloxParts.size() > 0) {
+		return &m_robloxParts.at(0);
 	}
 
 	return nullptr;
 }
 
 LDraw2RobloxPartMap::LDraw2RobloxPartMap(
-	std::string p_unk0x04, std::string p_unk0x20, std::string p_unk0x3c, int p_unk0x58
+	std::string name, std::string description, std::string ldrawFilename, int fidelity
 )
-	: m_unk0x04(p_unk0x04), m_unk0x20(p_unk0x20), m_unk0x3c(p_unk0x3c), m_unk0x58(p_unk0x58)
+	: m_name(name), m_description(description), m_ldrawFilename(ldrawFilename), m_fidelity(fidelity)
 {
 }
 
 LDraw2RobloxPartMap::~LDraw2RobloxPartMap() = default;
 
-void LDraw2RobloxPartMap::FUN_00473100(const Unknown00473110& p_unk0x04)
+void LDraw2RobloxPartMap::addRobloxPart(const RobloxPart& part)
 {
-	m_unk0x5c.push_back(p_unk0x04);
+	m_robloxParts.push_back(part);
 }
 
-Unknown00473110::Unknown00473110(int p_unk0x04, int p_unk0x08, std::string p_unk0x0c, std::string p_unk0x28)
-	: m_unk0x00(p_unk0x04), m_unk0x04(p_unk0x08), m_unk0x08(p_unk0x0c), m_unk0x24(p_unk0x28)
+RobloxPart::RobloxPart(int shape, int formFactor, std::string size, std::string yOffset)
+	: m_shape(shape), m_formFactor(formFactor), m_size(size), m_yOffset(yOffset)
 {
 }
 

@@ -79,11 +79,11 @@ protected:
 		bool operator()(const Light* l1, const Light* l2) const;
 	};
 
-	bool m_unk0x8a64;
+	bool m_lightingEnabled;
 	bool m_unk0x8a65;
-	String m_unk0x8a68;
-	SharedPtr<RbxSky> m_unk0x8a84;
-	SceneNode* m_unk0x8a90;
+	String m_skyFolder;
+	SharedPtr<RbxSky> m_sky;
+	SceneNode* m_skyBoxNode;
 	ShadowCasterSceneQueryListener* mShadowCasterQueryListener;
 	SceneMgrQueuedRenderableVisitor* mActiveQueuedRenderableVisitor;
 	SceneMgrQueuedRenderableVisitor mDefaultQueuedRenderableVisitor;

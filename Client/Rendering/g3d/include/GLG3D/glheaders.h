@@ -20,15 +20,6 @@
 #   define WIN32_LEAN_AND_MEAN
 #endif
 
-#ifdef G3D_LINUX
-// On Linux, we require OpenGL 1.2.1 to be installed.  On Windows we
-// are more forgiving and link OpenGL 1.1 statically and load the 
-// extensions for multitexture dynamically.  We should be able to
-// load both platforms dynamically, but the Wildcat drivers on Linux
-// don't support dynamic loading of multitexture.
-#define G3D_GL_ARB_multitexture_static
-#endif
-
 #include "../GL/gl.h"
 #include "../GL/glext.h"
 
@@ -37,7 +28,13 @@
 #endif
 
 #if defined(G3D_LINUX)
-    #include <GL/osmesa.h>
+    #ifdef G3D_OSMESA
+        #include <GL/osmesa.h>
+    #else
+        typedef struct __GLXcontextRec *GLXContext;
+        extern "C" GLXContext glXGetCurrentContext(void);
+        extern "C" void (*glXGetProcAddressARB(const GLubyte *procName))(void);
+    #endif
 #endif
 
 #include "../GL/glext.h"

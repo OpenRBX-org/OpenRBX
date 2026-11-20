@@ -18,12 +18,12 @@ class RbxSubEntity;
 class RbxEntity : public Entity
 {
 public:
-	struct Unknown00676870
+	struct Candidate
 	{
-		bool operator<(const Unknown00676870& other) const { return m_unk0x04 < other.m_unk0x04; }
+		bool operator<(const Candidate& other) const { return m_priority < other.m_priority; }
 
-		int m_unk0x00;
-		Real m_unk0x04;
+		int m_index;
+		Real m_priority;
 	};
 
 	RbxEntity();
@@ -32,31 +32,31 @@ public:
 	void _notifyCurrentCamera(Camera* cam) override;
 	void _updateRenderQueue(RenderQueue* queue) override;
 
-	void FUN_0052c8b0(AxisAlignedBox box) { m_unk0x248 = box; }
+	void setBounds(AxisAlignedBox box) { m_bounds = box; }
 
-	void FUN_00674e30(VisualEngine::Unk0x18* p_unk0x240);
-	void FUN_00674e40(MeshPtr mesh);
-	void FUN_00675a70(RbxSubEntity* subEntity);
-	void FUN_00675c90();
-	RbxSubEntity* FUN_00676680(SubMesh* subMesh, int lodIndex);
-	void FUN_00676730(RbxSubEntity* subEntity);
-	void FUN_006772d0(Camera* camera, const Light* light, std::vector<ShadowCaster*>* casters);
+	void setFrameRateManager(VisualEngine::FrameRateManager* frameRateManager);
+	void setMesh(MeshPtr mesh);
+	void removeSubEntity(RbxSubEntity* subEntity);
+	void clearSubEntities();
+	RbxSubEntity* createSubEntity(SubMesh* subMesh, int lodIndex);
+	void addSubEntity(RbxSubEntity* subEntity);
+	void findShadowCasters(Camera* camera, const Light* light, std::vector<ShadowCaster*>* casters);
 
-	virtual void FUN_00676870(Camera* cam);
-	virtual void FUN_00674fd0(bool visible);
+	virtual void updateVisibility(Camera* cam);
+	virtual void setSubEntitiesVisible(bool visible);
 
 private:
 	friend class RBX::AdornRbxGfx;
 	friend class RBX::RenderNew::RenderScene;
 
-	VisualEngine::Unk0x18* m_unk0x240;
-	bool m_unk0x244;
-	bool m_unk0x245;
-	bool m_unk0x246;
-	AxisAlignedBox m_unk0x248;
-	Real m_unk0x268;
-	int m_unk0x26c;
-	std::vector<unsigned char> m_unk0x270;
+	VisualEngine::FrameRateManager* m_frameRateManager;
+	bool m_frustumCull;
+	bool m_visibilityUpdated;
+	bool m_recordFrameStats;
+	AxisAlignedBox m_bounds;
+	Real m_minVisiblePercent;
+	int m_minVisibleCount;
+	std::vector<unsigned char> m_subEntityStates;
 };
 
 class RbxEntityFactory : public MovableObjectFactory

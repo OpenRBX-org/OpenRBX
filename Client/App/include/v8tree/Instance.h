@@ -253,7 +253,7 @@ public:
 	}
 
 	template <class Iterator>
-	bool FUN_00422f10(Iterator begin, Iterator end) const
+	bool canAddChildren(Iterator begin, Iterator end) const
 	{
 		for (Iterator iter = begin; iter != end; ++iter) {
 			const Instance* child = iter->get();

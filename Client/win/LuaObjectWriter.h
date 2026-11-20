@@ -10,7 +10,7 @@ class LuaObjectWriter
 {
 public:
 	virtual ~LuaObjectWriter();
-	virtual bool VTable0x04(std::ostream& stream, std::string p_unk0x08) = 0;
+	virtual bool write(std::ostream& stream, std::string parent) = 0;
 };
 
 } // namespace RBX::LDraw2Lua

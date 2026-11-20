@@ -21,13 +21,13 @@ G3D::VAR Mesh::tangentVAR;
 Mesh::VertexList Mesh::vertexRefCounts;
 Mesh::VertexList Mesh::freeList;
 bool Mesh::varDirty = true;
-Ogre::MeshPtr Mesh::g_unk0x0095877c;
+Ogre::MeshPtr Mesh::sharedMesh;
 
 static int vertexRefCount;
-static bool g_unk0x00958735;
-static int g_unk0x0095873c;
-static int g_unk0x00958798;
-static bool g_unk0x00958794;
+static bool anyVertexAllocated;
+static int destroyedLevelCount;
+static int subMeshNameCounter;
+static bool staticsInitialized;
 
 void Mesh::endRender(G3D::RenderDevice* rd)
 {
@@ -54,30 +54,30 @@ void Mesh::sendGeometry(const Level* lvl, G3D::RenderDevice* rd)
 	}
 }
 
-void Mesh::Level::FUN_005322f0()
+void Mesh::Level::releaseSubMesh()
 {
-	m_unk0x1c = true;
+	m_subMeshDirty = true;
 
-	if (m_unk0x24) {
-		delete m_unk0x24;
-		m_unk0x24 = nullptr;
+	if (m_subMesh) {
+		delete m_subMesh;
+		m_subMesh = nullptr;
 	}
 
-	if (m_unk0x20 > 0) {
-		g_unk0x0095877c->getNumSubMeshes();
-		Ogre::IndexData*& indexData = g_unk0x0095877c->getSubMesh(m_unk0x20)->indexData;
+	if (m_sharedSubMeshIndex > 0) {
+		sharedMesh->getNumSubMeshes();
+		Ogre::IndexData*& indexData = sharedMesh->getSubMesh(m_sharedSubMeshIndex)->indexData;
 		delete indexData;
 		indexData = nullptr;
-		Ogre::RbxSceneNode::FUN_0067b070(g_unk0x0095877c->getSubMesh(m_unk0x20));
+		Ogre::RbxSceneNode::removeSubMeshSphere(sharedMesh->getSubMesh(m_sharedSubMeshIndex));
 	}
 }
 
-void Mesh::FUN_00532380(Ogre::VisualEngine* engine)
+void Mesh::updateSharedMesh(Ogre::VisualEngine* engine)
 {
 	if (varDirty && visibleGeometry.vertexArray.size() != 0) {
-		if (!g_unk0x0095877c.isNull()) {
-			engine->FUN_00672e60(
-				g_unk0x0095877c,
+		if (!sharedMesh.isNull()) {
+			engine->setMeshVertexData(
+				sharedMesh,
 				visibleGeometry.vertexArray[0],
 				visibleGeometry.vertexArray.size(),
 				visibleGeometry.normalArray[0],
@@ -89,7 +89,7 @@ void Mesh::FUN_00532380(Ogre::VisualEngine* engine)
 			varDirty = false;
 		}
 		else {
-			g_unk0x0095877c = engine->FUN_006731e0(
+			sharedMesh = engine->createMesh(
 				"rbxvb",
 				"General",
 				visibleGeometry.vertexArray[0],
@@ -100,29 +100,27 @@ void Mesh::FUN_00532380(Ogre::VisualEngine* engine)
 				nullptr,
 				nullptr
 			);
-			Ogre::LogManager::getSingleton().logMessage(
-				std::string("create mesh=") + g_unk0x0095877c->getName() + "\n"
-			);
-			g_unk0x0095873c = 0;
+			Ogre::LogManager::getSingleton().logMessage(std::string("create mesh=") + sharedMesh->getName() + "\n");
+			destroyedLevelCount = 0;
 			varDirty = false;
 		}
 	}
 }
 
-void Mesh::FUN_005324e0(Ogre::VisualEngine* engine)
+void Mesh::makeShadowSubMesh(Ogre::VisualEngine* engine)
 {
-	if (!m_unk0x28.empty() && !m_unk0x18.empty()) {
+	if (!m_shadowVertices.empty() && !m_shadowIndices.empty()) {
 		Ogre::Vector3 minimum;
 		Ogre::Vector3 maximum;
-		m_unk0x38 = engine->FUN_006735b0(
-			m_unk0x28[0],
-			m_unk0x28.size(),
+		m_shadowSubMesh = engine->createRbxSubMesh(
+			m_shadowVertices[0],
+			m_shadowVertices.size(),
 			nullptr,
 			nullptr,
 			nullptr,
-			&m_unk0x18[0],
+			&m_shadowIndices[0],
 			nullptr,
-			m_unk0x18.size() / 3,
+			m_shadowIndices.size() / 3,
 			&minimum,
 			&maximum
 		);
@@ -142,8 +140,8 @@ unsigned int Mesh::allocVertex(
 	const G3D::Vector3& vertex, const G3D::Vector3& normal, const G3D::Vector2& tex, bool share
 )
 {
-	if (!g_unk0x00958735) {
-		g_unk0x00958735 = true;
+	if (!anyVertexAllocated) {
+		anyVertexAllocated = true;
 	}
 	varDirty = true;
 
@@ -196,10 +194,10 @@ Mesh::Level::~Level()
 		freeVertex(indexArray[i]);
 	}
 
-	FUN_005322f0();
-	g_unk0x0095873c++;
-	if (!g_unk0x0095877c.isNull()) {
-		g_unk0x0095877c->getNumSubMeshes();
+	releaseSubMesh();
+	destroyedLevelCount++;
+	if (!sharedMesh.isNull()) {
+		sharedMesh->getNumSubMeshes();
 	}
 }
 
@@ -257,23 +255,23 @@ void Mesh::initStatics()
 
 Mesh::Mesh()
 {
-	if (!g_unk0x00958794) {
+	if (!staticsInitialized) {
 		initStatics();
-		g_unk0x00958794 = true;
+		staticsInitialized = true;
 	}
 
-	m_unk0x38 = nullptr;
-	m_unk0x3c = 0;
+	m_shadowSubMesh = nullptr;
+	m_meshType = 0;
 }
 
 Mesh::~Mesh()
 {
-	delete m_unk0x38;
+	delete m_shadowSubMesh;
 }
 
 void Mesh::Level::makeHWSubMesh(Ogre::VisualEngine* engine, Ogre::AxisAlignedBox& box)
 {
-	if (m_unk0x1c) {
+	if (m_subMeshDirty) {
 		std::vector<unsigned int> triangles;
 		Ogre::SubMesh* subMesh;
 		if (primitive == G3D::RenderDevice::QUADS) {
@@ -287,15 +285,15 @@ void Mesh::Level::makeHWSubMesh(Ogre::VisualEngine* engine, Ogre::AxisAlignedBox
 				triangles[quad * 6 + 4] = indexArray[quad * 4 + 1];
 				triangles[quad * 6 + 5] = indexArray[quad * 4 + 2];
 			}
-			subMesh = engine->FUN_00671d90(g_unk0x0095877c, nullptr, &triangles[0], triangles.size() / 3);
+			subMesh = engine->createSubMesh(sharedMesh, nullptr, &triangles[0], triangles.size() / 3);
 		}
 		else {
-			subMesh = engine->FUN_00671d90(g_unk0x0095877c, nullptr, indexArray.getCArray(), indexArray.size() / 3);
+			subMesh = engine->createSubMesh(sharedMesh, nullptr, indexArray.getCArray(), indexArray.size() / 3);
 		}
 
 		if (subMesh) {
-			m_unk0x20 = g_unk0x0095877c->getNumSubMeshes() - 1;
-			m_unk0x1c = false;
+			m_sharedSubMeshIndex = sharedMesh->getNumSubMeshes() - 1;
+			m_subMeshDirty = false;
 		}
 
 		Ogre::Vector3 lo(1e9f, 1e9f, 1e9f);
@@ -329,10 +327,10 @@ void Mesh::Level::makeHWSubMesh(Ogre::VisualEngine* engine, Ogre::AxisAlignedBox
 	}
 }
 
-void Mesh::Level::FUN_00533160(Ogre::VisualEngine* engine, Ogre::AxisAlignedBox& box)
+void Mesh::Level::makeSubMesh(Ogre::VisualEngine* engine, Ogre::AxisAlignedBox& box)
 {
 	char name[8];
-	sprintf(name, "m%d", g_unk0x00958798++);
+	sprintf(name, "m%d", subMeshNameCounter++);
 
 	unsigned int minIndex = 9999999;
 	unsigned int maxIndex = 0;
@@ -351,7 +349,7 @@ void Mesh::Level::FUN_00533160(Ogre::VisualEngine* engine, Ogre::AxisAlignedBox&
 	std::vector<float> positions;
 	std::vector<float> normals;
 	std::vector<float> textureCoords;
-	if (engine->m_unk0x7f4) {
+	if (engine->m_use32BitIndices) {
 		if (primitive == G3D::RenderDevice::QUADS) {
 			indices32.resize(indexArray.size() / 4 * 6);
 			for (int i = 0; i < indexArray.size(); i += 4) {
@@ -440,24 +438,24 @@ void Mesh::Level::FUN_00533160(Ogre::VisualEngine* engine, Ogre::AxisAlignedBox&
 		}
 	}
 
-	size_t triangleCount = (engine->m_unk0x7f4 ? indices32.size() : indices16.size()) / 3;
+	size_t triangleCount = (engine->m_use32BitIndices ? indices32.size() : indices16.size()) / 3;
 	Ogre::Vector3 minimum;
 	Ogre::Vector3 maximum;
-	m_unk0x24 = engine->FUN_006735b0(
+	m_subMesh = engine->createRbxSubMesh(
 		&positions[0],
 		vertexCount,
 		&normals[0],
 		nullptr,
 		&textureCoords[0],
-		engine->m_unk0x7f4 ? nullptr : &indices16[0],
-		engine->m_unk0x7f4 ? &indices32[0] : nullptr,
+		engine->m_use32BitIndices ? nullptr : &indices16[0],
+		engine->m_use32BitIndices ? &indices32[0] : nullptr,
 		triangleCount,
 		&minimum,
 		&maximum
 	);
 	box.setMinimum(minimum.x, minimum.y, minimum.z);
 	box.setMaximum(maximum.x, maximum.y, maximum.z);
-	m_unk0x1c = false;
+	m_subMeshDirty = false;
 }
 
 } // namespace RBX::RenderNew

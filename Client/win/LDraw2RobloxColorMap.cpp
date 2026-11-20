@@ -2,7 +2,8 @@
 
 namespace RBX::LDraw2Lua {
 
-LDraw2RobloxColorMap::LDraw2RobloxColorMap(int p_unk0x04, int p_unk0x08) : m_unk0x04(p_unk0x04), m_unk0x08(p_unk0x08)
+LDraw2RobloxColorMap::LDraw2RobloxColorMap(int ldrawCode, int robloxCode)
+	: m_ldrawCode(ldrawCode), m_robloxCode(robloxCode)
 {
 }
 

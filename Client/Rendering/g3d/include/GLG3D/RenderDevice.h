@@ -176,7 +176,6 @@ private:
     friend class VAR;
     friend class VARArea;
     friend class Milestone;
-    friend class UserInput;
     friend class VertexAndPixelShader;
 
     GWindow*                    _window;

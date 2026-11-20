@@ -53,7 +53,7 @@ G3D::ReferenceCountedPointer<G3D::Texture> TextureProxy::getIfResolved() const
 	return texture;
 }
 
-static int FUN_00534170(int value)
+static int nearestPower(int value)
 {
 	if (value < 2) {
 		return 2;
@@ -66,7 +66,7 @@ static int FUN_00534170(int value)
 	return result;
 }
 
-static void FUN_00534190(
+static void halve1DImage(
 	int components,
 	unsigned int width,
 	unsigned int height,
@@ -106,7 +106,7 @@ static void FUN_00534190(
 	}
 }
 
-static void FUN_00534250(
+static void halveImage(
 	unsigned int width,
 	unsigned int height,
 	int components,
@@ -118,7 +118,7 @@ static void FUN_00534250(
 )
 {
 	if (width == 1 || height == 1) {
-		FUN_00534190(components, width, height, in, out, elementSize, rowSize, groupSize);
+		halve1DImage(components, width, height, in, out, elementSize, rowSize, groupSize);
 		return;
 	}
 
@@ -142,16 +142,16 @@ static void FUN_00534250(
 	}
 }
 
-static bool g_unk0x009587d0 = false;
-static std::string g_unk0x009587d4 = "shadetex";
+static bool shadeResourceGroupReady = false;
+static std::string shadeResourceGroup = "shadetex";
 
 G3D::Vector2 TextureProxy::getSize()
 {
 	G3D::Vector2 size;
 
-	if (!m_unk0x4c.isNull()) {
-		size.x = (float) m_unk0x4c->getWidth();
-		size.y = (float) m_unk0x4c->getHeight();
+	if (!m_texture.isNull()) {
+		size.x = (float) m_texture->getWidth();
+		size.y = (float) m_texture->getHeight();
 	}
 	else {
 		size.y = 0;
@@ -163,11 +163,11 @@ G3D::Vector2 TextureProxy::getSize()
 
 TextureProxy::~TextureProxy()
 {
-	if (!m_unk0x4c.isNull() && m_unk0x4c->getName() == g_unk0x009587d4) {
-		m_unk0x4c.setNull();
-		Ogre::ResourceGroupManager::getSingleton().unloadUnreferencedResourcesInGroup(g_unk0x009587d4, true);
+	if (!m_texture.isNull() && m_texture->getName() == shadeResourceGroup) {
+		m_texture.setNull();
+		Ogre::ResourceGroupManager::getSingleton().unloadUnreferencedResourcesInGroup(shadeResourceGroup, true);
 		Ogre::StringVectorPtr names =
-			Ogre::ResourceGroupManager::getSingleton().listResourceNames(g_unk0x009587d4, false);
+			Ogre::ResourceGroupManager::getSingleton().listResourceNames(shadeResourceGroup, false);
 		Ogre::LogManager::getSingleton().logMessage(
 			"RBX shadetex remaining: " + Ogre::StringConverter::toString(names->size())
 		);
@@ -180,14 +180,14 @@ G3D::ReferenceCountedPointer<G3D::Texture> TextureProxy::resolve(G3D::RenderDevi
 
 	if (!loaded) {
 		if (!shadeTexture.isNull()) {
-			if (!g_unk0x009587d0) {
-				Ogre::ResourceGroupManager::getSingleton().createResourceGroup(g_unk0x009587d4);
-				Ogre::ResourceGroupManager::getSingleton().initialiseResourceGroup(g_unk0x009587d4);
-				g_unk0x009587d0 = true;
+			if (!shadeResourceGroupReady) {
+				Ogre::ResourceGroupManager::getSingleton().createResourceGroup(shadeResourceGroup);
+				Ogre::ResourceGroupManager::getSingleton().initialiseResourceGroup(shadeResourceGroup);
+				shadeResourceGroupReady = true;
 			}
 
-			if (!m_unk0x4c.isNull()) {
-				Ogre::LogManager::getSingleton().logMessage("RBX Texture " + m_unk0x4c->getName() + " overwritten");
+			if (!m_texture.isNull()) {
+				Ogre::LogManager::getSingleton().logMessage("RBX Texture " + m_texture->getName() + " overwritten");
 			}
 
 			char encodedFileName[1024];
@@ -195,8 +195,8 @@ G3D::ReferenceCountedPointer<G3D::Texture> TextureProxy::resolve(G3D::RenderDevi
 				encodedFileName, "%g%g%g%s", shadeColor.r, shadeColor.g, shadeColor.b, shadeTexture->filename.c_str()
 			);
 
-			m_unk0x4c = Ogre::TextureManager::getSingleton().getByName(std::string(encodedFileName));
-			if (!m_unk0x4c.isNull()) {
+			m_texture = Ogre::TextureManager::getSingleton().getByName(std::string(encodedFileName));
+			if (!m_texture.isNull()) {
 				root = nullptr;
 				shadeTexture = nullptr;
 				loaded = true;
@@ -226,7 +226,7 @@ G3D::ReferenceCountedPointer<G3D::Texture> TextureProxy::resolve(G3D::RenderDevi
 
 			Ogre::Image shadedImage;
 			std::vector<unsigned char> mipData;
-			if (!engine->m_unk0x805) {
+			if (!engine->m_textureSquareOnly) {
 				int width = bumpImage.getWidth();
 				int height = bumpImage.getHeight();
 
@@ -257,7 +257,7 @@ G3D::ReferenceCountedPointer<G3D::Texture> TextureProxy::resolve(G3D::RenderDevi
 						memcpy(&mipData[0], bumpImage.getData(), width * height * 3);
 					}
 					else {
-						FUN_00534250(prevWidth, prevHeight, 3, prev, dst, 1, prevWidth * 3, 3);
+						halveImage(prevWidth, prevHeight, 3, prev, dst, 1, prevWidth * 3, 3);
 					}
 
 					prev = dst;
@@ -284,14 +284,14 @@ G3D::ReferenceCountedPointer<G3D::Texture> TextureProxy::resolve(G3D::RenderDevi
 			}
 
 			std::string name(encodedFileName);
-			m_unk0x4c = Ogre::TextureManager::getSingleton().create(name, g_unk0x009587d4);
-			m_unk0x4c->loadImage(shadedImage);
+			m_texture = Ogre::TextureManager::getSingleton().create(name, shadeResourceGroup);
+			m_texture->loadImage(shadedImage);
 
 			root = nullptr;
 			loaded = true;
 
-			Ogre::LogManager::getSingleton().logMessage("create shadetex=" + m_unk0x4c->getName() + "\n");
-			Ogre::ResourceGroupManager::getSingleton().unloadUnreferencedResourcesInGroup(g_unk0x009587d4, true);
+			Ogre::LogManager::getSingleton().logMessage("create shadetex=" + m_texture->getName() + "\n");
+			Ogre::ResourceGroupManager::getSingleton().unloadUnreferencedResourcesInGroup(shadeResourceGroup, true);
 		}
 		else if (root.isNull()) {
 			if (filename == "") {
@@ -300,8 +300,8 @@ G3D::ReferenceCountedPointer<G3D::Texture> TextureProxy::resolve(G3D::RenderDevi
 			else {
 				Ogre::Image image;
 				try {
-					m_unk0x4c = Ogre::TextureManager::getSingleton().getByName(filename);
-					if (m_unk0x4c.isNull()) {
+					m_texture = Ogre::TextureManager::getSingleton().getByName(filename);
+					if (m_texture.isNull()) {
 						const char* extensions[] = {
 							"png", "jpg", "bmp", "gif", "tif", "tiff", "pbm", "pgm", "tga", "dds", "xpm", "jig", "ico"
 						};
@@ -335,7 +335,7 @@ G3D::ReferenceCountedPointer<G3D::Texture> TextureProxy::resolve(G3D::RenderDevi
 										StandardOut::singleton()->print(
 											MESSAGE_ERROR, "Failed to load texture '%s'", filename.c_str()
 										);
-										m_unk0x4c.setNull();
+										m_texture.setNull();
 									}
 								}
 							}
@@ -343,9 +343,9 @@ G3D::ReferenceCountedPointer<G3D::Texture> TextureProxy::resolve(G3D::RenderDevi
 
 						if (found && image.getFormat() != Ogre::PF_UNKNOWN && image.getWidth() > 0 &&
 							image.getHeight() > 0) {
-							if (engine->m_unk0x800 == 1) {
-								int width = FUN_00534170(image.getWidth());
-								int height = FUN_00534170(image.getHeight());
+							if (engine->m_antialiasing == 1) {
+								int width = nearestPower(image.getWidth());
+								int height = nearestPower(image.getHeight());
 
 								if (width != image.getWidth() || height != image.getHeight()) {
 									Ogre::LogManager::getSingleton().logMessage(
@@ -358,14 +358,14 @@ G3D::ReferenceCountedPointer<G3D::Texture> TextureProxy::resolve(G3D::RenderDevi
 								}
 							}
 
-							m_unk0x4c = Ogre::TextureManager::getSingleton().create(filename, "General");
-							m_unk0x4c->loadImage(image);
-							Ogre::LogManager::getSingleton().logMessage("create tex=" + m_unk0x4c->getName());
+							m_texture = Ogre::TextureManager::getSingleton().create(filename, "General");
+							m_texture->loadImage(image);
+							Ogre::LogManager::getSingleton().logMessage("create tex=" + m_texture->getName());
 						}
 					}
 				}
 				catch (std::exception& e) {
-					m_unk0x4c.setNull();
+					m_texture.setNull();
 					Ogre::LogManager::getSingleton().logMessage(
 						"RBX failed to load " + filename + " what(): " + e.what()
 					);
@@ -380,7 +380,7 @@ G3D::ReferenceCountedPointer<G3D::Texture> TextureProxy::resolve(G3D::RenderDevi
 			}
 		}
 
-		if (m_unk0x4c.isNull()) {
+		if (m_texture.isNull()) {
 			Ogre::LogManager::getSingleton().logMessage("RBX texture not loaded in resolve()\n");
 		}
 

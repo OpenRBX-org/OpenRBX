@@ -7,34 +7,58 @@
 
 #include <G3D/Log.h>
 #include <G3D/debugAssert.h>
+#include <G3D/format.h>
 #include <algorithm>
-#include <atlbase.h>
-#include <atlcom.h>
-#include <atltime.h>
-#include <direct.h>
+#include <filesystem>
 #include <list>
 #include <memory>
+
+#ifdef _WIN32
+#include <direct.h>
+
+static const char pathSeparator = '\\';
+#else
+#include <unistd.h>
+
+static const char pathSeparator = '/';
+#endif
 
 bool LogManager::logsEnabled = true;
 
 MainLogManager* LogManager::mainLogManager;
+#ifdef _WIN32
 bool RobloxCrashReporter::silent;
+#endif
+
+unsigned long LogManager::currentThreadId()
+{
+#ifdef _WIN32
+	return GetCurrentThreadId();
+#else
+	return static_cast<unsigned long>(gettid());
+#endif
+}
 
 MainLogManager* LogManager::getMainLogManger()
 {
 	return mainLogManager;
 }
 
-ATL::CPath LogManager::GetLogPath() const
+std::string LogManager::GetLogPath() const
 {
-	std::string result = RBX::FileSystem::getUserAppDataDirectory(true, "logs");
-	return result.c_str();
+	return RBX::FileSystem::getUserAppDataDirectory(true, "logs");
+}
+
+static std::string logFolder(const std::string& path)
+{
+	if (!path.empty() && path.back() != pathSeparator) {
+		return path + pathSeparator;
+	}
+	return path;
 }
 
 std::string MainLogManager::getLogFileName()
 {
-	ATL::CPath path = GetLogPath();
-
 	std::string fileName = "log_";
 	fileName += guid;
 
@@ -42,15 +66,11 @@ std::string MainLogManager::getLogFileName()
 	fileName.erase(4, 3);
 	fileName += ".txt";
 
-	path.Append(fileName.c_str());
-
-	return (LPCSTR) path;
+	return logFolder(GetLogPath()) + fileName;
 }
 
 std::string MainLogManager::MakeLogFileName(const char* prefix)
 {
-	ATL::CPath path = GetLogPath();
-
 	std::string fileName = "log_";
 	fileName += guid;
 
@@ -59,17 +79,13 @@ std::string MainLogManager::MakeLogFileName(const char* prefix)
 	fileName += prefix;
 	fileName += ".txt";
 
-	path.Append(fileName.c_str());
-
-	return (LPCSTR) path;
+	return logFolder(GetLogPath()) + fileName;
 }
 
 std::string ThreadLogManager::getLogFileName()
 {
 	std::string fileName = mainLogManager->getLogFileName();
-	CString id;
-	id.Format("_%s_%d", name.c_str(), threadID);
-	fileName.insert(fileName.size() - 4, id);
+	fileName.insert(fileName.size() - 4, G3D::format("_%s_%lu", name.c_str(), threadID));
 	return fileName;
 }
 
@@ -88,7 +104,7 @@ RBX::Log* LogManager::getLog()
 
 RBX::Log* MainLogManager::provideLog()
 {
-	if (GetCurrentThreadId() == threadID) {
+	if (currentThreadId() == threadID) {
 		return getLog();
 	}
 	else {
@@ -96,6 +112,7 @@ RBX::Log* MainLogManager::provideLog()
 	}
 }
 
+#ifdef _WIN32
 RobloxCrashReporter::RobloxCrashReporter(const char* outputPath, const char* appName, MINIDUMP_TYPE mdType)
 {
 	controls.actionToTake = AOC_WRITE_TO_DISK | AOC_SILENT_MODE;
@@ -104,10 +121,7 @@ RobloxCrashReporter::RobloxCrashReporter(const char* outputPath, const char* app
 
 	strcpy(controls.appName, appName);
 
-	CVersionInfo vi;
-	vi.Load(ATL::_AtlBaseModule.GetModuleInstance());
-	CString v = vi.GetFileVersionAsString();
-	strcpy(controls.appVersion, v);
+	strcpy(controls.appVersion, fileVersionString().c_str());
 }
 
 LONG RobloxCrashReporter::ProcessException(_EXCEPTION_POINTERS* info)
@@ -130,26 +144,25 @@ void MainLogManager::WriteCrashDump()
 	appName += guid;
 	appName.erase(12);
 	appName.erase(4, 3);
-	crashReporter.reset(new RobloxCrashReporter(GetLogPath(), appName.c_str(), MiniDumpWithDataSegs));
+	crashReporter.reset(new RobloxCrashReporter(GetLogPath().c_str(), appName.c_str(), MiniDumpWithDataSegs));
 	crashReporter->Start();
 }
 
 static void __cdecl purecallHandler()
 {
-	CString eventMessage;
-	eventMessage.Format("Pure Call Error");
-	LogManager::ReportEvent(EVENTLOG_ERROR_TYPE, eventMessage);
+	LogManager::ReportEvent(LogManager::EventError, "Pure Call Error");
 
 	int* p = nullptr;
 	*p = p[1];
 }
+#endif
 
 MainLogManager::MainLogManager(const char* productName) : LogManager(productName)
 {
 	RBX::Guid::generateGUID(guid);
-	CullLogs("\\", 32);
-	CullLogs("error\\", 32);
-	CullLogs("archive\\", 32);
+	CullLogs("", 32);
+	CullLogs("error", 32);
+	CullLogs("archive", 32);
 
 	std::string g3dLogFile = getLogFileName();
 	g3dLogFile.erase(g3dLogFile.size() - 4);
@@ -162,31 +175,36 @@ MainLogManager::MainLogManager(const char* productName) : LogManager(productName
 	G3D::setAssertionHook(handleDebugAssert);
 	G3D::setFailureHook(handleG3DFailure);
 
+#ifdef _WIN32
 	_set_purecall_handler(purecallHandler);
+#endif
 }
 
 std::string MoveRelative(const char* fileName, std::string path)
 {
-	ATL::CPath dir(fileName);
-	dir.RemoveFileSpec();
-	dir.Append(path.c_str());
-	if (!PathFileExists(dir)) {
-		_mkdir(dir);
+	std::filesystem::path source(fileName);
+	std::filesystem::path dir = source.parent_path() / path;
+	std::string target = (dir / source.filename()).string();
+#ifdef _WIN32
+	if (!std::filesystem::exists(dir)) {
+		_mkdir(dir.string().c_str());
 	}
-	ATL::CPath file(fileName);
-	file.StripPath();
-	dir.Append(file);
-	MoveFile(fileName, dir);
-	return (LPCSTR) dir;
+	MoveFile(fileName, target.c_str());
+#else
+	std::error_code error;
+	std::filesystem::create_directory(dir, error);
+	std::filesystem::rename(source, target, error);
+#endif
+	return target;
 }
 
+#ifdef _WIN32
 bool MainLogManager::hasCrashLogs() const
 {
-	ATL::CPath path = GetLogPath();
-	path.AddBackslash();
+	std::string path = logFolder(GetLogPath());
 
 	WIN32_FIND_DATA FindFileData;
-	HANDLE hFind = FindFirstFile(path + "*.dmp", &FindFileData);
+	HANDLE hFind = FindFirstFile((path + "*.dmp").c_str(), &FindFileData);
 	if (hFind != INVALID_HANDLE_VALUE) {
 		do {
 			if (!(FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
@@ -202,25 +220,24 @@ std::vector<std::string> MainLogManager::archiveCrashLogs()
 {
 	std::vector<std::string> result;
 
-	ATL::CPath path = GetLogPath();
-	path.AddBackslash();
+	std::string path = logFolder(GetLogPath());
 
 	WIN32_FIND_DATA FindFileData;
-	HANDLE hFind = FindFirstFile(path + "*.dmp", &FindFileData);
+	HANDLE hFind = FindFirstFile((path + "*.dmp").c_str(), &FindFileData);
 	if (hFind != INVALID_HANDLE_VALUE) {
 		do {
 			if (!(FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
-				result.push_back(MoveRelative(path + FindFileData.cFileName, "archive\\"));
+				result.push_back(MoveRelative((path + FindFileData.cFileName).c_str(), "archive"));
 
 				std::string wildCard = FindFileData.cFileName;
 				wildCard = wildCard.substr(0, 9) + "*.*";
 
 				WIN32_FIND_DATA FindOtherFileData;
-				HANDLE hFindOther = FindFirstFile(path + wildCard.c_str(), &FindOtherFileData);
+				HANDLE hFindOther = FindFirstFile((path + wildCard).c_str(), &FindOtherFileData);
 				if (hFindOther != INVALID_HANDLE_VALUE) {
 					do {
 						if (!(FindOtherFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
-							result.push_back(MoveRelative(path + FindOtherFileData.cFileName, "archive\\"));
+							result.push_back(MoveRelative((path + FindOtherFileData.cFileName).c_str(), "archive"));
 						}
 					} while (FindNextFile(hFindOther, &FindOtherFileData));
 				}
@@ -233,23 +250,21 @@ std::vector<std::string> MainLogManager::archiveCrashLogs()
 
 struct DateCompare
 {
-	ATL::CFileTime fileTime;
+	FILETIME fileTime;
 
 	DateCompare(const WIN32_FIND_DATA& data) : fileTime(data.ftCreationTime) {}
 
-	bool operator()(WIN32_FIND_DATA data) const { return fileTime < data.ftCreationTime; }
+	bool operator()(WIN32_FIND_DATA data) const { return CompareFileTime(&fileTime, &data.ftCreationTime) < 0; }
 };
 
 void MainLogManager::CullLogs(const char* folder, int maxLogs)
 {
-	ATL::CPath path = GetLogPath();
-	path.Append(folder);
-	path.AddBackslash();
+	std::string path = logFolder(logFolder(GetLogPath()) + folder);
 
 	std::list<WIN32_FIND_DATA> files;
 
 	WIN32_FIND_DATA FindFileData;
-	HANDLE hFind = FindFirstFile(path + "*.*", &FindFileData);
+	HANDLE hFind = FindFirstFile((path + "*.*").c_str(), &FindFileData);
 	if (hFind != INVALID_HANDLE_VALUE) {
 		do {
 			if (!(FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
@@ -260,10 +275,72 @@ void MainLogManager::CullLogs(const char* folder, int maxLogs)
 
 	std::list<WIN32_FIND_DATA>::iterator iter = files.begin();
 	for (size_t i = maxLogs; i < files.size(); ++i) {
-		DeleteFile(path + iter->cFileName);
+		DeleteFile((path + iter->cFileName).c_str());
 		++iter;
 	}
 }
+#else
+static std::vector<std::filesystem::path> crashDumps(const std::string& path)
+{
+	std::vector<std::filesystem::path> dumps;
+	std::error_code error;
+	for (const std::filesystem::directory_entry& entry : std::filesystem::directory_iterator(path, error)) {
+		if (entry.is_regular_file() && entry.path().extension() == ".dmp") {
+			dumps.push_back(entry.path());
+		}
+	}
+	return dumps;
+}
+
+bool MainLogManager::hasCrashLogs() const
+{
+	return !crashDumps(logFolder(GetLogPath())).empty();
+}
+
+std::vector<std::string> MainLogManager::archiveCrashLogs()
+{
+	std::vector<std::string> result;
+
+	std::string path = logFolder(GetLogPath());
+	for (const std::filesystem::path& dump : crashDumps(path)) {
+		result.push_back(MoveRelative(dump.string().c_str(), "archive"));
+
+		std::string prefix = dump.filename().string().substr(0, 9);
+		std::error_code error;
+		std::vector<std::filesystem::path> others;
+		for (const std::filesystem::directory_entry& entry : std::filesystem::directory_iterator(path, error)) {
+			if (entry.is_regular_file() && entry.path().filename().string().starts_with(prefix)) {
+				others.push_back(entry.path());
+			}
+		}
+		for (const std::filesystem::path& other : others) {
+			result.push_back(MoveRelative(other.string().c_str(), "archive"));
+		}
+	}
+
+	return result;
+}
+
+void MainLogManager::CullLogs(const char* folder, int maxLogs)
+{
+	std::string path = logFolder(logFolder(GetLogPath()) + folder);
+
+	std::vector<std::filesystem::directory_entry> files;
+	std::error_code error;
+	for (const std::filesystem::directory_entry& entry : std::filesystem::directory_iterator(path, error)) {
+		if (entry.is_regular_file()) {
+			files.push_back(entry);
+		}
+	}
+	std::stable_sort(files.begin(), files.end(), [](const auto& left, const auto& right) {
+		return left.last_write_time() < right.last_write_time();
+	});
+
+	for (size_t i = maxLogs; i < files.size(); ++i) {
+		std::filesystem::remove(files[i - maxLogs].path(), error);
+	}
+}
+#endif
 
 MainLogManager::~MainLogManager()
 {
@@ -272,10 +349,10 @@ MainLogManager::~MainLogManager()
 		delete G3D::Log::common();
 
 		if (RBX::Log::aggregateWorstSeverity == RBX::Log::Error) {
-			MoveRelative(g3dLogFile.c_str(), "error\\");
+			MoveRelative(g3dLogFile.c_str(), "error");
 		}
 		else {
-			MoveRelative(g3dLogFile.c_str(), "archive\\");
+			MoveRelative(g3dLogFile.c_str(), "archive");
 		}
 	}
 
@@ -291,10 +368,10 @@ LogManager::~LogManager()
 		log = nullptr;
 
 		if (severity == RBX::Log::Error) {
-			MoveRelative(logFile.c_str(), "error\\");
+			MoveRelative(logFile.c_str(), "error");
 		}
 		else {
-			MoveRelative(logFile.c_str(), "archive\\");
+			MoveRelative(logFile.c_str(), "archive");
 		}
 	}
 }
@@ -308,16 +385,16 @@ bool MainLogManager::handleDebugAssert(
 	bool useGuiPrompt
 )
 {
-	CString eventMessage;
+	std::string eventMessage;
 	if (message.length() > 0) {
-		eventMessage.Format(
+		eventMessage = G3D::format(
 			"Assertion failed: %s\n\nMessage: %s\n\n%s(%d)", expression, message.c_str(), filename, lineNumber
 		);
 	}
 	else {
-		eventMessage.Format("Assertion failed: %s\n%s(%d)", expression, filename, lineNumber);
+		eventMessage = G3D::format("Assertion failed: %s\n%s(%d)", expression, filename, lineNumber);
 	}
-	ReportEvent(EVENTLOG_WARNING_TYPE, eventMessage);
+	ReportEvent(EventWarning, eventMessage.c_str());
 
 	return false;
 }
@@ -331,16 +408,15 @@ bool MainLogManager::handleG3DFailure(
 	bool useGuiPrompt
 )
 {
-	CString eventMessage;
+	std::string eventMessage;
 	if (message.length() > 0) {
-		eventMessage.Format(
-			"G3D Error: %s\n\nMessage: %s\n\n%s(%d)", expression, message.c_str(), filename, lineNumber
-		);
+		eventMessage =
+			G3D::format("G3D Error: %s\n\nMessage: %s\n\n%s(%d)", expression, message.c_str(), filename, lineNumber);
 	}
 	else {
-		eventMessage.Format("G3D Error: %s\n%s(%d)", expression, filename, lineNumber);
+		eventMessage = G3D::format("G3D Error: %s\n%s(%d)", expression, filename, lineNumber);
 	}
-	ReportEvent(EVENTLOG_ERROR_TYPE, eventMessage);
+	ReportEvent(EventError, eventMessage.c_str());
 
 	int* p = nullptr;
 	*p = p[1];
@@ -348,55 +424,32 @@ bool MainLogManager::handleG3DFailure(
 	return false;
 }
 
-void FUN_0042b3c0(const std::exception& e)
+void printException(const std::exception& e)
 {
-	RBX::StandardOut::singleton()->print(RBX::MESSAGE_ERROR, e.what());
+	RBX::StandardOut::singleton()->print(RBX::MESSAGE_ERROR, "%s", e.what());
 }
 
-void LogManager::ReportEvent(WORD type, const char* message)
+void LogManager::ReportEvent(EventType type, const char* message)
 {
 	switch (type) {
-	case EVENTLOG_SUCCESS:
+	case EventSuccess:
 		RBX::StandardOut::singleton()->print(RBX::MESSAGE_INFO, "%s", message);
 		break;
-	case EVENTLOG_ERROR_TYPE:
+	case EventError:
 		RBX::StandardOut::singleton()->print(RBX::MESSAGE_ERROR, "%s", message);
 		break;
-	case EVENTLOG_INFORMATION_TYPE:
+	case EventInformation:
 		RBX::StandardOut::singleton()->print(RBX::MESSAGE_INFO, "%s", message);
 		break;
-	case EVENTLOG_AUDIT_SUCCESS:
+	case EventAuditSuccess:
 		RBX::StandardOut::singleton()->print(RBX::MESSAGE_INFO, "%s", message);
 		break;
-	case EVENTLOG_AUDIT_FAILURE:
+	case EventAuditFailure:
 		RBX::StandardOut::singleton()->print(RBX::MESSAGE_ERROR, "%s", message);
+		break;
+	default:
 		break;
 	}
-}
-
-#ifdef _AFXDLL
-void LogManager::ReportEvent(WORD type, HRESULT hr, const char* file, int line)
-{
-	COleException exception;
-	exception.m_sc = hr;
-	char message[1024];
-	exception.GetErrorMessage(message, 1024);
-
-	CString text;
-	text.Format("HRESULT = %d: %s\n%s(%d)", hr, message, file, line);
-	ReportEvent(type, text);
-}
-#endif
-
-HRESULT LogManager::ReportCOMError(const GUID& guid, const char* message, HRESULT hr)
-{
-	ReportEvent(EVENTLOG_ERROR_TYPE, message);
-	return AtlReportError(guid, message, GUID_NULL, hr);
-}
-
-HRESULT LogManager::ReportExceptionAsCOMError(const GUID& guid, const std::exception& e)
-{
-	return ReportCOMError(guid, e.what(), S_OK);
 }
 
 ThreadLogManager* ThreadLogManager::getCurrent()

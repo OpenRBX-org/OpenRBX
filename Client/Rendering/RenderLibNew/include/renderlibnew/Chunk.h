@@ -27,9 +27,9 @@ public:
 	static const float DECAL_OFFSET;
 	static const float TEXTURE_OFFSET;
 
-	Ogre::RbxEntity* m_unk0x0c;
-	Ogre::RbxSubEntity* m_unk0x10;
-	float m_unk0x14;
+	Ogre::RbxEntity* m_entity;
+	Ogre::RbxSubEntity* m_subEntity;
+	float m_renderImportance;
 	float polygonOffset;
 	float radius;
 
@@ -47,11 +47,11 @@ public:
 	virtual G3D::ReferenceCountedPointer<Material> getMaterial() = 0;
 	virtual G3D::ReferenceCountedPointer<Mesh> getMesh() = 0;
 	virtual const G3D::CoordinateFrame& cframe() = 0;
-	virtual void VTable0x20();
+	virtual void releaseEntity();
 
-	virtual void VTable0x24(float p_unk0x14) { m_unk0x14 = p_unk0x14; }
+	virtual void setRenderImportance(float renderImportance) { m_renderImportance = renderImportance; }
 
-	virtual float VTable0x28() { return m_unk0x14; }
+	virtual float getRenderImportance() { return m_renderImportance; }
 
 	G3D::WeakReferenceCountedPointer<AggregateChunk> aggregate;
 };

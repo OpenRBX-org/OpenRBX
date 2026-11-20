@@ -59,7 +59,7 @@ protected:
 
 SphereMesh::SphereMesh(const G3D::Vector3& diameter, RenderSurfaceTypes surfaceTypes)
 {
-	m_unk0x3c = 2;
+	m_meshType = 2;
 
 	levels.append(new RenderNew::Mesh::Level(G3D::RenderDevice::QUADS));
 	{

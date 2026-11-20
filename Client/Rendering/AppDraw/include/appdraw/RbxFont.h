@@ -18,7 +18,7 @@ class RbxFont
 public:
 	RbxFont(const std::string& filename, G3D::BinaryInput& in);
 
-	Vector2 FUN_0067de70(
+	Vector2 computePackedArray(
 		const std::string& s,
 		double x,
 		double y,
@@ -27,8 +27,8 @@ public:
 		RBX::Adorn::Spacing spacing,
 		Vector2* quads
 	);
-	Vector2 FUN_0067e0f0(const std::string& s, double size, RBX::Adorn::Spacing spacing);
-	Vector2 FUN_0067e1e0(
+	Vector2 get2DStringBounds(const std::string& s, double size, RBX::Adorn::Spacing spacing);
+	Vector2 draw2D(
 		VisualEngine* engine,
 		const std::string& s,
 		const Vector2& position,
@@ -40,17 +40,17 @@ public:
 		RBX::Adorn::Spacing spacing
 	);
 
-	static SharedPtr<RbxFont> FUN_0067e9d0(const std::string& filename);
+	static SharedPtr<RbxFont> fromFile(const std::string& filename);
 
 private:
-	int m_unk0x00[128];
-	int m_unk0x200;
-	int m_unk0x204;
-	int m_unk0x208;
-	TexturePtr m_unk0x20c;
+	int m_subWidth[128];
+	int m_charWidth;
+	int m_charHeight;
+	int m_baseline;
+	TexturePtr m_texture;
 };
 
-extern int g_unk0x00961434;
+extern int fontTextureCount;
 
 } // namespace Ogre
 

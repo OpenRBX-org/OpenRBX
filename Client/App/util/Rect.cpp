@@ -31,25 +31,25 @@ Vector2 Rect::positionPoint(Location xLocation, Location yLocation) const
 	return point;
 }
 
-Vector2 Rect::positionPoint(const Vector2& p_unk0x04, Location p_unk0x08, Location p_unk0x0c) const
+Vector2 Rect::positionPoint(const Vector2& offset, Location xLocation, Location yLocation) const
 {
 	Vector2 point(0, 0);
 
-	switch (p_unk0x08) {
+	switch (xLocation) {
 	case LEFT:
-		point.x = low.x + p_unk0x04.x;
+		point.x = low.x + offset.x;
 		break;
 	case RIGHT:
-		point.x = high.x - p_unk0x04.x;
+		point.x = high.x - offset.x;
 		break;
 	}
 
-	switch (p_unk0x0c) {
+	switch (yLocation) {
 	case TOP:
-		point.y = low.y + p_unk0x04.y;
+		point.y = low.y + offset.y;
 		break;
 	case BOTTOM:
-		point.y = high.y - p_unk0x04.y;
+		point.y = high.y - offset.y;
 		break;
 	}
 

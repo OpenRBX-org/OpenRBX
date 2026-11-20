@@ -90,10 +90,10 @@ void GuiItem::label2d(
 	);
 }
 
-void GuiRoot::render2dItem(Adorn* p_unk0x04, GuiItem* p_unk0x08)
+void GuiRoot::render2dItem(Adorn* adorn, GuiItem* item)
 {
-	setCanvasSize(G3D::Vector2(G3D::Vector2int16(p_unk0x04->getWidth(), p_unk0x04->getHeight())));
-	p_unk0x08->render2d(p_unk0x04);
+	setCanvasSize(G3D::Vector2(G3D::Vector2int16(adorn->getWidth(), adorn->getHeight())));
+	item->render2d(adorn);
 }
 
 void RelativePanel::init(const Layout& layout)
@@ -124,10 +124,10 @@ G3D::Vector2 UnifiedWidget::childOffset() const
 	return G3D::Vector2(0, 28);
 }
 
-void UnifiedWidget::setMenuState(MenuState p_unk0x04)
+void UnifiedWidget::setMenuState(MenuState state)
 {
-	if (menuState != p_unk0x04) {
-		menuState = p_unk0x04;
+	if (menuState != state) {
+		menuState = state;
 		onMenuStateChanged();
 	}
 }
@@ -190,14 +190,14 @@ GuiItem::GuiItem() : guiSize(0, 0)
 	setName("Unnamed GuiItem");
 }
 
-const GuiItem* GuiItem::getGuiItem(int p_unk0x04) const
+const GuiItem* GuiItem::getGuiItem(int index) const
 {
-	return dynamic_cast<const GuiItem*>((*getChildren())[p_unk0x04].get());
+	return dynamic_cast<const GuiItem*>((*getChildren())[index].get());
 }
 
-GuiItem* GuiItem::getGuiItem(int p_unk0x04)
+GuiItem* GuiItem::getGuiItem(int index)
 {
-	return dynamic_cast<GuiItem*>((*getChildren())[p_unk0x04].get());
+	return dynamic_cast<GuiItem*>((*getChildren())[index].get());
 }
 
 GuiRoot::GuiRoot()
@@ -219,13 +219,13 @@ void GuiRoot::render2d(Adorn* adorn)
 	}
 }
 
-TopMenuBar::TopMenuBar(const std::string& p_unk0x04, Layout::Style p_unk0x08, bool p_unk0x0c)
+TopMenuBar::TopMenuBar(const std::string& name, Layout::Style style, bool translucent)
 {
 	init();
-	setName(p_unk0x04);
-	layoutStyle = p_unk0x08;
+	setName(name);
+	layoutStyle = style;
 
-	if (p_unk0x0c) {
+	if (translucent) {
 		backdropColor = translucentBackdrop();
 	}
 }
@@ -314,21 +314,21 @@ int UnifiedWidget::getFontSize() const
 	return 10;
 }
 
-void UnifiedWidget::render2dMe(Adorn* p_unk0x04)
+void UnifiedWidget::render2dMe(Adorn* adorn)
 {
-	p_unk0x04->rect2d(getMyRect2D(), menuState != NOTHING ? menuSelect() : G3D::Color4(G3D::Color3::white()));
-	p_unk0x04->outlineRect2d(getMyRect2D(), 1.0f, G3D::Color4(G3D::Color3::black()));
-	label2d(p_unk0x04, getName(), G3D::Color4(G3D::Color3::black()), G3D::Color4::clear(), Adorn::XALIGN_CENTER);
+	adorn->rect2d(getMyRect2D(), menuState != NOTHING ? menuSelect() : G3D::Color4(G3D::Color3::white()));
+	adorn->outlineRect2d(getMyRect2D(), 1.0f, G3D::Color4(G3D::Color3::black()));
+	label2d(adorn, getName(), G3D::Color4(G3D::Color3::black()), G3D::Color4::clear(), Adorn::XALIGN_CENTER);
 }
 
-void UnifiedWidget::render2dChildren(Adorn* p_unk0x04)
+void UnifiedWidget::render2dChildren(Adorn* adorn)
 {
 	if (showChildren()) {
 		for (unsigned int i = 0; i < numChildren(); ++i) {
 			GuiItem* item = getGuiItem(i);
 
 			if (item != nullptr) {
-				item->render2d(p_unk0x04);
+				item->render2d(adorn);
 			}
 		}
 	}
@@ -382,11 +382,11 @@ G3D::Vector2 UnifiedWidget::getChildPosition(const GuiItem* child) const
 	return position;
 }
 
-TextDisplay::TextDisplay(const std::string& p_unk0x04, const std::string& p_unk0x08)
+TextDisplay::TextDisplay(const std::string& name, const std::string& text)
 {
 	init();
-	setName(p_unk0x04);
-	label = p_unk0x08;
+	setName(name);
+	label = text;
 }
 
 int TextDisplay::getFontSize() const
@@ -417,28 +417,28 @@ void GuiItem::onDescendentRemoving(const shared_ptr<Instance>& instance)
 	Instance::onDescendentRemoving(instance);
 }
 
-GuiResponse UnifiedWidget::processShown_InTitle(const GuiEvent& p_unk0x04)
+GuiResponse UnifiedWidget::processShown_InTitle(const GuiEvent& event)
 {
 	loseFocus();
 
 	if (menuState == SHOWN) {
-		if (p_unk0x04.eventType == UIEvent::MOUSE_LEFT_BUTTON_UP) {
+		if (event.eventType == UIEvent::MOUSE_LEFT_BUTTON_UP) {
 			setMenuState(HOVER);
 		}
 	}
-	else if (p_unk0x04.eventType == UIEvent::MOUSE_LEFT_BUTTON_UP) {
+	else if (event.eventType == UIEvent::MOUSE_LEFT_BUTTON_UP) {
 		setMenuState(SHOWN);
 	}
 
 	return GuiResponse::used();
 }
 
-GuiResponse UnifiedWidget::processHover(const GuiEvent& p_unk0x04)
+GuiResponse UnifiedWidget::processHover(const GuiEvent& event)
 {
 	loseFocus();
 
-	if (getMyRect().pointInRect(p_unk0x04.mousePosition)) {
-		switch (p_unk0x04.eventType) {
+	if (getMyRect().pointInRect(event.mousePosition)) {
+		switch (event.eventType) {
 		case UIEvent::MOUSE_LEFT_BUTTON_DOWN:
 			setMenuState(SHOWN_APPEARING);
 			break;
@@ -454,12 +454,12 @@ GuiResponse UnifiedWidget::processHover(const GuiEvent& p_unk0x04)
 	return GuiResponse::notUsed();
 }
 
-GuiResponse UnifiedWidget::processNothing(const GuiEvent& p_unk0x04)
+GuiResponse UnifiedWidget::processNothing(const GuiEvent& event)
 {
 	loseFocus();
 
-	if (getMyRect().pointInRect(p_unk0x04.mousePosition)) {
-		switch (p_unk0x04.eventType) {
+	if (getMyRect().pointInRect(event.mousePosition)) {
+		switch (event.eventType) {
 		case UIEvent::MOUSE_LEFT_BUTTON_DOWN:
 		case UIEvent::MOUSE_LEFT_BUTTON_UP:
 			setMenuState(SHOWN_APPEARING);
@@ -542,14 +542,14 @@ GuiResponse TopMenuBar::process(const GuiEvent& event)
 	return GuiResponse::notUsed();
 }
 
-GuiResponse UnifiedWidget::processShown_OutOfTitle(const GuiEvent& p_unk0x04)
+GuiResponse UnifiedWidget::processShown_OutOfTitle(const GuiEvent& event)
 {
 	UnifiedWidget* oldFocus = dynamic_cast<UnifiedWidget*>(getFocus());
 
-	switch (p_unk0x04.eventType) {
+	switch (event.eventType) {
 	case UIEvent::MOUSE_LEFT_BUTTON_DOWN:
 	case UIEvent::MOUSE_LEFT_BUTTON_UP: {
-		GuiResponse response = GuiItem::process(p_unk0x04);
+		GuiResponse response = GuiItem::process(event);
 
 		if (response.wasNotUsed() || response.wasFinished()) {
 			if (response.wasFinished()) {
@@ -564,7 +564,7 @@ GuiResponse UnifiedWidget::processShown_OutOfTitle(const GuiEvent& p_unk0x04)
 	case UIEvent::MOUSE_MOVE: {
 		MenuState state = oldFocus != nullptr ? oldFocus->getMenuState() : NOTHING;
 
-		GuiItem::process(p_unk0x04);
+		GuiItem::process(event);
 
 		if (oldFocus != nullptr) {
 			UnifiedWidget* newFocus = dynamic_cast<UnifiedWidget*>(getFocus());
@@ -581,26 +581,26 @@ GuiResponse UnifiedWidget::processShown_OutOfTitle(const GuiEvent& p_unk0x04)
 	return GuiResponse::notUsed();
 }
 
-GuiResponse UnifiedWidget::processShown(const GuiEvent& p_unk0x04)
+GuiResponse UnifiedWidget::processShown(const GuiEvent& event)
 {
-	if (getMyRect().pointInRect(p_unk0x04.mousePosition)) {
-		return processShown_InTitle(p_unk0x04);
+	if (getMyRect().pointInRect(event.mousePosition)) {
+		return processShown_InTitle(event);
 	}
 
-	return processShown_OutOfTitle(p_unk0x04);
+	return processShown_OutOfTitle(event);
 }
 
-GuiResponse UnifiedWidget::process(const GuiEvent& p_unk0x04)
+GuiResponse UnifiedWidget::process(const GuiEvent& event)
 {
-	if (isVisible() && p_unk0x04.isMouseEvent()) {
+	if (isVisible() && event.isMouseEvent()) {
 		switch (menuState) {
 		case NOTHING:
-			return processNothing(p_unk0x04);
+			return processNothing(event);
 		case HOVER:
-			return processHover(p_unk0x04);
+			return processHover(event);
 		case SHOWN_APPEARING:
 		case SHOWN:
-			return processShown(p_unk0x04);
+			return processShown(event);
 		}
 	}
 

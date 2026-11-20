@@ -6,33 +6,33 @@
 
 namespace RBX::LDraw2Lua {
 
-struct Unknown00473110
+struct RobloxPart
 {
-	Unknown00473110(int p_unk0x04, int p_unk0x08, std::string p_unk0x0c, std::string p_unk0x28);
+	RobloxPart(int shape, int formFactor, std::string size, std::string yOffset);
 
-	int m_unk0x00;
-	int m_unk0x04;
-	std::string m_unk0x08;
-	std::string m_unk0x24;
+	int m_shape;
+	int m_formFactor;
+	std::string m_size;
+	std::string m_yOffset;
 };
 
 class LDraw2RobloxPartMap
 {
 public:
-	LDraw2RobloxPartMap(std::string p_unk0x04, std::string p_unk0x20, std::string p_unk0x3c, int p_unk0x58);
+	LDraw2RobloxPartMap(std::string name, std::string description, std::string ldrawFilename, int fidelity);
 
 	virtual ~LDraw2RobloxPartMap();
 
-	std::string FUN_00471130() const { return m_unk0x3c; }
+	std::string getLDrawFilename() const { return m_ldrawFilename; }
 
-	const Unknown00473110* FUN_00472ae0() const;
-	void FUN_00473100(const Unknown00473110& p_unk0x04);
+	const RobloxPart* getFirstRobloxPart() const;
+	void addRobloxPart(const RobloxPart& part);
 
-	std::string m_unk0x04;
-	std::string m_unk0x20;
-	std::string m_unk0x3c;
-	int m_unk0x58;
-	std::vector<Unknown00473110> m_unk0x5c;
+	std::string m_name;
+	std::string m_description;
+	std::string m_ldrawFilename;
+	int m_fidelity;
+	std::vector<RobloxPart> m_robloxParts;
 };
 
 } // namespace RBX::LDraw2Lua

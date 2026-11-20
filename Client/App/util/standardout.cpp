@@ -10,7 +10,7 @@ namespace RBX {
 
 void StandardOut::print(MessageType type, const std::exception& exp)
 {
-	print(type, exp.what());
+	print(type, "%s", exp.what());
 }
 
 void StandardOut::print(MessageType type, const char* format, ...)

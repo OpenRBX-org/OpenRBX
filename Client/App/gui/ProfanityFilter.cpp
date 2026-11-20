@@ -8,10 +8,10 @@
 
 namespace RBX {
 
-bool WordList::ContainsProfanity(std::string p_unk0x04)
+bool WordList::ContainsProfanity(std::string text)
 {
-	toLower(p_unk0x04);
-	return blacklist.contains(p_unk0x04);
+	toLower(text);
+	return blacklist.contains(text);
 }
 
 WordList::~WordList() = default;
@@ -33,11 +33,11 @@ WordList::WordList()
 
 ProfanityFilter::ProfanityFilter() = default;
 
-bool ProfanityFilter::ContainsProfanity(std::string p_unk0x04)
+bool ProfanityFilter::ContainsProfanity(std::string text)
 {
-	toLower(p_unk0x04);
+	toLower(text);
 
-	std::vector<std::string> words = split(p_unk0x04, " !.?,:;><[]{}|\\/@#$%^&*()_-+=\"");
+	std::vector<std::string> words = split(text, " !.?,:;><[]{}|\\/@#$%^&*()_-+=\"");
 
 	for (unsigned int i = 0; i < words.size(); i++) {
 		if (wordlist.ContainsProfanity(words[i])) {

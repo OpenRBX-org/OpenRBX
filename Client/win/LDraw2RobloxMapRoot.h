@@ -12,23 +12,23 @@ namespace RBX::LDraw2Lua {
 class LDraw2RobloxMapRoot
 {
 public:
-	LDraw2RobloxMapRoot(std::string p_unk0x04);
+	LDraw2RobloxMapRoot(std::string fileName);
 
 	virtual ~LDraw2RobloxMapRoot();
 
-	int FUN_004711c0(std::string p_unk0x04);
-	int FUN_004712c0(std::string p_unk0x04);
-	int FUN_00471430(std::string p_unk0x04);
-	LDraw2RobloxColorMap* FUN_004716b0(int p_unk0x04);
-	int FUN_00471710(int p_unk0x04);
-	LDraw2RobloxPartMap* FUN_00471730(const std::string& p_unk0x04);
-	LDraw2RobloxPartMap* FUN_00471790(const std::string& p_unk0x04);
-	void FUN_00471b90(LDraw2RobloxPartMap* p_unk0x04);
+	int parseFidelity(std::string text);
+	int parseShape(std::string text);
+	int parseFormFactor(std::string text);
+	LDraw2RobloxColorMap* findColorMap(int code);
+	int getRobloxColor(int code);
+	LDraw2RobloxPartMap* findPartMap(const std::string& key);
+	LDraw2RobloxPartMap* lookupPartMap(const std::string& fileName);
+	void addPartMap(LDraw2RobloxPartMap* partMap);
 
-	std::string m_unk0x04;
-	std::string m_unk0x20;
-	std::map<int, LDraw2RobloxColorMap*> m_unk0x3c;
-	std::map<std::string, LDraw2RobloxPartMap*> m_unk0x48;
+	std::string m_fileName;
+	std::string m_schemaVersion;
+	std::map<int, LDraw2RobloxColorMap*> m_colorMaps;
+	std::map<std::string, LDraw2RobloxPartMap*> m_partMaps;
 };
 
 } // namespace RBX::LDraw2Lua

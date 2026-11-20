@@ -13,25 +13,7 @@
 #include "G3D/GImage.h"
 #include "G3D/Array.h"
 
-// For SDL_Event
-#if defined(G3D_OSX)
-#include <SDL/SDL_events.h>
-#elif defined(G3D_WIN32)
-#include <SDL_events.h>
-#else
-#include <SDL.h>
-#endif
-
-
-// Setup the "main" linkage if not using SDL_main
-#if (defined(NO_SDL_MAIN) || defined(_CONSOLE)) && defined(main)
-    #undef main
-#endif
-
 namespace G3D {
-
-/** @deprecated To be replaced in 7.00 with a new implementation. */
-typedef SDL_Event GEvent;
 
 class Rect2D;
 
@@ -40,9 +22,7 @@ class Rect2D;
  and OpenGL context management.  A GWindow may be a user-level window, 
  with a minimize button and frame, or simply a rectangular area within 
  a larger window.  In the latter case, several of the methods (e.g.,
- setCaption) are likely to be ignored by the implementation.  See
- G3D::SDLWindow and the wxWindows, Qt, and Glut implementations in
- the contrib directory.
+ setCaption) are likely to be ignored by the implementation.
    
  Many parts of G3D assume that there is only one
  OS-level window, with one OpenGL context.  (Although you <B>can</B> have
@@ -50,8 +30,7 @@ class Rect2D;
  multiple OpenGL contexts if you manage switching between them yourself).
 
  Subclass this interface to support your preferred window system
- (e.g. ActiveX window, OS/X Carbon, MFC window, glut) or use the 
- generic SDLWindow subclass that supports all platforms.
+ (e.g. ActiveX window, OS/X Carbon, MFC window, glut).
 
  All dimensions are of the client area (inside the frame, if the
  window has a frame).
@@ -73,11 +52,7 @@ class Rect2D;
 
  <B>Implementations</B>
  The following GWindow subclasses already exist: 
- G3D::SDLWindow, 
- G3D::Win32Window, 
- <A HREF="../contrib/wxGWindow">wxGWindow</A> (wxWidgets),
- <A HREF = "../contrib/GlutWindow">GlutWindow</a>,
- and <A HREF="../contrib/CoreyGWindow/QGWindow.h">QGWindow</a> (Qt).
+ G3D::Win32Window.
 
  One typically chooses among these based on the GUI API used 
  to manage the main window.
@@ -187,37 +162,7 @@ public:
 			defaultIconFilename("nodefault") {}
 	};
 
-private:
-
-    /** */
-    class LoopBody {
-    public:
-        union{
-            void (*func)(void*);
-            class GApplet*      applet;
-        };
-
-        void*                   arg;        
-        
-        /** If true, the applet's oneFrame method is invoked in executeLoopBody.
-            If false, func is invoked on arg in  executeLoopBody. */
-        bool                    isGApplet;
-
-        LoopBody() : func(NULL), arg(NULL), isGApplet(false) {}
-        LoopBody(GApplet* a) : applet(a), arg(NULL), isGApplet(true) {}
-        LoopBody(void (*f)(void*), void* a) : func(f), arg(a), isGApplet(false) {}
-    };
-
-    Array<LoopBody>             loopBodyStack;
-
 protected:
-
-    bool notDone() {
-        return loopBodyStack.size() > 0;
-    }
-
-    /** Subclasses should call from their idle function. */
-    void executeLoopBody();
 
     /** Subclasses are required to call this
         from the end of their constructor/create function to
@@ -317,15 +262,6 @@ public:
 
     /** Relative to the window origin */
     virtual void setRelativeMousePosition(const Vector2& p) = 0;
-
-    /** Checks to see if any events are waiting.  If there is an event,
-        returns true and fills out the GEvent structure.  Otherwise
-        returns false.  The caller is responsible for invoking GWindow::notifyResize
-        with any resize events; the GWindow does not notify itself. */
-    virtual bool pollEvent(GEvent& e) {
-        (void)e;
-        return false;
-    }
 
     /** Returns the current mouse position and the state of the mouse buttons.
         It is essential to sample both simultaneously so that the mouse has
@@ -432,97 +368,6 @@ public:
 
     virtual void decMouseHideCount() {
         setMouseHideCount(mouseHideCount() - 1);
-    }
-
-    /** Windows for which this is true require a program
-        to hand control of the main loop to GWindow::startMainLoop.
-        The program's functionality may then be implemented through
-        the "loop body" function.
-    
-        That is, if requiresMainLoop returns true, you must use
-        the following structure:
-        <PRE>
-           void doEvents() {
-              GEvent e;
-              while (window->pollEvent(e)) {
-                  ... // Event handling
-              } 
-           }
-
-           void doGraphics() {
-              renderDevice->beginFrame();
-                  renderDevice->clear(true, true, true);
-                  ...  // draw stuff
-              renderDevice->endFrame();
-           }
-
-           void loopBody(void*) {
-              // all per-frame code; event-handling, physics, networking, AI, etc.
-              doEvents();
-              doLogic();
-              doNetwork();
-              doAI();
-              doGraphics();
-
-              // To end the program, invoke window->popLoopBody
-           }
-
-           window->pushLoopBody(callback, NULL);
-           window->runMainLoop(); // doesn't return
-        </PRE>
-
-        When requiresMainLoop returns false, you may use either the
-        above structure or the following one (which puts you in more
-        control of when graphics vs. other code is executed):
-
-        <PRE>
-            while (true) {
-              doEvents();
-              doLogic();
-              doNetwork();
-              doAI();
-              doGraphics();
-            }       
-        </PRE>
-
-        This design is necessary because some underlying Window APIs
-        (e.g. ActiveX, GLUT) enforce an event-driven structure.
-    */
-    virtual bool requiresMainLoop() const {
-        return false;
-    }
-
-    /** Pushes a function onto the stack of functions called by runMainLoop */
-    virtual void pushLoopBody(void (*body)(void*), void* arg) {
-        loopBodyStack.push(LoopBody(body, arg));
-    }
-
-    /** Invokes GApplet::beginRun after the applet is on the stack. */
-    virtual void pushLoopBody(GApplet* applet);
-
-    /** Pops a loop body off the stack.  If the loop body was a GApplet,
-        invokes GApplet::endRun on it.*/
-    virtual void popLoopBody();
-
-    /**
-     Executes an event loop, invoking callback repeatedly.  Put everything
-     that you want to execute once per frame into the callback function.
-     It is guaranteed safe to call pollEvents and all other GWindow methods
-     from the callback function.
-     
-     The default implementation (for requiresMainLoop() == false GWindows)
-     just calls the callback continuously.  Subclasses should use the
-     notDone() and executeLoopBody() functions.
-     */
-    virtual void runMainLoop() {
-        
-        alwaysAssertM(requiresMainLoop() == false,
-            "This GWindow implementation failed to overwrite runMainLoop "
-            "even though it requires a main loop.");
-
-        while (notDone()) {
-            executeLoopBody();
-        }
     }
 
 private:

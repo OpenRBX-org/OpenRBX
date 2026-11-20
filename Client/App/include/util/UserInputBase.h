@@ -2,11 +2,11 @@
 #define UTIL_USERINPUTBASE_H
 
 #include "util/ContentProvider.h"
+#include "util/KeyCode.h"
 #include "util/NavKeys.h"
 
 #include <G3D/ReferenceCount.h>
 #include <G3D/Vector2.h>
-#include <SDL_keysym.h>
 
 namespace RBX {
 

@@ -3,6 +3,7 @@
 #endif
 #include "vs1.0_inst.h"
 #include <stdio.h>
+#include <string.h>
 #include <string>
 #include <map>
 #include "nvparse_errors.h"

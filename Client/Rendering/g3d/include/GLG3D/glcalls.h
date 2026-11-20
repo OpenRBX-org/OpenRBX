@@ -88,11 +88,18 @@ Vector4 glGetVector4(GLenum which);
         return wglGetCurrentContext();
     }
 
-#elif defined(G3D_LINUX)
+#elif defined(G3D_LINUX) && defined(G3D_OSMESA)
 
     typedef OSMesaContext GLContext;
     inline GLContext glGetCurrentContext() {
         return OSMesaGetCurrentContext();
+    }
+
+#elif defined(G3D_LINUX)
+
+    typedef GLXContext GLContext;
+    inline GLContext glGetCurrentContext() {
+        return glXGetCurrentContext();
     }
 
 #elif defined(G3D_OSX)
@@ -235,8 +242,10 @@ void glMultMatrix(const CoordinateFrame& cf);
 inline void * glGetProcAddress(const char * name){
     #ifdef G3D_WIN32
 	    return (void *)wglGetProcAddress(name);
-    #elif defined(G3D_LINUX)
+    #elif defined(G3D_LINUX) && defined(G3D_OSMESA)
 	    return (void *)OSMesaGetProcAddress(name);
+    #elif defined(G3D_LINUX)
+	    return (void *)glXGetProcAddressARB((const GLubyte*)name);
     #elif defined(G3D_OSX)
 		return G3D::NSGLGetProcAddress((const char*)name);
     #else

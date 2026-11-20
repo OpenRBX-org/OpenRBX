@@ -32,7 +32,7 @@ MouseCommand* DragTool::onMouseDown(
 	return dragger->onMouseDown(uiEvent);
 }
 
-bool FUN_00662530(
+bool hitTestHandles(
 	const Extents& extents,
 	const CoordinateFrame& location,
 	const G3D::Ray& ray,
@@ -58,10 +58,10 @@ bool FUN_00662530(
 	return false;
 }
 
-bool FUN_00662700(const Extents& extents, const G3D::Ray& ray, G3D::Vector3& hitPoint, NormalId& normalId)
+bool hitTestExtentsHandles(const Extents& extents, const G3D::Ray& ray, G3D::Vector3& hitPoint, NormalId& normalId)
 {
 	CoordinateFrame location(extents.center());
-	return FUN_00662530(
+	return hitTestHandles(
 		Extents::fromCenterCorner(G3D::Vector3::zero(), extents.size() * 0.5f), location, ray, hitPoint, normalId
 	);
 }

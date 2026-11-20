@@ -11,12 +11,13 @@
 #include <GLG3D/VAR.h>
 #include <OgreMesh.h>
 #include <exception>
+#include <stdexcept>
 #include <vector>
 
 class ThumbnailGenerator;
 
 namespace Ogre {
-class Unknown00671c70;
+class RbxSubMesh;
 class VisualEngine;
 } // namespace Ogre
 
@@ -36,22 +37,22 @@ public:
 	public:
 		G3D::Array<IndexType> indexArray;
 		G3D::RenderDevice::Primitive primitive;
-		bool m_unk0x1c;
-		int m_unk0x20;
-		Ogre::SubMesh* m_unk0x24;
+		bool m_subMeshDirty;
+		int m_sharedSubMeshIndex;
+		Ogre::SubMesh* m_subMesh;
 
 		Level();
 
 		Level(G3D::RenderDevice::Primitive primitive)
-			: primitive(primitive), m_unk0x1c(true), m_unk0x20(-1), m_unk0x24(nullptr)
+			: primitive(primitive), m_subMeshDirty(true), m_sharedSubMeshIndex(-1), m_subMesh(nullptr)
 		{
 		}
 
 		~Level() override;
 
-		void FUN_005322f0();
+		void releaseSubMesh();
 		void makeHWSubMesh(Ogre::VisualEngine* engine, Ogre::AxisAlignedBox& box);
-		void FUN_00533160(Ogre::VisualEngine* engine, Ogre::AxisAlignedBox& box);
+		void makeSubMesh(Ogre::VisualEngine* engine, Ogre::AxisAlignedBox& box);
 	};
 
 	using LevelRef = G3D::ReferenceCountedPointer<Level>;
@@ -59,7 +60,7 @@ public:
 	G3D::Vector3& getVertex(int index)
 	{
 		if (index < 0 || index >= visibleGeometry.vertexArray.size()) {
-			throw std::exception("RBX Mesh::getVertex() index out of range");
+			throw std::runtime_error("RBX Mesh::getVertex() index out of range");
 		}
 		return visibleGeometry.vertexArray[index];
 	}
@@ -67,7 +68,7 @@ public:
 	const G3D::Vector3& getNormal(int index)
 	{
 		if (index < 0 || index >= visibleGeometry.normalArray.size()) {
-			throw std::exception("RBX Mesh::getNormal() index out of range");
+			throw std::runtime_error("RBX Mesh::getNormal() index out of range");
 		}
 		return visibleGeometry.normalArray[index];
 	}
@@ -110,17 +111,17 @@ protected:
 
 	int detailIndex(double detail) const { return G3D::iClamp((int) detail, 0, levels.size() - 1); }
 
-	std::vector<unsigned short> m_unk0x18;
-	std::vector<G3D::Vector3> m_unk0x28;
-	Ogre::Unknown00671c70* m_unk0x38;
+	std::vector<unsigned short> m_shadowIndices;
+	std::vector<G3D::Vector3> m_shadowVertices;
+	Ogre::RbxSubMesh* m_shadowSubMesh;
 
 public:
-	int m_unk0x3c;
+	int m_meshType;
 
-	static Ogre::MeshPtr g_unk0x0095877c;
+	static Ogre::MeshPtr sharedMesh;
 
-	static void FUN_00532380(Ogre::VisualEngine* engine);
-	void FUN_005324e0(Ogre::VisualEngine* engine);
+	static void updateSharedMesh(Ogre::VisualEngine* engine);
+	void makeShadowSubMesh(Ogre::VisualEngine* engine);
 
 	static G3D::ReferenceCountedPointer<Mesh> aggregate(
 		const std::vector<G3D::ReferenceCountedPointer<Chunk>>& chunkArray,

@@ -196,7 +196,7 @@ PBBMesh::PBBMesh(const G3D::Vector3& size, RenderSurfaceTypes surfaceTypes)
 
 	if (ViewBase::getShadowsEnabled()) {
 		G3D::Vector3 halfSize(size.x * 0.5, size.y * 0.5, size.z * 0.5);
-		BrickMesh::FUN_00514960(halfSize, m_unk0x28, m_unk0x18);
+		BrickMesh::makeShadowBox(halfSize, m_shadowVertices, m_shadowIndices);
 	}
 }
 

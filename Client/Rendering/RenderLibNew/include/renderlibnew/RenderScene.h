@@ -35,10 +35,10 @@ class RenderScene
 	friend class SceneManager;
 
 private:
-	Ogre::RbxSceneNode* m_unk0x00;
-	Ogre::RbxEntity* m_unk0x04;
-	Ogre::MaterialPtr m_unk0x08;
-	Ogre::MeshPtr m_unk0x14;
+	Ogre::RbxSceneNode* m_rootNode;
+	Ogre::RbxEntity* m_entity;
+	Ogre::MaterialPtr m_baseWhite;
+	Ogre::MeshPtr m_dummyMesh;
 	G3D::Array<RenderSurface> proxyArray;
 	G3D::Array<RenderSurface*> diffuseProxyArray;
 	G3D::Array<RenderSurface*> reflectProxyArray;
@@ -71,7 +71,7 @@ public:
 	RenderScene();
 	~RenderScene();
 
-	void FUN_0052c9b0(Ogre::VisualEngine* engine, bool p_unk0x8e);
+	void updateLights(Ogre::VisualEngine* engine, bool useAllLightsInUnshadowedPass);
 	void setThrottle(float t, float m, bool s, float c);
 	void setLighting(const G3D::ReferenceCountedPointer<G3D::Lighting>& L);
 	void presetLighting(

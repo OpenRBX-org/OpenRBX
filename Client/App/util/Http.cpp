@@ -5,6 +5,9 @@
 #include "util/standardout.h"
 
 #include <G3D/format.h>
+#include <algorithm>
+#include <cstring>
+#include <curl/curl.h>
 #include <memory>
 #include <mutex>
 #include <new>
@@ -13,62 +16,22 @@
 #include <zlib.h>
 
 #ifdef _WIN32
-#include <atlbase.h>
-#include <atlstr.h>
-#include <atlutil.h>
-#include <wininet.h>
+#include <windows.h>
 #else
-#include <algorithm>
-#include <cstdlib>
 #include <filesystem>
 #include <system_error>
-#define CPPHTTPLIB_OPENSSL_SUPPORT
-#include <httplib.h>
-#endif
-
-#ifdef _WIN32
-class CHINTERNET
-{
-	HINTERNET handle;
-
-public:
-	CHINTERNET(const CHINTERNET&) = delete;
-	CHINTERNET& operator=(const CHINTERNET&) = delete;
-
-	CHINTERNET(HINTERNET handle) : handle(handle) {}
-	CHINTERNET() : handle(nullptr) {}
-
-	CHINTERNET& operator=(HINTERNET handle)
-	{
-		this->handle = handle;
-		return *this;
-	}
-
-	operator bool() { return handle != nullptr; }
-	operator void*() { return handle; }
-
-	~CHINTERNET() { InternetCloseHandle(handle); }
-};
 #endif
 
 class HttpRequest_source
 {
-#ifdef _WIN32
-	HINTERNET request;
-#else
 	const std::string& body;
 	std::string::size_type offset;
-#endif
 	char buffer[4096];
 	int position;
 	int size;
 
 public:
-#ifdef _WIN32
-	HttpRequest_source(HINTERNET request) : request(request), position(0), size(0) {}
-#else
 	HttpRequest_source(const std::string& body) : body(body), offset(0), position(0), size(0) {}
-#endif
 
 	int read(char* s, int n);
 
@@ -94,6 +57,18 @@ public:
 	int available() const { return size - position; }
 	void consume() { position = size; }
 };
+
+int HttpRequest_source::read(char* s, int n)
+{
+	if (offset == body.size()) {
+		return -1;
+	}
+
+	const std::string::size_type amount = std::min<std::string::size_type>(n, body.size() - offset);
+	body.copy(s, amount, offset);
+	offset += amount;
+	return static_cast<int>(amount);
+}
 
 namespace {
 
@@ -315,8 +290,6 @@ struct UrlParts
 {
 	std::string scheme;
 	std::string host;
-	int port = 0;
-	std::string path;
 };
 
 bool isWebScheme(const std::string& scheme)
@@ -324,163 +297,205 @@ bool isWebScheme(const std::string& scheme)
 	return scheme == "ftp" || scheme == "http" || scheme == "https";
 }
 
-} // namespace
-
-#ifdef _WIN32
-
-namespace RBX {
-
-void ThrowIfFailure(bool success, const char* message)
+struct CurlDeleter
 {
-	if (!success) {
-		DWORD error = GetLastError();
+	void operator()(CURL* curl) const { curl_easy_cleanup(curl); }
+};
 
-		char buffer[256];
-		if (!FormatMessage(
-				FORMAT_MESSAGE_FROM_SYSTEM,
-				nullptr,
-				error,
-				MAKELANGID(LANG_NEUTRAL, SUBLANG_SYS_DEFAULT),
-				buffer,
-				256,
-				nullptr
-			)) {
-			throw std::runtime_error(G3D::format("%s, err=0x%X", message, error));
-		}
+struct CurlUrlDeleter
+{
+	void operator()(CURLU* url) const { curl_url_cleanup(url); }
+};
 
-		throw std::runtime_error(G3D::format("%s, %s", message, buffer));
+struct CurlListDeleter
+{
+	void operator()(curl_slist* list) const { curl_slist_free_all(list); }
+};
+
+typedef std::unique_ptr<curl_slist, CurlListDeleter> CurlList;
+
+std::string getUrlPart(CURLU* url, CURLUPart what)
+{
+	std::string result;
+	char* part = nullptr;
+	if (curl_url_get(url, what, &part, 0) == CURLUE_OK) {
+		result = part;
+		curl_free(part);
 	}
+	return result;
 }
 
-} // namespace RBX
-
-int HttpRequest_source::read(char* s, int n)
+UrlParts crackUrl(const char* url)
 {
-	DWORD numBytes;
-	if (!InternetQueryDataAvailable(request, &numBytes, 0, 0)) {
-		numBytes = 0;
-	}
-	if (numBytes == 0) {
-		return -1;
-	}
-
-	DWORD bytesRead;
-	if (!InternetReadFile(request, s, n, &bytesRead)) {
-		throw std::runtime_error("InternetReadFile failed");
-	}
-	return bytesRead;
-}
-
-static UrlParts crackUrl(const char* url)
-{
-	CUrl crack;
-	crack.CrackUrl(url);
-
 	UrlParts parts;
 
-	switch (crack.GetScheme()) {
-	case ATL_URL_SCHEME_FTP:
-		parts.scheme = "ftp";
-		break;
-	case ATL_URL_SCHEME_HTTP:
-		parts.scheme = "http";
-		break;
-	case ATL_URL_SCHEME_HTTPS:
-		parts.scheme = "https";
-		break;
+	std::unique_ptr<CURLU, CurlUrlDeleter> handle(curl_url());
+	if (!handle) {
+		throw std::bad_alloc();
 	}
 
-	parts.host = crack.GetHostName();
+	if (curl_url_set(handle.get(), CURLUPART_URL, url, CURLU_NON_SUPPORT_SCHEME) == CURLUE_OK) {
+		parts.scheme = getUrlPart(handle.get(), CURLUPART_SCHEME);
+		parts.host = getUrlPart(handle.get(), CURLUPART_HOST);
+	}
 
 	return parts;
 }
 
-static bool readSkipTrustCheck()
+void appendHeader(CurlList& headers, const std::string& header)
+{
+	curl_slist* list = curl_slist_append(headers.get(), header.c_str());
+	if (!list) {
+		throw std::bad_alloc();
+	}
+	headers.release();
+	headers.reset(list);
+}
+
+bool addHeaders(CurlList& headers, const char* additionalHeaders)
+{
+	bool contentType = false;
+
+	std::istringstream lines(additionalHeaders);
+	std::string line;
+
+	while (std::getline(lines, line)) {
+		if (!line.empty() && line.back() == '\r') {
+			line.pop_back();
+		}
+		if (line.empty()) {
+			continue;
+		}
+
+		std::string name = line.substr(0, line.find(':'));
+		RBX::trim(name);
+		RBX::toLower(name);
+		contentType |= name == "content-type";
+
+		appendHeader(headers, line);
+	}
+
+	return contentType;
+}
+
+#ifdef _WIN32
+
+bool readSkipTrustCheck()
 {
 	DWORD value = 0;
-	CRegKey key;
+	auto query = [&value](HKEY root, const char* path) {
+		HKEY key;
+		if (RegOpenKeyExA(root, path, 0, KEY_READ, &key) == ERROR_SUCCESS) {
+			DWORD data;
+			DWORD size = sizeof(data);
+			DWORD type;
+			if (RegQueryValueExA(key, "SkipTrustCheck", nullptr, &type, reinterpret_cast<LPBYTE>(&data), &size) ==
+					ERROR_SUCCESS &&
+				type == REG_DWORD) {
+				value = data;
+			}
+			RegCloseKey(key);
+		}
+	};
 
-	if (key.Open(HKEY_CURRENT_USER, "Software\\ROBLOX Corporation\\Roblox", KEY_READ) == ERROR_SUCCESS) {
-		key.QueryDWORDValue("SkipTrustCheck", value);
-	}
-
-	if (key.Open(HKEY_LOCAL_MACHINE, "Software\\Roblox", KEY_READ) == ERROR_SUCCESS) {
-		key.QueryDWORDValue("SkipTrustCheck", value);
-	}
+	query(HKEY_CURRENT_USER, "Software\\ROBLOX Corporation\\Roblox");
+	query(HKEY_LOCAL_MACHINE, "Software\\Roblox");
 
 	return value == 1;
 }
 
+std::string readInternetSetting(HKEY key, const char* name)
+{
+	char buffer[2048];
+	DWORD size = sizeof(buffer);
+	DWORD type;
+	if (RegQueryValueExA(key, name, nullptr, &type, reinterpret_cast<LPBYTE>(buffer), &size) != ERROR_SUCCESS ||
+		type != REG_SZ) {
+		return std::string();
+	}
+	return std::string(buffer, strnlen(buffer, size));
+}
+
+void setSystemProxy(CURL* curl, const std::string& scheme)
+{
+	HKEY key;
+	if (RegOpenKeyExA(
+			HKEY_CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings", 0, KEY_READ, &key
+		) != ERROR_SUCCESS) {
+		return;
+	}
+
+	DWORD enable = 0;
+	DWORD size = sizeof(enable);
+	DWORD type;
+	std::string server;
+	std::string bypassList;
+	if (RegQueryValueExA(key, "ProxyEnable", nullptr, &type, reinterpret_cast<LPBYTE>(&enable), &size) ==
+			ERROR_SUCCESS &&
+		type == REG_DWORD && enable) {
+		server = readInternetSetting(key, "ProxyServer");
+		bypassList = readInternetSetting(key, "ProxyOverride");
+	}
+	RegCloseKey(key);
+
+	std::string proxy;
+	std::istringstream entries(server);
+	std::string entry;
+	while (std::getline(entries, entry, ';')) {
+		RBX::trim(entry);
+		const std::string::size_type equals = entry.find('=');
+		if (equals == std::string::npos) {
+			if (proxy.empty()) {
+				proxy = entry;
+			}
+		}
+		else if (entry.compare(0, equals, scheme) == 0) {
+			proxy = entry.substr(equals + 1);
+			break;
+		}
+	}
+
+	if (proxy.empty()) {
+		return;
+	}
+
+	std::string bypass;
+	std::istringstream hosts(bypassList);
+	std::string host;
+	while (std::getline(hosts, host, ';')) {
+		RBX::trim(host);
+		if (host == "<local>") {
+			host = "localhost,127.0.0.1,::1";
+		}
+		else if (host.starts_with("*.")) {
+			host.erase(0, 2);
+		}
+		if (host.empty() || host.find('*') != std::string::npos) {
+			continue;
+		}
+		if (!bypass.empty()) {
+			bypass += ',';
+		}
+		bypass += host;
+	}
+
+	curl_easy_setopt(curl, CURLOPT_PROXY, proxy.c_str());
+	curl_easy_setopt(curl, CURLOPT_NOPROXY, bypass.c_str());
+}
+
+void setCertificates(CURL* curl)
+{
+	curl_easy_setopt(curl, CURLOPT_SSL_OPTIONS, static_cast<long>(CURLSSLOPT_NATIVE_CA));
+}
+
 #else
 
-int HttpRequest_source::read(char* s, int n)
-{
-	if (offset == body.size()) {
-		return -1;
-	}
-
-	const std::string::size_type amount = std::min<std::string::size_type>(n, body.size() - offset);
-	body.copy(s, amount, offset);
-	offset += amount;
-	return static_cast<int>(amount);
-}
-
-static UrlParts crackUrl(const char* url)
-{
-	UrlParts parts;
-
-	const std::string text(url);
-	const std::string::size_type schemeEnd = text.find("://");
-	if (schemeEnd == std::string::npos) {
-		return parts;
-	}
-
-	parts.scheme = text.substr(0, schemeEnd);
-	RBX::toLower(parts.scheme);
-
-	const std::string::size_type authorityBegin = schemeEnd + 3;
-	const std::string::size_type pathBegin = text.find_first_of("/?#", authorityBegin);
-	std::string authority = text.substr(authorityBegin, pathBegin - authorityBegin);
-
-	const std::string::size_type userInfoEnd = authority.rfind('@');
-	if (userInfoEnd != std::string::npos) {
-		authority.erase(0, userInfoEnd + 1);
-	}
-
-	const std::string::size_type portBegin = authority.rfind(':');
-	if (portBegin != std::string::npos && authority.find(']', portBegin) == std::string::npos) {
-		parts.port = std::atoi(authority.c_str() + portBegin + 1);
-		authority.erase(portBegin);
-	}
-	else if (parts.scheme == "https") {
-		parts.port = 443;
-	}
-	else if (parts.scheme == "ftp") {
-		parts.port = 21;
-	}
-	else {
-		parts.port = 80;
-	}
-
-	parts.host = authority;
-
-	if (pathBegin != std::string::npos) {
-		parts.path = text.substr(pathBegin, text.find('#', pathBegin) - pathBegin);
-	}
-
-	if (parts.path.empty() || parts.path[0] != '/') {
-		parts.path.insert(0, "/");
-	}
-
-	return parts;
-}
-
-static bool readSkipTrustCheck()
+bool readSkipTrustCheck()
 {
 	return false;
 }
 
-static const char* findCertificateBundle()
+const char* findCertificateBundle()
 {
 	static const char* const bundles[] = {
 		"/etc/pki/tls/certs/ca-bundle.crt",
@@ -500,26 +515,41 @@ static const char* findCertificateBundle()
 	return nullptr;
 }
 
-static void addHeaders(httplib::Headers& headers, const char* additionalHeaders)
+void setSystemProxy(CURL*, const std::string&)
 {
-	std::istringstream lines(additionalHeaders);
-	std::string line;
+}
 
-	while (std::getline(lines, line)) {
-		const std::string::size_type colon = line.find(':');
-		if (colon == std::string::npos) {
-			continue;
-		}
-
-		std::string name = line.substr(0, colon);
-		std::string value = line.substr(colon + 1);
-		RBX::trim(name);
-		RBX::trim(value);
-		headers.emplace(name, value);
+void setCertificates(CURL* curl)
+{
+	static const char* const certificateBundle = findCertificateBundle();
+	if (certificateBundle) {
+		curl_easy_setopt(curl, CURLOPT_CAINFO, certificateBundle);
 	}
 }
 
 #endif
+
+CURL* threadHandle()
+{
+	static std::once_flag initialized;
+	std::call_once(initialized, []() { curl_global_init(CURL_GLOBAL_DEFAULT); });
+
+	thread_local std::unique_ptr<CURL, CurlDeleter> handle(curl_easy_init());
+	if (!handle) {
+		throw std::bad_alloc();
+	}
+
+	curl_easy_reset(handle.get());
+	return handle.get();
+}
+
+size_t writeBody(char* data, size_t size, size_t count, void* body)
+{
+	static_cast<std::string*>(body)->append(data, size * count);
+	return size * count;
+}
+
+} // namespace
 
 namespace RBX {
 
@@ -594,174 +624,6 @@ bool Http::trustCheck(const char* url)
 	return false;
 }
 
-#ifdef _WIN32
-
-static void httpGetPost(
-	bool isPost,
-	const std::string& url,
-	std::istream& data,
-	bool compressData,
-	const char* additionalHeaders,
-	std::string& response
-)
-{
-	if (url.empty()) {
-		throw std::runtime_error("empty url");
-	}
-
-	if (!Http::trustCheck(url.c_str())) {
-		throw std::runtime_error(G3D::format("trust check failed for %s", url.c_str()));
-	}
-
-	CUrl u;
-	u.CrackUrl(url.c_str());
-
-	if (u.GetHostNameLength() == 0) {
-		throw std::runtime_error(G3D::format("'%s' is missing a hostName", url.c_str()));
-	}
-
-	CHINTERNET session(InternetOpen("Roblox", INTERNET_OPEN_TYPE_PRECONFIG, nullptr, nullptr, 0));
-	CHINTERNET connection(InternetConnect(
-		session, u.GetHostName(), u.GetPortNumber(), u.GetUserName(), u.GetPassword(), INTERNET_SERVICE_HTTP, 0, 1
-	));
-
-	CString s = u.GetUrlPath();
-	s += u.GetExtraInfo();
-
-	CHINTERNET request(HttpOpenRequest(
-		connection,
-		isPost ? "POST" : "GET",
-		s,
-		nullptr,
-		nullptr,
-		nullptr,
-		INTERNET_FLAG_EXISTING_CONNECT | INTERNET_FLAG_KEEP_CONNECTION | INTERNET_FLAG_NEED_FILE,
-		1
-	));
-	if (!request) {
-		throw std::runtime_error(G3D::format("HttpOpenRequest failed for %s", url.c_str()));
-	}
-
-	if (additionalHeaders) {
-		if (!HttpAddRequestHeaders(request, additionalHeaders, strlen(additionalHeaders), HTTP_ADDREQ_FLAG_ADD)) {
-			ThrowIfFailure(false, "HttpAddRequestHeaders failed");
-		}
-	}
-
-	const char* acceptEncoding = "Accept-Encoding: gzip\r\n";
-	if (!HttpAddRequestHeaders(request, acceptEncoding, strlen(acceptEncoding), HTTP_ADDREQ_FLAG_ADD)) {
-		ThrowIfFailure(false, "HttpAddRequestHeaders failed");
-	}
-
-	if (!isPost) {
-		if (!HttpSendRequest(request, nullptr, 0, nullptr, 0)) {
-			ThrowIfFailure(false, "HttpSendRequest failed");
-		}
-	}
-	else {
-		std::string uploadData = readStream(data);
-
-		if (compressData) {
-			std::string contentEncodingHeader = "Content-Encoding: gzip\r\n";
-			if (!HttpAddRequestHeaders(
-					request, contentEncodingHeader.c_str(), contentEncodingHeader.size(), HTTP_ADDREQ_FLAG_ADD
-				)) {
-				ThrowIfFailure(false, "HttpAddRequestHeaders failed");
-			}
-			if (!uploadData.empty()) {
-				uploadData = gzipCompress(uploadData);
-			}
-		}
-
-		const size_t uploadSize = uploadData.size();
-
-		if (uploadSize > 10000) {
-			std::string contentSizeHeader = G3D::format("Roblox-Content-Size: %d\r\n", uploadSize);
-			if (!HttpAddRequestHeaders(
-					request, contentSizeHeader.c_str(), contentSizeHeader.size(), HTTP_ADDREQ_FLAG_ADD
-				)) {
-				ThrowIfFailure(false, "HttpAddRequestHeaders failed");
-			}
-
-			std::string contentFirstHeader = G3D::format("Roblox-Content-First: %d\r\n", uploadData[0]);
-			if (!HttpAddRequestHeaders(
-					request, contentFirstHeader.c_str(), contentFirstHeader.size(), HTTP_ADDREQ_FLAG_ADD
-				)) {
-				ThrowIfFailure(false, "HttpAddRequestHeaders failed");
-			}
-
-			std::string contentLastHeader = G3D::format("Roblox-Content-Last: %d\r\n", uploadData[uploadSize - 1]);
-			if (!HttpAddRequestHeaders(
-					request, contentLastHeader.c_str(), contentLastHeader.size(), HTTP_ADDREQ_FLAG_ADD
-				)) {
-				ThrowIfFailure(false, "HttpAddRequestHeaders failed");
-			}
-
-			std::unique_ptr<MD5Hasher> hasher(MD5Hasher::create());
-			hasher->addData(uploadData);
-			std::string contentHashHeader = G3D::format("Roblox-Content-Hash: %s\r\n", hasher->c_str());
-			if (!HttpAddRequestHeaders(
-					request, contentHashHeader.c_str(), contentHashHeader.size(), HTTP_ADDREQ_FLAG_ADD
-				)) {
-				ThrowIfFailure(false, "HttpAddRequestHeaders failed");
-			}
-		}
-
-		INTERNET_BUFFERS buffer = {0};
-		buffer.dwStructSize = sizeof(INTERNET_BUFFERS);
-		buffer.dwBufferTotal = uploadSize;
-
-		if (!HttpSendRequestEx(request, &buffer, nullptr, 0, 0)) {
-			throw std::runtime_error("HttpSendRequestEx failed");
-		}
-
-		try {
-			DWORD bytesWritten;
-			if (!InternetWriteFile(request, uploadData.c_str(), uploadSize, &bytesWritten)) {
-				ThrowIfFailure(false, "InternetWriteFile failed");
-			}
-
-			if (bytesWritten != uploadSize) {
-				throw std::runtime_error("Failed to upload content");
-			}
-		}
-		catch (...) {
-			HttpEndRequest(request, nullptr, 0, 0);
-			throw;
-		}
-
-		if (!HttpEndRequest(request, nullptr, 0, 0)) {
-			ThrowIfFailure(false, "HttpEndRequest failed");
-		}
-	}
-
-	DWORD statusCode;
-	{
-		char szBuffer[80];
-		DWORD dwLen = 80;
-		if (!HttpQueryInfo(request, HTTP_QUERY_STATUS_CODE, szBuffer, &dwLen, nullptr)) {
-			ThrowIfFailure(false, "HttpQueryInfo failed");
-		}
-
-		statusCode = atol(szBuffer);
-	}
-
-	bool gzip = false;
-
-	{
-		char buffer[256];
-		DWORD length = 256;
-		if (HttpQueryInfo(request, HTTP_QUERY_CONTENT_ENCODING, buffer, &length, nullptr)) {
-			gzip = std::string(buffer) == "gzip";
-		}
-	}
-
-	HttpRequest_source source(request);
-	readResponse(source, gzip, statusCode, url, response);
-}
-
-#else
-
 static void httpGetPost(
 	bool isPost,
 	const std::string& url,
@@ -785,32 +647,32 @@ static void httpGetPost(
 		throw std::runtime_error(G3D::format("'%s' is missing a hostName", url.c_str()));
 	}
 
-	httplib::Client client((u.scheme == "https" ? "https://" : "http://") + u.host + ":" + std::to_string(u.port));
-	client.set_follow_location(true);
+	CURL* curl = threadHandle();
 
-	static const char* const certificateBundle = findCertificateBundle();
-	if (certificateBundle) {
-		client.set_ca_cert_path(certificateBundle);
-	}
+	char error[CURL_ERROR_SIZE] = "";
+	curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, error);
+	curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+	curl_easy_setopt(curl, CURLOPT_USERAGENT, "Roblox");
+	curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+	setSystemProxy(curl, u.scheme);
+	setCertificates(curl);
 
-	httplib::Headers headers{{"User-Agent", "Roblox"}};
+	CurlList headers;
+	bool contentType = false;
 
 	if (additionalHeaders) {
-		addHeaders(headers, additionalHeaders);
+		contentType = addHeaders(headers, additionalHeaders);
 	}
 
-	headers.emplace("Accept-Encoding", "gzip");
+	appendHeader(headers, "Accept-Encoding: gzip");
 
-	httplib::Result result;
+	std::string uploadData;
 
-	if (!isPost) {
-		result = client.Get(u.path, headers);
-	}
-	else {
-		std::string uploadData = readStream(data);
+	if (isPost) {
+		uploadData = readStream(data);
 
 		if (compressData) {
-			headers.emplace("Content-Encoding", "gzip");
+			appendHeader(headers, "Content-Encoding: gzip");
 			if (!uploadData.empty()) {
 				uploadData = gzipCompress(uploadData);
 			}
@@ -819,31 +681,48 @@ static void httpGetPost(
 		const size_t uploadSize = uploadData.size();
 
 		if (uploadSize > 10000) {
-			headers.emplace("Roblox-Content-Size", std::to_string(uploadSize));
-			headers.emplace("Roblox-Content-First", std::to_string(uploadData[0]));
-			headers.emplace("Roblox-Content-Last", std::to_string(uploadData[uploadSize - 1]));
+			appendHeader(headers, "Roblox-Content-Size: " + std::to_string(uploadSize));
+			appendHeader(headers, G3D::format("Roblox-Content-First: %d", uploadData[0]));
+			appendHeader(headers, G3D::format("Roblox-Content-Last: %d", uploadData[uploadSize - 1]));
 
 			std::unique_ptr<MD5Hasher> hasher(MD5Hasher::create());
 			hasher->addData(uploadData);
-			headers.emplace("Roblox-Content-Hash", hasher->c_str());
+			appendHeader(headers, G3D::format("Roblox-Content-Hash: %s", hasher->c_str()));
 		}
 
-		result = client.Post(u.path, headers, uploadData, "");
+		if (!contentType) {
+			appendHeader(headers, "Content-Type:");
+		}
+		appendHeader(headers, "Expect:");
+
+		curl_easy_setopt(curl, CURLOPT_POST, 1L);
+		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, uploadData.data());
+		curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE_LARGE, static_cast<curl_off_t>(uploadSize));
 	}
 
-	if (!result) {
+	curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers.get());
+
+	std::string body;
+	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeBody);
+	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &body);
+
+	const CURLcode result = curl_easy_perform(curl);
+	if (result != CURLE_OK) {
 		throw std::runtime_error(
-			G3D::format("HTTP request failed for %s, %s", url.c_str(), httplib::to_string(result.error()).c_str())
+			G3D::format("HTTP request failed for %s, %s", url.c_str(), *error ? error : curl_easy_strerror(result))
 		);
 	}
 
-	const bool gzip = result->get_header_value("Content-Encoding") == "gzip";
+	long statusCode = 0;
+	curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &statusCode);
 
-	HttpRequest_source source(result->body);
-	readResponse(source, gzip, result->status, url, response);
+	curl_header* encoding = nullptr;
+	const bool gzip = curl_easy_header(curl, "Content-Encoding", 0, CURLH_HEADER, -1, &encoding) == CURLHE_OK &&
+					  std::strcmp(encoding->value, "gzip") == 0;
+
+	HttpRequest_source source(body);
+	readResponse(source, gzip, statusCode, url, response);
 }
-
-#endif
 
 void Http::post(std::istream& input, bool compress, std::string& response)
 {

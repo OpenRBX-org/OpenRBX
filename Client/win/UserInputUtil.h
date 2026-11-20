@@ -6,24 +6,202 @@
 
 #include <G3D/Vector2.h>
 
-#define DIRECTINPUT_VERSION 0x0800
-#include <dinput.h>
+enum KeyboardScanCode
+{
+	SCAN_ESCAPE = 0x01,
+	SCAN_1 = 0x02,
+	SCAN_2 = 0x03,
+	SCAN_3 = 0x04,
+	SCAN_4 = 0x05,
+	SCAN_5 = 0x06,
+	SCAN_6 = 0x07,
+	SCAN_7 = 0x08,
+	SCAN_8 = 0x09,
+	SCAN_9 = 0x0a,
+	SCAN_0 = 0x0b,
+	SCAN_MINUS = 0x0c,
+	SCAN_EQUALS = 0x0d,
+	SCAN_BACK = 0x0e,
+	SCAN_TAB = 0x0f,
+	SCAN_Q = 0x10,
+	SCAN_W = 0x11,
+	SCAN_E = 0x12,
+	SCAN_R = 0x13,
+	SCAN_T = 0x14,
+	SCAN_Y = 0x15,
+	SCAN_U = 0x16,
+	SCAN_I = 0x17,
+	SCAN_O = 0x18,
+	SCAN_P = 0x19,
+	SCAN_LBRACKET = 0x1a,
+	SCAN_RBRACKET = 0x1b,
+	SCAN_RETURN = 0x1c,
+	SCAN_LCONTROL = 0x1d,
+	SCAN_A = 0x1e,
+	SCAN_S = 0x1f,
+	SCAN_D = 0x20,
+	SCAN_F = 0x21,
+	SCAN_G = 0x22,
+	SCAN_H = 0x23,
+	SCAN_J = 0x24,
+	SCAN_K = 0x25,
+	SCAN_L = 0x26,
+	SCAN_SEMICOLON = 0x27,
+	SCAN_APOSTROPHE = 0x28,
+	SCAN_GRAVE = 0x29,
+	SCAN_LSHIFT = 0x2a,
+	SCAN_BACKSLASH = 0x2b,
+	SCAN_Z = 0x2c,
+	SCAN_X = 0x2d,
+	SCAN_C = 0x2e,
+	SCAN_V = 0x2f,
+	SCAN_B = 0x30,
+	SCAN_N = 0x31,
+	SCAN_M = 0x32,
+	SCAN_COMMA = 0x33,
+	SCAN_PERIOD = 0x34,
+	SCAN_SLASH = 0x35,
+	SCAN_RSHIFT = 0x36,
+	SCAN_MULTIPLY = 0x37,
+	SCAN_LMENU = 0x38,
+	SCAN_SPACE = 0x39,
+	SCAN_CAPITAL = 0x3a,
+	SCAN_F1 = 0x3b,
+	SCAN_F2 = 0x3c,
+	SCAN_F3 = 0x3d,
+	SCAN_F4 = 0x3e,
+	SCAN_F5 = 0x3f,
+	SCAN_F6 = 0x40,
+	SCAN_F7 = 0x41,
+	SCAN_F8 = 0x42,
+	SCAN_F9 = 0x43,
+	SCAN_F10 = 0x44,
+	SCAN_NUMLOCK = 0x45,
+	SCAN_SCROLL = 0x46,
+	SCAN_NUMPAD7 = 0x47,
+	SCAN_NUMPAD8 = 0x48,
+	SCAN_NUMPAD9 = 0x49,
+	SCAN_SUBTRACT = 0x4a,
+	SCAN_NUMPAD4 = 0x4b,
+	SCAN_NUMPAD5 = 0x4c,
+	SCAN_NUMPAD6 = 0x4d,
+	SCAN_ADD = 0x4e,
+	SCAN_NUMPAD1 = 0x4f,
+	SCAN_NUMPAD2 = 0x50,
+	SCAN_NUMPAD3 = 0x51,
+	SCAN_NUMPAD0 = 0x52,
+	SCAN_DECIMAL = 0x53,
+	SCAN_OEM_102 = 0x56,
+	SCAN_F11 = 0x57,
+	SCAN_F12 = 0x58,
+	SCAN_F13 = 0x64,
+	SCAN_F14 = 0x65,
+	SCAN_F15 = 0x66,
+	SCAN_NUMPADEQUALS = 0x8d,
+	SCAN_NUMPADENTER = 0x9c,
+	SCAN_RCONTROL = 0x9d,
+	SCAN_DIVIDE = 0xb5,
+	SCAN_SYSRQ = 0xb7,
+	SCAN_RMENU = 0xb8,
+	SCAN_PAUSE = 0xc5,
+	SCAN_HOME = 0xc7,
+	SCAN_UP = 0xc8,
+	SCAN_PRIOR = 0xc9,
+	SCAN_LEFT = 0xcb,
+	SCAN_RIGHT = 0xcd,
+	SCAN_END = 0xcf,
+	SCAN_DOWN = 0xd0,
+	SCAN_NEXT = 0xd1,
+	SCAN_INSERT = 0xd2,
+	SCAN_DELETE = 0xd3,
+	SCAN_LWIN = 0xdb,
+	SCAN_RWIN = 0xdc,
+	SCAN_APPS = 0xdd,
+};
 
-SDLKey FUN_0046d6f0(DWORD scanCode);
-int FUN_0046db70(SDLKey key);
-int FUN_0046dff0(SDLKey key);
-RBX::UIEvent::EventType FUN_0046e290(UINT message);
-SDLMod FUN_0046e2e0(const BYTE* keys);
-void FUN_0046d670(const G3D::Vector2& mouseDelta, G3D::Vector2& wrapMouseDelta, G3D::Vector2& position);
-void FUN_0046d6a0(const G3D::Vector2& mouseDelta, G3D::Vector2& wrapMouseDelta, G3D::Vector2& position);
-G3D::Vector2 FUN_0046d6c0(const DIDEVICEOBJECTDATA& data);
-void FUN_0046e530(
+enum VirtualKeyCode
+{
+	VKEY_BACK = 0x08,
+	VKEY_TAB = 0x09,
+	VKEY_RETURN = 0x0d,
+	VKEY_CAPITAL = 0x14,
+	VKEY_ESCAPE = 0x1b,
+	VKEY_SPACE = 0x20,
+	VKEY_PRIOR = 0x21,
+	VKEY_NEXT = 0x22,
+	VKEY_END = 0x23,
+	VKEY_HOME = 0x24,
+	VKEY_LEFT = 0x25,
+	VKEY_UP = 0x26,
+	VKEY_RIGHT = 0x27,
+	VKEY_DOWN = 0x28,
+	VKEY_PRINT = 0x2a,
+	VKEY_SNAPSHOT = 0x2c,
+	VKEY_INSERT = 0x2d,
+	VKEY_DELETE = 0x2e,
+	VKEY_LWIN = 0x5b,
+	VKEY_RWIN = 0x5c,
+	VKEY_APPS = 0x5d,
+	VKEY_NUMPAD0 = 0x60,
+	VKEY_NUMPAD1 = 0x61,
+	VKEY_NUMPAD2 = 0x62,
+	VKEY_NUMPAD3 = 0x63,
+	VKEY_NUMPAD4 = 0x64,
+	VKEY_NUMPAD5 = 0x65,
+	VKEY_NUMPAD6 = 0x66,
+	VKEY_NUMPAD7 = 0x67,
+	VKEY_NUMPAD8 = 0x68,
+	VKEY_NUMPAD9 = 0x69,
+	VKEY_MULTIPLY = 0x6a,
+	VKEY_ADD = 0x6b,
+	VKEY_SUBTRACT = 0x6d,
+	VKEY_DECIMAL = 0x6e,
+	VKEY_DIVIDE = 0x6f,
+	VKEY_F1 = 0x70,
+	VKEY_F2 = 0x71,
+	VKEY_F3 = 0x72,
+	VKEY_F4 = 0x73,
+	VKEY_F5 = 0x74,
+	VKEY_F6 = 0x75,
+	VKEY_F7 = 0x76,
+	VKEY_F8 = 0x77,
+	VKEY_F9 = 0x78,
+	VKEY_F10 = 0x79,
+	VKEY_F11 = 0x7a,
+	VKEY_F12 = 0x7b,
+	VKEY_F13 = 0x7c,
+	VKEY_F14 = 0x7d,
+	VKEY_F15 = 0x7e,
+	VKEY_NUMLOCK = 0x90,
+	VKEY_SCROLL = 0x91,
+	VKEY_LSHIFT = 0xa0,
+	VKEY_RSHIFT = 0xa1,
+	VKEY_LCONTROL = 0xa2,
+	VKEY_RCONTROL = 0xa3,
+	VKEY_LMENU = 0xa4,
+	VKEY_RMENU = 0xa5,
+	VKEY_OEM_102 = 0xe2,
+};
+
+SDLKey keyFromScanCode(unsigned scanCode);
+int scanCodeFromKey(SDLKey key);
+SDLMod modifiersFromKeyState(const unsigned char* keys);
+
+int virtualKeyFromKey(SDLKey key);
+
+#ifdef _WIN32
+RBX::UIEvent::EventType mouseEventType(unsigned message);
+#endif
+
+void moveCursorFree(const G3D::Vector2& mouseDelta, G3D::Vector2& wrapMouseDelta, G3D::Vector2& position);
+void wrapCursorCenter(const G3D::Vector2& mouseDelta, G3D::Vector2& wrapMouseDelta, G3D::Vector2& position);
+void wrapCursorAtEdges(
 	const G3D::Vector2& mouseDelta, G3D::Vector2& wrapMouseDelta, G3D::Vector2& position, const G3D::Vector2& size
 );
-void FUN_0046e560(
+void wrapCursorHorizontalClampTop(
 	const G3D::Vector2& mouseDelta, G3D::Vector2& wrapMouseDelta, G3D::Vector2& position, const G3D::Vector2& size
 );
-void FUN_0046e5f0(
+void wrapCursorHorizontalSticky(
 	const G3D::Vector2& mouseDelta, G3D::Vector2& wrapMouseDelta, G3D::Vector2& position, const G3D::Vector2& size
 );
 

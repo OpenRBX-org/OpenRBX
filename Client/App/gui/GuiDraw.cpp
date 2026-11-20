@@ -55,10 +55,10 @@ bool GuiDrawImage::setImage(Adorn* adorn, const TextureId& textureId)
 	return normal.notNull();
 }
 
-void GuiDrawImage::setImageFromName(Adorn* p_unk0x04, const std::string& p_unk0x08)
+void GuiDrawImage::setImageFromName(Adorn* adorn, const std::string& name)
 {
-	ContentId id = ContentId::fromAssets("Textures\\" + p_unk0x08 + ".png");
-	setImage(p_unk0x04, TextureId(id));
+	ContentId id = ContentId::fromAssets("Textures\\" + name + ".png");
+	setImage(adorn, TextureId(id));
 }
 
 void GuiDrawImage::draw(

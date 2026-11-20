@@ -104,10 +104,10 @@ GuiResponse Widget::process(const GuiEvent& event)
 	return GuiResponse::notUsed();
 }
 
-void VerbWidget::onClick(const GuiEvent& p_unk0x04)
+void VerbWidget::onClick(const GuiEvent& event)
 {
 	if (verb != nullptr && verb->isEnabled()) {
-		verb->doIt(p_unk0x04.iDataState);
+		verb->doIt(event.iDataState);
 	}
 }
 
@@ -116,7 +116,7 @@ Widget::Widget() : widgetState(NOTHING)
 	setGuiSize(G3D::Vector2(100, 24));
 }
 
-VerbWidget::VerbWidget(Verb* p_unk0x04) : verb(p_unk0x04)
+VerbWidget::VerbWidget(Verb* verb) : verb(verb)
 {
 }
 

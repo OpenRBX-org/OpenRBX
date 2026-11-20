@@ -6,12 +6,12 @@ namespace RBX::LDraw2Lua {
 class LDraw2RobloxColorMap
 {
 public:
-	LDraw2RobloxColorMap(int p_unk0x04, int p_unk0x08);
+	LDraw2RobloxColorMap(int ldrawCode, int robloxCode);
 
 	virtual ~LDraw2RobloxColorMap() = default;
 
-	int m_unk0x04;
-	int m_unk0x08;
+	int m_ldrawCode;
+	int m_robloxCode;
 };
 
 } // namespace RBX::LDraw2Lua

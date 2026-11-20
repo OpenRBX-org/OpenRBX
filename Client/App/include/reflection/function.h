@@ -32,7 +32,7 @@ public:
 
 	virtual void execute(DescribedBase* instance, Arguments& arguments) const = 0;
 
-	const SignatureDescriptor& getSignature() const;
+	const SignatureDescriptor& getSignature() const { return signature; }
 
 	const Security security;
 

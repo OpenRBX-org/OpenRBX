@@ -292,12 +292,12 @@ GuiResponse DataModel::processAccelerators(const GuiEvent& event)
 	return GuiResponse::notUsed();
 }
 
-static G3D::Vector2 g_unk0x0095a91c;
+static G3D::Vector2 lastMousePosition;
 
 void DataModel::processEvent(const UIEvent& event)
 {
 	if (event.isMouseEvent()) {
-		g_unk0x0095a91c = G3D::Vector2(event.mousePosition.x, event.mousePosition.y);
+		lastMousePosition = G3D::Vector2(event.mousePosition.x, event.mousePosition.y);
 	}
 
 	GuiEvent guiEvent(event, this);

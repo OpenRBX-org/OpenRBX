@@ -30,9 +30,9 @@ public:
 		}
 	}
 
-	void render2dMe(Adorn* p_unk0x04) override;
+	void render2dMe(Adorn* adorn) override;
 
-	void setSize(const G3D::Vector2& p_unk0x04) { guiImageDraw.setImageSize(p_unk0x04); }
+	void setSize(const G3D::Vector2& size) { guiImageDraw.setImageSize(size); }
 	G3D::Vector2 getSize() const override { return guiImageDraw.getImageSize(); }
 };
 
@@ -48,15 +48,15 @@ public:
 class ChatWidget : public UnifiedWidget
 {
 private:
-	std::string findMenuString(GuiItem* p_unk0x04);
+	std::string findMenuString(GuiItem* item);
 
 	std::string code;
 
 	void onMenuStateChanged() override;
-	GuiResponse process(const GuiEvent& p_unk0x04) override;
+	GuiResponse process(const GuiEvent& event) override;
 
 public:
-	ChatWidget(const std::string& p_unk0x04, std::string p_unk0x08);
+	ChatWidget(const std::string& name, std::string chatCode);
 };
 
 } // namespace RBX

@@ -53,14 +53,14 @@ bool Dragger::intersectingWorldOrOthers(const G3D::Array<Primitive*>& primitives
 }
 
 void Dragger::movePrimitivesGoal(
-	const G3D::Array<Primitive*>& primitives, const G3D::Vector3& p_unk0x08, G3D::Vector3& movedSoFar
+	const G3D::Array<Primitive*>& primitives, const G3D::Vector3& goal, G3D::Vector3& movedSoFar
 )
 {
-	G3D::Vector3 delta = toGrid(p_unk0x08 - movedSoFar);
+	G3D::Vector3 delta = toGrid(goal - movedSoFar);
 
 	if (delta != G3D::Vector3::zero()) {
 		movePrimitives(primitives, delta);
-		movedSoFar = p_unk0x08;
+		movedSoFar = goal;
 	}
 }
 
@@ -127,31 +127,31 @@ void Dragger::searchDownGross(
 
 void Dragger::safePlaceAlongLine(
 	const G3D::Array<Primitive*>& primitives,
-	const G3D::Vector3& p_unk0x08,
-	const G3D::Vector3& p_unk0x0c,
+	const G3D::Vector3& start,
+	const G3D::Vector3& end,
 	G3D::Vector3& movedSoFar,
 	ContactManager& contactManager
 )
 {
-	movePrimitivesGoal(primitives, p_unk0x0c, movedSoFar);
+	movePrimitivesGoal(primitives, end, movedSoFar);
 
 	if (intersectingWorldOrOthers(primitives, contactManager)) {
-		G3D::Vector3 middle = toGrid((p_unk0x08 + p_unk0x0c) * 0.51f);
+		G3D::Vector3 middle = toGrid((start + end) * 0.51f);
 
 		movePrimitivesGoal(primitives, middle, movedSoFar);
 
 		bool intersecting = intersectingWorldOrOthers(primitives, contactManager);
 
-		if (middle == p_unk0x0c) {
+		if (middle == end) {
 			if (intersecting) {
-				movePrimitivesGoal(primitives, p_unk0x08, movedSoFar);
+				movePrimitivesGoal(primitives, start, movedSoFar);
 			}
 		}
 		else if (intersecting) {
-			safePlaceAlongLine(primitives, p_unk0x08, middle, movedSoFar, contactManager);
+			safePlaceAlongLine(primitives, start, middle, movedSoFar, contactManager);
 		}
 		else {
-			safePlaceAlongLine(primitives, middle, p_unk0x0c, movedSoFar, contactManager);
+			safePlaceAlongLine(primitives, middle, end, movedSoFar, contactManager);
 		}
 	}
 }

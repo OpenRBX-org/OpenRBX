@@ -121,7 +121,7 @@ private:
 
 public:
 	std::shared_ptr<SignalInstance> getSignalInstance(SignalSource& source) const;
-	const SignatureDescriptor& getSignature() const;
+	const SignatureDescriptor& getSignature() const { return signature; }
 
 protected:
 	SignalDescriptor(ClassDescriptor& classDescriptor, const char* name);

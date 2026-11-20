@@ -127,8 +127,8 @@ class TopMenuBar : public GuiItem
 {
 public:
 	TopMenuBar() { init(); }
-	TopMenuBar(const std::string& p_unk0x04, Layout::Style p_unk0x08, bool p_unk0x0c = false);
-	TopMenuBar(const std::string& p_unk0x04, Layout::Style p_unk0x08, G3D::Color4 p_unk0x0c);
+	TopMenuBar(const std::string& name, Layout::Style style, bool translucent = false);
+	TopMenuBar(const std::string& name, Layout::Style style, G3D::Color4 backdrop);
 
 	GuiResponse process(const GuiEvent& event) override;
 	void render2d(Adorn* adorn) override;
@@ -199,13 +199,13 @@ public:
 private:
 	MenuState menuState;
 
-	GuiResponse processShown_InTitle(const GuiEvent& p_unk0x04);
-	GuiResponse processShown_OutOfTitle(const GuiEvent& p_unk0x04);
-	GuiResponse processNothing(const GuiEvent& p_unk0x04);
-	GuiResponse processHover(const GuiEvent& p_unk0x04);
-	GuiResponse processShown(const GuiEvent& p_unk0x04);
-	GuiResponse processKey(const GuiEvent& p_unk0x04);
-	void render2dChildren(Adorn* p_unk0x04);
+	GuiResponse processShown_InTitle(const GuiEvent& event);
+	GuiResponse processShown_OutOfTitle(const GuiEvent& event);
+	GuiResponse processNothing(const GuiEvent& event);
+	GuiResponse processHover(const GuiEvent& event);
+	GuiResponse processShown(const GuiEvent& event);
+	GuiResponse processKey(const GuiEvent& event);
+	void render2dChildren(Adorn* adorn);
 	G3D::Vector2 getChildPosition(const GuiItem* child) const override;
 	bool canLoseFocus() override { return true; }
 	void onLoseFocus() override { menuState = NOTHING; }
@@ -217,16 +217,16 @@ protected:
 	virtual void onMenuStateChanged() {}
 	virtual G3D::Vector2 firstChildPosition() const;
 	virtual G3D::Vector2 childOffset() const;
-	virtual void render2dMe(Adorn* p_unk0x04);
+	virtual void render2dMe(Adorn* adorn);
 
 public:
-	UnifiedWidget(const std::string& p_unk0x04);
+	UnifiedWidget(const std::string& name);
 	UnifiedWidget() { init(); }
 
 	MenuState getMenuState() const { return menuState; }
-	void setMenuState(MenuState p_unk0x04);
+	void setMenuState(MenuState state);
 
-	GuiResponse process(const GuiEvent& p_unk0x04) override;
+	GuiResponse process(const GuiEvent& event) override;
 	void render2d(Adorn* adorn) override;
 };
 
@@ -255,7 +255,7 @@ protected:
 	virtual std::string getLabel() const;
 
 public:
-	TextDisplay(const std::string& p_unk0x04, const std::string& p_unk0x08);
+	TextDisplay(const std::string& name, const std::string& text);
 	TextDisplay();
 
 	void render2d(Adorn* adorn) override;

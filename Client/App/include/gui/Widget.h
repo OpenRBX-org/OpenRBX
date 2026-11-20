@@ -59,10 +59,10 @@ private:
 protected:
 	Verb* getVerb() { return verb; }
 	bool isEnabled() override;
-	void onClick(const GuiEvent& p_unk0x04) override;
+	void onClick(const GuiEvent& event) override;
 
 public:
-	VerbWidget(Verb* p_unk0x04);
+	VerbWidget(Verb* verb);
 	VerbWidget();
 	~VerbWidget() override;
 };

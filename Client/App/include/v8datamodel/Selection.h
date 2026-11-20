@@ -209,7 +209,7 @@ public:
 	typename std::vector<T*>::const_iterator end() const { return filteredSelection.end(); }
 
 	template <class _Pr>
-	T* FUN_00598690(_Pr predicate) const
+	T* findFirst(_Pr predicate) const
 	{
 		typename std::vector<T*>::const_iterator it =
 			std::find_if(filteredSelection.begin(), filteredSelection.end(), predicate);

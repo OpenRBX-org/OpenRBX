@@ -76,21 +76,21 @@ class AxisMoveTool : public Named<ArrowToolBase, sAxisMoveTool>
 private:
 	std::unique_ptr<MegaDragger> dragger;
 	std::string cursor;
-	bool m_unk0x44;
-	G3D::Vector2int16 m_unk0x46;
-	G3D::Ray m_unk0x4c;
-	int m_unk0x68;
-	G3D::Vector3 m_unk0x6c;
+	bool m_dragging;
+	G3D::Vector2int16 m_mouseDownPosition;
+	G3D::Ray m_handleRay;
+	int m_axis;
+	G3D::Vector3 m_position;
 
-	static const G3D::Vector3& FUN_0063c5c0()
+	static const G3D::Vector3& snapGrid()
 	{
 		static G3D::Vector3 v(1.0f, 0.4f, 1.0f);
 
 		return v;
 	}
 
-	bool FUN_0063cc60(Extents& extents);
-	bool FUN_0063ce30(const UIEvent& uiEvent, G3D::Vector3& hitPoint, NormalId& normalId);
+	bool computeSelectionExtents(Extents& extents);
+	bool hitTestSelectionHandles(const UIEvent& uiEvent, G3D::Vector3& hitPoint, NormalId& normalId);
 
 	MouseCommand* onMouseDown(const UIEvent& uiEvent) override;
 	void onMouseIdle(const UIEvent& uiEvent) override;
@@ -118,7 +118,7 @@ public:
 	void doIt(IDataState* dataState) override;
 
 private:
-	DataModel* m_unk0x0c;
+	DataModel* m_dataModel;
 };
 
 class RedoVerb : public Verb
@@ -130,7 +130,7 @@ public:
 	void doIt(IDataState* dataState) override;
 
 private:
-	DataModel* m_unk0x0c;
+	DataModel* m_dataModel;
 };
 
 } // namespace RBX

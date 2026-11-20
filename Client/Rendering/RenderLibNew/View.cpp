@@ -28,35 +28,40 @@
 #include <OgreResourceGroupManager.h>
 #include <OgreStringConverter.h>
 #include <cstdio>
+#include <filesystem>
+
+#ifdef _WIN32
 #include <windows.h>
+#endif
 
 namespace RBX::ViewNew {
 
-char g_unk0x0092a250[] = "material %s\n{\n\ttechnique\n\t{\n\t\tpass\n\t\t{\n\t\t\tlighting off\n\t\t\tdepth_write "
-						 "off\n\t\t\ttexture_unit\n\t\t\t{\n\t\t\t\tcubic_texture %s %s %s %s %s %s "
-						 "separateUV\n\t\t\t\ttex_address_mode clamp\n\t\t\t}\n\t\t}\n\t}\n}\n";
+char skyBoxMaterialScript[] =
+	"material %s\n{\n\ttechnique\n\t{\n\t\tpass\n\t\t{\n\t\t\tlighting off\n\t\t\tdepth_write "
+	"off\n\t\t\ttexture_unit\n\t\t\t{\n\t\t\t\tcubic_texture %s %s %s %s %s %s "
+	"separateUV\n\t\t\t\ttex_address_mode clamp\n\t\t\t}\n\t\t}\n\t}\n}\n";
 
-const char* g_unk0x0092a308[] = {"JPG", "BMP", "TGA", "PCX", "ICO", "PNG", "PPM", "PPM"};
+const char* imageFormatSuffixes[] = {"JPG", "BMP", "TGA", "PCX", "ICO", "PNG", "PPM", "PPM"};
 
 void View::invalidateLighting(bool updateSkybox)
 {
 	lightingValid = false;
 	if (updateSkybox) {
-		m_unk0x54 = false;
+		m_skyBoxValid = false;
 	}
 }
 
-bool g_unk0x0092a24c = true;
+bool bevelsEnabled = true;
 
-void FUN_0050b2a0(bool value)
+void setBevelsEnabled(bool value)
 {
-	g_unk0x0092a24c = value;
-	g_unk0x0092a908 = value;
+	bevelsEnabled = value;
+	brickMeshBevels = value;
 }
 
-bool FUN_0050b2b0()
+bool getBevelsEnabled()
 {
-	return g_unk0x0092a24c;
+	return bevelsEnabled;
 }
 
 Instance* View::getWorkspace()
@@ -117,7 +122,7 @@ void View::suppressSkybox()
 	renderLibScene->colorClearValue = clearColor;
 }
 
-void View::FUN_0050c5c0(void* rd)
+void View::loadSkyBox(void* rd)
 {
 	Ogre::VisualEngine* engine = static_cast<Ogre::VisualEngine*>(rd);
 	std::string files[6];
@@ -146,7 +151,8 @@ void View::FUN_0050c5c0(void* rd)
 		bk = lighting->sky->skyBk;
 	}
 
-	std::string skyFolder = ContentProvider::singleton().assetFolder() + "Sky\\";
+	std::string skyFolder =
+		ContentProvider::singleton().getAssetFile("Sky") + (char) std::filesystem::path::preferred_separator;
 	try {
 		files[0] = ContentProvider::singleton().getFile(ft);
 		files[1] = ContentProvider::singleton().getFile(bk);
@@ -171,8 +177,8 @@ void View::FUN_0050c5c0(void* rd)
 	if (baseName.find(".") == std::string::npos) {
 		G3D::GImage::Format format = G3D::GImage::resolveFormat(files[0]);
 		std::string suffix;
-		if (format >= 0 && format < sizeof(g_unk0x0092a308) / sizeof(g_unk0x0092a308[0])) {
-			suffix = std::string(".") + g_unk0x0092a308[format];
+		if (format >= 0 && format < sizeof(imageFormatSuffixes) / sizeof(imageFormatSuffixes[0])) {
+			suffix = std::string(".") + imageFormatSuffixes[format];
 		}
 		else {
 			suffix = ".raw";
@@ -180,23 +186,31 @@ void View::FUN_0050c5c0(void* rd)
 
 		for (int i = 0; i < 6; i++) {
 			moved[i] = files[i] + suffix;
+#ifdef _WIN32
 			MoveFileEx(files[i].c_str(), moved[i].c_str(), MOVEFILE_REPLACE_EXISTING);
+#else
+			std::rename(files[i].c_str(), moved[i].c_str());
+#endif
 			files[i] = moved[i];
 		}
 	}
 
 	std::string shortNames[6];
 	for (int i = 0; i < 6; i++) {
+#ifdef _WIN32
 		char shortName[0x400];
 		GetShortPathName(files[i].c_str(), shortName, sizeof(shortName));
 		shortNames[i] = shortName;
+#else
+		shortNames[i] = files[i];
+#endif
 	}
 
 	char script[0x800];
-	_snprintf(
+	snprintf(
 		script,
 		sizeof(script),
-		g_unk0x0092a250,
+		skyBoxMaterialScript,
 		"rbxskybox",
 		shortNames[1].c_str(),
 		shortNames[0].c_str(),
@@ -214,9 +228,9 @@ void View::FUN_0050c5c0(void* rd)
 		Ogre::MaterialManager::getSingleton().parseScript(stream, "General");
 		Ogre::MaterialPtr material = Ogre::MaterialManager::getSingleton().getByName("rbxskybox");
 
-		Ogre::RbxSceneManager* sceneManager = static_cast<Ogre::RbxSceneManager*>(engine->m_unk0x04);
-		sceneManager->m_unk0x8a68 = skyFolder;
-		engine->m_unk0x04->setSkyBox(
+		Ogre::RbxSceneManager* sceneManager = static_cast<Ogre::RbxSceneManager*>(engine->m_sceneManager);
+		sceneManager->m_skyFolder = skyFolder;
+		engine->m_sceneManager->setSkyBox(
 			true,
 			"rbxskybox",
 			2700.0f,
@@ -231,19 +245,23 @@ void View::FUN_0050c5c0(void* rd)
 
 	if (moved[0] != "") {
 		for (int i = 0; i < 6; i++) {
+#ifdef _WIN32
 			MoveFileEx(moved[i].c_str(), files[i].c_str(), MOVEFILE_REPLACE_EXISTING);
+#else
+			std::rename(moved[i].c_str(), files[i].c_str());
+#endif
 		}
 	}
 }
 
-void View::FUN_0050d3d0(void* rd)
+void View::updateLighting(void* rd)
 {
 	if (!lightingValid) {
 		Ogre::VisualEngine* engine = static_cast<Ogre::VisualEngine*>(rd);
 		Lighting* lighting = dataModel ? dataModel->create<Lighting>() : nullptr;
 
 		if (lighting->isSkySuppressed()) {
-			engine->m_unk0x04->setSkyBox(
+			engine->m_sceneManager->setSkyBox(
 				false,
 				"",
 				5000.0f,
@@ -252,10 +270,10 @@ void View::FUN_0050d3d0(void* rd)
 				Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME
 			);
 		}
-		else if (!m_unk0x54) {
+		else if (!m_skyBoxValid) {
 			try {
-				FUN_0050c5c0(rd);
-				m_unk0x54 = true;
+				loadSkyBox(rd);
+				m_skyBoxValid = true;
 			}
 			catch (G3D::GImage::Error& e) {
 				StandardOut::singleton()->print(MESSAGE_ERROR, "Failed to load sky box. %s", e.reason.c_str());
@@ -273,21 +291,21 @@ void View::FUN_0050d3d0(void* rd)
 		);
 		G3D::Color4 clearColor = lighting->getClearColor();
 		renderLibScene->colorClearValue = clearColor;
-		static_cast<Ogre::RbxSceneManager*>(engine->m_unk0x04)
-			->m_unk0x8a84->FUN_00678540(engine, lighting->getSkyParameters());
+		static_cast<Ogre::RbxSceneManager*>(engine->m_sceneManager)
+			->m_sky->update(engine, lighting->getSkyParameters());
 		lightingValid = true;
 	}
 }
 
 void View::render(void* rd)
 {
-	FUN_0050d3d0(rd);
+	updateLighting(rd);
 	renderLibScene->render(static_cast<G3D::RenderDevice*>(rd), dataModel->getWorkspace()->getGCamera());
 }
 
 View::View(std::shared_ptr<DataModel> dataModel)
 	: dataModel(dataModel), lightingValid(false), renderLibScene(new RenderNew::RenderScene()),
-	  textureManager(new G3D::TextureManager()), m_unk0x54(false)
+	  textureManager(new G3D::TextureManager()), m_skyBoxValid(false)
 {
 	sceneManager.reset(new RenderNew::AggregatingSceneManager(renderLibScene.get()));
 

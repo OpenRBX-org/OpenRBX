@@ -1,8 +1,6 @@
 #include "util/FileSystem.h"
 
 #ifdef _WIN32
-#include <atlpath.h>
-#include <atlstr.h>
 #include <shlobj.h>
 #include <windows.h>
 #else
@@ -105,6 +103,24 @@ HRESULT STDMETHODCALLTYPE VistaAPIs::GetIntegrity(BYTE* pVal)
 	return S_OK;
 }
 
+static std::string narrow(const wchar_t* text)
+{
+	int length = WideCharToMultiByte(CP_ACP, 0, text, -1, nullptr, 0, nullptr, nullptr);
+	std::string result(length > 0 ? length - 1 : 0, 0);
+	if (length > 1) {
+		WideCharToMultiByte(CP_ACP, 0, text, -1, result.data(), length, nullptr, nullptr);
+	}
+	return result;
+}
+
+static std::string withBackslash(std::string path)
+{
+	if (!path.empty() && path.back() != '\\') {
+		path += '\\';
+	}
+	return path;
+}
+
 std::string FileSystem::getUserAppDataDirectory(bool create, const char* subDirectory)
 {
 	VistaAPIs apis;
@@ -122,12 +138,12 @@ std::string FileSystem::getUserAppDataDirectory(bool create, const char* subDire
 
 		LPWSTR lppwstrPath = nullptr;
 		if (apis.SHGetKnownFolderPath(folderID, create ? 0x8000 : 0, nullptr, &lppwstrPath) != E_NOTIMPL) {
-			CString s(lppwstrPath);
+			std::string s = narrow(lppwstrPath);
 			CoTaskMemFree(lppwstrPath);
 
 			s += "\\Roblox\\";
 			if (create) {
-				if (!CreateDirectory(s, nullptr) && GetLastError() != ERROR_ALREADY_EXISTS) {
+				if (!CreateDirectory(s.c_str(), nullptr) && GetLastError() != ERROR_ALREADY_EXISTS) {
 					return "";
 				}
 			}
@@ -135,15 +151,13 @@ std::string FileSystem::getUserAppDataDirectory(bool create, const char* subDire
 			if (subDirectory) {
 				s += subDirectory;
 				if (create) {
-					if (!CreateDirectory(s, nullptr) && GetLastError() != ERROR_ALREADY_EXISTS) {
+					if (!CreateDirectory(s.c_str(), nullptr) && GetLastError() != ERROR_ALREADY_EXISTS) {
 						return "";
 					}
 				}
 			}
 
-			CPath path(s);
-			path.AddBackslash();
-			return (LPCSTR) path;
+			return withBackslash(s);
 		}
 	}
 
@@ -153,19 +167,13 @@ std::string FileSystem::getUserAppDataDirectory(bool create, const char* subDire
 		s += subDirectory;
 	}
 
-	CPath path;
-	HRESULT hr = SHGetFolderPathAndSubDir(
-		nullptr, flags | CSIDL_APPDATA, nullptr, 0, s.c_str(), path.m_strPath.GetBuffer(MAX_PATH)
-	);
+	char path[MAX_PATH];
+	HRESULT hr = SHGetFolderPathAndSubDir(nullptr, flags | CSIDL_APPDATA, nullptr, 0, s.c_str(), path);
 	if (hr != S_OK) {
-		hr = SHGetFolderPathAndSubDir(
-			nullptr, flags | CSIDL_COMMON_APPDATA, nullptr, 0, s.c_str(), path.m_strPath.GetBuffer(MAX_PATH)
-		);
+		hr = SHGetFolderPathAndSubDir(nullptr, flags | CSIDL_COMMON_APPDATA, nullptr, 0, s.c_str(), path);
 	}
 	if (hr == S_OK) {
-		path.m_strPath.ReleaseBuffer();
-		path.AddBackslash();
-		return (LPCSTR) path;
+		return withBackslash(path);
 	}
 	else {
 		return "";
@@ -184,19 +192,17 @@ std::string FileSystem::getCacheDirectory(bool create)
 
 		LPWSTR lppwstrPath = nullptr;
 		if (apis.SHGetKnownFolderPath(folderID, 0x8000, nullptr, &lppwstrPath) != E_NOTIMPL) {
-			CString s(lppwstrPath);
+			std::string s = narrow(lppwstrPath);
 			CoTaskMemFree(lppwstrPath);
 
 			s += "\\Roblox\\";
 			if (create) {
-				if (!CreateDirectory(s, nullptr) && GetLastError() != ERROR_ALREADY_EXISTS) {
+				if (!CreateDirectory(s.c_str(), nullptr) && GetLastError() != ERROR_ALREADY_EXISTS) {
 					return "";
 				}
 			}
 
-			CPath path(s);
-			path.AddBackslash();
-			return (LPCSTR) path;
+			return withBackslash(s);
 		}
 	}
 

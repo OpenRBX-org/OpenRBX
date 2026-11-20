@@ -14,19 +14,19 @@ class LDrawCommand;
 class LuaWriter
 {
 public:
-	LuaWriter(const char* p_unk0x04);
+	LuaWriter(const char* modelName);
 
 	virtual ~LuaWriter();
 
-	void FUN_00474020(std::ostream& stream);
-	void FUN_00474210(LDrawCommand* p_unk0x04);
+	void write(std::ostream& stream);
+	void add(LDrawCommand* command);
 
-	std::string m_unk0x04;
-	std::vector<LuaObjectWriter*> m_unk0x20;
+	std::string m_modelName;
+	std::vector<LuaObjectWriter*> m_objects;
 };
 
 } // namespace RBX::LDraw2Lua
 
-int FUN_004742e0(const std::string& p_unk0x04, const std::string& p_unk0x08);
+int compareNoCase(const std::string& left, const std::string& right);
 
 #endif // LUAWRITER_H

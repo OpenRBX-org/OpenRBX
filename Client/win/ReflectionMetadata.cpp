@@ -3,8 +3,9 @@
 #include "v8xml/SerializerV2.h"
 #include "v8xml/XmlSerializer.h"
 
+#include <G3D/System.h>
+#include <filesystem>
 #include <fstream>
-#include <shlwapi.h>
 
 namespace RBX::Reflection::Metadata {
 
@@ -44,29 +45,29 @@ bool Members::askAddChild(const Instance* instance) const
 	return dynamic_cast<const Member*>(instance) != nullptr;
 }
 
-Class* Classes::FUN_00446130(const ClassDescriptor* descriptor, bool recurse)
+Class* Classes::findClass(const ClassDescriptor* descriptor, bool recurse)
 {
 	Class* result = static_cast<Class*>(findFirstChildByName(descriptor->name.toString()));
 	if (result) {
 		return result;
 	}
 	if (recurse && descriptor->getBase()) {
-		return FUN_00446130(descriptor->getBase(), true);
+		return findClass(descriptor->getBase(), true);
 	}
 	return nullptr;
 }
 
-Class* Reflection::FUN_00446220(const ClassDescriptor* descriptor, bool recurse)
+Class* Reflection::getClass(const ClassDescriptor* descriptor, bool recurse)
 {
-	if (m_unk0xf8) {
-		return m_unk0xf8->FUN_00446130(descriptor, recurse);
+	if (m_classes) {
+		return m_classes->findClass(descriptor, recurse);
 	}
 	return nullptr;
 }
 
-Member* Reflection::FUN_00446920(const PropertyDescriptor* descriptor)
+Member* Reflection::getProperty(const PropertyDescriptor* descriptor)
 {
-	Class* item = m_unk0xf8 ? m_unk0xf8->FUN_00446130(&descriptor->owner, false) : nullptr;
+	Class* item = m_classes ? m_classes->findClass(&descriptor->owner, false) : nullptr;
 	if (item) {
 		Properties* members = item->findFirstChildOfType<Properties>();
 		if (members) {
@@ -76,9 +77,9 @@ Member* Reflection::FUN_00446920(const PropertyDescriptor* descriptor)
 	return nullptr;
 }
 
-Member* Reflection::FUN_00446970(const FunctionDescriptor* descriptor)
+Member* Reflection::getFunction(const FunctionDescriptor* descriptor)
 {
-	Class* item = m_unk0xf8 ? m_unk0xf8->FUN_00446130(&descriptor->owner, false) : nullptr;
+	Class* item = m_classes ? m_classes->findClass(&descriptor->owner, false) : nullptr;
 	if (item) {
 		Functions* members = item->findFirstChildOfType<Functions>();
 		if (members) {
@@ -88,9 +89,9 @@ Member* Reflection::FUN_00446970(const FunctionDescriptor* descriptor)
 	return nullptr;
 }
 
-Member* Reflection::FUN_004469c0(const SignalDescriptor* descriptor)
+Member* Reflection::getEvent(const SignalDescriptor* descriptor)
 {
-	Class* item = m_unk0xf8 ? m_unk0xf8->FUN_00446130(&descriptor->owner, false) : nullptr;
+	Class* item = m_classes ? m_classes->findClass(&descriptor->owner, false) : nullptr;
 	if (item) {
 		Events* members = item->findFirstChildOfType<Events>();
 		if (members) {
@@ -100,7 +101,7 @@ Member* Reflection::FUN_004469c0(const SignalDescriptor* descriptor)
 	return nullptr;
 }
 
-void FUN_00447680()
+void registerClasses()
 {
 	Reflection::classDescriptor();
 	Classes::classDescriptor();
@@ -110,11 +111,11 @@ void FUN_00447680()
 	Events::classDescriptor();
 }
 
-Reflection::Reflection() : m_unk0xf8(nullptr)
+Reflection::Reflection() : m_classes(nullptr)
 {
 }
 
-void Classes::FUN_00447d00(const ClassDescriptor& descriptor)
+void Classes::addHiddenClass(const ClassDescriptor& descriptor)
 {
 	Instance* existing = findFirstChildByName(descriptor.name.toString());
 	if (existing) {
@@ -128,7 +129,7 @@ void Classes::FUN_00447d00(const ClassDescriptor& descriptor)
 	metadata->setParent(this);
 }
 
-void Reflection::FUN_00447e50(std::string fileName)
+void Reflection::load(std::string fileName)
 {
 	if (fileName.size() == 0) {
 		return;
@@ -142,35 +143,31 @@ void Reflection::FUN_00447e50(std::string fileName)
 	readChildren(root.get(), binder);
 	binder.resolveRefs();
 
-	m_unk0xf8 = findFirstChildOfType<Classes>();
-	if (m_unk0xf8) {
-		m_unk0xf8->FUN_00447d00(ClassDescriptor::rootDescriptor());
-		m_unk0xf8->FUN_00447d00(Instance::classDescriptor());
-		m_unk0xf8->FUN_00447d00(Reflection::classDescriptor());
-		m_unk0xf8->FUN_00447d00(Classes::classDescriptor());
-		m_unk0xf8->FUN_00447d00(Item::classDescriptor());
-		m_unk0xf8->FUN_00447d00(Class::classDescriptor());
-		m_unk0xf8->FUN_00447d00(Member::classDescriptor());
-		m_unk0xf8->FUN_00447d00(Properties::classDescriptor());
-		m_unk0xf8->FUN_00447d00(Functions::classDescriptor());
-		m_unk0xf8->FUN_00447d00(Events::classDescriptor());
+	m_classes = findFirstChildOfType<Classes>();
+	if (m_classes) {
+		m_classes->addHiddenClass(ClassDescriptor::rootDescriptor());
+		m_classes->addHiddenClass(Instance::classDescriptor());
+		m_classes->addHiddenClass(Reflection::classDescriptor());
+		m_classes->addHiddenClass(Classes::classDescriptor());
+		m_classes->addHiddenClass(Item::classDescriptor());
+		m_classes->addHiddenClass(Class::classDescriptor());
+		m_classes->addHiddenClass(Member::classDescriptor());
+		m_classes->addHiddenClass(Properties::classDescriptor());
+		m_classes->addHiddenClass(Functions::classDescriptor());
+		m_classes->addHiddenClass(Events::classDescriptor());
 	}
 }
 
-std::shared_ptr<Reflection> Reflection::FUN_004480c0()
+std::shared_ptr<Reflection> Reflection::singleton()
 {
-	static std::shared_ptr<Reflection> g_unk0x00953a24;
-	if (!g_unk0x00953a24) {
-		g_unk0x00953a24 = Creatable<Instance>::create<Reflection>();
+	static std::shared_ptr<Reflection> reflection;
+	if (!reflection) {
+		reflection = Creatable<Instance>::create<Reflection>();
 
-		CString fileName;
-		AfxGetModuleShortFileName(AfxGetApp()->m_hInstance, fileName);
-		CString directory((LPCTSTR) fileName);
-		PathRemoveFileSpec(directory.GetBuffer(directory.GetLength()));
-		directory.ReleaseBuffer();
-		g_unk0x00953a24->FUN_00447e50((LPCTSTR) (directory + "\\ReflectionMetadata.xml"));
+		std::filesystem::path fileName = std::filesystem::path(G3D::System::currentProgramFilename()).parent_path();
+		reflection->load((fileName / "ReflectionMetadata.xml").string().c_str());
 	}
-	return g_unk0x00953a24;
+	return reflection;
 }
 
 RBX::Reflection::BoundProp<bool, 1> Item::prop_Browsable("Browsable", "Reflection", &Item::browsable);

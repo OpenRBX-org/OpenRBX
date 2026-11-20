@@ -8,11 +8,11 @@
 
 extern const char sRenderSettings[];
 
-extern const float g_unk0x008094f8;
-extern const float g_unk0x008094fc;
-extern const float g_unk0x00809500;
-extern const float g_unk0x00809504;
-extern G3D::Vector2int16 g_unk0x0091a2ec;
+extern const float defaultMinShadingQuality;
+extern const float defaultMaxShadingQuality;
+extern const float defaultMinMeshDetail;
+extern const float defaultMaxMeshDetail;
+extern G3D::Vector2int16 defaultWindowSize;
 
 class CRenderSettings;
 
@@ -21,111 +21,111 @@ class CRenderSettings : public RBX::GlobalSettingsItem<CRenderSettings, sRenderS
 public:
 	enum GraphicsMode
 	{
-		c_graphicsModeUnk0x1 = 1,
-		c_graphicsModeUnk0x2,
-		c_graphicsModeUnk0x3,
-		c_graphicsModeUnk0x4,
-		c_graphicsModeUnk0x5,
+		c_graphicsModeAutomatic = 1,
+		c_graphicsModeOpenGLStable,
+		c_graphicsModeDirect3D,
+		c_graphicsModeOpenGL,
+		c_graphicsModeNoGraphics,
 	};
 
 	enum FrameRateManagerMode
 	{
-		c_frameRateManagerModeUnk0x0,
-		c_frameRateManagerModeUnk0x1,
-		c_frameRateManagerModeUnk0x2,
+		c_frameRateManagerModeAutomatic,
+		c_frameRateManagerModeOn,
+		c_frameRateManagerModeOff,
 	};
 
 	enum BevelMode
 	{
-		c_bevelModeUnk0x0,
-		c_bevelModeUnk0x1,
-		c_bevelModeUnk0x2,
+		c_bevelModeAutomatic,
+		c_bevelModeOn,
+		c_bevelModeOff,
 	};
 
 	enum ShadowMode
 	{
-		c_shadowModeUnk0x0,
-		c_shadowModeUnk0x1,
-		c_shadowModeUnk0x2,
+		c_shadowModeAutomatic,
+		c_shadowModeOn,
+		c_shadowModeOff,
 	};
 
 	enum AntialiasingMode
 	{
-		c_antialiasingModeUnk0x0,
-		c_antialiasingModeUnk0x1,
-		c_antialiasingModeUnk0x2,
+		c_antialiasingModeAutomatic,
+		c_antialiasingModeOn,
+		c_antialiasingModeOff,
 	};
 
 	enum AASamples
 	{
-		c_aaSamplesUnk0x1 = 1,
-		c_aaSamplesUnk0x4 = 4,
-		c_aaSamplesUnk0x8 = 8,
+		c_aaSamplesNone = 1,
+		c_aaSamples4 = 4,
+		c_aaSamples8 = 8,
 	};
 
 	CRenderSettings();
 
-	float FUN_00448290() const { return m_unk0x10c; }
+	float getMinShadingQuality() const { return m_minShadingQuality; }
 
-	float FUN_004482a0() const { return m_unk0x110; }
+	float getMaxShadingQuality() const { return m_maxShadingQuality; }
 
-	float FUN_004482b0() const { return m_unk0x114; }
+	float getMinMeshDetail() const { return m_minMeshDetail; }
 
-	float FUN_004482c0() const { return m_unk0x118; }
+	float getMaxMeshDetail() const { return m_maxMeshDetail; }
 
-	BevelMode FUN_004482d0() const;
-	AntialiasingMode FUN_004482e0() const;
-	AASamples FUN_004482f0() const;
-	G3D::Vector2int16 FUN_00448300() const;
-	G3D::Vector2int16 FUN_00448310() const;
-	int FUN_00448320() const;
-	void FUN_0044cda0(AASamples p_unk0x04);
-	void FUN_0044cdd0(G3D::Vector2int16 p_unk0x04);
-	void FUN_0044ce00(G3D::Vector2int16 p_unk0x04);
-	void FUN_0044ce30(float p_unk0x04);
-	void FUN_0044ced0(float p_unk0x04);
-	void FUN_0044cf70(float p_unk0x04);
-	void FUN_0044cfe0(float p_unk0x04);
-	void FUN_0044d050(int p_unk0x04);
-	void FUN_0044d0b0(GraphicsMode p_unk0x04);
-	void FUN_0044d1b0(bool p_unk0x04);
-	void FUN_0044d0e0(FrameRateManagerMode p_unk0x04);
-	void FUN_0044d110(BevelMode p_unk0x04);
-	void FUN_0044d140(AntialiasingMode p_unk0x04);
-	void FUN_0044d170(ShadowMode p_unk0x04);
-	GraphicsMode FUN_0044d430();
+	BevelMode getBevelMode() const;
+	AntialiasingMode getAntialiasingMode() const;
+	AASamples getAASamples() const;
+	G3D::Vector2int16 getFullscreenSize() const;
+	G3D::Vector2int16 getWindowSize() const;
+	int getAggregateSize() const;
+	void setAASamples(AASamples value);
+	void setFullscreenSize(G3D::Vector2int16 value);
+	void setWindowSize(G3D::Vector2int16 value);
+	void setMinShadingQuality(float value);
+	void setMaxShadingQuality(float value);
+	void setMinMeshDetail(float value);
+	void setMaxMeshDetail(float value);
+	void setAggregateSize(int value);
+	void setGraphicsMode(GraphicsMode value);
+	void updateQualityProfile(bool value);
+	void setFrameRateManagerMode(FrameRateManagerMode value);
+	void setBevelMode(BevelMode value);
+	void setAntialiasingMode(AntialiasingMode value);
+	void setShadowMode(ShadowMode value);
+	GraphicsMode getLatchedGraphicsMode();
 
-	GraphicsMode FUN_00468a60() const { return m_unk0xf8; }
-	ShadowMode FUN_00776c60() const { return m_unk0x104; }
-	FrameRateManagerMode FUN_00776c70() const { return m_unk0x108; }
+	GraphicsMode getGraphicsMode() const { return m_graphicsMode; }
+	ShadowMode getShadowMode() const { return m_shadowMode; }
+	FrameRateManagerMode getFrameRateManagerMode() const { return m_frameRateManagerMode; }
 
-	GraphicsMode m_unk0xf8;
-	BevelMode m_unk0xfc;
-	AntialiasingMode m_unk0x100;
-	ShadowMode m_unk0x104;
-	FrameRateManagerMode m_unk0x108;
-	float m_unk0x10c;
-	float m_unk0x110;
-	float m_unk0x114;
-	float m_unk0x118;
-	bool m_unk0x11c;
-	std::string m_unk0x120;
-	G3D::Vector2int16 m_unk0x13c;
-	G3D::Vector2int16 m_unk0x140;
+	GraphicsMode m_graphicsMode;
+	BevelMode m_bevelMode;
+	AntialiasingMode m_antialiasingMode;
+	ShadowMode m_shadowMode;
+	FrameRateManagerMode m_frameRateManagerMode;
+	float m_minShadingQuality;
+	float m_maxShadingQuality;
+	float m_minMeshDetail;
+	float m_maxMeshDetail;
+	bool m_delaySwapBuffer;
+	std::string m_profileName;
+	G3D::Vector2int16 m_fullscreenSize;
+	G3D::Vector2int16 m_windowSize;
 };
 
-extern CRenderSettings::GraphicsMode g_unk0x00953ae0;
+extern CRenderSettings::GraphicsMode latchedGraphicsMode;
 
-inline CRenderSettings::GraphicsMode CRenderSettings::FUN_0044d430()
+inline CRenderSettings::GraphicsMode CRenderSettings::getLatchedGraphicsMode()
 {
-	if (g_unk0x00953ae0 == 0) {
-		g_unk0x00953ae0 = m_unk0xf8;
+	if (latchedGraphicsMode == 0) {
+		latchedGraphicsMode = m_graphicsMode;
 	}
-	return g_unk0x00953ae0;
+	return latchedGraphicsMode;
 }
 
-extern RBX::Reflection::BoundProp<bool, 1> g_unk0x00953c68;
+extern RBX::Reflection::BoundProp<bool, 1> prop_delaySwapBuffer;
 
-extern CRenderSettings::AASamples g_unk0x0091a2e8;
+extern CRenderSettings::AASamples aaSamples;
 
 #endif // RENDERSETTINGS_H

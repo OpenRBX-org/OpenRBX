@@ -275,16 +275,16 @@ float Math::angle(const Vector3& v0, const Vector3& v1)
 	return acosf(dot);
 }
 
-float Math::elevationAngle(const Vector3& p_unk0x04)
+float Math::elevationAngle(const Vector3& direction)
 {
-	if (p_unk0x04.y >= 1.0f) {
+	if (direction.y >= 1.0f) {
 		return 1.57079637f;
 	}
-	if (p_unk0x04.y <= -1.0f) {
+	if (direction.y <= -1.0f) {
 		return -1.57079637f;
 	}
 
-	return asinf(p_unk0x04.y);
+	return asinf(direction.y);
 }
 
 bool Math::fuzzyEq(const Vector3& v0, const Vector3& v1, float epsilon)
@@ -466,9 +466,9 @@ const Matrix3& Math::matrixTiltNegativeZ()
 	return m;
 }
 
-const Matrix3 Math::matrixTiltQuadrant(int p_unk0x04)
+const Matrix3 Math::matrixTiltQuadrant(int quadrant)
 {
-	switch (p_unk0x04) {
+	switch (quadrant) {
 	case 0:
 		return Matrix3(1.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f);
 	case 1:
@@ -482,9 +482,9 @@ const Matrix3 Math::matrixTiltQuadrant(int p_unk0x04)
 	}
 }
 
-int Math::toYAxisQuadrant(const CoordinateFrame& p_unk0x04)
+int Math::toYAxisQuadrant(const CoordinateFrame& frame)
 {
-	Vector3 look = p_unk0x04.lookVector();
+	Vector3 look = frame.lookVector();
 
 	return radiansToQuadrant(atan2(-look.x, -look.z));
 }
@@ -643,12 +643,12 @@ float Math::maxAxisLength(const Vector3& v)
 	return std::max(answer[0], std::max(answer[1], answer[2]));
 }
 
-Vector3 Math::closestPointOnRay(const Ray& p_unk0x08, const Ray& p_unk0x0c)
+Vector3 Math::closestPointOnRay(const Ray& ray, const Ray& other)
 {
-	Vector3 pa = p_unk0x08.origin;
-	Vector3 pb = p_unk0x0c.origin;
-	Vector3 ua = p_unk0x08.direction;
-	Vector3 ub = p_unk0x0c.direction;
+	Vector3 pa = ray.origin;
+	Vector3 pb = other.origin;
+	Vector3 ua = ray.direction;
+	Vector3 ub = other.direction;
 	Vector3 p = pb - pa;
 	float uaub = ua.dot(ub);
 	float q1 = ua.dot(p);

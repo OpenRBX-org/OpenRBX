@@ -14,40 +14,40 @@ namespace Ogre {
 class TwoDManager : public RenderQueueListener
 {
 public:
-	struct Unk0x30
+	struct Sprite
 	{
-		float m_unk0x00;
-		float m_unk0x04;
-		float m_unk0x08;
-		float m_unk0x0c;
-		float m_unk0x10;
-		float m_unk0x14;
-		float m_unk0x18;
-		float m_unk0x1c;
-		uint32 m_unk0x20;
-		int m_unk0x24;
-		int m_unk0x28;
-		int m_unk0x2c;
+		float x1;
+		float y1;
+		float x2;
+		float y2;
+		float tx1;
+		float ty1;
+		float tx2;
+		float ty2;
+		uint32 colour;
+		int texHandle;
+		int operationType;
+		int segment;
 	};
 
-	struct Unk0x10
+	struct VertexChunk
 	{
-		uint32 m_unk0x00;
-		int m_unk0x04;
-		int m_unk0x08;
-		int m_unk0x0c;
+		uint32 texHandle;
+		int operationType;
+		int segment;
+		int vertexCount;
 	};
 
 	~TwoDManager() override;
 	TwoDManager();
 
-	void FUN_0067c6c0(
-		SceneManager* sceneManager, RenderTarget* target, uint8 queueGroupId, bool p_unk0x09, bool p_unk0x0a
+	void init(
+		SceneManager* sceneManager, RenderTarget* target, uint8 queueGroupId, bool afterQueue, bool unitCoordinates
 	);
-	void FUN_0067c710();
-	void FUN_0067cb20(size_t numVertices);
-	void FUN_0067cec0();
-	void FUN_0067d9e0(
+	void prepareForRender();
+	void createHardwareBuffer(size_t numVertices);
+	void renderBuffer();
+	void spriteBltFull(
 		std::string texture,
 		const G3D::Color4& color,
 		float x0,
@@ -59,22 +59,22 @@ public:
 		float u1,
 		float v1
 	);
-	void FUN_0067dcc0(int type, float x0, float y0, float x1, float y1, const G3D::Color4& color);
-	void FUN_0067dd70(float x0, float y0, float x1, float y1, const G3D::Color4& color);
+	void rectBlt(int type, float x0, float y0, float x1, float y1, const G3D::Color4& color);
+	void lineBlt(float x0, float y0, float x1, float y1, const G3D::Color4& color);
 
 	void renderQueueStarted(uint8 queueGroupId, const String& invocation, bool& skipThisInvocation) override;
 	void renderQueueEnded(uint8 queueGroupId, const String& invocation, bool& repeatThisInvocation) override;
 
 private:
-	SceneManager* m_unk0x04;
-	uint8 m_unk0x08;
-	bool m_unk0x09;
-	bool m_unk0x0a;
-	RenderTarget* m_unk0x0c;
-	RenderOperation m_unk0x10;
-	HardwareVertexBufferSharedPtr m_unk0x24;
+	SceneManager* m_sceneManager;
+	uint8 m_targetQueue;
+	bool m_afterQueue;
+	bool m_unitCoordinates;
+	RenderTarget* m_renderTarget;
+	RenderOperation m_renderOperation;
+	HardwareVertexBufferSharedPtr m_hardwareBuffer;
 	HardwareIndexBufferSharedPtr m_unk0x30;
-	std::list<Unk0x30> m_unk0x3c;
+	std::list<Sprite> m_sprites;
 };
 
 } // namespace Ogre

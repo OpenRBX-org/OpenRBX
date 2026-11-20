@@ -18,16 +18,8 @@ if (ENABLE_CLANG_TIDY)
   set_source_files_properties(Client/App/v8world/Contact.cpp PROPERTIES SKIP_LINTING ON)
 endif()
 
-math(EXPR bits "8 * ${CMAKE_SIZEOF_VOID_P}")
-message(STATUS "Building ${bits}-bit binaries")
-if (bits EQUAL 64)
-  set(OPENRBX_FMOD fmodex64)
-  set(OPENRBX_ARCH x64)
-  set(OPENRBX_MIDL_ENV x64)
-else()
-  set(OPENRBX_FMOD fmodex)
-  set(OPENRBX_ARCH x86)
-  set(OPENRBX_MIDL_ENV win32)
+if (NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
+  message(FATAL_ERROR "OpenRBX only builds 64-bit binaries")
 endif()
 
 function(add_cxx_warning WARNING)
@@ -72,7 +64,6 @@ set(OPENRBX_3RDPARTY "${PROJECT_SOURCE_DIR}/3rdparty")
 
 set(OPENRBX_G3D_INCLUDE_DIR   "${PROJECT_SOURCE_DIR}/Client/Rendering/g3d/include")
 set(OPENRBX_LUA_INCLUDE_DIR   "${PROJECT_SOURCE_DIR}/Client/App/lua-5.1.1/src")
-set(OPENRBX_SDL_INCLUDE_DIR   "${PROJECT_SOURCE_DIR}/Client/Rendering/SDL-1.2.6/include")
 set(OPENRBX_MESA_INCLUDE_DIR  "${PROJECT_SOURCE_DIR}/Client/Rendering/Mesa-6.5/include")
 set(OPENRBX_G3D_EXTRA_INCLUDE_DIRS
   "${PROJECT_SOURCE_DIR}/Client/Rendering/g3d/png"
@@ -81,28 +72,33 @@ set(OPENRBX_G3D_EXTRA_INCLUDE_DIRS
 
 if (WIN32)
   add_library(fmodex IMPORTED UNKNOWN)
-  set_property(TARGET fmodex PROPERTY IMPORTED_LOCATION "${PROJECT_SOURCE_DIR}/Client/fmod/api/lib/${OPENRBX_FMOD}_vc.lib")
+  set_property(TARGET fmodex PROPERTY IMPORTED_LOCATION "${PROJECT_SOURCE_DIR}/Client/fmod/api/lib/fmodex64_vc.lib")
 else()
   add_library(fmodex SHARED IMPORTED)
-  set_property(TARGET fmodex PROPERTY IMPORTED_LOCATION "${PROJECT_SOURCE_DIR}/Client/fmod/api/lib/lib${OPENRBX_FMOD}.so")
+  set_property(TARGET fmodex PROPERTY IMPORTED_LOCATION "${PROJECT_SOURCE_DIR}/Client/fmod/api/lib/libfmodex64.so")
   set_property(TARGET fmodex PROPERTY IMPORTED_NO_SONAME TRUE)
 endif()
 set_property(TARGET fmodex PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${PROJECT_SOURCE_DIR}/Client/fmod/api/inc")
 
 if (WIN32)
   set(OPENRBX_RUNTIME_FILES
-    Client/fmod/api/${OPENRBX_FMOD}.dll
+    Client/fmod/api/fmodex64.dll
     Client/win/AppSettings.xml
     Client/win/ReflectionMetadata.xml
     Client/win/copyrights.txt
   )
 else()
   set(OPENRBX_RUNTIME_FILES
-    Client/fmod/api/lib/lib${OPENRBX_FMOD}.so
+    Client/fmod/api/lib/libfmodex64.so
+    Client/win/AppSettings.xml
+    Client/win/ReflectionMetadata.xml
+    Client/win/copyrights.txt
   )
 
   set(THREADS_PREFER_PTHREAD_FLAG ON)
   find_package(Threads REQUIRED)
+  find_package(OpenGL REQUIRED)
+  find_package(X11 REQUIRED)
 endif()
 set(OPENRBX_RUNTIME_OUTPUTS)
 foreach(file ${OPENRBX_RUNTIME_FILES})
@@ -117,11 +113,34 @@ add_custom_target(runtime_files DEPENDS ${OPENRBX_RUNTIME_OUTPUTS})
 
 add_subdirectory(3rdparty)
 
+find_package(Qt6 REQUIRED COMPONENTS Widgets Core5Compat)
+
+file(GLOB OPENRBX_SCINTILLA_SOURCES
+  "${PROJECT_SOURCE_DIR}/3rdparty/scintilla/src/*.cxx"
+  "${PROJECT_SOURCE_DIR}/3rdparty/scintilla/qt/ScintillaEditBase/*.cpp"
+  "${PROJECT_SOURCE_DIR}/3rdparty/scintilla/qt/ScintillaEditBase/*.h"
+  "${PROJECT_SOURCE_DIR}/3rdparty/lexilla/src/Lexilla.cxx"
+  "${PROJECT_SOURCE_DIR}/3rdparty/lexilla/lexlib/*.cxx"
+  "${PROJECT_SOURCE_DIR}/3rdparty/lexilla/lexers/*.cxx"
+)
+add_library(scintilla STATIC ${OPENRBX_SCINTILLA_SOURCES})
+set_target_properties(scintilla PROPERTIES AUTOMOC ON CXX_STANDARD 17)
+target_compile_definitions(scintilla PRIVATE SCINTILLA_QT=1 SCI_LEXER=1 LEXILLA_NO_EXPORT=1 _CRT_SECURE_NO_DEPRECATE=1)
+target_compile_definitions(scintilla PUBLIC EXPORT_IMPORT_API=)
+target_include_directories(scintilla PUBLIC
+  "${PROJECT_SOURCE_DIR}/3rdparty/scintilla/include"
+  "${PROJECT_SOURCE_DIR}/3rdparty/scintilla/src"
+  "${PROJECT_SOURCE_DIR}/3rdparty/scintilla/qt/ScintillaEditBase"
+  "${PROJECT_SOURCE_DIR}/3rdparty/lexilla/include"
+)
+target_include_directories(scintilla PRIVATE "${PROJECT_SOURCE_DIR}/3rdparty/lexilla/lexlib")
+target_link_libraries(scintilla PUBLIC Qt6::Widgets Qt6::Core5Compat)
+
 if (WIN32)
   set(OPENRBX_G3D_LIBS   graphics3d glg3d)
   set(OPENRBX_MESA_LIBS  opengl32 glu32 osmesa32)
 else()
-  set(OPENRBX_G3D_LIBS   glg3d graphics3d)
+  set(OPENRBX_G3D_LIBS   glg3d_osmesa graphics3d)
   set(OPENRBX_MESA_LIBS  glu osmesa)
 endif()
 
@@ -307,7 +326,7 @@ set(OPENRBX_APP_SOURCES
   Client/App/v8datamodel/UserController.cpp
   Client/App/v8datamodel/Value.cpp
   Client/App/v8datamodel/Visit.cpp
-  Client/App/v8datamodel/Unknown005d2700.cpp
+  Client/App/v8datamodel/DocumentVerbs.cpp
   Client/App/v8datamodel/factoryregistration.cpp
   Client/App/v8tree/Service.cpp
 )
@@ -452,7 +471,7 @@ set(OPENRBX_APPDRAW_CLIENT_SOURCES
   Client/Rendering/AppDraw/RbxSky.cpp
   Client/Rendering/AppDraw/RbxSubEntity.cpp
   Client/Rendering/AppDraw/TwoDManager.cpp
-  Client/Rendering/AppDraw/Unknown0067eb00.cpp
+  Client/Rendering/AppDraw/Quadric.cpp
   Client/Rendering/AppDraw/VisualEngine.cpp
 )
 
@@ -481,7 +500,6 @@ set(OPENRBX_3RDPARTY_INCLUDE_DIRS
   "${OPENRBX_G3D_INCLUDE_DIR}"
   "${OPENRBX_LUA_INCLUDE_DIR}"
   ${OPENRBX_G3D_EXTRA_INCLUDE_DIRS}
-  "${OPENRBX_SDL_INCLUDE_DIR}"
 )
 if (NOT WIN32)
   list(APPEND OPENRBX_3RDPARTY_INCLUDE_DIRS "${OPENRBX_MESA_INCLUDE_DIR}")
@@ -563,11 +581,7 @@ add_engine_library(app
 )
 
 if (TARGET app)
-  target_link_libraries(app PRIVATE fmodex)
-  if (NOT WIN32)
-    target_include_directories(app PRIVATE "${OPENRBX_3RDPARTY}/cpp-httplib")
-    target_link_libraries(app PRIVATE OpenSSL::SSL OpenSSL::Crypto)
-  endif()
+  target_link_libraries(app PRIVATE fmodex CURL::libcurl)
 endif()
 
 add_engine_library(network
@@ -622,6 +636,7 @@ target_link_libraries(webservice PRIVATE
   ${OPENRBX_G3D_LIBS}
   ${OPENRBX_MESA_LIBS}
   fmodex
+  CURL::libcurl
 )
 add_dependencies(webservice runtime_files)
 
@@ -629,6 +644,7 @@ if (WIN32)
   target_sources(webservice PRIVATE WebService/WebService.rc)
   target_link_libraries(webservice PRIVATE
     advapi32
+    dbghelp
     gdi32
     ole32
     setupapi
@@ -636,17 +652,16 @@ if (WIN32)
     shlwapi
     user32
     version
-    wininet
     ws2_32
   )
 else()
-  target_link_libraries(webservice PRIVATE OpenSSL::SSL OpenSSL::Crypto Threads::Threads ${CMAKE_DL_LIBS})
-  set_target_properties(webservice PROPERTIES BUILD_RPATH "$ORIGIN" INSTALL_RPATH "$ORIGIN")
+  target_link_libraries(webservice PRIVATE Threads::Threads ${CMAKE_DL_LIBS})
+  set_target_properties(webservice PROPERTIES BUILD_WITH_INSTALL_RPATH TRUE INSTALL_RPATH "$ORIGIN")
 endif()
 
 if (MSVC)
   target_link_options(webservice PRIVATE "-MAP:$<TARGET_FILE_DIR:webservice>/$<TARGET_FILE_BASE_NAME:webservice>.map" "/OPT:REF,ICF")
-  foreach(lib zlib.lib G3D.lib G3D-debug.lib GLG3D.lib GLG3D-debug.lib sdl.lib sdlmain.lib glut32.lib)
+  foreach(lib zlib.lib G3D.lib G3D-debug.lib GLG3D.lib GLG3D-debug.lib glut32.lib)
     target_link_options(webservice PRIVATE "/NODEFAULTLIB:${lib}")
   endforeach()
   set_property(TARGET webservice PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
@@ -674,10 +689,6 @@ if (EXISTS "${CLANGFORMAT_BIN}")
       add_custom_target(clang-format ${CLANGFORMAT_BIN} -i "--files=${CMAKE_CURRENT_BINARY_DIR}/openrbx_sources.txt")
     endif()
   endif()
-endif()
-
-if (NOT WIN32)
-  return()
 endif()
 
 add_engine_library(appdraw_rbxgfx
@@ -710,119 +721,13 @@ foreach(lib rbxviewnew renderlibnew appdraw_rbxgfx appdraw_client)
     target_include_directories(${lib} PRIVATE ${OPENRBX_RENDERLIBNEW_INCLUDE_DIRS} "${PROJECT_SOURCE_DIR}/Client/Rendering/OgreSDK/include")
   endif()
 endforeach()
-foreach(lib appdraw_rbxgfx appdraw_client)
-  if (TARGET ${lib})
+if (WIN32)
+  foreach(lib appdraw_rbxgfx appdraw_client)
     target_include_directories(${lib} PRIVATE "${OPENRBX_3RDPARTY}/Microsoft DirectX SDK (November 2007)/Include")
-  endif()
-endforeach()
-
-set(OPENRBX_TOOLKITPRO "${OPENRBX_3RDPARTY}/Codejock Software/MFC/Xtreme ToolkitPro v11.2.1")
-set(OPENRBX_TOOLKITPRO_WORKSPACE "${OPENRBX_TOOLKITPRO}/Workspace/ToolkitPro")
-file(READ "${OPENRBX_TOOLKITPRO_WORKSPACE}/ToolkitProStatic_vc80.vcproj" OPENRBX_TOOLKITPRO_VCPROJ)
-string(REGEX MATCHALL "RelativePath=\"[^\"]+\\.cpp\"" OPENRBX_TOOLKITPRO_FILES "${OPENRBX_TOOLKITPRO_VCPROJ}")
-set(OPENRBX_TOOLKITPRO_SOURCES)
-foreach(entry ${OPENRBX_TOOLKITPRO_FILES})
-  string(REGEX REPLACE "RelativePath=\"(.*)\"" "\\1" path "${entry}")
-  string(REPLACE "\\" "/" path "${path}")
-  list(APPEND OPENRBX_TOOLKITPRO_SOURCES "${OPENRBX_TOOLKITPRO_WORKSPACE}/${path}")
-endforeach()
-
-add_library(toolkitpro STATIC ${OPENRBX_TOOLKITPRO_SOURCES})
-openrbx_compile_defaults(toolkitpro)
-target_compile_definitions(toolkitpro PRIVATE WIN32 _LIB NDEBUG _MBCS _AFXDLL ZLIB_WINAPI)
-target_include_directories(toolkitpro PRIVATE
-  "${OPENRBX_TOOLKITPRO_WORKSPACE}"
-  "${OPENRBX_TOOLKITPRO}/Source"
-  "${OPENRBX_TOOLKITPRO}/Source/Common"
-)
-target_compile_options(toolkitpro PRIVATE /O2 /Ob1 /GF /Gy /Zc:wchar_t)
-set_property(TARGET toolkitpro PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
+  endforeach()
+endif()
 
 set(OPENRBX_OGRE "${PROJECT_SOURCE_DIR}/Client/Rendering/OgreSDK")
-
-set(OPENRBX_ROBLOX_MIDL_DIR "${CMAKE_CURRENT_BINARY_DIR}/roblox_midl")
-file(MAKE_DIRECTORY "${OPENRBX_ROBLOX_MIDL_DIR}")
-add_custom_command(
-  OUTPUT "${OPENRBX_ROBLOX_MIDL_DIR}/Roblox_h.h" "${OPENRBX_ROBLOX_MIDL_DIR}/Roblox_i.c"
-  COMMAND midl /nologo /env ${OPENRBX_MIDL_ENV} /h Roblox_h.h /iid Roblox_i.c /tlb Roblox.tlb /proxy Roblox_p.c /dlldata dlldata.c
-          "${PROJECT_SOURCE_DIR}/Client/win/Roblox.idl"
-  DEPENDS "${PROJECT_SOURCE_DIR}/Client/win/Roblox.idl"
-  WORKING_DIRECTORY "${OPENRBX_ROBLOX_MIDL_DIR}"
-)
-
-add_executable(roblox WIN32
-  Client/win/AboutRobloxDialog.cpp
-  Client/win/App.cpp
-  Client/win/Unknown00409ef0.cpp
-  Client/win/BrowserView.cpp
-  Client/win/ChatPrompt.cpp
-  Client/win/ChildFrm.cpp
-  Client/win/ClipboardVerbs.cpp
-  Client/win/DHTMLWindow.cpp
-  Client/win/DxUserInput.cpp
-  Client/win/UserInputUtil.cpp
-  Client/win/ErrorUploader.cpp
-  Client/win/InsertObjectDialog.cpp
-  Client/win/InstanceExplorer.cpp
-  Client/win/LogManager.cpp
-  Client/win/LuaHtmlView.cpp
-  Client/win/LDraw2RobloxColorMap.cpp
-  Client/win/LDraw2RobloxMapRoot.cpp
-  Client/win/LDraw2RobloxPartMap.cpp
-  Client/win/LDrawCommand.cpp
-  Client/win/LDrawParser.cpp
-  Client/win/LuaFunction.cpp
-  Client/win/LuaWriter.cpp
-  Client/win/MainFrm.cpp
-  Client/win/MarshalWindow.cpp
-  Client/win/MultiPlayerPane.cpp
-  Client/win/NullDoc.cpp
-  Client/win/ObjectBrowser.cpp
-  Client/win/PropGrid.cpp
-  Client/win/RBXImage.cpp
-  Client/win/RenderSettings.cpp
-  Client/win/Roblox.cpp
-  Client/win/RobloxDoc.cpp
-  Client/win/RobloxReportView.cpp
-  Client/win/RobloxView.cpp
-  Client/win/RobloxWnd.cpp
-  Client/win/SaveToRobloxDialog.cpp
-  Client/win/ScintillaCtrl.cpp
-  Client/win/ScintillaDocView.cpp
-  Client/win/ScriptDoc.cpp
-  Client/win/SecureHtmlView.cpp
-  Client/win/SelectionCaption.cpp
-  Client/win/SettingsDialog.cpp
-  Client/win/VersionInfo.cpp
-  Client/win/WebToolbox.cpp
-  Client/win/Workspace.cpp
-  Client/win/ActiveDocView.cpp
-  Client/win/ReflectionMetadata.cpp
-  Client/win/RobloxTreeCtrl.cpp
-  Client/win/Content.cpp
-  Client/win/Roblox.rc
-  "${OPENRBX_ROBLOX_MIDL_DIR}/Roblox_h.h"
-  "${OPENRBX_ROBLOX_MIDL_DIR}/Roblox_i.c"
-)
-openrbx_compile_defaults(roblox)
-set_target_properties(roblox PROPERTIES CXX_STANDARD 23 CXX_SCAN_FOR_MODULES OFF)
-target_compile_options(roblox PRIVATE /permissive)
-target_compile_definitions(roblox PRIVATE ${OPENRBX_COMMON_DEFINITIONS} _AFXDLL _XTP_STATICLINK _XTPLIB_NOAUTOLINK)
-target_precompile_headers(roblox PRIVATE "${PROJECT_SOURCE_DIR}/Client/win/StdAfx.h")
-set_source_files_properties("${OPENRBX_ROBLOX_MIDL_DIR}/Roblox_i.c" PROPERTIES SKIP_PRECOMPILE_HEADERS ON)
-
-target_include_directories(roblox PRIVATE
-  "${PROJECT_SOURCE_DIR}/Client/win"
-  "${OPENRBX_ROBLOX_MIDL_DIR}"
-  ${OPENRBX_ENGINE_INCLUDE_DIRS}
-  ${OPENRBX_RENDERLIBNEW_INCLUDE_DIRS}
-  ${OPENRBX_3RDPARTY_INCLUDE_DIRS}
-  "${OPENRBX_MESA_INCLUDE_DIR}"
-  "${OPENRBX_TOOLKITPRO}/Source"
-  "${OPENRBX_OGRE}/include"
-  "${OPENRBX_3RDPARTY}/scintilla/include"
-  "${OPENRBX_3RDPARTY}/Microsoft DirectX SDK (November 2007)/Include"
-)
 
 set(OPENRBX_CLIENT_ENGINE_LIBRARIES)
 foreach(lib rbxview renderlib rbxviewnew renderlibnew network_client app appdraw_rbxgfx appdraw appdraw_client lua)
@@ -831,14 +736,187 @@ foreach(lib rbxview renderlib rbxviewnew renderlibnew network_client app appdraw
   endif()
 endforeach()
 
+
+file(GLOB OPENRBX_ROBLOX_QT_RESOURCES
+  "${PROJECT_SOURCE_DIR}/Client/win/res/*.bmp"
+  "${PROJECT_SOURCE_DIR}/Client/win/res/*.cur"
+  "${PROJECT_SOURCE_DIR}/Client/win/res/*.htm"
+  "${PROJECT_SOURCE_DIR}/Client/win/res/*.ico"
+  "${PROJECT_SOURCE_DIR}/Client/win/res/*.png"
+)
+
+add_executable(roblox WIN32
+  Client/qt/AboutRobloxDialog.cpp
+  Client/qt/ActiveDocView.cpp
+  Client/qt/BrowserView.cpp
+  Client/qt/ChatPrompt.cpp
+  Client/qt/ChildFrm.cpp
+  Client/qt/ClipboardVerbs.cpp
+  Client/qt/ColorSelector.cpp
+  Client/qt/Command.cpp
+  Client/qt/CommandLineComboBox.cpp
+  Client/qt/CustomizeSheet.cpp
+  Client/qt/Dialog.cpp
+  Client/qt/DisplayMode.cpp
+  Client/qt/DocView.cpp
+  Client/qt/ExplorerPane.cpp
+  Client/qt/FileDialog.cpp
+  Client/qt/External.cpp
+  Client/qt/FactoryRegistration.cpp
+  Client/qt/HtmlDialog.cpp
+  Client/qt/HtmlView.cpp
+  Client/qt/HtmlWindow.cpp
+  Client/qt/BrowserScrollBar.cpp
+  Client/qt/ImageManager.cpp
+  Client/qt/InputDevice.cpp
+  Client/qt/InsertObjectDialog.cpp
+  Client/qt/InstanceExplorer.cpp
+  Client/qt/LayoutImport.cpp
+  Client/qt/MainFrm.cpp
+  Client/qt/MultiPlayerPane.cpp
+  Client/qt/NativeInput.cpp
+  Client/qt/NullDoc.cpp
+  Client/qt/PaneCaption.cpp
+  Client/qt/PopupToolBar.cpp
+  Client/qt/ObjectBrowser.cpp
+  Client/qt/Printing.cpp
+  Client/qt/Profile.cpp
+  Client/qt/PropertySheet.cpp
+  Client/qt/PropGrid.cpp
+  Client/qt/Resources.cpp
+  Client/qt/Roblox.cpp
+  Client/qt/RobloxDoc.cpp
+  Client/qt/RobloxReportView.cpp
+  Client/qt/RobloxTreeCtrl.cpp
+  Client/qt/RobloxView.cpp
+  Client/qt/RobloxWnd.cpp
+  Client/qt/ScintillaCtrl.cpp
+  Client/qt/ScintillaDocView.cpp
+  Client/qt/ScriptDoc.cpp
+  Client/qt/SelectionCaption.cpp
+  Client/qt/SelectionTreeCtrl.cpp
+  Client/qt/NativeWindow.cpp
+  Client/qt/ReportControl.cpp
+  Client/qt/SettingsDialog.cpp
+  Client/qt/SplitterPane.cpp
+  Client/qt/SystemColorDialog.cpp
+  Client/qt/SystemMessageBox.cpp
+  Client/qt/TearOffGripper.cpp
+  Client/qt/ImageEditorDialog.cpp
+  Client/qt/MenuEditItem.cpp
+  Client/qt/MenuIconGrid.cpp
+  Client/qt/MenuExpandButton.cpp
+  Client/qt/TreeWidget.cpp
+  Client/qt/UserInput.cpp
+  Client/qt/StandardOutputView.cpp
+  Client/qt/StatusBar.cpp
+  Client/qt/VerbBinder.cpp
+  Client/qt/WebToolbox.cpp
+  Client/qt/WhidbeyStyle.cpp
+  Client/qt/WorkspaceTabButtons.cpp
+  Client/qt/Workspace.cpp
+  Client/win/ErrorUploader.cpp
+  Client/win/LDraw2RobloxColorMap.cpp
+  Client/win/LDraw2RobloxMapRoot.cpp
+  Client/win/LDraw2RobloxPartMap.cpp
+  Client/win/LDrawCommand.cpp
+  Client/win/LDrawParser.cpp
+  Client/win/LogManager.cpp
+  Client/win/LuaWriter.cpp
+  Client/win/ReflectionMetadata.cpp
+  Client/win/RenderSettings.cpp
+  Client/win/AuthenticationNegotiator.cpp
+  Client/win/UserInputUtil.cpp
+  Client/win/VersionInfo.cpp
+)
+if (WIN32)
+  target_sources(roblox PRIVATE Client/qt/PreviewView.cpp Client/qt/Roblox.rc)
+endif()
+qt_add_resources(roblox "roblox_resources" PREFIX "/" BASE "${PROJECT_SOURCE_DIR}/Client/win" FILES ${OPENRBX_ROBLOX_QT_RESOURCES})
+openrbx_compile_defaults(roblox)
+qt_disable_unicode_defines(roblox)
+set_target_properties(roblox PROPERTIES CXX_STANDARD 23 CXX_SCAN_FOR_MODULES OFF OUTPUT_NAME "Roblox")
+target_compile_definitions(roblox PRIVATE ${OPENRBX_COMMON_DEFINITIONS} QT_NO_KEYWORDS)
+if (WIN32)
+  target_compile_options(roblox PRIVATE /permissive)
+  target_compile_definitions(roblox PRIVATE "_WINSOCKAPI_=")
+else()
+  set_target_properties(roblox PROPERTIES BUILD_WITH_INSTALL_RPATH TRUE INSTALL_RPATH "$ORIGIN;$ORIGIN/lib")
+endif()
+target_include_directories(roblox PRIVATE
+  "${PROJECT_SOURCE_DIR}/Client/qt"
+  "${PROJECT_SOURCE_DIR}/Client/win"
+  ${OPENRBX_ENGINE_INCLUDE_DIRS}
+  ${OPENRBX_RENDERLIBNEW_INCLUDE_DIRS}
+  ${OPENRBX_3RDPARTY_INCLUDE_DIRS}
+  "${OPENRBX_MESA_INCLUDE_DIR}"
+  "${OPENRBX_OGRE}/include"
+  "${OPENRBX_3RDPARTY}/webview/core/include"
+)
+if (WIN32)
+  target_include_directories(roblox PRIVATE
+    "${OPENRBX_3RDPARTY}/Microsoft DirectX SDK (November 2007)/Include"
+    "${OPENRBX_3RDPARTY}/webview2/include"
+  )
+endif()
 add_dependencies(roblox runtime_files)
+if (NOT WIN32)
+  find_package(PkgConfig REQUIRED)
+  string(REPLACE ";" "," OPENRBX_CLIENT_LINK_GROUP "${OPENRBX_CLIENT_ENGINE_LIBRARIES}")
+  pkg_check_modules(OPENRBX_WEBKIT REQUIRED IMPORTED_TARGET gtk+-3.0 webkit2gtk-4.1)
+  find_package(Qt6 REQUIRED COMPONENTS XcbQpaPrivate PrintSupport)
+  target_sources(roblox PRIVATE Client/qt/GlxWindow.cpp)
+  add_dependencies(roblox rggl rgpar)
+  target_link_libraries(roblox PRIVATE
+    PkgConfig::OPENRBX_WEBKIT
+    Qt6::Widgets
+    Qt6::PrintSupport
+    scintilla
+    SDL3::SDL3-static
+    rgmain
+    "$<LINK_GROUP:RESCAN,${OPENRBX_CLIENT_LINK_GROUP},network>"
+    glg3d
+    graphics3d
+    glu
+    fmodex
+    CURL::libcurl
+    OpenGL::GL
+    X11::X11
+    X11::Xrandr
+    Threads::Threads
+    ${CMAKE_DL_LIBS}
+  )
+  add_custom_command(TARGET roblox POST_BUILD
+    COMMAND "${CMAKE_COMMAND}" -E make_directory "$<TARGET_FILE_DIR:roblox>/lib"
+    COMMAND "${CMAKE_COMMAND}" -E copy_if_different "$<TARGET_SONAME_FILE:Qt6::Core>"
+            "$<TARGET_SONAME_FILE:Qt6::Gui>" "$<TARGET_SONAME_FILE:Qt6::Widgets>"
+            "$<TARGET_SONAME_FILE:Qt6::Core5Compat>" "$<TARGET_SONAME_FILE:Qt6::XcbQpaPrivate>"
+            "$<TARGET_SONAME_FILE:Qt6::PrintSupport>" "$<TARGET_FILE_DIR:roblox>/lib"
+    COMMAND "${CMAKE_COMMAND}" -E make_directory "$<TARGET_FILE_DIR:roblox>/plugins/platforms"
+    COMMAND "${CMAKE_COMMAND}" -E copy_if_different "$<TARGET_FILE:Qt6::QXcbIntegrationPlugin>"
+            "$<TARGET_FILE_DIR:roblox>/plugins/platforms"
+    COMMAND "${CMAKE_COMMAND}" -E make_directory "$<TARGET_FILE_DIR:roblox>/plugins/printsupport"
+    COMMAND "${CMAKE_COMMAND}" -E copy_if_different "$<TARGET_FILE:Qt6::QCupsPrinterSupportPlugin>"
+            "$<TARGET_FILE_DIR:roblox>/plugins/printsupport"
+    COMMAND "${CMAKE_COMMAND}" -E make_directory "$<TARGET_FILE_DIR:roblox>/plugins/imageformats"
+    COMMAND "${CMAKE_COMMAND}" -E copy_if_different "$<TARGET_FILE:Qt6::QICOPlugin>"
+            "$<TARGET_FILE_DIR:roblox>/plugins/imageformats"
+    COMMAND "${CMAKE_COMMAND}" -E make_directory "$<TARGET_FILE_DIR:roblox>/plugins/platforminputcontexts"
+    COMMAND "${CMAKE_COMMAND}" -E copy_if_different "$<TARGET_FILE:Qt6::QComposePlatformInputContextPlugin>"
+            "$<TARGET_FILE_DIR:roblox>/plugins/platforminputcontexts"
+  )
+  return()
+endif()
 target_link_libraries(roblox PRIVATE
-  toolkitpro
+  Qt6::Widgets
+  scintilla
+  SDL3::SDL3-static
   rgmain
   ${OPENRBX_CLIENT_ENGINE_LIBRARIES}
   ${OPENRBX_G3D_LIBS}
   ${OPENRBX_MESA_LIBS}
   fmodex
+  CURL::libcurl
   advapi32
   dbghelp
   gdi32
@@ -850,22 +928,24 @@ target_link_libraries(roblox PRIVATE
   shlwapi
   user32
   version
-  wininet
   winmm
   ws2_32
-  "${OPENRBX_3RDPARTY}/Microsoft DirectX SDK (November 2007)/Lib/${OPENRBX_ARCH}/dinput8.lib"
-  "${OPENRBX_3RDPARTY}/Microsoft DirectX SDK (November 2007)/Lib/${OPENRBX_ARCH}/dxguid.lib"
 )
-
-target_link_options(roblox PRIVATE "-MAP:$<TARGET_FILE_DIR:roblox>/$<TARGET_FILE_BASE_NAME:roblox>.map" "/FIXED:NO" "/MANIFEST:NO")
-if (OPENRBX_ARCH STREQUAL "x64")
-  target_link_options(roblox PRIVATE "/HIGHENTROPYVA:NO")
-endif()
-foreach(lib zlib.lib G3D.lib G3D-debug.lib GLG3D.lib GLG3D-debug.lib sdl.lib sdlmain.lib glut32.lib)
+target_link_options(roblox PRIVATE "-MAP:$<TARGET_FILE_DIR:roblox>/$<TARGET_FILE_BASE_NAME:roblox>.map" "/FIXED:NO" "/MANIFEST:NO" "/OPT:REF,ICF" "/HIGHENTROPYVA:NO" "/SUBSYSTEM:WINDOWS,5.02")
+foreach(lib zlib.lib G3D.lib G3D-debug.lib GLG3D.lib GLG3D-debug.lib glut32.lib)
   target_link_options(roblox PRIVATE "/NODEFAULTLIB:${lib}")
 endforeach()
-
-set_property(TARGET roblox PROPERTY OUTPUT_NAME "Roblox")
-
-target_link_options(roblox PRIVATE "/OPT:REF,ICF")
 set_property(TARGET roblox PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+add_custom_command(TARGET roblox POST_BUILD
+  COMMAND "${CMAKE_COMMAND}" -E copy_if_different "$<TARGET_FILE:Qt6::Core>" "$<TARGET_FILE:Qt6::Gui>"
+          "$<TARGET_FILE:Qt6::Widgets>" "$<TARGET_FILE:Qt6::Core5Compat>" "$<TARGET_FILE_DIR:roblox>"
+  COMMAND "${CMAKE_COMMAND}" -E make_directory "$<TARGET_FILE_DIR:roblox>/platforms"
+  COMMAND "${CMAKE_COMMAND}" -E copy_if_different "$<TARGET_FILE:Qt6::QWindowsIntegrationPlugin>"
+          "$<TARGET_FILE_DIR:roblox>/platforms"
+  COMMAND "${CMAKE_COMMAND}" -E make_directory "$<TARGET_FILE_DIR:roblox>/imageformats"
+  COMMAND "${CMAKE_COMMAND}" -E copy_if_different "$<TARGET_FILE:Qt6::QICOPlugin>"
+          "$<TARGET_FILE_DIR:roblox>/imageformats"
+  COMMAND "${CMAKE_COMMAND}" -E make_directory "$<TARGET_FILE_DIR:roblox>/styles"
+  COMMAND "${CMAKE_COMMAND}" -E copy_if_different "$<TARGET_FILE:Qt6::QModernWindowsStylePlugin>"
+          "$<TARGET_FILE_DIR:roblox>/styles"
+)

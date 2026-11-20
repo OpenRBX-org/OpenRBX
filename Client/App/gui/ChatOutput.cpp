@@ -99,16 +99,16 @@ void ChatOutput::render2d(Adorn* adorn)
 	}
 }
 
-ChatLine::ChatLine(Network::Player* p_unk0x04, const std::string& p_unk0x08, float p_unk0x0c)
-	: message(p_unk0x08), dieTime(p_unk0x0c), profane(false)
+ChatLine::ChatLine(Network::Player* player, const std::string& message, float dieTime)
+	: message(message), dieTime(dieTime), profane(false)
 {
-	user = p_unk0x04->getName();
+	user = player->getName();
 
-	Teams* teams = ServiceProvider::find<Teams>(p_unk0x04);
+	Teams* teams = ServiceProvider::find<Teams>(player);
 
 	if (teams && teams->isTeamGame()) {
-		if (!p_unk0x04->getNeutral()) {
-			Team* team = teams->getTeamFromPlayer(p_unk0x04);
+		if (!player->getNeutral()) {
+			Team* team = teams->getTeamFromPlayer(player);
 
 			if (team) {
 				userColor = team->getTeamColor().color3();
@@ -126,9 +126,9 @@ ChatLine::ChatLine(Network::Player* p_unk0x04, const std::string& p_unk0x08, flo
 	}
 }
 
-bool ChatOutput::ParseCommand(Network::ChatMessage p_unk0x04)
+bool ChatOutput::ParseCommand(Network::ChatMessage chatMessage)
 {
-	std::vector<std::string> tokens = tokenize(p_unk0x04.message, " -_/,");
+	std::vector<std::string> tokens = tokenize(chatMessage.message, " -_/,");
 
 	if (tokens.size() == 0) {
 		return false;
@@ -138,7 +138,7 @@ bool ChatOutput::ParseCommand(Network::ChatMessage p_unk0x04)
 
 	if (tokens[0] == "sc") {
 		std::string message = SafeChat::singleton().getMessage(tokens);
-		fifo.push_back(new ChatLine(p_unk0x04.source.get(), message, time + 60));
+		fifo.push_back(new ChatLine(chatMessage.source.get(), message, time + 60));
 		return true;
 	}
 

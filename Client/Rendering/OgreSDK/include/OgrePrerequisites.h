@@ -110,15 +110,7 @@ namespace Ogre {
         typedef float Real;
     #endif
 
-    #if OGRE_COMPILER == OGRE_COMPILER_GNUC && OGRE_COMP_VER >= 310 && !defined(STLPORT)
-    #   define HashMap ::__gnu_cxx::hash_map
-    #else
-    #   if OGRE_COMPILER == OGRE_COMPILER_MSVC
-    #       define HashMap ::std::unordered_map
-    #   else
-    #       define HashMap ::std::hash_map
-    #   endif
-    #endif
+    #define HashMap ::std::unordered_map
 
     /** In order to avoid finger-aches :)
     */

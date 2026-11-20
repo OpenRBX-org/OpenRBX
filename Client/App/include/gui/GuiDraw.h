@@ -34,10 +34,7 @@ private:
 
 public:
 	GuiDrawImage() {}
-	GuiDrawImage(Adorn* p_unk0x04, const std::string& p_unk0x08) : size(0, 0)
-	{
-		setImageFromName(p_unk0x04, p_unk0x08);
-	}
+	GuiDrawImage(Adorn* adorn, const std::string& name) : size(0, 0) { setImageFromName(adorn, name); }
 
 	void render2d(Adorn* adorn, bool enabled, Rect& rect, Widget::WidgetState state);
 

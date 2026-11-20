@@ -11,7 +11,7 @@
 
 namespace RBX::ViewNew {
 
-bool g_unk0x0092a908 = true;
+bool brickMeshBevels = true;
 
 static int orderedCompare(const G3D::Vector3& a, const G3D::Vector3& b)
 {
@@ -79,9 +79,9 @@ const float BrickMesh::normalPerturbation = 0.05f;
 
 const float BrickMesh::bevel = 0.0f;
 
-static bool g_unk0x00958541;
+static bool suppressPerturbation;
 
-float BrickMesh::g_unk0x00958544 = 0.0f;
+float BrickMesh::bevelSize = 0.0f;
 
 static G3D::Vector2 flatTex(1.0f / 64.0f, 8.0f / 9.0f);
 
@@ -132,7 +132,7 @@ void meshFace(
 
 	G3D::Vector2 perturbationMin;
 	G3D::Vector2 perturbationMax;
-	if (!g_unk0x00958541) {
+	if (!suppressPerturbation) {
 		perturbationMin.x = G3D::uniformRandom(-BrickMesh::normalPerturbation, BrickMesh::normalPerturbation);
 		perturbationMin.y = G3D::uniformRandom(-BrickMesh::normalPerturbation, BrickMesh::normalPerturbation);
 		perturbationMax.x = G3D::uniformRandom() > 0.5f ? perturbationMin.x : -perturbationMin.x;
@@ -285,7 +285,7 @@ static void appendTriangles(std::vector<unsigned short>& indices, int v0, int v1
 	indices.push_back(v3);
 }
 
-void BrickMesh::FUN_00514070(const G3D::Vector3& size, RenderSurfaceTypes surfaceTypes, BrickColor color)
+void BrickMesh::addLevel(const G3D::Vector3& size, RenderSurfaceTypes surfaceTypes, BrickColor color)
 {
 	RenderNew::Mesh::LevelRef level = new RenderNew::Mesh::Level(G3D::RenderDevice::QUADS);
 	levels.append(level);
@@ -295,14 +295,14 @@ void BrickMesh::FUN_00514070(const G3D::Vector3& size, RenderSurfaceTypes surfac
 	const float colorIndex = color.getClosestPaletteIndex();
 
 	unsigned int corners[24];
-	meshFace<0>(halfSize, g_unk0x00958544, surfaceTypes, colorIndex, level, &corners[0]);
-	meshFace<1>(halfSize, g_unk0x00958544, surfaceTypes, colorIndex, level, &corners[4]);
-	meshFace<2>(halfSize, g_unk0x00958544, surfaceTypes, colorIndex, level, &corners[8]);
-	meshFace<3>(halfSize, g_unk0x00958544, surfaceTypes, colorIndex, level, &corners[12]);
-	meshFace<4>(halfSize, g_unk0x00958544, surfaceTypes, colorIndex, level, &corners[16]);
-	meshFace<5>(halfSize, g_unk0x00958544, surfaceTypes, colorIndex, level, &corners[20]);
+	meshFace<0>(halfSize, bevelSize, surfaceTypes, colorIndex, level, &corners[0]);
+	meshFace<1>(halfSize, bevelSize, surfaceTypes, colorIndex, level, &corners[4]);
+	meshFace<2>(halfSize, bevelSize, surfaceTypes, colorIndex, level, &corners[8]);
+	meshFace<3>(halfSize, bevelSize, surfaceTypes, colorIndex, level, &corners[12]);
+	meshFace<4>(halfSize, bevelSize, surfaceTypes, colorIndex, level, &corners[16]);
+	meshFace<5>(halfSize, bevelSize, surfaceTypes, colorIndex, level, &corners[20]);
 
-	if (g_unk0x00958544 > 0.0f) {
+	if (bevelSize > 0.0f) {
 		G3D::Vector2 tex = flatTex;
 		tex.x += colorIndex / 32.0;
 
@@ -421,7 +421,7 @@ void BrickMesh::FUN_00514070(const G3D::Vector3& size, RenderSurfaceTypes surfac
 	}
 }
 
-void BrickMesh::FUN_00514960(
+void BrickMesh::makeShadowBox(
 	const G3D::Vector3& halfSize, std::vector<G3D::Vector3>& vertices, std::vector<unsigned short>& indices
 )
 {
@@ -447,14 +447,13 @@ void BrickMesh::FUN_00514960(
 
 BrickMesh::BrickMesh(const G3D::Vector3& size, RenderSurfaceTypes surfaceTypes, BrickColor color)
 {
-	m_unk0x3c = 1;
-	FUN_00514070(size, surfaceTypes, color);
+	m_meshType = 1;
+	addLevel(size, surfaceTypes, color);
 
 	if (ViewBase::getShadowsEnabled()) {
-		G3D::Vector3 halfSize =
-			G3D::Vector3(size.x * 0.5, size.y * 0.5, size.z * 0.5) -
-			G3D::Vector3(widthInset + g_unk0x00958544, g_unk0x00958544, widthInset + g_unk0x00958544);
-		FUN_00514960(halfSize, m_unk0x28, m_unk0x18);
+		G3D::Vector3 halfSize = G3D::Vector3(size.x * 0.5, size.y * 0.5, size.z * 0.5) -
+								G3D::Vector3(widthInset + bevelSize, bevelSize, widthInset + bevelSize);
+		makeShadowBox(halfSize, m_shadowVertices, m_shadowIndices);
 	}
 }
 
@@ -476,18 +475,18 @@ G3D::ReferenceCountedPointer<RenderNew::Mesh> BrickMesh::create(
 	G3D::ReferenceCountedPointer<RenderNew::Mesh>& slot = variations.meshes[index];
 	G3D::ReferenceCountedPointer<RenderNew::Mesh> result = slot;
 	if (result.isNull()) {
-		g_unk0x00958541 = false;
-		if (g_unk0x0092a908) {
-			g_unk0x00958544 = 0.065f;
+		suppressPerturbation = false;
+		if (brickMeshBevels) {
+			bevelSize = 0.065f;
 			result = new BrickMesh(size, surfaceTypes, color);
 
-			g_unk0x00958544 = 0.0f;
-			g_unk0x00958541 = true;
-			dynamic_cast<BrickMesh*>(result.pointer())->FUN_00514070(size, surfaceTypes, color);
-			g_unk0x00958541 = false;
+			bevelSize = 0.0f;
+			suppressPerturbation = true;
+			dynamic_cast<BrickMesh*>(result.pointer())->addLevel(size, surfaceTypes, color);
+			suppressPerturbation = false;
 		}
 		else {
-			g_unk0x00958544 = 0.0f;
+			bevelSize = 0.0f;
 			result = new BrickMesh(size, surfaceTypes, color);
 		}
 

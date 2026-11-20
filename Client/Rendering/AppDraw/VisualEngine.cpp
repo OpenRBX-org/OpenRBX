@@ -20,42 +20,48 @@
 #include <OgreViewport.h>
 #include <algorithm>
 #include <cstdio>
-#include <d3d9.h>
-#include <ddraw.h>
 #include <stdexcept>
 #include <vector>
 
+#ifdef _WIN32
+#include <d3d9.h>
+#include <ddraw.h>
+#else
+#include <GLG3D/DXCaps.h>
+#endif
+
 namespace Ogre {
 
-bool g_unk0x00949dd0;
+bool frameRateManagerEnabled;
 
-Root* g_unk0x0096134c;
+Root* ogreRoot;
 
-DWORD g_unk0x00961350;
+unsigned int videoMemorySize;
 
-bool g_unk0x00961354;
+bool videoMemorySizeKnown;
 
-int g_unk0x00961358;
+int sceneManagerCount;
 
-int g_unk0x0096135c;
+int renderWindowCount;
 
-Unknown00671c70::Unknown00671c70() : m_unk0x84(false), m_unk0x88(nullptr)
+RbxSubMesh::RbxSubMesh() : m_edgeListBuilt(false), m_edgeList(nullptr)
 {
 }
 
-Vector3 FUN_005e0b40(const G3D::Vector3& v)
+Vector3 toOgreVector3(const G3D::Vector3& v)
 {
 	return Vector3(v.x, v.y, v.z);
 }
 
-ColourValue FUN_00671cd0(const G3D::Color4& color)
+ColourValue toOgreColour(const G3D::Color4& color)
 {
 	return ColourValue(color.r, color.g, color.b, color.a);
 }
 
-unsigned int FUN_00671cf0()
+unsigned int getVideoMemorySize()
 {
-	if (!g_unk0x00961354) {
+	if (!videoMemorySizeKnown) {
+#ifdef _WIN32
 		CoInitialize(nullptr);
 		IDirectDraw2* directDraw = nullptr;
 		DWORD freeMemory = 0;
@@ -65,19 +71,24 @@ unsigned int FUN_00671cf0()
 			directDraw->Initialize(nullptr);
 			DDSCAPS caps;
 			caps.dwCaps = DDSCAPS_VIDEOMEMORY | DDSCAPS_LOCALVIDMEM;
-			if (FAILED(directDraw->GetAvailableVidMem(&caps, &g_unk0x00961350, &freeMemory))) {
-				g_unk0x00961350 = 0;
+			DWORD totalMemory = 0;
+			if (FAILED(directDraw->GetAvailableVidMem(&caps, &totalMemory, &freeMemory))) {
+				totalMemory = 0;
 				freeMemory = 0;
 			}
+			videoMemorySize = totalMemory;
 			directDraw->Release();
 		}
 		CoUninitialize();
-		g_unk0x00961354 = true;
+#else
+		videoMemorySize = (unsigned int) G3D::DXCaps::videoMemorySize();
+#endif
+		videoMemorySizeKnown = true;
 	}
-	return g_unk0x00961350;
+	return videoMemorySize;
 }
 
-SubMesh* VisualEngine::FUN_00671d90(
+SubMesh* VisualEngine::createSubMesh(
 	MeshPtr& mesh, const unsigned short* indices16, const unsigned int* indices32, size_t triangleCount
 )
 {
@@ -98,60 +109,61 @@ SubMesh* VisualEngine::FUN_00671d90(
 	return subMesh;
 }
 
-VisualEngine::Unk0x18::Unk0x18() : m_unk0x00(0)
+VisualEngine::FrameRateManager::FrameRateManager() : m_frameCount(0)
 {
 }
 
-int VisualEngine::Unk0x18::FUN_00671ea0() const
+int VisualEngine::FrameRateManager::getFrameCount() const
 {
-	return m_unk0x00;
+	return m_frameCount;
 }
 
-void VisualEngine::Unk0x18::FUN_00671eb0(const Unk0x08& entry)
+void VisualEngine::FrameRateManager::addFrame(const FrameStats& entry)
 {
-	m_unk0x08[m_unk0x00 % 100] = entry;
-	m_unk0x00++;
+	m_frames[m_frameCount % 100] = entry;
+	m_frameCount++;
 }
 
-VisualEngine::Unk0x18::Unk0x08& VisualEngine::Unk0x18::FUN_00671ef0(int back)
+VisualEngine::FrameRateManager::FrameStats& VisualEngine::FrameRateManager::getFrame(int back)
 {
-	int index = m_unk0x00 - back - 1;
-	return m_unk0x08[index % 100];
+	int index = m_frameCount - back - 1;
+	return m_frames[index % 100];
 }
 
 VisualEngine::VisualEngine()
-	: m_unk0x04(nullptr), m_unk0x08(nullptr), m_unk0x0c(nullptr), m_unk0x10(nullptr), m_unk0x14(nullptr), m_unk0x7f8(-1)
+	: m_sceneManager(nullptr), m_camera(nullptr), m_renderWindow(nullptr), m_viewport(nullptr), m_twoDManager(nullptr),
+	  m_largeVertexBufferOverride(-1)
 {
 }
 
 VisualEngine::~VisualEngine()
 {
-	if (g_unk0x0096134c) {
-		if (m_unk0x04) {
-			g_unk0x0096134c->destroySceneManager(m_unk0x04);
+	if (ogreRoot) {
+		if (m_sceneManager) {
+			ogreRoot->destroySceneManager(m_sceneManager);
 		}
-		if (m_unk0x0c) {
-			g_unk0x0096134c->detachRenderTarget(m_unk0x0c);
+		if (m_renderWindow) {
+			ogreRoot->detachRenderTarget(m_renderWindow);
 		}
-		delete m_unk0x14;
+		delete m_twoDManager;
 	}
 }
 
-void FUN_00672010()
+void destroyRoot()
 {
-	if (g_unk0x0096134c) {
-		delete g_unk0x0096134c;
-		g_unk0x0096134c = nullptr;
+	if (ogreRoot) {
+		delete ogreRoot;
+		ogreRoot = nullptr;
 	}
 }
 
-float VisualEngine::Unk0x18::FUN_00672980(int count)
+float VisualEngine::FrameRateManager::getMedianFrameTime(int count)
 {
-	if (count <= 99 && m_unk0x00 >= count) {
+	if (count <= 99 && m_frameCount >= count) {
 		std::vector<float> values(count, 0.0f);
 		values.clear();
 		for (int i = 1; i <= count; i++) {
-			values.push_back(m_unk0x08[(m_unk0x00 - i) % 100].m_unk0x00);
+			values.push_back(m_frames[(m_frameCount - i) % 100].m_frameTime);
 		}
 		std::sort(values.begin(), values.end());
 		return values[count / 2];
@@ -159,7 +171,7 @@ float VisualEngine::Unk0x18::FUN_00672980(int count)
 	return -1.0f;
 }
 
-VertexData* VisualEngine::FUN_00672ab0(
+VertexData* VisualEngine::createVertexData(
 	const float* positions,
 	size_t vertexCount,
 	const float* normals,
@@ -224,7 +236,7 @@ VertexData* VisualEngine::FUN_00672ab0(
 	return vertexData;
 }
 
-void VisualEngine::FUN_00672e60(
+void VisualEngine::setMeshVertexData(
 	MeshPtr& mesh,
 	const float* positions,
 	size_t vertexCount,
@@ -239,7 +251,7 @@ void VisualEngine::FUN_00672e60(
 		delete mesh->sharedVertexData;
 		mesh->sharedVertexData = nullptr;
 	}
-	mesh->sharedVertexData = FUN_00672ab0(positions, vertexCount, normals, colours, textureCoords);
+	mesh->sharedVertexData = createVertexData(positions, vertexCount, normals, colours, textureCoords);
 
 	if (minimum && maximum) {
 		mesh->_setBounds(AxisAlignedBox(minimum->x, minimum->y, minimum->z, maximum->x, maximum->y, maximum->z));
@@ -274,7 +286,7 @@ void VisualEngine::FUN_00672e60(
 	}
 }
 
-MeshPtr VisualEngine::FUN_006731e0(
+MeshPtr VisualEngine::createMesh(
 	const char* name,
 	const char* group,
 	const float* positions,
@@ -287,7 +299,7 @@ MeshPtr VisualEngine::FUN_006731e0(
 )
 {
 	MeshPtr mesh = MeshManager::getSingleton().createManual(name, group);
-	FUN_00672e60(mesh, positions, vertexCount, normals, colours, textureCoords, minimum, maximum);
+	setMeshVertexData(mesh, positions, vertexCount, normals, colours, textureCoords, minimum, maximum);
 
 	if (minimum && maximum) {
 		mesh->_setBounds(AxisAlignedBox(minimum->x, minimum->y, minimum->z, maximum->x, maximum->y, maximum->z));
@@ -325,7 +337,7 @@ MeshPtr VisualEngine::FUN_006731e0(
 	return mesh;
 }
 
-Unknown00671c70* VisualEngine::FUN_006735b0(
+RbxSubMesh* VisualEngine::createRbxSubMesh(
 	const float* positions,
 	size_t vertexCount,
 	const float* normals,
@@ -338,9 +350,9 @@ Unknown00671c70* VisualEngine::FUN_006735b0(
 	Vector3* maximumOut
 )
 {
-	Unknown00671c70* subMesh = new Unknown00671c70();
+	RbxSubMesh* subMesh = new RbxSubMesh();
 	subMesh->parent = nullptr;
-	subMesh->vertexData = FUN_00672ab0(positions, vertexCount, normals, colours, textureCoords);
+	subMesh->vertexData = createVertexData(positions, vertexCount, normals, colours, textureCoords);
 	subMesh->useSharedVertices = false;
 
 	size_t indexCount = triangleCount * 3;
@@ -383,32 +395,32 @@ Unknown00671c70* VisualEngine::FUN_006735b0(
 	*maximumOut = maximum;
 
 	AxisAlignedBox box(minimum, maximum);
-	subMesh->m_unk0x8c = box;
-	subMesh->m_unk0xac = box.getHalfSize().length();
+	subMesh->m_bounds = box;
+	subMesh->m_boundingRadius = box.getHalfSize().length();
 	return subMesh;
 }
 
-void VisualEngine::FUN_00673860(
-	int renderSystem, unsigned long window, int width, int height, int antialiasing, std::string logFileName
+void VisualEngine::initialise(
+	int renderSystem, const String& window, int width, int height, int antialiasing, std::string logFileName
 )
 {
 	try {
-		if (g_unk0x0096134c == nullptr) {
-			g_unk0x0096134c = new Root("", "", logFileName);
+		if (ogreRoot == nullptr) {
+			ogreRoot = new Root("", "", logFileName);
 
 			static RbxSceneManagerFactory factory;
-			g_unk0x0096134c->addSceneManagerFactory(&factory);
+			ogreRoot->addSceneManagerFactory(&factory);
 
 			ResourceGroupManager::getSingleton().initialiseResourceGroup("General");
 			ResourceGroupManager::getSingleton().addResourceLocation(".", "FileSystem", "General", false);
 
 			if (renderSystem == 0) {
 				try {
-					g_unk0x0096134c->loadPlugin("rgdx.dll");
+					ogreRoot->loadPlugin("rgdx");
 				}
 				catch (Exception& e) {
 					LogManager::getSingleton().logMessage("Error loading DX9 render system.\n");
-					FUN_00672010();
+					destroyRoot();
 					throw std::runtime_error(
 						std::string("Cannot initialize graphics; installation error likely. Error: ") + e.what()
 					);
@@ -416,26 +428,26 @@ void VisualEngine::FUN_00673860(
 			}
 			else if (renderSystem == 1) {
 				try {
-					g_unk0x0096134c->loadPlugin("rggl.dll");
+					ogreRoot->loadPlugin("rggl");
 				}
 				catch (Exception&) {
 					LogManager::getSingleton().logMessage("Error loading OGL render system.\n");
-					FUN_00672010();
+					destroyRoot();
 					throw std::runtime_error("Cannot initialize graphics; installation error likely.");
 				}
 			}
 
 			try {
-				g_unk0x0096134c->loadPlugin("rgpar.dll");
+				ogreRoot->loadPlugin("rgpar");
 			}
 			catch (Exception&) {
 				LogManager::getSingleton().logMessage("Error loading particle system.\n");
-				FUN_00672010();
+				destroyRoot();
 				throw std::runtime_error("Cannot initialize gfx component; installation error likely.");
 			}
 
-			RenderSystemList* renderers = g_unk0x0096134c->getAvailableRenderers();
-			g_unk0x0096134c->setRenderSystem(renderers->front());
+			RenderSystemList* renderers = ogreRoot->getAvailableRenderers();
+			ogreRoot->setRenderSystem(renderers->front());
 
 			ConfigOptionMap& options = Root::getSingleton().getRenderSystem()->getConfigOptions();
 			ConfigOptionMap::iterator floatingPoint = options.find("Floating-point mode");
@@ -444,18 +456,22 @@ void VisualEngine::FUN_00673860(
 				LogManager::getSingleton().logMessage("NOTE forcing Floating-point mode to be Consistent");
 			}
 
-			g_unk0x0096134c->initialise(false, "OGRE Render Window");
+			ogreRoot->initialise(false, "OGRE Render Window");
 		}
 
-		m_unk0x7f0 = FUN_00671cf0();
+		m_videoMemorySize = getVideoMemorySize();
 
 		ConfigOptionMap& options = Root::getSingleton().getRenderSystem()->getConfigOptions();
 
 		char name[8];
-		_snprintf(name, sizeof(name), "win%d", g_unk0x0096135c++);
+		snprintf(name, sizeof(name), "win%d", renderWindowCount++);
 
 		NameValuePairList params;
-		params["externalWindowHandle"] = StringConverter::toString(window);
+#ifdef _WIN32
+		params["externalWindowHandle"] = window;
+#else
+		params["parentWindowHandle"] = window;
+#endif
 
 		bool has32Bit = false;
 		ConfigOptionMap::iterator videoMode = options.find("Video Mode");
@@ -505,19 +521,19 @@ void VisualEngine::FUN_00673860(
 				params["FSAA"] = "1";
 				params["FSAAQuality"] = "0";
 				LogManager::getSingleton().logMessage("RBX antiliasing is on\n");
-				m_unk0x800 = 1;
+				m_antialiasing = 1;
 			}
 			else {
 				LogManager::getSingleton().logMessage("RBX antiliasing is off\n");
-				m_unk0x800 = 2;
+				m_antialiasing = 2;
 			}
 		}
 		else if (antialiasing == 2) {
-			m_unk0x800 = antialiasing;
+			m_antialiasing = antialiasing;
 		}
 
 		try {
-			m_unk0x0c = g_unk0x0096134c->createRenderWindow(name, width, height, false, &params);
+			m_renderWindow = ogreRoot->createRenderWindow(name, width, height, false, &params);
 		}
 		catch (Exception&) {
 			LogManager::getSingleton().logMessage("Error createRenderWindow.\n");
@@ -525,73 +541,81 @@ void VisualEngine::FUN_00673860(
 		}
 
 		if (renderSystem == 0) {
+#ifdef _WIN32
 			try {
 				IDirect3DSurface9* depthBuffer;
-				m_unk0x0c->getCustomAttribute("D3DZBUFFER", &depthBuffer);
+				m_renderWindow->getCustomAttribute("D3DZBUFFER", &depthBuffer);
 				D3DSURFACE_DESC desc;
 				if (SUCCEEDED(depthBuffer->GetDesc(&desc))) {
 					switch (desc.Format) {
 					case D3DFMT_D16_LOCKABLE:
 					case D3DFMT_D16:
-						m_unk0x7fc = 16;
+						m_depthBits = 16;
 						break;
 					case D3DFMT_D32:
 					case D3DFMT_D32F_LOCKABLE:
-						m_unk0x7fc = 32;
+						m_depthBits = 32;
 						break;
 					case D3DFMT_D15S1:
-						m_unk0x7fc = 15;
+						m_depthBits = 15;
 						break;
 					case D3DFMT_D24S8:
 					case D3DFMT_D24X8:
 					case D3DFMT_D24X4S4:
 					case D3DFMT_D24FS8:
-						m_unk0x7fc = 24;
+						m_depthBits = 24;
 						break;
 					default:
-						m_unk0x7fc = 32;
+						m_depthBits = 32;
 						LogManager::getSingleton().logMessage("RBX unknown zbuffer format");
 						break;
 					}
 				}
 				else {
-					m_unk0x7fc = 24;
+					m_depthBits = 24;
 				}
 			}
 			catch (...) {
-				m_unk0x7fc = 24;
+				m_depthBits = 24;
 			}
+#endif
 		}
 		else {
-			m_unk0x7fc = -1;
+			m_depthBits = -1;
 		}
-		LogManager::getSingleton().logMessage("RBX zbuffer bits " + StringConverter::toString(m_unk0x7fc));
+		LogManager::getSingleton().logMessage("RBX zbuffer bits " + StringConverter::toString(m_depthBits));
 
 		unsigned int maxVertexIndex = 0xffffffff;
-		m_unk0x804 = false;
-		m_unk0x805 = false;
-		m_unk0x806 = true;
+		m_softwareVertexProcessing = false;
+		m_textureSquareOnly = false;
+		m_supportDepthBias = true;
 		if (renderSystem == 0) {
+#ifdef _WIN32
 			try {
 				IDirect3DDevice9* device;
-				m_unk0x0c->getCustomAttribute("D3DDEVICE", &device);
+				m_renderWindow->getCustomAttribute("D3DDEVICE", &device);
 				D3DCAPS9 caps;
 				device->GetDeviceCaps(&caps);
 				maxVertexIndex = caps.MaxVertexIndex;
 				LogManager::getSingleton().logMessage(
 					"RBX maxVertexIndex=" + StringConverter::toString(maxVertexIndex)
 				);
-				m_unk0x804 = device->GetSoftwareVertexProcessing() != FALSE;
+				m_softwareVertexProcessing = device->GetSoftwareVertexProcessing() != FALSE;
 				LogManager::getSingleton().logMessage(
-					"RBX softwareVertexProcessing=" + StringConverter::toString(m_unk0x804)
+					"RBX softwareVertexProcessing=" + StringConverter::toString(m_softwareVertexProcessing)
 				);
-				m_unk0x805 = (caps.TextureCaps & D3DPTEXTURECAPS_SQUAREONLY) != 0;
-				LogManager::getSingleton().logMessage("RBX textureSquareOnly=" + StringConverter::toString(m_unk0x805));
-				m_unk0x806 = (caps.RasterCaps & D3DPRASTERCAPS_DEPTHBIAS) != 0;
-				LogManager::getSingleton().logMessage("RBX supportDepthBias=" + StringConverter::toString(m_unk0x806));
+				m_textureSquareOnly = (caps.TextureCaps & D3DPTEXTURECAPS_SQUAREONLY) != 0;
+				LogManager::getSingleton().logMessage(
+					"RBX textureSquareOnly=" + StringConverter::toString(m_textureSquareOnly)
+				);
+				m_supportDepthBias = (caps.RasterCaps & D3DPRASTERCAPS_DEPTHBIAS) != 0;
+				LogManager::getSingleton().logMessage(
+					"RBX supportDepthBias=" + StringConverter::toString(m_supportDepthBias)
+				);
 			}
 			catch (...) {
 			}
+#endif
 		}
 
 		ConfigOptionMap::iterator renderingDevice = options.find("Rendering Device");
@@ -603,51 +627,51 @@ void VisualEngine::FUN_00673860(
 			deviceName = renderingDevice->second.currentValue;
 		}
 		LogManager::getSingleton().logMessage("RBX device=" + deviceName);
-		LogManager::getSingleton().logMessage("RBX vidMemSize=" + StringConverter::toString(m_unk0x7f0));
+		LogManager::getSingleton().logMessage("RBX vidMemSize=" + StringConverter::toString(m_videoMemorySize));
 
 		bool smallVertexBuffer = maxVertexIndex < 0x10000 || StringUtil::match(deviceName, "*Intel*", false) ||
 								 StringUtil::match(deviceName, "*GeForce*MX*", false) ||
-								 (m_unk0x7f0 & 0xfff00000) < 0x2000000;
+								 (m_videoMemorySize & 0xfff00000) < 0x2000000;
 		if (smallVertexBuffer) {
 			LogManager::getSingleton().logMessage("RBX useLargeVertexBuffer=false");
-			m_unk0x7f5 = false;
-			m_unk0x7f4 = false;
+			m_useLargeVertexBuffer = false;
+			m_use32BitIndices = false;
 		}
 		else {
 			LogManager::getSingleton().logMessage("RBX useLargeVertexBuffer=true");
-			m_unk0x7f5 = true;
-			m_unk0x7f4 = true;
+			m_useLargeVertexBuffer = true;
+			m_use32BitIndices = true;
 		}
-		if (m_unk0x7f8 == 0) {
-			m_unk0x7f5 = false;
-			m_unk0x7f4 = false;
+		if (m_largeVertexBufferOverride == 0) {
+			m_useLargeVertexBuffer = false;
+			m_use32BitIndices = false;
 		}
-		else if (m_unk0x7f8 == 1) {
-			m_unk0x7f5 = true;
-			m_unk0x7f4 = true;
+		else if (m_largeVertexBufferOverride == 1) {
+			m_useLargeVertexBuffer = true;
+			m_use32BitIndices = true;
 		}
 
-		bool savage = StringUtil::match(deviceName, "*Savage*", true) && !m_unk0x805;
+		bool savage = StringUtil::match(deviceName, "*Savage*", true) && !m_textureSquareOnly;
 		if (savage) {
 			LogManager::getSingleton().logMessage("RBX Savage lies");
-			m_unk0x805 = true;
+			m_textureSquareOnly = true;
 		}
 
-		String sceneManagerName = String("sm") + StringConverter::toString(g_unk0x00961358++);
-		m_unk0x04 =
-			dynamic_cast<RbxSceneManager*>(g_unk0x0096134c->createSceneManager("RbxSceneManager", sceneManagerName));
-		m_unk0x08 = m_unk0x04->createCamera("Camera");
-		m_unk0x08->setAutoAspectRatio(true);
-		m_unk0x08->setNearClipDistance(5.0f);
-		m_unk0x10 = m_unk0x0c->addViewport(m_unk0x08, 0, 0.0f, 0.0f, 1.0f, 1.0f);
-		m_unk0x10->setBackgroundColour(ColourValue(0.0f, 0.0f, 0.0f));
-		m_unk0x08->setAspectRatio(Real(width) / height);
+		String sceneManagerName = String("sm") + StringConverter::toString(sceneManagerCount++);
+		m_sceneManager =
+			dynamic_cast<RbxSceneManager*>(ogreRoot->createSceneManager("RbxSceneManager", sceneManagerName));
+		m_camera = m_sceneManager->createCamera("Camera");
+		m_camera->setAutoAspectRatio(true);
+		m_camera->setNearClipDistance(5.0f);
+		m_viewport = m_renderWindow->addViewport(m_camera, 0, 0.0f, 0.0f, 1.0f, 1.0f);
+		m_viewport->setBackgroundColour(ColourValue(0.0f, 0.0f, 0.0f));
+		m_camera->setAspectRatio(Real(width) / height);
 		ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
-		if (m_unk0x7f0 > 0) {
-			TextureManager::getSingleton().setMemoryBudget(m_unk0x7f0);
+		if (m_videoMemorySize > 0) {
+			TextureManager::getSingleton().setMemoryBudget(m_videoMemorySize);
 		}
-		m_unk0x14 = new TwoDManager();
-		m_unk0x14->FUN_0067c6c0(m_unk0x04, m_unk0x0c, RENDER_QUEUE_OVERLAY, true, false);
+		m_twoDManager = new TwoDManager();
+		m_twoDManager->init(m_sceneManager, m_renderWindow, RENDER_QUEUE_OVERLAY, true, false);
 	}
 	catch (Exception& e) {
 		throw std::runtime_error(e.getFullDescription().c_str());

@@ -419,7 +419,7 @@ SpatialHash::SpatialHash(World* world, ContactManager* contactManager)
 	nodes.swap(temp);
 }
 
-unsigned int FUN_0061c870(SpatialNode* node)
+unsigned int countGrids(SpatialNode* node)
 {
 	std::set<Vector3int32> grids;
 
@@ -441,7 +441,7 @@ void SpatialHash::doStats() const
 
 	for (unsigned int i = 0; i < numBuckets(); i++) {
 		bucketCounts[i] = numNodes(i);
-		gridCounts[i] = FUN_0061c870(nodes[i]);
+		gridCounts[i] = countGrids(nodes[i]);
 	}
 
 	std::sort(bucketCounts.begin(), bucketCounts.end());

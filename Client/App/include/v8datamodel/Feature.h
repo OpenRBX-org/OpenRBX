@@ -147,8 +147,8 @@ public:
 	static void join(Instance*, Instance*);
 };
 
-bool FUN_00617200(Instance* first, Instance* second);
-void FUN_0061a840(Instance* first, Instance* second);
+bool canJoinMotor(Instance* first, Instance* second);
+void joinMotor(Instance* first, Instance* second);
 
 } // namespace RBX
 

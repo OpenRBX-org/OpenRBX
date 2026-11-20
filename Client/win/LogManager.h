@@ -1,17 +1,20 @@
 #ifndef LOGMANAGER_H
 #define LOGMANAGER_H
 
-#include "network/CrashReporter.h"
 #include "util/Log.h"
 #include "util/Thread.h"
 
-#include <atlpath.h>
 #include <exception>
-#include <imagehlp.h>
 #include <memory>
 #include <string>
 #include <vector>
+
+#ifdef _WIN32
+#include "network/CrashReporter.h"
+
+#include <imagehlp.h>
 #include <windows.h>
+#endif
 
 class MainLogManager;
 
@@ -21,30 +24,34 @@ class LogManager
 	static bool logsEnabled;
 
 protected:
-	const DWORD threadID;
+	const unsigned long threadID;
 	std::string name;
 	static MainLogManager* mainLogManager;
 
 public:
+	enum EventType
+	{
+		EventSuccess,
+		EventError,
+		EventWarning,
+		EventInformation,
+		EventAuditSuccess,
+		EventAuditFailure,
+	};
+
 	RBX::Log* getLog();
 	static MainLogManager* getMainLogManger();
-	static HRESULT ReportCOMError(const GUID&, const char*, HRESULT);
-	static HRESULT ReportCOMError(const GUID&, const wchar_t*, HRESULT);
-	static HRESULT ReportCOMError(const GUID&, HRESULT);
-	static HRESULT ReportExceptionAsCOMError(const GUID&, const std::exception&);
-	static void ReportException(const std::exception&);
-	static void ReportLastError(const char*);
-	static void ReportEvent(WORD, HRESULT, const char*, int);
-	static void ReportEvent(WORD, const char*, const char*, int);
-	static void ReportEvent(WORD type, const char* message);
-	ATL::CPath GetLogPath() const;
+	static void ReportEvent(EventType type, const char* message);
+	static unsigned long currentThreadId();
+	std::string GetLogPath() const;
 	virtual ~LogManager();
 	virtual std::string getLogFileName() = 0;
 
 protected:
-	LogManager(const char* name) : log(nullptr), threadID(GetCurrentThreadId()), name(name) {}
+	LogManager(const char* name) : log(nullptr), threadID(currentThreadId()), name(name) {}
 };
 
+#ifdef _WIN32
 class RobloxCrashReporter : public CrashReporter
 {
 public:
@@ -54,10 +61,13 @@ public:
 
 	LONG ProcessException(_EXCEPTION_POINTERS* info) override;
 };
+#endif
 
 class MainLogManager : public RBX::ILogProvider, public LogManager
 {
+#ifdef _WIN32
 	std::unique_ptr<RobloxCrashReporter> crashReporter;
+#endif
 
 public:
 	MainLogManager(const char* productName);
@@ -72,7 +82,9 @@ public:
 	bool hasCrashLogs() const;
 	std::vector<std::string> archiveCrashLogs();
 	void CullLogs(const char* folder, int maxLogs);
+#ifdef _WIN32
 	void WriteCrashDump();
+#endif
 
 private:
 	std::string guid;
@@ -108,6 +120,6 @@ protected:
 	std::string getLogFileName() override;
 };
 
-void FUN_0042b3c0(const std::exception& e);
+void printException(const std::exception& e);
 
 #endif // LOGMANAGER_H

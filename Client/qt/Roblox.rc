@@ -1,0 +1,40 @@
+#include <winres.h>
+
+LANGUAGE 9, 1
+
+128 ICON "../win/res/icon_128.ico"
+
+129 ICON "../win/res/icon_129.ico"
+
+185 ICON "../win/res/icon_185.ico"
+
+1 VERSIONINFO
+FILEVERSION 0, 3, 676, 0
+PRODUCTVERSION 0, 3, 676, 0
+FILEFLAGSMASK 0x3fL
+FILEFLAGS 0x0L
+FILEOS 0x4L
+FILETYPE 0x1L
+FILESUBTYPE 0x0L
+BEGIN
+	BLOCK "StringFileInfo"
+	BEGIN
+		BLOCK "040904e4"
+		BEGIN
+			VALUE "CompanyName", "ROBLOX Corporation"
+			VALUE "FileDescription", "ROBLOX Game"
+			VALUE "FileVersion", "0, 3, 676, 0"
+			VALUE "InternalName", "Roblox.exe"
+			VALUE "LegalCopyright", "\251 2007, ROBLOX Corporation.  All rights reserved."
+			VALUE "OriginalFilename", "Roblox.exe"
+			VALUE "ProductName", "ROBLOX"
+			VALUE "ProductVersion", "0, 3, 676, 0"
+		END
+	END
+	BLOCK "VarFileInfo"
+	BEGIN
+		VALUE "Translation", 0x409, 0x4e4
+	END
+END
+
+1 24 "../win/res/Roblox.manifest"

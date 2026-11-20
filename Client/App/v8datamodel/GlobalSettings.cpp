@@ -17,7 +17,7 @@ const char sGlobalSettings[] = "GlobalSettings";
 
 std::recursive_mutex GlobalSettings::mutex;
 
-static std::string FUN_00581c60()
+static std::string settingsFileName()
 {
 	std::string fileName = FileSystem::getUserAppDataDirectory(true, nullptr);
 
@@ -31,12 +31,12 @@ static std::string FUN_00581c60()
 void GlobalSettings::eraseSettingsStore()
 {
 	std::error_code error;
-	std::filesystem::remove(FUN_00581c60(), error);
+	std::filesystem::remove(settingsFileName(), error);
 }
 
 void GlobalSettings::loadState()
 {
-	std::string fileName = FUN_00581c60();
+	std::string fileName = settingsFileName();
 
 	if (fileName.size() == 0) {
 		return;
@@ -59,7 +59,7 @@ void GlobalSettings::loadState()
 
 void GlobalSettings::saveState()
 {
-	std::string fileName = FUN_00581c60();
+	std::string fileName = settingsFileName();
 
 	if (fileName.size() == 0) {
 		return;

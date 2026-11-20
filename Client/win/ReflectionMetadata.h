@@ -36,8 +36,8 @@ class Classes : public DescribedCreatable<Classes, Instance, sClasses>
 public:
 	Classes() {}
 
-	Class* FUN_00446130(const ClassDescriptor* descriptor, bool recurse);
-	void FUN_00447d00(const ClassDescriptor& descriptor);
+	Class* findClass(const ClassDescriptor* descriptor, bool recurse);
+	void addHiddenClass(const ClassDescriptor& descriptor);
 
 protected:
 	bool askAddChild(const Instance* instance) const override;
@@ -82,18 +82,18 @@ class Class : public DescribedCreatable<Class, Item, sClass>
 public:
 	Class() : explorerOrder(-1), explorerImageIndex(0) {}
 
-	int FUN_00422100() const
+	int getExplorerOrder() const
 	{
 		if (explorerOrder) {
 			return explorerOrder;
 		}
-		return dynamic_cast<Class*>(getParent()) && dynamic_cast<Class*>(getParent())->FUN_00422100();
+		return dynamic_cast<Class*>(getParent()) && dynamic_cast<Class*>(getParent())->getExplorerOrder();
 	}
 
-	int FUN_004251c0() const
+	int getExplorerImageIndex() const
 	{
 		if (explorerImageIndex == -1) {
-			return dynamic_cast<Class*>(getParent()) && dynamic_cast<Class*>(getParent())->FUN_004251c0();
+			return dynamic_cast<Class*>(getParent()) && dynamic_cast<Class*>(getParent())->getExplorerImageIndex();
 		}
 		return std::max<int>(explorerImageIndex, 0);
 	}
@@ -120,23 +120,23 @@ class Reflection : public DescribedCreatable<Reflection, Instance, sReflection>
 public:
 	Reflection();
 
-	Class* FUN_00446220(const ClassDescriptor* descriptor, bool recurse);
-	Member* FUN_00446920(const PropertyDescriptor* descriptor);
-	Member* FUN_00446970(const FunctionDescriptor* descriptor);
-	Member* FUN_004469c0(const SignalDescriptor* descriptor);
+	Class* getClass(const ClassDescriptor* descriptor, bool recurse);
+	Member* getProperty(const PropertyDescriptor* descriptor);
+	Member* getFunction(const FunctionDescriptor* descriptor);
+	Member* getEvent(const SignalDescriptor* descriptor);
 
-	void FUN_00447e50(std::string fileName);
+	void load(std::string fileName);
 
-	static std::shared_ptr<Reflection> FUN_004480c0();
+	static std::shared_ptr<Reflection> singleton();
 
 protected:
 	bool askAddChild(const Instance* instance) const override;
 
 private:
-	Classes* m_unk0xf8;
+	Classes* m_classes;
 };
 
-void FUN_00447680();
+void registerClasses();
 
 } // namespace RBX::Reflection::Metadata
 

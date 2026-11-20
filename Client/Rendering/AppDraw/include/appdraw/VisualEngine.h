@@ -12,6 +12,7 @@
 #include <string>
 
 class CRobloxWnd;
+class RobloxWindow;
 
 namespace G3D {
 class Color4;
@@ -34,65 +35,69 @@ class View;
 
 namespace Ogre {
 
-class Unknown00671c70 : public SubMesh
+class RbxSubMesh : public SubMesh
 {
 public:
-	Unknown00671c70();
-	~Unknown00671c70();
+	RbxSubMesh();
+	~RbxSubMesh();
 
-	void FUN_0067c590();
+	void buildEdgeList();
 
-	bool m_unk0x84;
-	EdgeData* m_unk0x88;
-	AxisAlignedBox m_unk0x8c;
-	float m_unk0xac;
+	bool m_edgeListBuilt;
+	EdgeData* m_edgeList;
+	AxisAlignedBox m_bounds;
+	float m_boundingRadius;
 };
 
-Vector3 FUN_005e0b40(const G3D::Vector3& v);
-ColourValue FUN_00671cd0(const G3D::Color4& color);
+Vector3 toOgreVector3(const G3D::Vector3& v);
+ColourValue toOgreColour(const G3D::Color4& color);
 
 class VisualEngine
 {
 public:
-	class Unk0x18
+	class FrameRateManager
 	{
 	public:
-		struct Unk0x08
+		struct FrameStats
 		{
-			Unk0x08() : m_unk0x00(-1.0f), m_unk0x04(-1.0f), m_unk0x08(-1.0f), m_unk0x0c(-1.0f), m_unk0x10(-1.0f) {}
+			FrameStats()
+				: m_frameTime(-1.0f), m_visibleCount(-1.0f), m_renderedCount(-1.0f), m_renderWindow(-1.0f),
+				  m_viewport(-1.0f)
+			{
+			}
 
-			float m_unk0x00;
-			float m_unk0x04;
-			float m_unk0x08;
-			float m_unk0x0c;
-			float m_unk0x10;
+			float m_frameTime;
+			float m_visibleCount;
+			float m_renderedCount;
+			float m_renderWindow;
+			float m_viewport;
 		};
 
-		Unk0x18();
+		FrameRateManager();
 
-		int FUN_00671ea0() const;
-		void FUN_00671eb0(const Unk0x08& entry);
-		Unk0x08& FUN_00671ef0(int back);
-		float FUN_00672980(int count);
+		int getFrameCount() const;
+		void addFrame(const FrameStats& entry);
+		FrameStats& getFrame(int back);
+		float getMedianFrameTime(int count);
 
 	private:
-		int m_unk0x00;
-		Unk0x08 m_unk0x08[100];
+		int m_frameCount;
+		FrameStats m_frames[100];
 	};
 
 	VisualEngine();
 	virtual ~VisualEngine();
 
-	SceneManager* getSceneManager() const { return m_unk0x04; }
-	Viewport* getViewport() const { return m_unk0x10; }
+	SceneManager* getSceneManager() const { return m_sceneManager; }
+	Viewport* getViewport() const { return m_viewport; }
 
-	Unk0x18& getUnk0x18() { return m_unk0x18; }
+	FrameRateManager& getFrameRateManager() { return m_frameRateManager; }
 
-	SubMesh* FUN_00671d90(
+	SubMesh* createSubMesh(
 		MeshPtr& mesh, const unsigned short* indices16, const unsigned int* indices32, size_t triangleCount
 	);
 
-	VertexData* FUN_00672ab0(
+	VertexData* createVertexData(
 		const float* positions,
 		size_t vertexCount,
 		const float* normals,
@@ -100,7 +105,7 @@ public:
 		const float* textureCoords
 	);
 
-	void FUN_00672e60(
+	void setMeshVertexData(
 		MeshPtr& mesh,
 		const float* positions,
 		size_t vertexCount,
@@ -111,7 +116,7 @@ public:
 		const Vector3* maximum
 	);
 
-	MeshPtr FUN_006731e0(
+	MeshPtr createMesh(
 		const char* name,
 		const char* group,
 		const float* positions,
@@ -123,7 +128,7 @@ public:
 		const Vector3* maximum
 	);
 
-	Unknown00671c70* FUN_006735b0(
+	RbxSubMesh* createRbxSubMesh(
 		const float* positions,
 		size_t vertexCount,
 		const float* normals,
@@ -136,12 +141,13 @@ public:
 		Vector3* maximumOut
 	);
 
-	void FUN_00673860(
-		int renderSystem, unsigned long window, int width, int height, int antialiasing, std::string logFileName
+	void initialise(
+		int renderSystem, const String& window, int width, int height, int antialiasing, std::string logFileName
 	);
 
 private:
 	friend class ::CRobloxWnd;
+	friend class ::RobloxWindow;
 	friend class RBX::AdornRbxGfx;
 	friend class RBX::RenderNew::Mesh;
 	friend class RBX::RenderNew::RenderScene;
@@ -149,44 +155,44 @@ private:
 	friend class RBX::ViewNew::View;
 	friend class RbxFont;
 
-	SceneManager* m_unk0x04;
-	Camera* m_unk0x08;
-	RenderWindow* m_unk0x0c;
-	Viewport* m_unk0x10;
-	TwoDManager* m_unk0x14;
-	Unk0x18 m_unk0x18;
-	unsigned int m_unk0x7f0;
-	bool m_unk0x7f4;
-	bool m_unk0x7f5;
-	int m_unk0x7f8;
-	int m_unk0x7fc;
-	int m_unk0x800;
-	bool m_unk0x804;
-	bool m_unk0x805;
-	bool m_unk0x806;
+	SceneManager* m_sceneManager;
+	Camera* m_camera;
+	RenderWindow* m_renderWindow;
+	Viewport* m_viewport;
+	TwoDManager* m_twoDManager;
+	FrameRateManager m_frameRateManager;
+	unsigned int m_videoMemorySize;
+	bool m_use32BitIndices;
+	bool m_useLargeVertexBuffer;
+	int m_largeVertexBufferOverride;
+	int m_depthBits;
+	int m_antialiasing;
+	bool m_softwareVertexProcessing;
+	bool m_textureSquareOnly;
+	bool m_supportDepthBias;
 };
 
-extern bool g_unk0x00949dd0;
-extern Root* g_unk0x0096134c;
+extern bool frameRateManagerEnabled;
+extern Root* ogreRoot;
 
-unsigned int FUN_00671cf0();
-void FUN_00672010();
+unsigned int getVideoMemorySize();
+void destroyRoot();
 
-inline void Unknown00671c70::FUN_0067c590()
+inline void RbxSubMesh::buildEdgeList()
 {
-	if (!m_unk0x84) {
+	if (!m_edgeListBuilt) {
 		vertexData->prepareForShadowVolume();
-		m_unk0x84 = true;
+		m_edgeListBuilt = true;
 		EdgeListBuilder builder;
 		builder.addVertexData(vertexData);
 		builder.addIndexData(indexData, 0, operationType);
-		m_unk0x88 = builder.build();
+		m_edgeList = builder.build();
 	}
 }
 
-inline Unknown00671c70::~Unknown00671c70()
+inline RbxSubMesh::~RbxSubMesh()
 {
-	delete m_unk0x88;
+	delete m_edgeList;
 }
 
 } // namespace Ogre

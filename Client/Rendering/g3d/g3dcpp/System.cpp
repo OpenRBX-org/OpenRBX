@@ -35,6 +35,7 @@
 #   include "G3D/RegistryUtil.h"
 
 #elif defined(G3D_LINUX) 
+    #include <cpuid.h>
 
     #include <stdlib.h>
     #include <stdio.h>
@@ -310,23 +311,13 @@ void System::init() {
             ebxreg = info[1];
             ecxreg = info[2];
             edxreg = info[3];
-        #elif defined(__GNUC__) && defined(i386)
-            asm (
-                "movl $0, %%eax \n"
-                "cpuid          \n"
-                "movl %%eax, %0 \n"
-                "movl %%ebx, %1 \n"
-                "movl %%ecx, %2 \n"
-                "movl %%edx, %3 \n"
-                : 
-                "=m" (eaxreg), 
-                "=m" (ebxreg), 
-                "=m" (ecxreg), 
-                "=m" (edxreg) 
-                :
-                // No inputs
-                : 
-                "%eax","%ebx","%ecx","%edx" );
+        #elif defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__))
+            unsigned int a, b, c, d;
+            __cpuid(0, a, b, c, d);
+            eaxreg = a;
+            ebxreg = b;
+            ecxreg = c;
+            edxreg = d;
         #else
             ebxreg = 0;
             edxreg = 0;
@@ -346,17 +337,9 @@ void System::init() {
         #ifdef _MSC_VER
             __cpuid(info, 0x80000000);
             eaxreg = info[0];
-        #elif defined(__GNUC__) && defined(i386)
-            asm (
-                "movl $0x80000000, %%eax \n"
-                "cpuid                   \n"
-                "movl %%eax, %0          \n"
-                : 
-                "=m" (eaxreg)
-                :
-                // No inputs
-                : 
-                "%eax", "%ebx", "%ecx", "%edx" );
+        #elif defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__))
+            __cpuid(0x80000000, a, b, c, d);
+            eaxreg = a;
         #else
             eaxreg = 0;
         #endif
@@ -508,25 +491,8 @@ void checkForCPUID() {
         bitChanged = static_cast<unsigned long>(__readeflags() ^ originalFlags);
         __writeeflags(originalFlags);
 
-#    elif defined(__GNUC__) && defined(i386)
-        // Linux
-        __asm__ (
-"        pushfl                      # Get original EFLAGS             \n"
-"        pushfl                                                        \n"
-"        popl    %%eax                                                 \n"
-"        movl    %%eax, %%ecx                                          \n"
-"        xorl    $0x200000, %%eax    # Flip ID bit in EFLAGS           \n"
-"        pushl   %%eax               # Save new EFLAGS value on stack  \n"
-"        popfl                       # Replace current EFLAGS value    \n"
-"        pushfl                      # Get new EFLAGS                  \n"
-"        popl    %%eax               # Store new EFLAGS in EAX         \n"
-"        popfl                                                         \n"
-"        xorl    %%ecx, %%eax        # Can not toggle ID bit,          \n"
-"        movl    %%eax, %0           # We have CPUID support           \n"
-        : "=m" (bitChanged)
-        : // No inputs
-        : "%eax", "%ecx"
-        );
+#    elif defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__))
+        bitChanged = __get_cpuid_max(0, 0) != 0;
 
 #    else               
        // Unknown architecture
@@ -553,18 +519,10 @@ void getStandardProcessorExtensions() {
         __cpuid(info, 1);
         features = info[3];
 
-    #elif defined(__GNUC__) && defined(i386)
-        // Linux
-        __asm__ (
-                "movl    $1, %%eax                                                 \n"
-                "cpuid                       # Get family/model/stepping/features  \n"
-                "movl    %%edx, %0                                                 \n"
-                : 
-                "=m" (features)
-                : 
-                // No inputs
-                : 
-                "%eax", "%ebx", "%ecx", "%edx" );
+    #elif defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__))
+        unsigned int a, b, c, d;
+        __cpuid(1, a, b, c, d);
+        features = d;
 
     #else
         // Other

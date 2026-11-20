@@ -190,7 +190,7 @@ void PartChunk::onPropertyChanged(const Reflection::PropertyDescriptor* descript
 		invalidateMesh();
 	}
 	else if (descriptor == &PartInstance::prop_RenderImportance) {
-		VTable0x24(partInstance->getRenderImportance());
+		setRenderImportance(partInstance->getRenderImportance());
 	}
 }
 
@@ -456,7 +456,7 @@ void Decal::updateMesh()
 		radius = sqrt(2.0f) * 0.5 * primaryComponent(size);
 
 		if (mesh.notNull()) {
-			mesh->m_unk0x3c = 4;
+			mesh->m_meshType = 4;
 		}
 	}
 }

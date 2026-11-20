@@ -21,8 +21,6 @@
 #include <time.h>
 #ifdef G3D_WIN32
     #include "GLG3D/Win32Window.h"
-#elif defined(G3D_OSX)
-    #include "GLG3D/SDLWindow.h"    
 #endif
 #include "GLG3D/GLCaps.h"
 
@@ -200,17 +198,13 @@ bool RenderDevice::supportsOpenGLExtension(
 }
 
 
-#if defined(G3D_WIN32) || defined(G3D_OSX)
+#ifdef G3D_WIN32
 bool RenderDevice::init(
     const GWindowSettings&      _settings,
     Log*                        log) {
 
     deleteWindow = true;
-    #ifdef G3D_WIN32
-        return init(Win32Window::create(_settings), log);
-    #else
-        return init(new SDLWindow(_settings), log);
-    #endif
+    return init(Win32Window::create(_settings), log);
 }
 #endif
 

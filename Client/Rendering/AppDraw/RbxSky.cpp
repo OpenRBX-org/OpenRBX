@@ -26,10 +26,10 @@
 
 namespace Ogre {
 
-void RbxSky::FUN_00677eb0(VisualEngine* engine, const G3D::LightingParameters& parameters)
+void RbxSky::updateMoon(VisualEngine* engine, const G3D::LightingParameters& parameters)
 {
 	if (parameters.moonPosition.y > -0.3f) {
-		m_unk0x85 = true;
+		m_starsVisible = true;
 
 		MeshPtr mesh = MeshManager::getSingleton().getByName("starsMesh");
 		if (!mesh.isNull()) {
@@ -50,18 +50,18 @@ void RbxSky::FUN_00677eb0(VisualEngine* engine, const G3D::LightingParameters& p
 		}
 	}
 	else {
-		m_unk0x85 = false;
+		m_starsVisible = false;
 	}
 
 	G3D::Vector3 position = parameters.physicallyCorrect ? parameters.trueMoonPosition : parameters.moonPosition;
 	float brightness = std::min(1.0f - parameters.skyAmbient.g + 0.1f, 1.0f);
 	position *= 2700.0;
-	m_unk0x44->setPosition(position.x, position.y, position.z);
-	m_unk0x38->getBillboard(0)->setColour(ColourValue(brightness, brightness, brightness, 1.0f));
-	m_unk0xb8 = Vector3(position.x, position.y, position.z);
+	m_moonNode->setPosition(position.x, position.y, position.z);
+	m_moon->getBillboard(0)->setColour(ColourValue(brightness, brightness, brightness, 1.0f));
+	m_moonPosition = Vector3(position.x, position.y, position.z);
 }
 
-void RbxSky::FUN_00678210(VisualEngine* engine, const G3D::LightingParameters& parameters)
+void RbxSky::updateSun(VisualEngine* engine, const G3D::LightingParameters& parameters)
 {
 	G3D::Vector3 position = parameters.physicallyCorrect ? parameters.trueSunPosition : parameters.sunPosition;
 	G3D::Color3 colour = parameters.emissiveScale * 0.8;
@@ -72,60 +72,60 @@ void RbxSky::FUN_00678210(VisualEngine* engine, const G3D::LightingParameters& p
 	}
 
 	position *= 2700.0;
-	m_unk0x40->setPosition(position.x, position.y, position.z);
-	m_unk0x34->getBillboard(0)->setColour(ColourValue(colour.r, colour.g, colour.b, 1.0f));
-	m_unk0x34->getBillboard(1)->setColour(ColourValue(colour.r, colour.g, colour.b, 1.0f));
-	m_unk0x34->getBillboard(2)->setColour(ColourValue(colour.r, colour.g, colour.b, 1.0f));
-	m_unk0xac = Vector3(position.x, position.y, position.z);
+	m_sunNode->setPosition(position.x, position.y, position.z);
+	m_sun->getBillboard(0)->setColour(ColourValue(colour.r, colour.g, colour.b, 1.0f));
+	m_sun->getBillboard(1)->setColour(ColourValue(colour.r, colour.g, colour.b, 1.0f));
+	m_sun->getBillboard(2)->setColour(ColourValue(colour.r, colour.g, colour.b, 1.0f));
+	m_sunPosition = Vector3(position.x, position.y, position.z);
 
 	if (position.x > 0.0f && position.y >= -0.1) {
 		float rays = std::max(0.0f, std::min((float) (1.0f - position.y * 2.0 / sqrt(2.0)), 1.0f));
 		float alpha = rays * 0.256f;
-		m_unk0x3c->getBillboard(0)->setColour(ColourValue(alpha, alpha, alpha, alpha));
-		m_unk0x84 = true;
+		m_sunRays->getBillboard(0)->setColour(ColourValue(alpha, alpha, alpha, alpha));
+		m_sunRaysVisible = true;
 	}
 	else {
-		m_unk0x84 = false;
+		m_sunRaysVisible = false;
 	}
 }
 
-void RbxSky::FUN_00678540(VisualEngine* engine, const G3D::LightingParameters& parameters)
+void RbxSky::update(VisualEngine* engine, const G3D::LightingParameters& parameters)
 {
 	engine->getViewport()->setBackgroundColour(
 		ColourValue(parameters.skyAmbient.r, parameters.skyAmbient.g, parameters.skyAmbient.b, 1.0f)
 	);
-	if (m_unk0xa8) {
-		FUN_00677eb0(engine, parameters);
-		FUN_00678210(engine, parameters);
+	if (m_celestialBodies) {
+		updateMoon(engine, parameters);
+		updateSun(engine, parameters);
 	}
 }
 
-void RbxSky::FUN_00678610(Camera* cam, RenderQueue* queue, uint8 queueGroupId)
+void RbxSky::updateRenderQueue(Camera* cam, RenderQueue* queue, uint8 queueGroupId)
 {
 	Vector3 position = cam->getDerivedPosition();
-	m_unk0x44->setPosition(m_unk0xb8 + position);
-	m_unk0x40->setPosition(m_unk0xac + position);
-	m_unk0x48->setPosition(position);
+	m_moonNode->setPosition(m_moonPosition + position);
+	m_sunNode->setPosition(m_sunPosition + position);
+	m_starsNode->setPosition(position);
 
 	queue->getQueueGroup(RENDER_QUEUE_1)->setShadowsEnabled(false);
 	queue->getQueueGroup(RENDER_QUEUE_2)->setShadowsEnabled(false);
 
-	m_unk0x38->setRenderQueueGroup(RENDER_QUEUE_1);
-	m_unk0x38->_notifyCurrentCamera(cam);
-	m_unk0x38->_updateRenderQueue(queue);
+	m_moon->setRenderQueueGroup(RENDER_QUEUE_1);
+	m_moon->_notifyCurrentCamera(cam);
+	m_moon->_updateRenderQueue(queue);
 
-	m_unk0x34->setRenderQueueGroup(RENDER_QUEUE_2);
-	m_unk0x34->_notifyCurrentCamera(cam);
-	m_unk0x34->_updateRenderQueue(queue);
+	m_sun->setRenderQueueGroup(RENDER_QUEUE_2);
+	m_sun->_notifyCurrentCamera(cam);
+	m_sun->_updateRenderQueue(queue);
 
-	if (m_unk0x84) {
-		m_unk0x3c->setRenderQueueGroup(RENDER_QUEUE_2);
-		m_unk0x3c->_notifyCurrentCamera(cam);
-		m_unk0x3c->_updateRenderQueue(queue);
+	if (m_sunRaysVisible) {
+		m_sunRays->setRenderQueueGroup(RENDER_QUEUE_2);
+		m_sunRays->_notifyCurrentCamera(cam);
+		m_sunRays->_updateRenderQueue(queue);
 	}
 
-	if (m_unk0x85) {
-		SceneNode::ObjectIterator it = m_unk0x48->getAttachedObjectIterator();
+	if (m_starsVisible) {
+		SceneNode::ObjectIterator it = m_starsNode->getAttachedObjectIterator();
 		while (it.hasMoreElements()) {
 			ManualObject* stars = dynamic_cast<ManualObject*>(it.getNext());
 			stars->setRenderQueueGroup(RENDER_QUEUE_1);
@@ -137,117 +137,117 @@ void RbxSky::FUN_00678610(Camera* cam, RenderQueue* queue, uint8 queueGroupId)
 
 RbxSky::~RbxSky() = default;
 
-RbxSky::RbxSky(SceneManager* sceneManager, const String& folder, bool p_unk0x0c) : m_unk0x84(false)
+RbxSky::RbxSky(SceneManager* sceneManager, const String& folder, bool celestialBodies) : m_sunRaysVisible(false)
 {
-	m_unk0xa8 = p_unk0x0c;
-	if (!m_unk0xa8) {
+	m_celestialBodies = celestialBodies;
+	if (!m_celestialBodies) {
 		return;
 	}
 
 	const String& name = sceneManager->getName();
 
-	m_unk0x10 = TextureManager::getSingleton().load(folder + "moon.jpg", "General");
-	m_unk0x04 = TextureManager::getSingleton().load(folder + "sun.jpg", "General");
-	m_unk0x28 = TextureManager::getSingleton().load(folder + "sun-rays.jpg", "General");
+	m_moonTexture = TextureManager::getSingleton().load(folder + "moon.jpg", "General");
+	m_sunTexture = TextureManager::getSingleton().load(folder + "sun.jpg", "General");
+	m_sunRaysTexture = TextureManager::getSingleton().load(folder + "sun-rays.jpg", "General");
 
-	m_unk0x54 = MaterialManager::getSingleton().create(name + "sunMatl", "General");
-	m_unk0x54->setSceneBlending(SBF_ONE, SBF_ONE);
-	TextureUnitState* sunUnit = m_unk0x54->getTechnique(0)->getPass(0)->createTextureUnitState();
+	m_sunMaterial = MaterialManager::getSingleton().create(name + "sunMatl", "General");
+	m_sunMaterial->setSceneBlending(SBF_ONE, SBF_ONE);
+	TextureUnitState* sunUnit = m_sunMaterial->getTechnique(0)->getPass(0)->createTextureUnitState();
 	sunUnit->setColourOperationEx(LBX_MODULATE, LBS_TEXTURE, LBS_CURRENT);
 	sunUnit->setAlphaOperation(LBX_MODULATE, LBS_TEXTURE, LBS_CURRENT);
-	sunUnit->setTextureName(m_unk0x04->getName());
-	m_unk0x54->setDepthWriteEnabled(false);
-	m_unk0x54->setLightingEnabled(false);
+	sunUnit->setTextureName(m_sunTexture->getName());
+	m_sunMaterial->setDepthWriteEnabled(false);
+	m_sunMaterial->setLightingEnabled(false);
 
-	m_unk0x60 = m_unk0x54->clone(name + "sunRaysMatl");
-	m_unk0x60->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setTextureName(m_unk0x28->getName());
+	m_sunRaysMaterial = m_sunMaterial->clone(name + "sunRaysMatl");
+	m_sunRaysMaterial->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setTextureName(m_sunRaysTexture->getName());
 
-	m_unk0x6c = MaterialManager::getSingleton().create(name + "moonMatl", "General");
-	m_unk0x6c->setSceneBlending(SBF_SOURCE_ALPHA, SBF_ONE);
-	TextureUnitState* moonUnit = m_unk0x6c->getTechnique(0)->getPass(0)->createTextureUnitState();
+	m_moonMaterial = MaterialManager::getSingleton().create(name + "moonMatl", "General");
+	m_moonMaterial->setSceneBlending(SBF_SOURCE_ALPHA, SBF_ONE);
+	TextureUnitState* moonUnit = m_moonMaterial->getTechnique(0)->getPass(0)->createTextureUnitState();
 	moonUnit->setColourOperationEx(LBX_MODULATE, LBS_TEXTURE, LBS_CURRENT);
 	moonUnit->setAlphaOperation(LBX_MODULATE, LBS_TEXTURE, LBS_CURRENT);
-	moonUnit->setTextureName(m_unk0x10->getName());
-	moonUnit->setTextureName(m_unk0x10->getName());
-	m_unk0x6c->setDepthWriteEnabled(false);
-	m_unk0x6c->setLightingEnabled(false);
+	moonUnit->setTextureName(m_moonTexture->getName());
+	moonUnit->setTextureName(m_moonTexture->getName());
+	m_moonMaterial->setDepthWriteEnabled(false);
+	m_moonMaterial->setLightingEnabled(false);
 
-	m_unk0x34 = sceneManager->createBillboardSet(name + "sun", 1);
-	m_unk0x34->setDefaultDimensions(1000.0f, 1000.0f);
-	m_unk0x34->createBillboard(Vector3::ZERO, ColourValue::White);
-	m_unk0x34->createBillboard(Vector3::ZERO, ColourValue::White);
-	m_unk0x34->createBillboard(Vector3::ZERO, ColourValue::White);
-	m_unk0x34->setMaterialName(name + "sunMatl");
+	m_sun = sceneManager->createBillboardSet(name + "sun", 1);
+	m_sun->setDefaultDimensions(1000.0f, 1000.0f);
+	m_sun->createBillboard(Vector3::ZERO, ColourValue::White);
+	m_sun->createBillboard(Vector3::ZERO, ColourValue::White);
+	m_sun->createBillboard(Vector3::ZERO, ColourValue::White);
+	m_sun->setMaterialName(name + "sunMatl");
 
-	m_unk0x3c = sceneManager->createBillboardSet(name + "sunRays", 1);
-	m_unk0x3c->setDefaultDimensions(1000.0f, 1000.0f);
-	m_unk0x3c->createBillboard(Vector3::ZERO, ColourValue::White);
-	m_unk0x3c->setMaterialName(name + "sunRaysMatl");
+	m_sunRays = sceneManager->createBillboardSet(name + "sunRays", 1);
+	m_sunRays->setDefaultDimensions(1000.0f, 1000.0f);
+	m_sunRays->createBillboard(Vector3::ZERO, ColourValue::White);
+	m_sunRays->setMaterialName(name + "sunRaysMatl");
 
-	m_unk0x38 = sceneManager->createBillboardSet(name + "moon", 1);
-	m_unk0x38->setDefaultDimensions(500.0f, 500.0f);
-	m_unk0x38->createBillboard(Vector3::ZERO, ColourValue::White);
-	m_unk0x38->setMaterialName(name + "moonMatl");
+	m_moon = sceneManager->createBillboardSet(name + "moon", 1);
+	m_moon->setDefaultDimensions(500.0f, 500.0f);
+	m_moon->createBillboard(Vector3::ZERO, ColourValue::White);
+	m_moon->setMaterialName(name + "moonMatl");
 
-	m_unk0x4c = sceneManager->createSceneNode(name + "skyNode");
-	m_unk0x40 = m_unk0x4c->createChildSceneNode(name + "sunNode");
-	m_unk0x44 = m_unk0x4c->createChildSceneNode(name + "moonNode");
-	m_unk0x40->attachObject(m_unk0x34);
-	m_unk0x40->attachObject(m_unk0x3c);
-	m_unk0x44->attachObject(m_unk0x38);
-	m_unk0x34->setCastShadows(false);
-	m_unk0x3c->setCastShadows(false);
-	m_unk0x38->setCastShadows(false);
+	m_skyNode = sceneManager->createSceneNode(name + "skyNode");
+	m_sunNode = m_skyNode->createChildSceneNode(name + "sunNode");
+	m_moonNode = m_skyNode->createChildSceneNode(name + "moonNode");
+	m_sunNode->attachObject(m_sun);
+	m_sunNode->attachObject(m_sunRays);
+	m_moonNode->attachObject(m_moon);
+	m_sun->setCastShadows(false);
+	m_sunRays->setCastShadows(false);
+	m_moon->setCastShadows(false);
 
 	if (G3D::fileExists(folder + "real.str")) {
 		G3D::BinaryInput in(folder + "real.str", G3D::G3D_LITTLE_ENDIAN, true);
 		in.readString(5);
 
 		int count = in.readInt16();
-		m_unk0x88.resize(count);
-		m_unk0x98.resize(count, 0.0f);
+		m_starPositions.resize(count);
+		m_starBrightness.resize(count, 0.0f);
 
 		for (int i = 0; i < count; i++) {
 			float x = (in.readInt16() * 2.0 + 1.0) * (1.0 / 65535.0);
 			float y = (in.readInt16() * 2.0 + 1.0) * (1.0 / 65535.0);
 			float z = (in.readInt16() * 2.0 + 1.0) * (1.0 / 65535.0);
-			m_unk0x88[i] = Vector3(x * 1000.0, y * 1000.0, z * 1000.0);
-			m_unk0x98[i] = G3D::square((in.readInt16() * 2.0 + 1.0) * (1.0 / 65535.0)) + 0.3f;
+			m_starPositions[i] = Vector3(x * 1000.0, y * 1000.0, z * 1000.0);
+			m_starBrightness[i] = G3D::square((in.readInt16() * 2.0 + 1.0) * (1.0 / 65535.0)) + 0.3f;
 		}
 	}
 	else {
-		m_unk0x88.resize(3000);
-		m_unk0x98.resize(m_unk0x88.size(), 0.0f);
+		m_starPositions.resize(3000);
+		m_starBrightness.resize(m_starPositions.size(), 0.0f);
 
-		for (int i = m_unk0x88.size() - 1; i >= 0; --i) {
+		for (int i = m_starPositions.size() - 1; i >= 0; --i) {
 			G3D::Vector3 direction = G3D::Vector3::random();
-			m_unk0x88[i] = Vector3(direction.x * 1000.0, direction.y * 1000.0, direction.z * 1000.0);
-			m_unk0x98[i] = G3D::square(G3D::uniformRandom()) + 0.3f;
+			m_starPositions[i] = Vector3(direction.x * 1000.0, direction.y * 1000.0, direction.z * 1000.0);
+			m_starBrightness[i] = G3D::square(G3D::uniformRandom()) + 0.3f;
 		}
 	}
 
-	m_unk0x48 = sceneManager->createSceneNode(name + "starsNode");
+	m_starsNode = sceneManager->createSceneNode(name + "starsNode");
 
 	for (int i = 1; i <= 3; i++) {
-		m_unk0x78 =
+		m_starsMaterial =
 			MaterialManager::getSingleton().create(name + "starsMatl" + StringConverter::toString(i), "General");
-		m_unk0x78->setDepthWriteEnabled(false);
-		m_unk0x78->setLightingEnabled(false);
+		m_starsMaterial->setDepthWriteEnabled(false);
+		m_starsMaterial->setLightingEnabled(false);
 
 		Real brightness = i;
-		m_unk0x78->setPointSize(brightness + 0.2f);
+		m_starsMaterial->setPointSize(brightness + 0.2f);
 
 		String starsName = name + "st" + StringConverter::toString(i);
 		ManualObject* stars = new ManualObject(starsName);
-		stars->begin(m_unk0x78->getName(), RenderOperation::OT_POINT_LIST);
-		for (int j = 0; j < (int) m_unk0x88.size(); j++) {
-			if (i - 1 < m_unk0x98[j] * 3.0 && m_unk0x98[j] * 3.0 <= brightness) {
-				stars->position(m_unk0x88[j].x, m_unk0x88[j].y, m_unk0x88[j].z);
+		stars->begin(m_starsMaterial->getName(), RenderOperation::OT_POINT_LIST);
+		for (int j = 0; j < (int) m_starPositions.size(); j++) {
+			if (i - 1 < m_starBrightness[j] * 3.0 && m_starBrightness[j] * 3.0 <= brightness) {
+				stars->position(m_starPositions[j].x, m_starPositions[j].y, m_starPositions[j].z);
 			}
 		}
 		stars->end();
-		stars->setMaterialName(0, m_unk0x78->getName());
-		m_unk0x48->attachObject(stars);
+		stars->setMaterialName(0, m_starsMaterial->getName());
+		m_starsNode->attachObject(stars);
 		stars->setCastShadows(false);
 	}
 }

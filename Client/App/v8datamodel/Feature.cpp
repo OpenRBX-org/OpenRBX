@@ -67,7 +67,7 @@ float VelocityMotor::getCurrentAngle() const
 	return static_cast<MotorJoint*>(joint)->getCurrentAngle();
 }
 
-bool FUN_00617200(Instance* first, Instance* second)
+bool canJoinMotor(Instance* first, Instance* second)
 {
 	return (dynamic_cast<Hole*>(first) && dynamic_cast<MotorFeature*>(second)) ||
 		   (dynamic_cast<Hole*>(second) && dynamic_cast<MotorFeature*>(first));
@@ -325,9 +325,9 @@ MotorFeature::MotorFeature()
 	setName("MotorFeature");
 }
 
-void FUN_0061a840(Instance* first, Instance* second)
+void joinMotor(Instance* first, Instance* second)
 {
-	if (FUN_00617200(first, second)) {
+	if (canJoinMotor(first, second)) {
 		Instance* hole = dynamic_cast<Hole*>(first) ? first : second;
 		Instance* feature = hole == first ? second : first;
 

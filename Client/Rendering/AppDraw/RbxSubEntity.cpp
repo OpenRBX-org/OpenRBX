@@ -9,21 +9,22 @@
 #include <OgreLogManager.h>
 #include <OgreSubMesh.h>
 #include <exception>
+#include <stdexcept>
 
 namespace Ogre {
 
-void RbxSubEntity::FUN_0067b3d0(SubMesh* subMesh)
+void RbxSubEntity::setSubMesh(SubMesh* subMesh)
 {
 	mSubMesh = subMesh;
 }
 
 void RbxSubEntity::getRenderOperation(RenderOperation& op)
 {
-	if (m_unk0x120 == 0) {
+	if (m_lodIndex == 0) {
 		mSubMesh->_getRenderOperation(op);
 	}
 	else {
-		m_unk0x11c[m_unk0x120 - 1]->_getRenderOperation(op);
+		m_lodSubMeshes[m_lodIndex - 1]->_getRenderOperation(op);
 	}
 }
 
@@ -33,36 +34,36 @@ Real RbxSubEntity::getSquaredViewDepth(const Camera* cam) const
 		return mCachedCameraDist;
 	}
 	dynamic_cast<RbxSceneNode*>(mParentEntity->getParentNode());
-	Vector3 diff = m_unk0xdc.getTrans() - cam->getDerivedPosition();
+	Vector3 diff = m_worldTransform.getTrans() - cam->getDerivedPosition();
 	return diff.squaredLength();
 }
 
-void RbxSubEntity::FUN_0067b4b0(const MaterialPtr& material)
+void RbxSubEntity::setMaterial(const MaterialPtr& material)
 {
 	mpMaterial = material;
 }
 
-void RbxSubEntity::FUN_0067b4c0(int lodIndex, SubMesh* subMesh)
+void RbxSubEntity::setLodSubMesh(int lodIndex, SubMesh* subMesh)
 {
 	if (lodIndex == 0) {
 		mSubMesh = subMesh;
 	}
 	else {
-		m_unk0x11c[lodIndex - 1] = subMesh;
+		m_lodSubMeshes[lodIndex - 1] = subMesh;
 	}
 }
 
-SubMesh* RbxSubEntity::FUN_0067b4e0(int lodIndex)
+SubMesh* RbxSubEntity::getLodSubMesh(int lodIndex)
 {
 	if (lodIndex == 0) {
 		return mSubMesh;
 	}
-	return m_unk0x11c[lodIndex - 1];
+	return m_lodSubMeshes[lodIndex - 1];
 }
 
-void RbxSubEntity::FUN_0067b500(int lodIndex)
+void RbxSubEntity::setLodIndex(int lodIndex)
 {
-	m_unk0x120 = lodIndex;
+	m_lodIndex = lodIndex;
 }
 
 const AxisAlignedBox& RbxSubEntity::getLightCapBounds() const
@@ -72,17 +73,17 @@ const AxisAlignedBox& RbxSubEntity::getLightCapBounds() const
 
 Real RbxSubEntity::getPointExtrusionDistance(const Light* l) const
 {
-	return getExtrusionDistance(m_unk0xdc.getTrans(), l);
+	return getExtrusionDistance(m_worldTransform.getTrans(), l);
 }
 
 EdgeData* RbxSubEntity::getEdgeList()
 {
-	throw std::exception("RBX RbxSubEntity::getEdgeList(): should not be called");
+	throw std::runtime_error("RBX RbxSubEntity::getEdgeList(): should not be called");
 }
 
 bool RbxSubEntity::hasEdgeList()
 {
-	throw std::exception("RBX RbxSubEntity::hasEdgeList(): should not be called");
+	throw std::runtime_error("RBX RbxSubEntity::hasEdgeList(): should not be called");
 }
 
 RbxSubEntity::RbxSubEntityShadowRenderable::RbxSubEntityShadowRenderable(
@@ -155,21 +156,21 @@ bool RbxSubEntity::RbxSubEntityShadowRenderable::isVisible() const
 const AxisAlignedBox& RbxSubEntity::getWorldBoundingBox(bool derive) const
 {
 	static AxisAlignedBox box;
-	Unknown00671c70* subMesh = m_unk0x12c;
+	RbxSubMesh* subMesh = m_shadowSubMesh;
 	if (!subMesh) {
 		for (int i = 0; i >= 0; i--) {
-			if (m_unk0x11c[i]) {
-				subMesh = static_cast<Unknown00671c70*>(m_unk0x11c[i]);
+			if (m_lodSubMeshes[i]) {
+				subMesh = static_cast<RbxSubMesh*>(m_lodSubMeshes[i]);
 				break;
 			}
 		}
 		if (!subMesh) {
-			subMesh = static_cast<Unknown00671c70*>(mSubMesh);
+			subMesh = static_cast<RbxSubMesh*>(mSubMesh);
 		}
 	}
 
-	Vector3 center = m_unk0xdc.getTrans();
-	Real radius = subMesh->m_unk0xac * 1.7f;
+	Vector3 center = m_worldTransform.getTrans();
+	Real radius = subMesh->m_boundingRadius * 1.7f;
 	box.setExtents(center + Vector3(-radius), center + radius);
 	return box;
 }
@@ -182,81 +183,81 @@ const AxisAlignedBox& RbxSubEntity::getDarkCapBounds(const Light& light, Real di
 	return box;
 }
 
-RbxSubEntity::RbxSubEntity(Entity* parent) : SubEntity(parent, nullptr), m_unk0x120(0), m_unk0x128(true)
+RbxSubEntity::RbxSubEntity(Entity* parent) : SubEntity(parent, nullptr), m_lodIndex(0), m_castShadows(true)
 {
-	m_unk0x12c = nullptr;
-	m_unk0x11c[0] = nullptr;
+	m_shadowSubMesh = nullptr;
+	m_lodSubMeshes[0] = nullptr;
 }
 
 bool RbxSubEntity::getCastShadows() const
 {
-	return m_unk0x128;
+	return m_castShadows;
 }
 
 void RbxSubEntity::getWorldTransforms(Matrix4* xform) const
 {
-	*xform = m_unk0xdc;
+	*xform = m_worldTransform;
 }
 
 const Quaternion& RbxSubEntity::getWorldOrientation() const
 {
 	LogManager::getSingleton().logMessage("RBX perf warning!", LML_NORMAL, false);
-	static Quaternion orientation = m_unk0xdc.extractQuaternion();
+	static Quaternion orientation = m_worldTransform.extractQuaternion();
 	return orientation;
 }
 
 const Vector3& RbxSubEntity::getWorldPosition() const
 {
-	static Vector3 position(m_unk0xdc[0][3], m_unk0xdc[1][3], m_unk0xdc[2][3]);
+	static Vector3 position(m_worldTransform[0][3], m_worldTransform[1][3], m_worldTransform[2][3]);
 	return position;
 }
 
-void RbxSubEntity::FUN_0067bcc0(Real value)
+void RbxSubEntity::setRenderImportance(Real value)
 {
-	m_unk0x124 = value;
+	m_renderImportance = value;
 }
 
-Real RbxSubEntity::FUN_0067bcd0() const
+Real RbxSubEntity::getRenderImportance() const
 {
-	return m_unk0x124;
+	return m_renderImportance;
 }
 
 RbxSubEntity::RbxSubEntity(Entity* parent, SubMesh* subMesh, int lodIndex)
-	: SubEntity(parent, nullptr), m_unk0x120(lodIndex), m_unk0x128(true)
+	: SubEntity(parent, nullptr), m_lodIndex(lodIndex), m_castShadows(true)
 {
-	m_unk0x11c[0] = nullptr;
+	m_lodSubMeshes[0] = nullptr;
 	if (lodIndex == 0) {
 		mSubMesh = subMesh;
 	}
 	else {
-		m_unk0x11c[m_unk0x120 - 1] = subMesh;
+		m_lodSubMeshes[m_lodIndex - 1] = subMesh;
 	}
-	m_unk0x12c = nullptr;
+	m_shadowSubMesh = nullptr;
 }
 
 RbxSubEntity::~RbxSubEntity()
 {
-	for (int i = 0; i < (int) m_unk0x130.size(); i++) {
-		delete m_unk0x130[i];
+	for (int i = 0; i < (int) m_shadowRenderables.size(); i++) {
+		delete m_shadowRenderables[i];
 	}
-	m_unk0x130.clear();
+	m_shadowRenderables.clear();
 
 	if (mSubMesh) {
 		if (mSubMesh->useSharedVertices) {
-			throw std::exception("RBX RbxSubEntity dtor(1)");
+			throw std::runtime_error("RBX RbxSubEntity dtor(1)");
 		}
-		delete static_cast<Unknown00671c70*>(mSubMesh);
+		delete static_cast<RbxSubMesh*>(mSubMesh);
 		mSubMesh = nullptr;
 	}
 	mSubMesh = nullptr;
 
 	for (int i = 0; i < 1; i++) {
-		if (m_unk0x11c[i]) {
-			if (m_unk0x11c[i]->useSharedVertices) {
-				throw std::exception("RBX RbxSubEntity dtor (2)");
+		if (m_lodSubMeshes[i]) {
+			if (m_lodSubMeshes[i]->useSharedVertices) {
+				throw std::runtime_error("RBX RbxSubEntity dtor (2)");
 			}
-			delete static_cast<Unknown00671c70*>(m_unk0x11c[i]);
-			m_unk0x11c[i] = nullptr;
+			delete static_cast<RbxSubMesh*>(m_lodSubMeshes[i]);
+			m_lodSubMeshes[i] = nullptr;
 		}
 	}
 }
@@ -270,43 +271,43 @@ ShadowCaster::ShadowRenderableListIterator RbxSubEntity::getShadowVolumeRenderab
 	unsigned long flags
 )
 {
-	Unknown00671c70* subMesh = m_unk0x12c;
+	RbxSubMesh* subMesh = m_shadowSubMesh;
 	if (!subMesh) {
 		for (int i = 0; i >= 0; i--) {
-			if (m_unk0x11c[i]) {
-				subMesh = static_cast<Unknown00671c70*>(m_unk0x11c[i]);
+			if (m_lodSubMeshes[i]) {
+				subMesh = static_cast<RbxSubMesh*>(m_lodSubMeshes[i]);
 				break;
 			}
 		}
 		if (!subMesh) {
-			subMesh = static_cast<Unknown00671c70*>(mSubMesh);
+			subMesh = static_cast<RbxSubMesh*>(mSubMesh);
 		}
 	}
 
-	if (m_unk0x130.empty()) {
-		subMesh->FUN_0067c590();
+	if (m_shadowRenderables.empty()) {
+		subMesh->buildEdgeList();
 	}
 
 	Vector4 lightPos = light->getAs4DVector();
-	Matrix4 world2Obj = m_unk0xdc.inverseAffine();
+	Matrix4 world2Obj = m_worldTransform.inverseAffine();
 	lightPos = world2Obj.transformAffine(lightPos);
 
-	EdgeData* edgeList = subMesh->m_unk0x88;
+	EdgeData* edgeList = subMesh->m_edgeList;
 	if (!edgeList) {
-		return ShadowRenderableListIterator(m_unk0x130.begin(), m_unk0x130.end());
+		return ShadowRenderableListIterator(m_shadowRenderables.begin(), m_shadowRenderables.end());
 	}
 
-	bool init = m_unk0x130.empty();
+	bool init = m_shadowRenderables.empty();
 	EdgeData::EdgeGroupList::iterator egi;
 	ShadowRenderableList::iterator si, siend;
 	RbxSubEntityShadowRenderable* esr = nullptr;
 	if (init) {
-		m_unk0x130.resize(edgeList->edgeGroups.size());
+		m_shadowRenderables.resize(edgeList->edgeGroups.size());
 	}
 
-	siend = m_unk0x130.end();
+	siend = m_shadowRenderables.end();
 	egi = edgeList->edgeGroups.begin();
-	for (si = m_unk0x130.begin(); si != siend; ++si, ++egi) {
+	for (si = m_shadowRenderables.begin(); si != siend; ++si, ++egi) {
 		const VertexData* pVertData = egi->vertexData;
 		if (init) {
 			*si = new RbxSubEntityShadowRenderable(nullptr, indexBuffer, pVertData, !extrude, this);
@@ -321,9 +322,9 @@ ShadowCaster::ShadowRenderableListIterator RbxSubEntity::getShadowVolumeRenderab
 	}
 
 	updateEdgeListLightFacing(edgeList, lightPos);
-	generateShadowVolume(edgeList, *indexBuffer, light, m_unk0x130, flags);
+	generateShadowVolume(edgeList, *indexBuffer, light, m_shadowRenderables, flags);
 
-	return ShadowRenderableListIterator(m_unk0x130.begin(), m_unk0x130.end());
+	return ShadowRenderableListIterator(m_shadowRenderables.begin(), m_shadowRenderables.end());
 }
 
 } // namespace Ogre

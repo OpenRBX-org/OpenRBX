@@ -41,7 +41,7 @@ public:
 	std::unique_ptr<MaterialFactory> materialFactory;
 
 private:
-	bool m_unk0x54;
+	bool m_skyBoxValid;
 
 public:
 	View(std::shared_ptr<DataModel> dataModel);
@@ -61,14 +61,14 @@ private:
 	void updateLighting() override;
 	void invalidateLighting(bool updateSkybox) override;
 
-	void FUN_0050c5c0(void* rd);
-	void FUN_0050d3d0(void* rd);
+	void loadSkyBox(void* rd);
+	void updateLighting(void* rd);
 };
 
-extern bool g_unk0x0092a24c;
+extern bool bevelsEnabled;
 
-void FUN_0050b2a0(bool value);
-bool FUN_0050b2b0();
+void setBevelsEnabled(bool value);
+bool getBevelsEnabled();
 
 } // namespace ViewNew
 } // namespace RBX

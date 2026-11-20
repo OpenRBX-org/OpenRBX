@@ -4,9 +4,9 @@
 
 namespace RBX {
 
-MenuItem::MenuItem(Verb* p_unk0x04, const std::string& p_unk0x08) : VerbWidget(p_unk0x04)
+MenuItem::MenuItem(Verb* verb, const std::string& name) : VerbWidget(verb)
 {
-	setName(p_unk0x08);
+	setName(name);
 	setGuiSize(G3D::Vector2(200, 24));
 }
 

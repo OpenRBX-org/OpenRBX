@@ -27,7 +27,7 @@ class ModelInstance : public DescribedCreatable<ModelInstance, PVInstance, sMode
 public:
 	static bool showModelCoord;
 
-	void FUN_00565040(const G3D::Vector3& front);
+	void setFront(const G3D::Vector3& front);
 
 private:
 	mutable CoordinateFrame modelInPrimary;

@@ -34,8 +34,8 @@ public:
 
 		return root;
 	}
-	std::vector<ClassDescriptor*>::const_iterator derivedClasses_begin() const;
-	std::vector<ClassDescriptor*>::const_iterator derivedClasses_end() const;
+	std::vector<ClassDescriptor*>::const_iterator derivedClasses_begin() const { return derivedClasses.begin(); }
+	std::vector<ClassDescriptor*>::const_iterator derivedClasses_end() const { return derivedClasses.end(); }
 
 	static bool lockedDown;
 

@@ -1,8 +1,9 @@
 #ifndef UTIL_UIEVENT_H
 #define UTIL_UIEVENT_H
 
+#include "util/KeyCode.h"
+
 #include <G3D/Vector2int16.h>
-#include <SDL_keysym.h>
 #include <bit>
 #include <type_traits>
 

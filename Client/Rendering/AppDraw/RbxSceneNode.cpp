@@ -7,7 +7,7 @@
 
 namespace Ogre {
 
-std::map<const SubMesh*, Sphere>* g_unk0x009613c4;
+std::map<const SubMesh*, Sphere>* subMeshSpheres;
 
 void RbxSceneNode::_update(bool updateChildren, bool parentHasChanged)
 {
@@ -77,11 +77,11 @@ void RbxSceneNode::_updateBounds()
 	}
 }
 
-const Matrix4& RbxSceneNode::FUN_0067ac90(SubMesh* subMesh)
+const Matrix4& RbxSceneNode::getSubMeshTransform(SubMesh* subMesh)
 {
 	if (subMesh != nullptr) {
-		std::map<const SubMesh*, Matrix4*>::iterator it = m_unk0x1c0.find(subMesh);
-		if (it == m_unk0x1c0.end()) {
+		std::map<const SubMesh*, Matrix4*>::iterator it = m_subMeshTransforms.find(subMesh);
+		if (it == m_subMeshTransforms.end()) {
 			throw std::runtime_error("Transform map error");
 		}
 		return *it->second;
@@ -93,47 +93,47 @@ const Matrix4& RbxSceneNode::FUN_0067ac90(SubMesh* subMesh)
 	return mCachedTransform;
 }
 
-bool RbxSceneNode::FUN_0067ada0(SubMesh* subMesh) const
+bool RbxSceneNode::hasSubMeshTransform(SubMesh* subMesh) const
 {
-	std::map<const SubMesh*, Matrix4*>::const_iterator it = m_unk0x1c0.find(subMesh);
-	return it != m_unk0x1c0.end();
+	std::map<const SubMesh*, Matrix4*>::const_iterator it = m_subMeshTransforms.find(subMesh);
+	return it != m_subMeshTransforms.end();
 }
 
-void RbxSceneNode::FUN_0067aeb0(SubMesh* subMesh, const Matrix4& transform)
+void RbxSceneNode::setSubMeshTransform(SubMesh* subMesh, const Matrix4& transform)
 {
 	const SubMesh* key = subMesh;
-	std::map<const SubMesh*, Matrix4*>::iterator it = m_unk0x1c0.find(key);
-	if (it == m_unk0x1c0.end()) {
+	std::map<const SubMesh*, Matrix4*>::iterator it = m_subMeshTransforms.find(key);
+	if (it == m_subMeshTransforms.end()) {
 		std::pair<std::map<const SubMesh*, Matrix4*>::iterator, bool> inserted;
-		inserted = m_unk0x1c0.insert(std::map<const SubMesh*, Matrix4*>::value_type(key, new Matrix4));
+		inserted = m_subMeshTransforms.insert(std::map<const SubMesh*, Matrix4*>::value_type(key, new Matrix4));
 		it = inserted.first;
 	}
 	*it->second = transform;
 }
 
-const Sphere& RbxSceneNode::FUN_0067af60(SubMesh* subMesh)
+const Sphere& RbxSceneNode::getSubMeshSphere(SubMesh* subMesh)
 {
-	std::map<const SubMesh*, Sphere>::const_iterator it = g_unk0x009613c4->find(subMesh);
-	if (it == g_unk0x009613c4->end()) {
+	std::map<const SubMesh*, Sphere>::const_iterator it = subMeshSpheres->find(subMesh);
+	if (it == subMeshSpheres->end()) {
 		throw std::runtime_error("bsphere map error");
 	}
 	return it->second;
 }
 
-bool RbxSceneNode::FUN_0067b020(SubMesh* subMesh) const
+bool RbxSceneNode::hasSubMeshSphere(SubMesh* subMesh) const
 {
-	std::map<const SubMesh*, Sphere>::const_iterator it = g_unk0x009613c4->find(subMesh);
-	return it != g_unk0x009613c4->end();
+	std::map<const SubMesh*, Sphere>::const_iterator it = subMeshSpheres->find(subMesh);
+	return it != subMeshSpheres->end();
 }
 
-bool RbxSceneNode::FUN_0067b070(SubMesh* subMesh)
+bool RbxSceneNode::removeSubMeshSphere(SubMesh* subMesh)
 {
-	if (g_unk0x009613c4 == nullptr) {
+	if (subMeshSpheres == nullptr) {
 		return false;
 	}
-	std::map<const SubMesh*, Sphere>::iterator it = g_unk0x009613c4->find(subMesh);
-	if (it != g_unk0x009613c4->end()) {
-		g_unk0x009613c4->erase(it);
+	std::map<const SubMesh*, Sphere>::iterator it = subMeshSpheres->find(subMesh);
+	if (it != subMeshSpheres->end()) {
+		subMeshSpheres->erase(it);
 		return true;
 	}
 	return false;
@@ -141,27 +141,28 @@ bool RbxSceneNode::FUN_0067b070(SubMesh* subMesh)
 
 RbxSceneNode::~RbxSceneNode()
 {
-	for (std::map<const SubMesh*, Matrix4*>::iterator it = m_unk0x1c0.begin(); it != m_unk0x1c0.end(); ++it) {
+	for (std::map<const SubMesh*, Matrix4*>::iterator it = m_subMeshTransforms.begin(); it != m_subMeshTransforms.end();
+		 ++it) {
 		delete it->second;
 	}
-	m_unk0x1c0.clear();
+	m_subMeshTransforms.clear();
 }
 
-void RbxSceneNode::FUN_0067b220()
+void RbxSceneNode::createSubMeshSpheres()
 {
-	if (g_unk0x009613c4 == nullptr) {
-		g_unk0x009613c4 = new std::map<const SubMesh*, Sphere>;
+	if (subMeshSpheres == nullptr) {
+		subMeshSpheres = new std::map<const SubMesh*, Sphere>;
 	}
 }
 
-void RbxSceneNode::FUN_0067b2b0(SubMesh* subMesh, const Sphere& sphere)
+void RbxSceneNode::setSubMeshSphere(SubMesh* subMesh, const Sphere& sphere)
 {
-	FUN_0067b220();
+	createSubMeshSpheres();
 	const SubMesh* key = subMesh;
-	std::map<const SubMesh*, Sphere>::iterator it = g_unk0x009613c4->find(key);
-	if (it == g_unk0x009613c4->end()) {
+	std::map<const SubMesh*, Sphere>::iterator it = subMeshSpheres->find(key);
+	if (it == subMeshSpheres->end()) {
 		std::pair<std::map<const SubMesh*, Sphere>::iterator, bool> inserted;
-		inserted = g_unk0x009613c4->insert(std::map<const SubMesh*, Sphere>::value_type(key, Sphere()));
+		inserted = subMeshSpheres->insert(std::map<const SubMesh*, Sphere>::value_type(key, Sphere()));
 		it = inserted.first;
 	}
 	it->second = sphere;
