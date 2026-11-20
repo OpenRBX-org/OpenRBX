@@ -139,6 +139,13 @@ static SDL_Window* window;
 static int users;
 #ifndef _WIN32
 static QSocketNotifier* connectionNotifier;
+
+static Display* x11Display()
+{
+	return static_cast<Display*>(
+		SDL_GetPointerProperty(SDL_GetWindowProperties(window), SDL_PROP_WINDOW_X11_DISPLAY_POINTER, nullptr)
+	);
+}
 #endif
 
 static unsigned scanCodeFromSDL(SDL_Scancode scancode)
@@ -209,9 +216,7 @@ void open(void* frame)
 		throw std::runtime_error(SDL_GetError());
 	}
 #ifndef _WIN32
-	Display* display = static_cast<Display*>(
-		SDL_GetPointerProperty(SDL_GetWindowProperties(window), SDL_PROP_WINDOW_X11_DISPLAY_POINTER, nullptr)
-	);
+	Display* display = x11Display();
 	connectionNotifier = new QSocketNotifier(XConnectionNumber(display), QSocketNotifier::Read);
 	QObject::connect(connectionNotifier, &QSocketNotifier::activated, SDL_PumpEvents);
 #endif
@@ -235,7 +240,7 @@ void pump()
 	SDL_PumpEvents();
 }
 
-bool captureMouse(int x, int y)
+bool captureMouse(int x, int y, std::uintptr_t viewport)
 {
 #ifdef _WIN32
 	SDL_Rect pin = {x, y, 1, 1};
@@ -249,7 +254,36 @@ bool captureMouse(int x, int y)
 #else
 	SDL_PumpEvents();
 	SDL_FlushEvents(SDL_EVENT_MOUSE_MOTION, SDL_EVENT_MOUSE_WHEEL);
-	return SDL_SetWindowRelativeMouseMode(window, true);
+	if (!SDL_SetWindowRelativeMouseMode(window, true)) {
+		return false;
+	}
+
+	// SDL's X11 backend skips confinement for Qt-owned windows.
+	const SDL_PropertiesID properties = SDL_GetWindowProperties(window);
+	Display* display = x11Display();
+	const Window frame = SDL_GetNumberProperty(properties, SDL_PROP_WINDOW_X11_WINDOW_NUMBER, None);
+	const char empty[] = {0};
+	const Pixmap bitmap = XCreateBitmapFromData(display, frame, empty, 1, 1);
+	XColor black = {};
+	const Cursor cursor = XCreatePixmapCursor(display, bitmap, bitmap, &black, &black, 0, 0);
+	XFreePixmap(display, bitmap);
+	const int result = XGrabPointer(
+		display,
+		frame,
+		False,
+		ButtonPressMask | ButtonReleaseMask | PointerMotionMask,
+		GrabModeAsync,
+		GrabModeAsync,
+		static_cast<Window>(viewport),
+		cursor,
+		CurrentTime
+	);
+	XFreeCursor(display, cursor);
+	if (result != GrabSuccess) {
+		SDL_SetWindowRelativeMouseMode(window, false);
+		return false;
+	}
+	return true;
 #endif
 }
 
@@ -258,6 +292,10 @@ void releaseMouse()
 	SDL_SetWindowRelativeMouseMode(window, false);
 #ifdef _WIN32
 	SDL_SetWindowMouseRect(window, nullptr);
+#else
+	Display* display = x11Display();
+	XUngrabPointer(display, CurrentTime);
+	XFlush(display);
 #endif
 }
 

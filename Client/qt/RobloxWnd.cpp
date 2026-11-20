@@ -310,7 +310,7 @@ void CRobloxWnd::processMouse(RBX::UIEvent::EventType eventType, QMouseEvent* ev
 			m_glWindow->makeCurrent();
 		}
 		if (m_userInput && eventType != RBX::UIEvent::NO_EVENT) {
-			QPointF position = event->position();
+			QPointF position = event->position() * devicePixelRatioF();
 			m_userInput->mouseMessage(eventType, G3D::Vector2(position.x(), position.y()));
 		}
 		update();
@@ -370,7 +370,7 @@ void CRobloxWnd::wheelEvent(QWheelEvent* event)
 			m_glWindow->makeCurrent();
 		}
 		if (m_userInput) {
-			QPointF position = event->position();
+			QPointF position = event->position() * devicePixelRatioF();
 			m_userInput->mouseWheel(event->angleDelta().y() > 0, G3D::Vector2(position.x(), position.y()));
 		}
 		update();

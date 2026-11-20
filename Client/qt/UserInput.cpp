@@ -85,11 +85,13 @@ void UserInput::acquireMouse(const G3D::Vector2& position)
 			NativeInput::mapToWindow(m_viewport, m_frame, QPoint(viewport.width() / 2, viewport.height() / 2));
 
 		m_acquirePoint = NativeInput::cursorPosition();
-		m_mouseAcquired = InputDevice::captureMouse(center.x(), center.y());
+		m_mouseAcquired = InputDevice::captureMouse(center.x(), center.y(), m_viewport);
 
 		if (m_mouseAcquired) {
 			mouseOwner = this;
+#ifdef _WIN32
 			NativeInput::hideCursor(m_viewport);
+#endif
 			G3D::Rect2D rect = m_viewportRect;
 			m_cursorOffset = position - rect.center();
 		}
@@ -345,7 +347,9 @@ void UserInput::onDeactivate()
 		QPoint point(static_cast<int>(position.x), static_cast<int>(position.y));
 		NativeInput::setCursorPosition(NativeInput::clientToScreen(m_viewport, point));
 
+#ifdef _WIN32
 		NativeInput::showArrowCursor(m_viewport);
+#endif
 
 		NativeInput::invalidate(m_viewport);
 		m_mouseAcquired = false;

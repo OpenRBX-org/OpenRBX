@@ -1,6 +1,8 @@
 #ifndef INPUTDEVICE_H
 #define INPUTDEVICE_H
 
+#include <cstdint>
+
 struct InputEvent
 {
 	enum Type
@@ -34,7 +36,7 @@ void open(void* frame);
 void close();
 void pump();
 
-bool captureMouse(int x, int y);
+bool captureMouse(int x, int y, std::uintptr_t viewport);
 void releaseMouse();
 int takeMouseEvents(InputEvent* events, int capacity);
 int peekMouseMotion(InputEvent* events, int capacity);
