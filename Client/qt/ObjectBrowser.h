@@ -3,7 +3,7 @@
 
 #include "DocView.h"
 #include "TreeWidget.h"
-#include "reflection/EnumConverter.h"
+#include "reflection/enumconverter.h"
 #include "reflection/function.h"
 #include "reflection/object.h"
 #include "reflection/property.h"
