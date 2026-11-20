@@ -1003,7 +1003,7 @@ if (NOT WIN32)
     "${OGRE}/OgreMain/include"
     "${OGRE}/RenderSystems/GL/src/nvparse"
     "${OGRE}/RenderSystems/GL/src/atifs/include"
-    "${OGRE}/RenderSystems/GL/src/glsl/include"
+    "${OGRE}/RenderSystems/GL/src/GLSL/include"
     "${MESA}/include"
   )
   target_compile_definitions(rggl PRIVATE ${OPENRBX_OGRE_LINUX_DEFINITIONS})
@@ -1119,7 +1119,7 @@ target_include_directories(rggl PRIVATE
   "${OGRE}/RenderSystems/GL/src/nvparse"
   "${OGRE}/RenderSystems/GL/src/nvparse/winheaders"
   "${OGRE}/RenderSystems/GL/src/atifs/include"
-  "${OGRE}/RenderSystems/GL/src/glsl/include"
+  "${OGRE}/RenderSystems/GL/src/GLSL/include"
 )
 target_compile_definitions(rggl PRIVATE WIN32 NDEBUG _WINDOWS _USRDLL OGRE_GLPLUGIN_EXPORTS _MBCS)
 target_compile_options(rggl PRIVATE /Ox ${OPENRBX_OGRE_COMPILE_OPTIONS} /GL)

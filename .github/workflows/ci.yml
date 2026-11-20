@@ -50,11 +50,10 @@ jobs:
         with:
           arch: ${{ matrix.arch }}
 
-      - name: Install LLVM
+      - name: Add Visual Studio LLVM to PATH
         if: ${{ matrix.clang-tidy }}
-        uses: KyleMayes/install-llvm-action@v2
-        with:
-          version: '21'
+        shell: pwsh
+        run: Add-Content $env:GITHUB_PATH (Join-Path $env:VCINSTALLDIR 'Tools\Llvm\x64\bin')
 
       - name: Setup sccache
         if: ${{ !matrix.clang-tidy }}
