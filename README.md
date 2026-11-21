@@ -29,7 +29,7 @@ The client and the RBXGS web service build for Windows and Linux. Other platform
 * [Git](https://git-scm.com/downloads)
 * [Visual Studio](https://visualstudio.microsoft.com/) 2022 or later with the Desktop development with C++ workload
 * [Strawberry Perl](https://strawberryperl.com/), used to build OpenSSL
-* [Python](https://www.python.org/) with `pip install meson mako` and [WinFlexBison](https://github.com/lexxmark/winflexbison) on the `PATH`, used to build Mesa
+* [Python](https://www.python.org/) with `pip install meson mako packaging pyyaml` and [WinFlexBison](https://github.com/lexxmark/winflexbison) on the `PATH`, used to build Mesa
 
 #### Building (Windows)
 
