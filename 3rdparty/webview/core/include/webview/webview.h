@@ -1190,8 +1190,10 @@ webview_error_t api_filter(WorkFn &&do_work) noexcept {
 class user_script {
 public:
   class impl;
+  using impl_deleter = std::function<void(impl *)>;
+  using impl_ptr = std::unique_ptr<impl, impl_deleter>;
 
-  user_script(const std::string &code, std::unique_ptr<impl> &&impl_)
+  user_script(const std::string &code, impl_ptr &&impl_)
       : m_code{code}, m_impl{std::move(impl_)} {}
 
   user_script(const user_script &other) = delete;
@@ -1215,7 +1217,7 @@ public:
 
 private:
   std::string m_code;
-  std::unique_ptr<impl> m_impl;
+  impl_ptr m_impl;
 };
 
 class engine_base {
@@ -2020,8 +2022,9 @@ protected:
         js.c_str(), WEBKIT_USER_CONTENT_INJECT_TOP_FRAME,
         WEBKIT_USER_SCRIPT_INJECT_AT_DOCUMENT_START, nullptr, nullptr);
     webkit_user_content_manager_add_script(m_user_content_manager, wk_script);
-    user_script script{js, std::unique_ptr<user_script::impl>{
-                               new user_script::impl{wk_script}}};
+    user_script script{
+        js, user_script::impl_ptr{new user_script::impl{wk_script},
+                                  [](user_script::impl *p) { delete p; }}};
     webkit_user_script_unref(wk_script);
     return script;
   }
@@ -2412,8 +2415,9 @@ protected:
         WKUserScriptInjectionTimeAtDocumentStart, YES);
     // Script is retained when added.
     objc::msg_send<void>(m_manager, "addUserScript:"_sel, wk_script);
-    user_script script{js, std::unique_ptr<user_script::impl>{
-                               new user_script::impl{wk_script}}};
+    user_script script{
+        js, user_script::impl_ptr{new user_script::impl{wk_script},
+                                  [](user_script::impl *p) { delete p; }}};
     objc::msg_send<void>(wk_script, "release"_sel);
     return script;
   }
@@ -4163,8 +4167,9 @@ protected:
     }
     // TODO: There's a non-zero chance that we didn't get the script ID.
     //       We need to convey the error somehow.
-    return user_script{js, std::unique_ptr<user_script::impl>{
-                               new user_script::impl{script_id, wjs}}};
+    return user_script{
+        js, user_script::impl_ptr{new user_script::impl{script_id, wjs},
+                                  [](user_script::impl *p) { delete p; }}};
   }
 
   void
