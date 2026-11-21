@@ -324,6 +324,14 @@ private:
         return __rdtsc();
     }
 
+#elif defined(G3D_LINUX) && defined(__aarch64__)
+    inline uint64 System::getCycleCount() {
+        // The ARM virtual counter advances at a fixed rate.
+        uint64 count;
+        __asm__ __volatile__("isb; mrs %0, cntvct_el0" : "=r"(count));
+        return count;
+    }
+
 #elif (defined(G3D_LINUX) || defined(G3D_MINGW32))
 
     inline uint64 System::getCycleCount() {
