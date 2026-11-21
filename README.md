@@ -23,6 +23,7 @@ The client and the RBXGS web service build for Windows and Linux. Other platform
 |----------|-----------|-------|
 | Windows (x64) | Visual Studio 2022 or later | Builds the client and the RBXGS web service. |
 | Linux (x64) | GCC 14 or later | Builds the client and the RBXGS web service. |
+| Linux (ARM64) | GCC 14 or later | Builds the client and the RBXGS web service. |
 
 #### Prerequisites (Windows)
 
@@ -71,6 +72,13 @@ cmake --build build
 ```
 
 Once the build completes, the client (`Roblox`) and the RBXGS web service (`WebService`) are in the `build` folder with the libraries they load.
+
+The client expects a `content` directory beside the executable for game assets.
+
+On Linux, pass `-DOPENRBX_USE_SYSTEM_QT=ON` to use an installed Qt 6 instead of
+building and bundling Qt. This requires the development packages for Qt
+Widgets, Print Support, and Core5Compat, plus the Qt XCB platform plugin at
+runtime. The ARM64 build was verified with Qt 6.11 on Fedora Asahi Remix 44.
 
 ## Contributing
 
