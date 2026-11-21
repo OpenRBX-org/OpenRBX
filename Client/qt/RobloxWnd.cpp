@@ -134,7 +134,8 @@ void CRobloxWnd::resizeRbxGfx(int cx, int cy)
 		unsigned long nativeWindow = 0;
 		window->getCustomAttribute("DISPLAY", &display);
 		window->getCustomAttribute("WINDOW", &nativeWindow);
-		resizeNativeWindow(display, nativeWindow, cx, cy);
+		const qreal scale = devicePixelRatioF();
+		resizeNativeWindow(display, nativeWindow, qRound(cx * scale), qRound(cy * scale));
 #endif
 		window->windowMovedOrResized();
 
