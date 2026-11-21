@@ -44,30 +44,34 @@ public:
 
     /** Atomic set */
     explicit inline AtomicInt32(const int32 x) {
-        // APR does this assignment using InterlockedExchange
-        // Morgan believes that volatile should be sufficient, however.
-        _value = x;
+        *this = x;
     }
 
     /** Atomic set */
-    inline AtomicInt32(const AtomicInt32& x) {
-        _value = x._value;
-    }
+    inline AtomicInt32(const AtomicInt32& x) : AtomicInt32(x.value()) {}
 
     /** Atomic set */
     inline const AtomicInt32& operator=(const int32 x) {
+#       if defined(G3D_LINUX)
+        __atomic_store_n(&_value, x, __ATOMIC_SEQ_CST);
+#       else
         _value = x;
+#       endif
         return *this;
     }
 
     /** Atomic set */
     inline const void operator=(const AtomicInt32& x) {
-        _value = x._value;
+        *this = x.value();
     }
 
     /** Returns the current value */
     inline const int32 value() const {
+#       if defined(G3D_LINUX)
+        return __atomic_load_n(&_value, __ATOMIC_SEQ_CST);
+#       else
         return _value;
+#       endif
     }
 
     /** Returns the old value, before the add. */
@@ -78,13 +82,8 @@ public:
 
 #       elif defined(G3D_LINUX)
 
-            int32 old;
-            asm volatile ("lock; xaddl %0,%1"
-                  : "=r"(old), "=m"(_value) /* outputs */
-                  : "0"(x), "m"(_value)   /* inputs */
-                  : "memory", "cc");
-            return old;
-            
+            return __atomic_fetch_add(&_value, x, __ATOMIC_SEQ_CST);
+
 #       elif defined(G3D_OSX)
 			int32 prev, temp;
 
@@ -127,14 +126,9 @@ public:
             // Note: returns the newly decremented value
             return InterlockedDecrement(VCAST &_value) != 0;
 #       elif defined(G3D_LINUX)
-            unsigned char nz;
 
-            asm volatile ("lock; decl %1;\n\t"
-                          "setnz %%al"
-                          : "=a" (nz)
-                          : "m" (_value)
-                          : "memory", "cc");
-            return nz;
+            return add(-1) != 1;
+
 #       elif defined(G3D_OSX)
 			// Note: add returns the old value. We will only be 0, if we were 1 prior to this.
             return add(-1) != 1;
@@ -163,12 +157,11 @@ public:
                 return InterlockedCompareExchange(VCAST &_value, exchange, comperand);
 #          endif
 #       elif defined(G3D_LINUX)
-            int32 ret;
-            asm volatile ("lock; cmpxchgl %1, %2"
-                          : "=a" (ret)
-                          : "r" (exchange), "m" (_value), "0"(comperand)
-                          : "memory", "cc");
-            return ret;
+
+            int32 old = comperand;
+            __atomic_compare_exchange_n(&_value, &old, exchange, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
+            return old;
+
 #       elif defined(G3D_OSX)
 			int32 prev;
 

@@ -76,7 +76,7 @@
 // the cat namespace
 
 #if !defined(HOST_ENDIAN_IS_BIG) && !defined(HOST_ENDIAN_IS_LITTLE)
-#if defined(__sparc) || defined(__sparc__) || defined(__powerpc__) || \
+#if defined(__AARCH64EB__) || defined(__sparc) || defined(__sparc__) || defined(__powerpc__) || \
 	defined(__ppc__) || defined(__hppa) || defined(_MIPSEB) || defined(_POWER) || \
 	defined(_M_PPC) || defined(_M_MPPC) || defined(_M_MRX000) || \
 	defined(__POWERPC) || defined(m68k) || defined(powerpc) || \
@@ -88,7 +88,7 @@
 
 # define HOST_ENDIAN_IS_BIG
 
-#elif defined(__i386__) || defined(i386) || defined(intel) || defined(_M_IX86) || \
+#elif defined(__AARCH64EL__) || defined(__i386__) || defined(i386) || defined(intel) || defined(_M_IX86) || \
 	defined(__amd64) || defined(__amd64__) || defined(_M_X64) || \
 	defined(__alpha__) || defined(__alpha) || defined(__ia64) || defined(__ia64__) || \
 	defined(_M_ALPHA) || defined(ns32000) || defined(__ns32000__) || defined(sequent) || \
@@ -112,7 +112,7 @@ namespace cat
 	// LITTLE_ENDIAN or BIG_ENDIAN (endian.h)
 	// dalfy
 #if !defined(BIG_ENDIAN) && !defined(LITTLE_ENDIAN)
-#if defined(__sparc) || defined(__sparc__) || defined(__powerpc__) || \
+#if defined(__AARCH64EB__) || defined(__sparc) || defined(__sparc__) || defined(__powerpc__) || \
 	defined(__ppc__) || defined(__hppa) || defined(_MIPSEB) || defined(_POWER) || \
 	defined(_M_PPC) || defined(_M_MPPC) || defined(_M_MRX000) || \
 	defined(__POWERPC) || defined(m68k) || defined(powerpc) || \
@@ -124,7 +124,7 @@ namespace cat
 
 # define BIG_ENDIAN
 
-#elif defined(__i386__) || defined(i386) || defined(intel) || defined(_M_IX86) || \
+#elif defined(__AARCH64EL__) || defined(__i386__) || defined(i386) || defined(intel) || defined(_M_IX86) || \
 	defined(__amd64) || defined(__amd64__) || defined(_M_X64) || \
 	defined(__alpha__) || defined(__alpha) || defined(__ia64) || defined(__ia64__) || \
 	defined(_M_ALPHA) || defined(ns32000) || defined(__ns32000__) || defined(sequent) || \

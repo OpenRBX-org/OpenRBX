@@ -1,98 +1,100 @@
-set(OPENRBX_QTBASE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/qtbase")
-set(OPENRBX_QTBASE_BINARY_DIR "${CMAKE_BINARY_DIR}/3rdparty/qtbase-build")
-set(OPENRBX_QTBASE_PREFIX "${OPENRBX_QTBASE_BINARY_DIR}/install")
+if (WIN32 OR NOT OPENRBX_USE_SYSTEM_QT)
+  set(OPENRBX_QTBASE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/qtbase")
+  set(OPENRBX_QTBASE_BINARY_DIR "${CMAKE_BINARY_DIR}/3rdparty/qtbase-build")
+  set(OPENRBX_QTBASE_PREFIX "${OPENRBX_QTBASE_BINARY_DIR}/install")
 
-set(OPENRBX_QTBASE_OPTIONS
-  -DCMAKE_BUILD_TYPE=Release
-  -DCMAKE_INSTALL_PREFIX=${OPENRBX_QTBASE_PREFIX}
-  -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
-  -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
-  -DBUILD_SHARED_LIBS=ON
-  -DQT_BUILD_TESTS=OFF
-  -DQT_BUILD_EXAMPLES=OFF
-  -DFEATURE_sql=OFF
-  -DFEATURE_network=OFF
-  -DFEATURE_testlib=OFF
-  -DFEATURE_concurrent=OFF
-  -DFEATURE_dbus=OFF
-  -DFEATURE_vulkan=OFF
-  -DFEATURE_xml=OFF
-  -DQT_GENERATE_SBOM=OFF
-)
-if (WIN32)
-  list(APPEND OPENRBX_QTBASE_OPTIONS -DFEATURE_windeployqt=OFF -DFEATURE_printsupport=OFF)
-else()
-  list(APPEND OPENRBX_QTBASE_OPTIONS
-    -DFEATURE_printsupport=ON
-    -DFEATURE_cups=ON
-    -DFEATURE_icu=OFF
-    -DFEATURE_glib=ON
-    -DFEATURE_libudev=OFF
-    -DFEATURE_evdev=OFF
-    -DFEATURE_eglfs=OFF
-    -DFEATURE_linuxfb=OFF
-    -DFEATURE_vnc=OFF
-    -DFEATURE_xcb=ON
-    -DFEATURE_system_zlib=OFF
-    -DFEATURE_system_png=OFF
-    -DFEATURE_system_jpeg=OFF
-    -DFEATURE_system_pcre2=OFF
-    -DFEATURE_system_harfbuzz=OFF
-    -DFEATURE_system_doubleconversion=OFF
-    -DFEATURE_system_libb2=OFF
+  set(OPENRBX_QTBASE_OPTIONS
+    -DCMAKE_BUILD_TYPE=Release
+    -DCMAKE_INSTALL_PREFIX=${OPENRBX_QTBASE_PREFIX}
+    -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
+    -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+    -DBUILD_SHARED_LIBS=ON
+    -DQT_BUILD_TESTS=OFF
+    -DQT_BUILD_EXAMPLES=OFF
+    -DFEATURE_sql=OFF
+    -DFEATURE_network=OFF
+    -DFEATURE_testlib=OFF
+    -DFEATURE_concurrent=OFF
+    -DFEATURE_dbus=OFF
+    -DFEATURE_vulkan=OFF
+    -DFEATURE_xml=OFF
+    -DQT_GENERATE_SBOM=OFF
   )
-endif()
+  if (WIN32)
+    list(APPEND OPENRBX_QTBASE_OPTIONS -DFEATURE_windeployqt=OFF -DFEATURE_printsupport=OFF)
+  else()
+    list(APPEND OPENRBX_QTBASE_OPTIONS
+      -DFEATURE_printsupport=ON
+      -DFEATURE_cups=ON
+      -DFEATURE_icu=OFF
+      -DFEATURE_glib=ON
+      -DFEATURE_libudev=OFF
+      -DFEATURE_evdev=OFF
+      -DFEATURE_eglfs=OFF
+      -DFEATURE_linuxfb=OFF
+      -DFEATURE_vnc=OFF
+      -DFEATURE_xcb=ON
+      -DFEATURE_system_zlib=OFF
+      -DFEATURE_system_png=OFF
+      -DFEATURE_system_jpeg=OFF
+      -DFEATURE_system_pcre2=OFF
+      -DFEATURE_system_harfbuzz=OFF
+      -DFEATURE_system_doubleconversion=OFF
+      -DFEATURE_system_libb2=OFF
+    )
+  endif()
 
-if (NOT EXISTS "${OPENRBX_QTBASE_PREFIX}/lib/cmake/Qt6/Qt6Config.cmake")
-  message(STATUS "Building qtbase in ${OPENRBX_QTBASE_BINARY_DIR}")
-  execute_process(
-    COMMAND "${CMAKE_COMMAND}" -S "${OPENRBX_QTBASE_SOURCE_DIR}" -B "${OPENRBX_QTBASE_BINARY_DIR}" -G Ninja
-            ${OPENRBX_QTBASE_OPTIONS}
-    RESULT_VARIABLE result
-  )
-  if (NOT result EQUAL 0)
-    message(FATAL_ERROR "qtbase configure failed")
+  if (NOT EXISTS "${OPENRBX_QTBASE_PREFIX}/lib/cmake/Qt6/Qt6Config.cmake")
+    message(STATUS "Building qtbase in ${OPENRBX_QTBASE_BINARY_DIR}")
+    execute_process(
+      COMMAND "${CMAKE_COMMAND}" -S "${OPENRBX_QTBASE_SOURCE_DIR}" -B "${OPENRBX_QTBASE_BINARY_DIR}" -G Ninja
+              ${OPENRBX_QTBASE_OPTIONS}
+      RESULT_VARIABLE result
+    )
+    if (NOT result EQUAL 0)
+      message(FATAL_ERROR "qtbase configure failed")
+    endif()
+    execute_process(COMMAND "${CMAKE_COMMAND}" --build "${OPENRBX_QTBASE_BINARY_DIR}" RESULT_VARIABLE result)
+    if (NOT result EQUAL 0)
+      message(FATAL_ERROR "qtbase build failed")
+    endif()
+    execute_process(COMMAND "${CMAKE_COMMAND}" --install "${OPENRBX_QTBASE_BINARY_DIR}" RESULT_VARIABLE result)
+    if (NOT result EQUAL 0)
+      message(FATAL_ERROR "qtbase install failed")
+    endif()
   endif()
-  execute_process(COMMAND "${CMAKE_COMMAND}" --build "${OPENRBX_QTBASE_BINARY_DIR}" RESULT_VARIABLE result)
-  if (NOT result EQUAL 0)
-    message(FATAL_ERROR "qtbase build failed")
-  endif()
-  execute_process(COMMAND "${CMAKE_COMMAND}" --install "${OPENRBX_QTBASE_BINARY_DIR}" RESULT_VARIABLE result)
-  if (NOT result EQUAL 0)
-    message(FATAL_ERROR "qtbase install failed")
-  endif()
-endif()
 
-if (NOT EXISTS "${OPENRBX_QTBASE_PREFIX}/lib/cmake/Qt6Core5Compat/Qt6Core5CompatConfig.cmake")
-  set(OPENRBX_QT5COMPAT_BINARY_DIR "${CMAKE_BINARY_DIR}/3rdparty/qt5compat-build")
-  message(STATUS "Building qt5compat in ${OPENRBX_QT5COMPAT_BINARY_DIR}")
-  execute_process(
-    COMMAND "${CMAKE_COMMAND}" -S "${CMAKE_CURRENT_SOURCE_DIR}/qt5compat" -B "${OPENRBX_QT5COMPAT_BINARY_DIR}" -G Ninja
-            -DCMAKE_BUILD_TYPE=Release
-            -DCMAKE_PREFIX_PATH=${OPENRBX_QTBASE_PREFIX}
-            -DCMAKE_INSTALL_PREFIX=${OPENRBX_QTBASE_PREFIX}
-            -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
-            -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
-            -DQT_BUILD_TESTS=OFF
-            -DQT_BUILD_EXAMPLES=OFF
-            -DQT_GENERATE_SBOM=OFF
-    RESULT_VARIABLE result
-  )
-  if (NOT result EQUAL 0)
-    message(FATAL_ERROR "qt5compat configure failed")
+  if (NOT EXISTS "${OPENRBX_QTBASE_PREFIX}/lib/cmake/Qt6Core5Compat/Qt6Core5CompatConfig.cmake")
+    set(OPENRBX_QT5COMPAT_BINARY_DIR "${CMAKE_BINARY_DIR}/3rdparty/qt5compat-build")
+    message(STATUS "Building qt5compat in ${OPENRBX_QT5COMPAT_BINARY_DIR}")
+    execute_process(
+      COMMAND "${CMAKE_COMMAND}" -S "${CMAKE_CURRENT_SOURCE_DIR}/qt5compat" -B "${OPENRBX_QT5COMPAT_BINARY_DIR}" -G Ninja
+              -DCMAKE_BUILD_TYPE=Release
+              -DCMAKE_PREFIX_PATH=${OPENRBX_QTBASE_PREFIX}
+              -DCMAKE_INSTALL_PREFIX=${OPENRBX_QTBASE_PREFIX}
+              -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
+              -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+              -DQT_BUILD_TESTS=OFF
+              -DQT_BUILD_EXAMPLES=OFF
+              -DQT_GENERATE_SBOM=OFF
+      RESULT_VARIABLE result
+    )
+    if (NOT result EQUAL 0)
+      message(FATAL_ERROR "qt5compat configure failed")
+    endif()
+    execute_process(COMMAND "${CMAKE_COMMAND}" --build "${OPENRBX_QT5COMPAT_BINARY_DIR}" RESULT_VARIABLE result)
+    if (NOT result EQUAL 0)
+      message(FATAL_ERROR "qt5compat build failed")
+    endif()
+    execute_process(COMMAND "${CMAKE_COMMAND}" --install "${OPENRBX_QT5COMPAT_BINARY_DIR}" RESULT_VARIABLE result)
+    if (NOT result EQUAL 0)
+      message(FATAL_ERROR "qt5compat install failed")
+    endif()
   endif()
-  execute_process(COMMAND "${CMAKE_COMMAND}" --build "${OPENRBX_QT5COMPAT_BINARY_DIR}" RESULT_VARIABLE result)
-  if (NOT result EQUAL 0)
-    message(FATAL_ERROR "qt5compat build failed")
-  endif()
-  execute_process(COMMAND "${CMAKE_COMMAND}" --install "${OPENRBX_QT5COMPAT_BINARY_DIR}" RESULT_VARIABLE result)
-  if (NOT result EQUAL 0)
-    message(FATAL_ERROR "qt5compat install failed")
-  endif()
-endif()
 
-list(APPEND CMAKE_PREFIX_PATH "${OPENRBX_QTBASE_PREFIX}")
-set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH}" PARENT_SCOPE)
+  list(APPEND CMAKE_PREFIX_PATH "${OPENRBX_QTBASE_PREFIX}")
+  set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH}" PARENT_SCOPE)
+endif()
 
 foreach(option ALSOFT_UTILS ALSOFT_EXAMPLES ALSOFT_INSTALL ALSOFT_INSTALL_CONFIG ALSOFT_INSTALL_HRTF_DATA
                ALSOFT_INSTALL_AMBDEC_PRESETS ALSOFT_INSTALL_EXAMPLES ALSOFT_INSTALL_UTILS ALSOFT_UPDATE_BUILD_VERSION)

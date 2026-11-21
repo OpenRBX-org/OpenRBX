@@ -121,6 +121,8 @@ namespace _internal {
                 // MSVC6
                 #define rawBreak()  _asm { int 3 };
             #endif
+        #elif defined(__aarch64__)
+            #define rawBreak() __asm__ __volatile__("brk #0");
         #else
             // GCC on Windows
             #define rawBreak() __asm__ __volatile__ ( "int $3" ); 

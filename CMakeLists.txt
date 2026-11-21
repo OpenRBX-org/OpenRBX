@@ -56,6 +56,7 @@ function(openrbx_compile_defaults NAME)
 endfunction()
 
 option(OPENRBX_WERROR "Treat warnings as errors" OFF)
+option(OPENRBX_USE_SYSTEM_QT "Use the installed Qt 6 on Linux" OFF)
 
 add_cxx_warning(parentheses)
 
@@ -839,8 +840,13 @@ if (NOT WIN32)
   find_package(PkgConfig REQUIRED)
   string(REPLACE ";" "," OPENRBX_CLIENT_LINK_GROUP "${OPENRBX_CLIENT_ENGINE_LIBRARIES}")
   pkg_check_modules(OPENRBX_WEBKIT REQUIRED IMPORTED_TARGET gtk+-3.0 webkit2gtk-4.1)
-  find_package(Qt6 REQUIRED COMPONENTS XcbQpaPrivate PrintSupport)
+  find_package(Qt6 REQUIRED COMPONENTS PrintSupport)
+  if (NOT OPENRBX_USE_SYSTEM_QT)
+    find_package(Qt6 REQUIRED COMPONENTS XcbQpaPrivate)
+  endif()
   target_sources(roblox PRIVATE Client/qt/GlxWindow.cpp)
+  # Keep legacy codec symbols private when loading Qt and GTK.
+  target_link_options(roblox PRIVATE "LINKER:--exclude-libs,libgraphics3d.a")
   add_dependencies(roblox rggl rgpar)
   target_link_libraries(roblox PRIVATE
     PkgConfig::OPENRBX_WEBKIT
@@ -863,25 +869,27 @@ if (NOT WIN32)
     Threads::Threads
     ${CMAKE_DL_LIBS}
   )
-  add_custom_command(TARGET roblox POST_BUILD
-    COMMAND "${CMAKE_COMMAND}" -E make_directory "$<TARGET_FILE_DIR:roblox>/lib"
-    COMMAND "${CMAKE_COMMAND}" -E copy_if_different "$<TARGET_SONAME_FILE:Qt6::Core>"
-            "$<TARGET_SONAME_FILE:Qt6::Gui>" "$<TARGET_SONAME_FILE:Qt6::Widgets>"
-            "$<TARGET_SONAME_FILE:Qt6::Core5Compat>" "$<TARGET_SONAME_FILE:Qt6::XcbQpaPrivate>"
-            "$<TARGET_SONAME_FILE:Qt6::PrintSupport>" "$<TARGET_FILE_DIR:roblox>/lib"
-    COMMAND "${CMAKE_COMMAND}" -E make_directory "$<TARGET_FILE_DIR:roblox>/plugins/platforms"
-    COMMAND "${CMAKE_COMMAND}" -E copy_if_different "$<TARGET_FILE:Qt6::QXcbIntegrationPlugin>"
-            "$<TARGET_FILE_DIR:roblox>/plugins/platforms"
-    COMMAND "${CMAKE_COMMAND}" -E make_directory "$<TARGET_FILE_DIR:roblox>/plugins/printsupport"
-    COMMAND "${CMAKE_COMMAND}" -E copy_if_different "$<TARGET_FILE:Qt6::QCupsPrinterSupportPlugin>"
-            "$<TARGET_FILE_DIR:roblox>/plugins/printsupport"
-    COMMAND "${CMAKE_COMMAND}" -E make_directory "$<TARGET_FILE_DIR:roblox>/plugins/imageformats"
-    COMMAND "${CMAKE_COMMAND}" -E copy_if_different "$<TARGET_FILE:Qt6::QICOPlugin>"
-            "$<TARGET_FILE_DIR:roblox>/plugins/imageformats"
-    COMMAND "${CMAKE_COMMAND}" -E make_directory "$<TARGET_FILE_DIR:roblox>/plugins/platforminputcontexts"
-    COMMAND "${CMAKE_COMMAND}" -E copy_if_different "$<TARGET_FILE:Qt6::QComposePlatformInputContextPlugin>"
-            "$<TARGET_FILE_DIR:roblox>/plugins/platforminputcontexts"
-  )
+  if (NOT OPENRBX_USE_SYSTEM_QT)
+    add_custom_command(TARGET roblox POST_BUILD
+      COMMAND "${CMAKE_COMMAND}" -E make_directory "$<TARGET_FILE_DIR:roblox>/lib"
+      COMMAND "${CMAKE_COMMAND}" -E copy_if_different "$<TARGET_SONAME_FILE:Qt6::Core>"
+              "$<TARGET_SONAME_FILE:Qt6::Gui>" "$<TARGET_SONAME_FILE:Qt6::Widgets>"
+              "$<TARGET_SONAME_FILE:Qt6::Core5Compat>" "$<TARGET_SONAME_FILE:Qt6::XcbQpaPrivate>"
+              "$<TARGET_SONAME_FILE:Qt6::PrintSupport>" "$<TARGET_FILE_DIR:roblox>/lib"
+      COMMAND "${CMAKE_COMMAND}" -E make_directory "$<TARGET_FILE_DIR:roblox>/plugins/platforms"
+      COMMAND "${CMAKE_COMMAND}" -E copy_if_different "$<TARGET_FILE:Qt6::QXcbIntegrationPlugin>"
+              "$<TARGET_FILE_DIR:roblox>/plugins/platforms"
+      COMMAND "${CMAKE_COMMAND}" -E make_directory "$<TARGET_FILE_DIR:roblox>/plugins/printsupport"
+      COMMAND "${CMAKE_COMMAND}" -E copy_if_different "$<TARGET_FILE:Qt6::QCupsPrinterSupportPlugin>"
+              "$<TARGET_FILE_DIR:roblox>/plugins/printsupport"
+      COMMAND "${CMAKE_COMMAND}" -E make_directory "$<TARGET_FILE_DIR:roblox>/plugins/imageformats"
+      COMMAND "${CMAKE_COMMAND}" -E copy_if_different "$<TARGET_FILE:Qt6::QICOPlugin>"
+              "$<TARGET_FILE_DIR:roblox>/plugins/imageformats"
+      COMMAND "${CMAKE_COMMAND}" -E make_directory "$<TARGET_FILE_DIR:roblox>/plugins/platforminputcontexts"
+      COMMAND "${CMAKE_COMMAND}" -E copy_if_different "$<TARGET_FILE:Qt6::QComposePlatformInputContextPlugin>"
+              "$<TARGET_FILE_DIR:roblox>/plugins/platforminputcontexts"
+    )
+  endif()
   return()
 endif()
 target_link_libraries(roblox PRIVATE

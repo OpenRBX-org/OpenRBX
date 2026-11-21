@@ -76,14 +76,14 @@
 #       error G3D only supports the gcc compiler on Linux.
 #   endif
 
-#   if !defined(__i386__) && !defined(__x86_64__)
-#       error G3D only supports x86 machines on Linux.
+#   if !defined(__i386__) && !defined(__x86_64__) && !defined(__aarch64__)
+#       error G3D only supports x86 and AArch64 machines on Linux.
 #   endif
 
 #   define G3D_DEPRECATED __attribute__((__deprecated__))
 
 #   ifndef __cdecl
-#       ifdef __x86_64__
+#       ifndef __i386__
 #           define __cdecl
 #       else
 #           define __cdecl __attribute__((cdecl))
@@ -91,7 +91,7 @@
 #   endif
 
 #   ifndef __stdcall
-#       ifdef __x86_64__
+#       ifndef __i386__
 #           define __stdcall
 #       else
 #           define __stdcall __attribute__((stdcall))
