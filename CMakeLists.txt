@@ -13,7 +13,7 @@ option(ENABLE_CLANG_TIDY "Enable clang-tidy")
 if (ENABLE_CLANG_TIDY)
   find_program(CLANG_TIDY_BIN NAMES "clang-tidy")
   set(CMAKE_C_CLANG_TIDY "${CLANG_TIDY_BIN}")
-  set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY_BIN}" "--extra-arg=/EHsc")
+  set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY_BIN}" "--extra-arg=/EHsc" "--extra-arg=/std:c++latest")
 
   set_source_files_properties(Client/App/v8world/Contact.cpp PROPERTIES SKIP_LINTING ON)
 endif()
