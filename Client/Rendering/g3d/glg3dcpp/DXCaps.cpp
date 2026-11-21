@@ -154,7 +154,7 @@ uint64 DXCaps::videoMemorySize() {
 
 } // namespace G3D
 
-#elif defined(G3D_LINUX) && !defined(G3D_OSMESA)
+#elif defined(G3D_LINUX) && !defined(G3D_EGL)
 #include "GL/glx.h"
 #include <string.h>
 

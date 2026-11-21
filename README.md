@@ -27,8 +27,9 @@ The client and the RBXGS web service build for Windows and Linux. Other platform
 #### Prerequisites (Windows)
 
 * [Git](https://git-scm.com/downloads)
-* [Visual Studio](https://visualstudio.microsoft.com/) 2022 or later with the Desktop development with C++ workload.
+* [Visual Studio](https://visualstudio.microsoft.com/) 2022 or later with the Desktop development with C++ workload
 * [Strawberry Perl](https://strawberryperl.com/), used to build OpenSSL
+* [Python](https://www.python.org/) with `pip install meson mako` and [WinFlexBison](https://github.com/lexxmark/winflexbison) on the `PATH`, used to build Mesa
 
 #### Building (Windows)
 
@@ -48,7 +49,7 @@ Once the build completes, the client (`Roblox.exe`) and the RBXGS web service (`
 
 #### Building (Linux)
 
-Install Git, CMake, Ninja, Make, Perl, GCC 14 or later and the X11, GTK 3 and WebKitGTK development packages. On Ubuntu 24.04:
+Install Git, CMake, Ninja, Make, Perl, GCC 14 or later and the X11, EGL, GTK 3, WebKitGTK, PipeWire, PulseAudio and ALSA development packages. On Ubuntu 24.04:
 
 ```sh
 sudo apt install git cmake ninja-build make perl g++-14 libgl-dev libx11-dev libxext-dev libxrandr-dev \
@@ -56,7 +57,8 @@ sudo apt install git cmake ninja-build make perl g++-14 libgl-dev libx11-dev lib
   libx11-xcb-dev libxcb1-dev libxcb-cursor-dev libxcb-glx0-dev libxcb-icccm4-dev libxcb-image0-dev \
   libxcb-keysyms1-dev libxcb-randr0-dev libxcb-render-util0-dev libxcb-shape0-dev libxcb-shm0-dev \
   libxcb-sync-dev libxcb-util-dev libxcb-xfixes0-dev libxcb-xkb-dev libxkbcommon-dev libxkbcommon-x11-dev \
-  libfontconfig1-dev libfreetype-dev libglib2.0-dev libgtk-3-dev libwebkit2gtk-4.1-dev libcups2-dev
+  libfontconfig1-dev libfreetype-dev libglib2.0-dev libgtk-3-dev libwebkit2gtk-4.1-dev libcups2-dev \
+  libpipewire-0.3-dev libpulse-dev libasound2-dev libegl-dev libopengl-dev
 ```
 
 Then:

@@ -4,23 +4,19 @@
 #include "reflection/property.h"
 #include "reflection/reflection.h"
 #include "reflection/type.h"
+#include "util/AudioSystem.h"
 #include "util/ContentProvider.h"
 #include "util/RunStateOwner.h"
 #include "util/SoundWorld.h"
 #include "v8tree/Instance.h"
 #include "v8tree/Service.h"
 
+#include <cstddef>
 #include <map>
 #include <memory>
 #include <string>
 
 extern char sStockSound[];
-
-namespace FMOD {
-class Channel;
-class Sound;
-class System;
-} // namespace FMOD
 
 namespace RBX {
 
@@ -50,16 +46,17 @@ public:
 	Sound(const Sound&) = delete;
 	Sound& operator=(const Sound&) = delete;
 
-	Sound(FMOD::System* system, SoundId id, bool is3D);
+	Sound(Audio::System* system, SoundId id, bool is3D);
 	~Sound();
 
-	FMOD::Sound* get();
+	const std::shared_ptr<Audio::SoundData>& get();
 	void detatch();
 	void release();
+	std::size_t getMemoryUsed() const;
 
 private:
-	FMOD::Sound* fmod_sound;
-	FMOD::System* system;
+	std::shared_ptr<Audio::SoundData> data;
+	Audio::System* system;
 
 public:
 	int refCount;
@@ -104,8 +101,7 @@ class SoundService : public DescribedCreatable<SoundService, Instance, sSoundSer
 private:
 	using StockSounds = std::map<SoundType, std::shared_ptr<SoundChannel>>;
 
-	FMOD::System* system;
-	unsigned int fmod_version;
+	std::unique_ptr<Audio::System> system;
 	StockSounds stockSounds;
 	float dopplerscale;
 	float distancefactor;
@@ -137,13 +133,15 @@ public:
 
 	void playSound(SoundType soundType);
 
-	unsigned int getfmod_version() const { return fmod_version; }
+	std::string getVersion() const { return system->getVersion(); }
 
 private:
-	static void getSoundStats(const LoadedSounds& sounds, unsigned int& numSounds, unsigned int& numUnusedSounds);
+	static void getSoundStats(
+		const LoadedSounds& sounds, unsigned int& numSounds, unsigned int& numUnusedSounds, std::size_t& memoryUsed
+	);
 
 public:
-	void getSoundStats(unsigned int& numSounds, unsigned int& numUnusedSounds) const;
+	void getSoundStats(unsigned int& numSounds, unsigned int& numUnusedSounds, std::size_t& memoryUsed) const;
 
 	ReverbType getAmbientReverb() const { return ambientReverb; }
 
@@ -155,8 +153,8 @@ public:
 	static Reflection::EnumPropDescriptor<SoundService, ReverbType> prop_AmbientReverb;
 
 private:
-	void openFmod();
-	void closeFmod();
+	void openAudio();
+	void closeAudio();
 	void garbageCollectSounds();
 	static void gcSounds(LoadedSounds& sounds);
 
@@ -215,7 +213,7 @@ protected:
 private:
 	void updateListenState();
 	void updateLooped();
-	void update3D(FMOD::Channel* channel);
+	void update3D(const Audio::Channel& channel);
 	void playSound(Instance* context);
 	void playSound();
 	void releaseChannel();
@@ -225,7 +223,7 @@ public:
 
 private:
 	std::shared_ptr<Sound> sound;
-	FMOD::Channel* fmod_channel;
+	Audio::Channel channel;
 	SoundId soundId;
 	float volume;
 	bool playOnRemove;

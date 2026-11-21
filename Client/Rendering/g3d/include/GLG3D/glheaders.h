@@ -27,14 +27,12 @@
     #include "../GL/wglext.h"
 #endif
 
-#if defined(G3D_LINUX)
-    #ifdef G3D_OSMESA
-        #include <GL/osmesa.h>
-    #else
-        typedef struct __GLXcontextRec *GLXContext;
-        extern "C" GLXContext glXGetCurrentContext(void);
-        extern "C" void (*glXGetProcAddressARB(const GLubyte *procName))(void);
-    #endif
+#if defined(G3D_EGL)
+    #include <EGL/egl.h>
+#elif defined(G3D_LINUX)
+    typedef struct __GLXcontextRec *GLXContext;
+    extern "C" GLXContext glXGetCurrentContext(void);
+    extern "C" void (*glXGetProcAddressARB(const GLubyte *procName))(void);
 #endif
 
 #include "../GL/glext.h"

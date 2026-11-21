@@ -16,12 +16,8 @@
 #include "v8xml/XmlElement.h"
 
 #include <G3D/System.h>
-#include <G3D/format.h>
 #include <G3D/g3dmath.h>
 #include <algorithm>
-#include <fmod.hpp>
-#include <fmod_errors.h>
-#include <stdexcept>
 
 char sStockSound[] = "StockSound";
 
@@ -63,30 +59,12 @@ int SoundChannel::getPlayCount() const
 
 bool SoundChannel::isPaused() const
 {
-	if (fmod_channel == nullptr) {
-		return true;
-	}
-
-	bool paused;
-	if (fmod_channel->getPaused(&paused) == FMOD_ERR_INVALID_HANDLE) {
-		return true;
-	}
-
-	return paused;
+	return channel.isPaused();
 }
 
 bool SoundChannel::isPlaying() const
 {
-	if (fmod_channel == nullptr) {
-		return false;
-	}
-
-	bool playing;
-	if (fmod_channel->isPlaying(&playing) == FMOD_ERR_INVALID_HANDLE) {
-		return false;
-	}
-
-	return playing;
+	return channel.isPlaying();
 }
 
 SoundId SoundChannel::getSoundId() const
@@ -104,8 +82,7 @@ bool SoundChannel::getLooped() const
 	return looped;
 }
 
-Sound::Sound(FMOD::System* system, SoundId id, bool is3D)
-	: fmod_sound(nullptr), system(system), refCount(0), id(id), is3D(is3D)
+Sound::Sound(Audio::System* system, SoundId id, bool is3D) : data(), system(system), refCount(0), id(id), is3D(is3D)
 {
 }
 
@@ -183,16 +160,7 @@ static RBX::Reflection::BoundFuncDesc<RBX::Soundscape::SoundChannel, void(), 0> 
 	&RBX::Soundscape::SoundChannel::stop, "Stop", RBX::Reflection::FunctionDescriptor::AnyCaller
 );
 
-void checkResult(FMOD_RESULT result)
-{
-	if (result != FMOD_OK) {
-		std::string message = G3D::format("FMOD %d: %s", result, FMOD_ErrorString(result));
-		RBX::StandardOut::singleton()->print(RBX::MESSAGE_WARNING, "%s", message.c_str());
-		throw std::runtime_error(message);
-	}
-}
-
-bool convert(const G3D::Vector3& src, FMOD_VECTOR& dst)
+bool convert(const G3D::Vector3& src, RBX::Audio::Vector& dst)
 {
 	G3D::Vector3 filter = src;
 
@@ -297,34 +265,26 @@ SoundChannel::~SoundChannel() = default;
 
 namespace RBX::Soundscape {
 
-void SoundService::getSoundStats(const LoadedSounds& sounds, unsigned int& numSounds, unsigned int& numUnusedSounds)
+void SoundService::getSoundStats(
+	const LoadedSounds& sounds, unsigned int& numSounds, unsigned int& numUnusedSounds, std::size_t& memoryUsed
+)
 {
 	for (LoadedSounds::const_iterator iter = sounds.begin(); iter != sounds.end(); ++iter) {
 		numSounds++;
 		if (iter->second->refCount == 0) {
 			numUnusedSounds++;
 		}
+		memoryUsed += iter->second->getMemoryUsed();
 	}
 }
 
-void SoundService::getSoundStats(unsigned int& numSounds, unsigned int& numUnusedSounds) const
+void SoundService::getSoundStats(unsigned int& numSounds, unsigned int& numUnusedSounds, std::size_t& memoryUsed) const
 {
-	getSoundStats(loadedSounds, numSounds, numUnusedSounds);
-	getSoundStats(loaded3DSounds, numSounds, numUnusedSounds);
+	getSoundStats(loadedSounds, numSounds, numUnusedSounds, memoryUsed);
+	getSoundStats(loaded3DSounds, numSounds, numUnusedSounds, memoryUsed);
 }
 
 } // namespace RBX::Soundscape
-
-void checkResultNoThrow(FMOD_RESULT result)
-{
-	if (result != FMOD_OK) {
-		if (RBX::DebugSettings::singleton().soundWarnings) {
-			char err[512];
-			strncpy(err, FMOD_ErrorString(result), 512);
-			RBX::StandardOut::singleton()->print(RBX::MESSAGE_WARNING, "FMOD %d: %s", result, err);
-		}
-	}
-}
 
 namespace RBX::Soundscape {
 
@@ -335,142 +295,95 @@ void SoundService::updateAmbientReverb()
 	}
 
 	switch (ambientReverb) {
-	case NoReverb: {
-		FMOD_REVERB_PROPERTIES p = FMOD_PRESET_OFF;
-		checkResultNoThrow(system->setReverbProperties(&p));
+	case NoReverb:
+		system->setReverbProperties(Audio::Preset::Off);
 		break;
-	}
-	case GenericReverb: {
-		FMOD_REVERB_PROPERTIES p = FMOD_PRESET_GENERIC;
-		checkResultNoThrow(system->setReverbProperties(&p));
+	case GenericReverb:
+		system->setReverbProperties(Audio::Preset::Generic);
 		break;
-	}
-	case PaddedCell: {
-		FMOD_REVERB_PROPERTIES p = FMOD_PRESET_PADDEDCELL;
-		checkResultNoThrow(system->setReverbProperties(&p));
+	case PaddedCell:
+		system->setReverbProperties(Audio::Preset::PaddedCell);
 		break;
-	}
-	case Room: {
-		FMOD_REVERB_PROPERTIES p = FMOD_PRESET_PADDEDCELL;
-		checkResultNoThrow(system->setReverbProperties(&p));
+	case Room:
+		system->setReverbProperties(Audio::Preset::PaddedCell);
 		break;
-	}
-	case Bathroom: {
-		FMOD_REVERB_PROPERTIES p = FMOD_PRESET_BATHROOM;
-		checkResultNoThrow(system->setReverbProperties(&p));
+	case Bathroom:
+		system->setReverbProperties(Audio::Preset::Bathroom);
 		break;
-	}
-	case LivingRoom: {
-		FMOD_REVERB_PROPERTIES p = FMOD_PRESET_LIVINGROOM;
-		checkResultNoThrow(system->setReverbProperties(&p));
+	case LivingRoom:
+		system->setReverbProperties(Audio::Preset::LivingRoom);
 		break;
-	}
-	case StoneRoom: {
-		FMOD_REVERB_PROPERTIES p = FMOD_PRESET_STONEROOM;
-		checkResultNoThrow(system->setReverbProperties(&p));
+	case StoneRoom:
+		system->setReverbProperties(Audio::Preset::StoneRoom);
 		break;
-	}
-	case Auditorium: {
-		FMOD_REVERB_PROPERTIES p = FMOD_PRESET_AUDITORIUM;
-		checkResultNoThrow(system->setReverbProperties(&p));
+	case Auditorium:
+		system->setReverbProperties(Audio::Preset::Auditorium);
 		break;
-	}
-	case ConcertHall: {
-		FMOD_REVERB_PROPERTIES p = FMOD_PRESET_CONCERTHALL;
-		checkResultNoThrow(system->setReverbProperties(&p));
+	case ConcertHall:
+		system->setReverbProperties(Audio::Preset::ConcertHall);
 		break;
-	}
-	case Cave: {
-		FMOD_REVERB_PROPERTIES p = FMOD_PRESET_CAVE;
-		checkResultNoThrow(system->setReverbProperties(&p));
+	case Cave:
+		system->setReverbProperties(Audio::Preset::Cave);
 		break;
-	}
-	case Arena: {
-		FMOD_REVERB_PROPERTIES p = FMOD_PRESET_ARENA;
-		checkResultNoThrow(system->setReverbProperties(&p));
+	case Arena:
+		system->setReverbProperties(Audio::Preset::Arena);
 		break;
-	}
-	case Hangar: {
-		FMOD_REVERB_PROPERTIES p = FMOD_PRESET_HANGAR;
-		checkResultNoThrow(system->setReverbProperties(&p));
+	case Hangar:
+		system->setReverbProperties(Audio::Preset::Hangar);
 		break;
-	}
-	case CarpettedHallway: {
-		FMOD_REVERB_PROPERTIES p = FMOD_PRESET_CARPETTEDHALLWAY;
-		checkResultNoThrow(system->setReverbProperties(&p));
+	case CarpettedHallway:
+		system->setReverbProperties(Audio::Preset::CarpettedHallway);
 		break;
-	}
-	case Hallway: {
-		FMOD_REVERB_PROPERTIES p = FMOD_PRESET_HALLWAY;
-		checkResultNoThrow(system->setReverbProperties(&p));
+	case Hallway:
+		system->setReverbProperties(Audio::Preset::Hallway);
 		break;
-	}
-	case StoneCorridor: {
-		FMOD_REVERB_PROPERTIES p = FMOD_PRESET_STONECORRIDOR;
-		checkResultNoThrow(system->setReverbProperties(&p));
+	case StoneCorridor:
+		system->setReverbProperties(Audio::Preset::StoneCorridor);
 		break;
-	}
-	case Alley: {
-		FMOD_REVERB_PROPERTIES p = FMOD_PRESET_ALLEY;
-		checkResultNoThrow(system->setReverbProperties(&p));
+	case Alley:
+		system->setReverbProperties(Audio::Preset::Alley);
 		break;
-	}
-	case Forest: {
-		FMOD_REVERB_PROPERTIES p = FMOD_PRESET_FOREST;
-		checkResultNoThrow(system->setReverbProperties(&p));
+	case Forest:
+		system->setReverbProperties(Audio::Preset::Forest);
 		break;
-	}
-	case City: {
-		FMOD_REVERB_PROPERTIES p = FMOD_PRESET_CITY;
-		checkResultNoThrow(system->setReverbProperties(&p));
+	case City:
+		system->setReverbProperties(Audio::Preset::City);
 		break;
-	}
-	case Mountains: {
-		FMOD_REVERB_PROPERTIES p = FMOD_PRESET_MOUNTAINS;
-		checkResultNoThrow(system->setReverbProperties(&p));
+	case Mountains:
+		system->setReverbProperties(Audio::Preset::Mountains);
 		break;
-	}
-	case Quarry: {
-		FMOD_REVERB_PROPERTIES p = FMOD_PRESET_QUARRY;
-		checkResultNoThrow(system->setReverbProperties(&p));
+	case Quarry:
+		system->setReverbProperties(Audio::Preset::Quarry);
 		break;
-	}
-	case Plain: {
-		FMOD_REVERB_PROPERTIES p = FMOD_PRESET_PLAIN;
-		checkResultNoThrow(system->setReverbProperties(&p));
+	case Plain:
+		system->setReverbProperties(Audio::Preset::Plain);
 		break;
-	}
-	case ParkingLot: {
-		FMOD_REVERB_PROPERTIES p = FMOD_PRESET_PARKINGLOT;
-		checkResultNoThrow(system->setReverbProperties(&p));
+	case ParkingLot:
+		system->setReverbProperties(Audio::Preset::ParkingLot);
 		break;
-	}
-	case SewerPipe: {
-		FMOD_REVERB_PROPERTIES p = FMOD_PRESET_SEWERPIPE;
-		checkResultNoThrow(system->setReverbProperties(&p));
+	case SewerPipe:
+		system->setReverbProperties(Audio::Preset::SewerPipe);
 		break;
-	}
-	case UnderWater: {
-		FMOD_REVERB_PROPERTIES p = FMOD_PRESET_UNDERWATER;
-		checkResultNoThrow(system->setReverbProperties(&p));
+	case UnderWater:
+		system->setReverbProperties(Audio::Preset::UnderWater);
 		break;
-	}
 	}
 }
 
 void SoundService::update3DSettings()
 {
-	if (system) {
-		checkResultNoThrow(system->set3DSettings(dopplerscale, distancefactor, rolloffscale));
+	if (system && !system->set3DSettings(dopplerscale, distancefactor, rolloffscale) &&
+		DebugSettings::singleton().soundWarnings) {
+		StandardOut::singleton()->print(MESSAGE_WARNING, "Invalid 3D sound settings");
 	}
 }
 
 void SoundChannel::releaseChannel()
 {
-	if (fmod_channel) {
-		checkResultNoThrow(fmod_channel->setUserData(nullptr));
+	if (channel) {
+		channel.setUserData(nullptr);
 
-		fmod_channel = nullptr;
+		channel = Audio::Channel();
 	}
 
 	if (sound) {
@@ -487,110 +400,55 @@ void SoundChannel::onServiceProvider(const ServiceProvider* oldProvider, const S
 
 void SoundChannel::updateLooped()
 {
-	if (fmod_channel) {
-		FMOD_MODE mode;
-		checkResultNoThrow(fmod_channel->getMode(&mode));
-		mode |= looped ? FMOD_LOOP_NORMAL : FMOD_LOOP_OFF;
-		mode &= looped ? ~FMOD_LOOP_OFF : ~FMOD_LOOP_NORMAL;
-		checkResultNoThrow(fmod_channel->setMode(mode));
-		checkResultNoThrow(fmod_channel->setLoopCount(looped ? -1 : 0));
-	}
+	channel.setLooped(looped);
 }
 
-void SoundChannel::update3D(FMOD::Channel* channel)
+void SoundChannel::update3D(const Audio::Channel& channel)
 {
 	if (is3D && part) {
-		FMOD_VECTOR pos;
+		Audio::Vector pos;
 		if (convert(part->getCoordinateFrame().translation, pos)) {
-			FMOD_VECTOR vel;
+			Audio::Vector vel;
 			if (convert(part->getLinearVelocity(), vel)) {
-				checkResultNoThrow(channel->set3DAttributes(&pos, &vel));
+				channel.set3DAttributes(pos, vel);
 			}
 		}
 	}
 }
 
-FMOD::Sound* Sound::get()
+const std::shared_ptr<Audio::SoundData>& Sound::get()
 {
-	if (!fmod_sound) {
-		std::shared_ptr<const std::string> data = ContentProvider::singleton().requestContentString(id);
-		if (!data) {
-			return nullptr;
+	if (!data) {
+		std::shared_ptr<const std::string> content = ContentProvider::singleton().requestContentString(id);
+		if (content) {
+			data = system->createSound(*content, is3D);
 		}
-
-		FMOD_MODE mode = is3D ? FMOD_3D : 0;
-		mode |= FMOD_OPENMEMORY | (GameSettings::singleton().softwareSound ? FMOD_SOFTWARE : FMOD_HARDWARE);
-
-		FMOD_CREATESOUNDEXINFO info;
-		memset(&info, 0, sizeof(FMOD_CREATESOUNDEXINFO));
-		info.cbsize = sizeof(FMOD_CREATESOUNDEXINFO);
-		info.length = data->size();
-
-		checkResult(system->createSound(data->c_str(), mode, &info, &fmod_sound));
 	}
 
-	return fmod_sound;
+	return data;
 }
 
-void SoundService::openFmod()
+std::size_t Sound::getMemoryUsed() const
+{
+	return data ? Audio::System::getMemoryUsed(*data) : 0;
+}
+
+void SoundService::openAudio()
 {
 	if (soundDisabled || mySoundDisabled || !GameSettings::singleton().soundEnabled) {
 		return;
 	}
 
 	try {
-		checkResult(FMOD::System_Create(&system));
-
-		checkResult(system->getVersion(&fmod_version));
-		if (fmod_version < FMOD_VERSION) {
-			throw std::runtime_error("Incorrect FMODEX DLL version");
-		}
-
-		int driver = -1;
-		checkResultNoThrow(system->getDriver(&driver));
-		if (driver >= 0) {
-			char name[256] = "?";
-			checkResultNoThrow(system->getDriverName(driver, name, 256));
-		}
-		else {
-			StandardOut::singleton()->print(MESSAGE_WARNING, "No active sound driver detected");
-		}
-
-		FMOD_CAPS caps;
-		FMOD_SPEAKERMODE speakermode;
-		checkResult(system->getDriverCaps(0, &caps, nullptr, nullptr, &speakermode));
-
-		checkResult(system->setSpeakerMode(speakermode));
-
-		if (caps & FMOD_CAPS_HARDWARE_EMULATED) {
-			StandardOut::singleton()->print(
-				MESSAGE_WARNING, "The acceleration slider in the Sound Control Panel set to 'off'"
-			);
-			checkResult(system->setDSPBufferSize(1024, 10));
-		}
-
-		checkResultNoThrow(system->setHardwareChannels(0, 0, 0, 0));
-
-		FMOD_RESULT result = system->init(100, FMOD_INIT_NORMAL, nullptr);
-		if (result == FMOD_ERR_OUTPUT_CREATEBUFFER) {
-			StandardOut::singleton()->print(
-				MESSAGE_WARNING, "The speaker mode selected isn't supported by this soundcard.  Using Stereo"
-			);
-			checkResult(system->setSpeakerMode(FMOD_SPEAKERMODE_STEREO));
-
-			checkResult(system->init(100, FMOD_INIT_NORMAL, nullptr));
-		}
+		system = std::make_unique<Audio::System>();
 
 		update3DSettings();
 		if (ambientReverb != NoReverb) {
 			updateAmbientReverb();
 		}
 	}
-	catch (const std::exception&) {
-		if (system) {
-			checkResultNoThrow(system->release());
-			system = nullptr;
-		}
+	catch (const std::exception& e) {
+		StandardOut::singleton()->print(MESSAGE_WARNING, "%s", e.what());
 	}
 }
 
@@ -621,15 +479,15 @@ void SoundService::gcSounds(LoadedSounds& sounds)
 void SoundChannel::onEvent(const RunService* source, Heartbeat event)
 {
 	if (!isPaused()) {
-		update3D(fmod_channel);
+		update3D(channel);
 	}
 }
 
 void Sound::release()
 {
-	if (fmod_sound) {
-		checkResultNoThrow(fmod_sound->release());
-		fmod_sound = nullptr;
+	if (data) {
+		system->releaseSound(data);
+		data.reset();
 	}
 }
 
@@ -638,7 +496,7 @@ Sound::~Sound()
 	release();
 }
 
-void SoundService::closeFmod()
+void SoundService::closeAudio()
 {
 	stockSounds.clear();
 	removeAllChildren();
@@ -649,11 +507,7 @@ void SoundService::closeFmod()
 	loadedSounds.clear();
 	loaded3DSounds.clear();
 
-	if (system) {
-		checkResultNoThrow(system->release());
-
-		system = nullptr;
-	}
+	system.reset();
 }
 
 SoundService::~SoundService() = default;
@@ -704,7 +558,7 @@ std::shared_ptr<Sound> SoundService::loadSound(SoundId id, bool is3D)
 		return iter->second;
 	}
 
-	std::shared_ptr<Sound> result(new Sound(system, id, is3D));
+	std::shared_ptr<Sound> result(new Sound(system.get(), id, is3D));
 	sounds[id] = result;
 	return result;
 }
@@ -721,8 +575,8 @@ void registerSound()
 namespace Soundscape {
 
 SoundService::SoundService()
-	: system(nullptr), fmod_version(0), dopplerscale(1.0f), distancefactor(10.0f), rolloffscale(1.0f),
-	  ambientReverb(NoReverb), nextGarbageCollectTime(G3D::System::getTick()), mySoundDisabled(false)
+	: system(), dopplerscale(1.0f), distancefactor(10.0f), rolloffscale(1.0f), ambientReverb(NoReverb),
+	  nextGarbageCollectTime(G3D::System::getTick()), mySoundDisabled(false)
 {
 	setName("Soundscape");
 }
@@ -745,13 +599,13 @@ void SoundService::onEvent(const RunService* source, Heartbeat event)
 			if (camera) {
 				G3D::CoordinateFrame cf = camera->getCameraCoordinateFrame();
 
-				FMOD_VECTOR listener_pos;
+				Audio::Vector listener_pos;
 				if (convert(cf.translation, listener_pos)) {
-					FMOD_VECTOR listener_forward;
+					Audio::Vector listener_forward;
 					if (convert(-cf.lookVector(), listener_forward)) {
-						FMOD_VECTOR listener_up;
+						Audio::Vector listener_up;
 						if (convert(cf.upVector(), listener_up)) {
-							FMOD_VECTOR listener_vel;
+							Audio::Vector listener_vel;
 							listener_vel.x = listener_vel.y = listener_vel.z = 0.0f;
 							PVInstance* pvInstance = dynamic_cast<PVInstance*>(camera->getCameraSubjectInstance());
 							if (pvInstance) {
@@ -761,9 +615,7 @@ void SoundService::onEvent(const RunService* source, Heartbeat event)
 								}
 							}
 
-							checkResultNoThrow(system->set3DListenerAttributes(
-								0, &listener_pos, &listener_vel, &listener_forward, &listener_up
-							));
+							system->set3DListenerAttributes(listener_pos, listener_vel, listener_forward, listener_up);
 						}
 					}
 				}
@@ -771,7 +623,7 @@ void SoundService::onEvent(const RunService* source, Heartbeat event)
 		}
 
 		garbageCollectSounds();
-		checkResultNoThrow(system->update());
+		system->update();
 	}
 }
 
@@ -781,15 +633,15 @@ bool SoundChannel::askSetParent(const Instance* parent) const
 }
 
 SoundChannel::SoundChannel()
-	: sound(), fmod_channel(nullptr), volume(0.5f), playOnRemove(false), is3D(false), looped(false),
-	  soundDisabled(false), playCount(-1), part(nullptr)
+	: sound(), channel(), volume(0.5f), playOnRemove(false), is3D(false), looped(false), soundDisabled(false),
+	  playCount(-1), part(nullptr)
 {
 	setName("Sound");
 }
 
 void SoundChannel::updateListenState()
 {
-	if (part && is3D && fmod_channel) {
+	if (part && is3D && channel) {
 		startListening(ServiceProvider::find<RunService>(this), this);
 	}
 	else {
@@ -800,21 +652,12 @@ void SoundChannel::updateListenState()
 } // namespace Soundscape
 } // namespace RBX
 
-FMOD_RESULT F_CALLBACK callbackChannelEnd(
-	FMOD_CHANNEL* channel,
-	FMOD_CHANNEL_CALLBACKTYPE type,
-	int command,
-	unsigned int commanddata1,
-	unsigned int commanddata2
-)
+static void callbackChannelEnd(void* userData)
 {
-	RBX::Soundscape::SoundChannel* sound;
-	FMOD_Channel_GetUserData(channel, reinterpret_cast<void**>(&sound));
+	RBX::Soundscape::SoundChannel* sound = static_cast<RBX::Soundscape::SoundChannel*>(userData);
 	if (sound) {
 		sound->onChannelEnd();
 	}
-
-	return FMOD_OK;
 }
 
 namespace RBX::Soundscape {
@@ -840,17 +683,14 @@ SoundServiceStatsItem::SoundServiceStatsItem(const RBX::Soundscape::SoundService
 void SoundServiceStatsItem::update()
 {
 	if (service->enabled()) {
-		formatValue(service->getfmod_version(), "fmod %08x", service->getfmod_version());
-
-		int a, b;
-		if (FMOD_Memory_GetStats(&a, &b) == FMOD_OK) {
-			currentalloced = a;
-			maxalloced = b;
-		}
+		setValue(0, service->getVersion());
 
 		numUnusedSounds = 0;
 		numSounds = 0;
-		service->getSoundStats(numSounds, numUnusedSounds);
+		std::size_t memoryUsed = 0;
+		service->getSoundStats(numSounds, numUnusedSounds, memoryUsed);
+		currentalloced = static_cast<unsigned int>(memoryUsed);
+		maxalloced = std::max(maxalloced, currentalloced);
 	}
 	else {
 		setValue(0, "-disabled-");
@@ -866,12 +706,9 @@ void SoundChannel::playSound(Instance* context)
 	}
 
 	try {
-		if (looped && fmod_channel) {
-			bool playing;
-			if (fmod_channel->isPlaying(&playing) != FMOD_ERR_INVALID_HANDLE && playing) {
-				checkResult(fmod_channel->setPaused(false));
-				return;
-			}
+		if (looped && channel.isPlaying()) {
+			channel.setPaused(false);
+			return;
 		}
 
 		SoundService* soundService = ServiceProvider::create<SoundService>(context);
@@ -887,20 +724,20 @@ void SoundChannel::playSound(Instance* context)
 			is3D = part != nullptr;
 			sound = soundService->loadSound(soundId, is3D);
 			sound->refCount++;
-			FMOD::Sound* fmodSound = sound->get();
-			if (fmodSound) {
-				checkResult(soundService->system->playSound(FMOD_CHANNEL_FREE, fmodSound, true, &fmod_channel));
+			const std::shared_ptr<Audio::SoundData>& data = sound->get();
+			if (data) {
+				channel = soundService->system->playSound(data, true);
 
 				updateLooped();
 
-				update3D(fmod_channel);
+				update3D(channel);
 
-				checkResult(fmod_channel->setVolume(volume));
+				channel.setVolume(volume);
 
-				checkResult(fmod_channel->setUserData(this));
-				checkResult(fmod_channel->setCallback(FMOD_CHANNEL_CALLBACKTYPE_END, callbackChannelEnd, 0));
+				channel.setUserData(this);
+				channel.setEndCallback(callbackChannelEnd);
 
-				checkResult(fmod_channel->setPaused(false));
+				channel.setPaused(false);
 
 				updateListenState();
 			}
@@ -950,9 +787,7 @@ void SoundChannel::setVolume(float value)
 	value = G3D::clamp(value, 0.0f, 1.0f);
 	if (volume != value) {
 		volume = value;
-		if (fmod_channel) {
-			checkResultNoThrow(fmod_channel->setVolume(volume));
-		}
+		channel.setVolume(volume);
 
 		raisePropertyChanged(sound_desc_Volume);
 	}
@@ -977,9 +812,7 @@ void SoundChannel::play()
 
 void SoundChannel::pause()
 {
-	if (fmod_channel) {
-		checkResultNoThrow(fmod_channel->setPaused(true));
-	}
+	channel.setPaused(true);
 
 	updateListenState();
 
@@ -991,10 +824,10 @@ void SoundChannel::pause()
 
 void SoundChannel::stop()
 {
-	if (fmod_channel) {
-		checkResultNoThrow(fmod_channel->setUserData(nullptr));
-		checkResultNoThrow(fmod_channel->stop());
-		fmod_channel = nullptr;
+	if (channel) {
+		channel.setUserData(nullptr);
+		channel.stop();
+		channel = Audio::Channel();
 	}
 
 	updateListenState();
@@ -1125,7 +958,7 @@ void SoundService::onServiceProvider(const ServiceProvider* oldProvider, const S
 	}
 
 	if (oldProvider) {
-		closeFmod();
+		closeAudio();
 	}
 
 	Instance::onServiceProvider(oldProvider, newProvider);
@@ -1133,7 +966,7 @@ void SoundService::onServiceProvider(const ServiceProvider* oldProvider, const S
 	startListening(newProvider ? newProvider->find<RunService>() : nullptr, this);
 
 	if (newProvider) {
-		openFmod();
+		openAudio();
 		loadStockSounds();
 
 		Stats::StatsService* stats = newProvider->create<Stats::StatsService>();

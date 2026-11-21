@@ -94,6 +94,52 @@ endif()
 list(APPEND CMAKE_PREFIX_PATH "${OPENRBX_QTBASE_PREFIX}")
 set(CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH}" PARENT_SCOPE)
 
+foreach(option ALSOFT_UTILS ALSOFT_EXAMPLES ALSOFT_INSTALL ALSOFT_INSTALL_CONFIG ALSOFT_INSTALL_HRTF_DATA
+               ALSOFT_INSTALL_AMBDEC_PRESETS ALSOFT_INSTALL_EXAMPLES ALSOFT_INSTALL_UTILS ALSOFT_UPDATE_BUILD_VERSION
+               ALSOFT_EMBED_HRTF_DATA)
+  set(${option} OFF CACHE BOOL "" FORCE)
+endforeach()
+if (NOT WIN32)
+  foreach(option ALSOFT_BACKEND_OSS ALSOFT_BACKEND_JACK ALSOFT_BACKEND_PORTAUDIO ALSOFT_BACKEND_SNDIO
+                 ALSOFT_BACKEND_SOLARIS)
+    set(${option} OFF CACHE BOOL "" FORCE)
+  endforeach()
+  foreach(option ALSOFT_REQUIRE_PIPEWIRE ALSOFT_REQUIRE_PULSEAUDIO ALSOFT_REQUIRE_ALSA)
+    set(${option} ON CACHE BOOL "" FORCE)
+  endforeach()
+endif()
+add_subdirectory(openal-soft EXCLUDE_FROM_ALL)
+set_target_properties(OpenAL PROPERTIES
+  RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}"
+  LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}"
+)
+
+set(LIBOPENMPT "${CMAKE_CURRENT_SOURCE_DIR}/libopenmpt")
+file(GLOB OPENRBX_LIBOPENMPT_SOURCES
+  "${LIBOPENMPT}/src/openmpt/all/*.cpp"
+  "${LIBOPENMPT}/src/openmpt/base/*.cpp"
+  "${LIBOPENMPT}/src/openmpt/logging/*.cpp"
+  "${LIBOPENMPT}/src/openmpt/random/*.cpp"
+  "${LIBOPENMPT}/src/openmpt/fileformat_base/*.cpp"
+  "${LIBOPENMPT}/src/openmpt/soundbase/*.cpp"
+  "${LIBOPENMPT}/src/openmpt/soundfile_data/*.cpp"
+  "${LIBOPENMPT}/common/*.cpp"
+  "${LIBOPENMPT}/soundlib/*.cpp"
+  "${LIBOPENMPT}/soundlib/plugins/*.cpp"
+  "${LIBOPENMPT}/soundlib/plugins/dmo/*.cpp"
+  "${LIBOPENMPT}/sounddsp/*.cpp"
+  "${LIBOPENMPT}/libopenmpt/*.cpp"
+)
+add_library(openmpt STATIC ${OPENRBX_LIBOPENMPT_SOURCES})
+target_include_directories(openmpt PRIVATE "${LIBOPENMPT}/src" "${LIBOPENMPT}/common")
+target_include_directories(openmpt PUBLIC "${LIBOPENMPT}")
+target_compile_definitions(openmpt PRIVATE LIBOPENMPT_BUILD)
+set_target_properties(openmpt PROPERTIES CXX_STANDARD 20)
+
+add_library(stb_vorbis STATIC stb/stb_vorbis.c)
+target_include_directories(stb_vorbis PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/stb")
+target_compile_definitions(stb_vorbis PUBLIC STB_VORBIS_NO_STDIO STB_VORBIS_NO_PUSHDATA_API)
+
 if (MSVC)
   set(CMAKE_CXX_FLAGS "/nologo")
   set(CMAKE_C_FLAGS "/nologo")
@@ -110,13 +156,12 @@ file(GLOB OPENRBX_GLG3D_SOURCES "${G3D}/glg3dcpp/*.cpp")
 
 add_library(graphics3d STATIC ${OPENRBX_GRAPHICS3D_SOURCES})
 add_library(glg3d STATIC ${OPENRBX_GLG3D_SOURCES})
-set(OPENRBX_G3D_TARGETS graphics3d glg3d)
+add_library(glg3d_egl STATIC ${OPENRBX_GLG3D_SOURCES})
+target_compile_definitions(glg3d_egl PRIVATE G3D_EGL)
+target_link_libraries(glg3d_egl PUBLIC egl)
+set(OPENRBX_G3D_TARGETS graphics3d glg3d glg3d_egl)
 if (NOT WIN32)
   target_link_libraries(glg3d PUBLIC OpenGL::GL X11::X11)
-
-  add_library(glg3d_osmesa STATIC ${OPENRBX_GLG3D_SOURCES})
-  target_compile_definitions(glg3d_osmesa PRIVATE G3D_OSMESA)
-  list(APPEND OPENRBX_G3D_TARGETS glg3d_osmesa)
 endif()
 
 foreach(name ${OPENRBX_G3D_TARGETS})
@@ -126,7 +171,7 @@ foreach(name ${OPENRBX_G3D_TARGETS})
   if (WIN32)
     target_compile_definitions(${name} PRIVATE WIN32 NDEBUG _LIB G3D_BUILDING_LIBRARY_DLL _VC80_UPGRADE=0x0710 _MBCS)
   else()
-    target_include_directories(${name} PRIVATE "${PROJECT_SOURCE_DIR}/Client/Rendering/Mesa-6.5/include")
+    target_include_directories(${name} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/glu/include")
     target_compile_definitions(${name} PRIVATE NDEBUG _LIB G3D_DEBUG_NOGUI)
     set_target_properties(${name} PROPERTIES C_STANDARD 99)
   endif()
@@ -137,372 +182,71 @@ endforeach()
 if (MSVC)
   target_compile_options(graphics3d PRIVATE /W2)
   target_compile_options(glg3d PRIVATE /W3)
+  target_compile_options(glg3d_egl PRIVATE /W3)
 endif()
 
-set(MESA "${PROJECT_SOURCE_DIR}/Client/Rendering/Mesa-6.5")
-
-set(OPENRBX_MESA_CORE_SOURCES
-  "${MESA}/src/mesa/array_cache/ac_context.c"
-  "${MESA}/src/mesa/array_cache/ac_import.c"
-  "${MESA}/src/mesa/glapi/glapi.c"
-  "${MESA}/src/mesa/glapi/glthread.c"
-  "${MESA}/src/mesa/main/accum.c"
-  "${MESA}/src/mesa/main/api_arrayelt.c"
-  "${MESA}/src/mesa/main/api_loopback.c"
-  "${MESA}/src/mesa/main/api_noop.c"
-  "${MESA}/src/mesa/main/api_validate.c"
-  "${MESA}/src/mesa/main/attrib.c"
-  "${MESA}/src/mesa/main/blend.c"
-  "${MESA}/src/mesa/main/bufferobj.c"
-  "${MESA}/src/mesa/main/buffers.c"
-  "${MESA}/src/mesa/main/clip.c"
-  "${MESA}/src/mesa/main/colortab.c"
-  "${MESA}/src/mesa/main/context.c"
-  "${MESA}/src/mesa/main/convolve.c"
-  "${MESA}/src/mesa/main/debug.c"
-  "${MESA}/src/mesa/main/depth.c"
-  "${MESA}/src/mesa/main/depthstencil.c"
-  "${MESA}/src/mesa/main/dispatch.c"
-  "${MESA}/src/mesa/main/dlist.c"
-  "${MESA}/src/mesa/main/drawpix.c"
-  "${MESA}/src/mesa/main/enable.c"
-  "${MESA}/src/mesa/main/enums.c"
-  "${MESA}/src/mesa/main/eval.c"
-  "${MESA}/src/mesa/main/execmem.c"
-  "${MESA}/src/mesa/main/extensions.c"
-  "${MESA}/src/mesa/main/fbobject.c"
-  "${MESA}/src/mesa/main/feedback.c"
-  "${MESA}/src/mesa/main/fog.c"
-  "${MESA}/src/mesa/main/framebuffer.c"
-  "${MESA}/src/mesa/main/get.c"
-  "${MESA}/src/mesa/main/getstring.c"
-  "${MESA}/src/mesa/main/hash.c"
-  "${MESA}/src/mesa/main/hint.c"
-  "${MESA}/src/mesa/main/histogram.c"
-  "${MESA}/src/mesa/main/image.c"
-  "${MESA}/src/mesa/main/imports.c"
-  "${MESA}/src/mesa/main/light.c"
-  "${MESA}/src/mesa/main/lines.c"
-  "${MESA}/src/mesa/main/matrix.c"
-  "${MESA}/src/mesa/main/mm.c"
-  "${MESA}/src/mesa/main/occlude.c"
-  "${MESA}/src/mesa/main/pixel.c"
-  "${MESA}/src/mesa/main/points.c"
-  "${MESA}/src/mesa/main/polygon.c"
-  "${MESA}/src/mesa/main/rastpos.c"
-  "${MESA}/src/mesa/main/renderbuffer.c"
-  "${MESA}/src/mesa/main/state.c"
-  "${MESA}/src/mesa/main/stencil.c"
-  "${MESA}/src/mesa/main/texcompress.c"
-  "${MESA}/src/mesa/main/texcompress_fxt1.c"
-  "${MESA}/src/mesa/main/texcompress_s3tc.c"
-  "${MESA}/src/mesa/main/texenvprogram.c"
-  "${MESA}/src/mesa/main/texformat.c"
-  "${MESA}/src/mesa/main/teximage.c"
-  "${MESA}/src/mesa/main/texobj.c"
-  "${MESA}/src/mesa/main/texrender.c"
-  "${MESA}/src/mesa/main/texstate.c"
-  "${MESA}/src/mesa/main/texstore.c"
-  "${MESA}/src/mesa/main/varray.c"
-  "${MESA}/src/mesa/main/vtxfmt.c"
-  "${MESA}/src/mesa/math/m_debug_clip.c"
-  "${MESA}/src/mesa/math/m_debug_norm.c"
-  "${MESA}/src/mesa/math/m_debug_xform.c"
-  "${MESA}/src/mesa/math/m_eval.c"
-  "${MESA}/src/mesa/math/m_matrix.c"
-  "${MESA}/src/mesa/math/m_translate.c"
-  "${MESA}/src/mesa/math/m_vector.c"
-  "${MESA}/src/mesa/math/m_xform.c"
-  "${MESA}/src/mesa/shader/arbprogparse.c"
-  "${MESA}/src/mesa/shader/arbprogram.c"
-  "${MESA}/src/mesa/shader/atifragshader.c"
-  "${MESA}/src/mesa/shader/grammar/grammar_mesa.c"
-  "${MESA}/src/mesa/shader/nvfragparse.c"
-  "${MESA}/src/mesa/shader/nvprogram.c"
-  "${MESA}/src/mesa/shader/nvvertexec.c"
-  "${MESA}/src/mesa/shader/nvvertparse.c"
-  "${MESA}/src/mesa/shader/program.c"
-  "${MESA}/src/mesa/shader/shaderobjects.c"
-  "${MESA}/src/mesa/shader/shaderobjects_3dlabs.c"
-  "${MESA}/src/mesa/shader/slang/slang_analyse.c"
-  "${MESA}/src/mesa/shader/slang/slang_assemble.c"
-  "${MESA}/src/mesa/shader/slang/slang_assemble_assignment.c"
-  "${MESA}/src/mesa/shader/slang/slang_assemble_conditional.c"
-  "${MESA}/src/mesa/shader/slang/slang_assemble_constructor.c"
-  "${MESA}/src/mesa/shader/slang/slang_assemble_typeinfo.c"
-  "${MESA}/src/mesa/shader/slang/slang_compile.c"
-  "${MESA}/src/mesa/shader/slang/slang_compile_function.c"
-  "${MESA}/src/mesa/shader/slang/slang_compile_operation.c"
-  "${MESA}/src/mesa/shader/slang/slang_compile_struct.c"
-  "${MESA}/src/mesa/shader/slang/slang_compile_variable.c"
-  "${MESA}/src/mesa/shader/slang/slang_execute.c"
-  "${MESA}/src/mesa/shader/slang/slang_execute_x86.c"
-  "${MESA}/src/mesa/shader/slang/slang_export.c"
-  "${MESA}/src/mesa/shader/slang/slang_library_noise.c"
-  "${MESA}/src/mesa/shader/slang/slang_library_texsample.c"
-  "${MESA}/src/mesa/shader/slang/slang_link.c"
-  "${MESA}/src/mesa/shader/slang/slang_preprocess.c"
-  "${MESA}/src/mesa/shader/slang/slang_storage.c"
-  "${MESA}/src/mesa/shader/slang/slang_utility.c"
-  "${MESA}/src/mesa/swrast/s_aaline.c"
-  "${MESA}/src/mesa/swrast/s_aatriangle.c"
-  "${MESA}/src/mesa/swrast/s_accum.c"
-  "${MESA}/src/mesa/swrast/s_alpha.c"
-  "${MESA}/src/mesa/swrast/s_arbshader.c"
-  "${MESA}/src/mesa/swrast/s_atifragshader.c"
-  "${MESA}/src/mesa/swrast/s_bitmap.c"
-  "${MESA}/src/mesa/swrast/s_blend.c"
-  "${MESA}/src/mesa/swrast/s_blit.c"
-  "${MESA}/src/mesa/swrast/s_buffers.c"
-  "${MESA}/src/mesa/swrast/s_context.c"
-  "${MESA}/src/mesa/swrast/s_copypix.c"
-  "${MESA}/src/mesa/swrast/s_depth.c"
-  "${MESA}/src/mesa/swrast/s_drawpix.c"
-  "${MESA}/src/mesa/swrast/s_feedback.c"
-  "${MESA}/src/mesa/swrast/s_fog.c"
-  "${MESA}/src/mesa/swrast/s_imaging.c"
-  "${MESA}/src/mesa/swrast/s_lines.c"
-  "${MESA}/src/mesa/swrast/s_logic.c"
-  "${MESA}/src/mesa/swrast/s_masking.c"
-  "${MESA}/src/mesa/swrast/s_nvfragprog.c"
-  "${MESA}/src/mesa/swrast/s_points.c"
-  "${MESA}/src/mesa/swrast/s_readpix.c"
-  "${MESA}/src/mesa/swrast/s_span.c"
-  "${MESA}/src/mesa/swrast/s_stencil.c"
-  "${MESA}/src/mesa/swrast/s_texcombine.c"
-  "${MESA}/src/mesa/swrast/s_texfilter.c"
-  "${MESA}/src/mesa/swrast/s_texstore.c"
-  "${MESA}/src/mesa/swrast/s_triangle.c"
-  "${MESA}/src/mesa/swrast/s_zoom.c"
-  "${MESA}/src/mesa/swrast_setup/ss_context.c"
-  "${MESA}/src/mesa/swrast_setup/ss_triangle.c"
-  "${MESA}/src/mesa/tnl/t_array_api.c"
-  "${MESA}/src/mesa/tnl/t_array_import.c"
-  "${MESA}/src/mesa/tnl/t_context.c"
-  "${MESA}/src/mesa/tnl/t_pipeline.c"
-  "${MESA}/src/mesa/tnl/t_save_api.c"
-  "${MESA}/src/mesa/tnl/t_save_loopback.c"
-  "${MESA}/src/mesa/tnl/t_save_playback.c"
-  "${MESA}/src/mesa/tnl/t_vb_arbprogram.c"
-  "${MESA}/src/mesa/tnl/t_vb_arbshader.c"
-  "${MESA}/src/mesa/tnl/t_vb_cull.c"
-  "${MESA}/src/mesa/tnl/t_vb_fog.c"
-  "${MESA}/src/mesa/tnl/t_vb_light.c"
-  "${MESA}/src/mesa/tnl/t_vb_normals.c"
-  "${MESA}/src/mesa/tnl/t_vb_points.c"
-  "${MESA}/src/mesa/tnl/t_vb_program.c"
-  "${MESA}/src/mesa/tnl/t_vb_render.c"
-  "${MESA}/src/mesa/tnl/t_vb_texgen.c"
-  "${MESA}/src/mesa/tnl/t_vb_texmat.c"
-  "${MESA}/src/mesa/tnl/t_vb_vertex.c"
-  "${MESA}/src/mesa/tnl/t_vertex.c"
-  "${MESA}/src/mesa/tnl/t_vertex_generic.c"
-  "${MESA}/src/mesa/tnl/t_vp_build.c"
-  "${MESA}/src/mesa/tnl/t_vtx_api.c"
-  "${MESA}/src/mesa/tnl/t_vtx_eval.c"
-  "${MESA}/src/mesa/tnl/t_vtx_exec.c"
-  "${MESA}/src/mesa/tnl/t_vtx_generic.c"
-)
-
-set(OPENRBX_MESA_GDI_SOURCES
-  "${MESA}/src/mesa/drivers/common/driverfuncs.c"
-  "${MESA}/src/mesa/drivers/windows/gdi/wgl.c"
-  "${MESA}/src/mesa/drivers/windows/gdi/wmesa.c"
-)
-
-set(OPENRBX_MESA_OSMESA_SOURCES
-  "${MESA}/src/mesa/drivers/common/driverfuncs.c"
-  "${MESA}/src/mesa/drivers/osmesa/osmesa.c"
-)
-
-set(OPENRBX_MESA_GLU_SOURCES
-  "${MESA}/src/glu/sgi/libnurbs/interface/bezierEval.cc"
-  "${MESA}/src/glu/sgi/libnurbs/interface/bezierPatch.cc"
-  "${MESA}/src/glu/sgi/libnurbs/interface/bezierPatchMesh.cc"
-  "${MESA}/src/glu/sgi/libnurbs/interface/glcurveval.cc"
-  "${MESA}/src/glu/sgi/libnurbs/interface/glinterface.cc"
-  "${MESA}/src/glu/sgi/libnurbs/interface/glrenderer.cc"
-  "${MESA}/src/glu/sgi/libnurbs/interface/glsurfeval.cc"
-  "${MESA}/src/glu/sgi/libnurbs/interface/incurveeval.cc"
-  "${MESA}/src/glu/sgi/libnurbs/interface/insurfeval.cc"
-  "${MESA}/src/glu/sgi/libnurbs/internals/arc.cc"
-  "${MESA}/src/glu/sgi/libnurbs/internals/arcsorter.cc"
-  "${MESA}/src/glu/sgi/libnurbs/internals/arctess.cc"
-  "${MESA}/src/glu/sgi/libnurbs/internals/backend.cc"
-  "${MESA}/src/glu/sgi/libnurbs/internals/basiccrveval.cc"
-  "${MESA}/src/glu/sgi/libnurbs/internals/basicsurfeval.cc"
-  "${MESA}/src/glu/sgi/libnurbs/internals/bin.cc"
-  "${MESA}/src/glu/sgi/libnurbs/internals/bufpool.cc"
-  "${MESA}/src/glu/sgi/libnurbs/internals/cachingeval.cc"
-  "${MESA}/src/glu/sgi/libnurbs/internals/ccw.cc"
-  "${MESA}/src/glu/sgi/libnurbs/internals/coveandtiler.cc"
-  "${MESA}/src/glu/sgi/libnurbs/internals/curve.cc"
-  "${MESA}/src/glu/sgi/libnurbs/internals/curvelist.cc"
-  "${MESA}/src/glu/sgi/libnurbs/internals/curvesub.cc"
-  "${MESA}/src/glu/sgi/libnurbs/internals/dataTransform.cc"
-  "${MESA}/src/glu/sgi/libnurbs/internals/displaylist.cc"
-  "${MESA}/src/glu/sgi/libnurbs/internals/flist.cc"
-  "${MESA}/src/glu/sgi/libnurbs/internals/flistsorter.cc"
-  "${MESA}/src/glu/sgi/libnurbs/internals/hull.cc"
-  "${MESA}/src/glu/sgi/libnurbs/internals/intersect.cc"
-  "${MESA}/src/glu/sgi/libnurbs/internals/knotvector.cc"
-  "${MESA}/src/glu/sgi/libnurbs/internals/mapdesc.cc"
-  "${MESA}/src/glu/sgi/libnurbs/internals/mapdescv.cc"
-  "${MESA}/src/glu/sgi/libnurbs/internals/maplist.cc"
-  "${MESA}/src/glu/sgi/libnurbs/internals/mesher.cc"
-  "${MESA}/src/glu/sgi/libnurbs/internals/monoTriangulationBackend.cc"
-  "${MESA}/src/glu/sgi/libnurbs/internals/monotonizer.cc"
-  "${MESA}/src/glu/sgi/libnurbs/internals/mycode.cc"
-  "${MESA}/src/glu/sgi/libnurbs/internals/nurbsinterfac.cc"
-  "${MESA}/src/glu/sgi/libnurbs/internals/nurbstess.cc"
-  "${MESA}/src/glu/sgi/libnurbs/internals/patch.cc"
-  "${MESA}/src/glu/sgi/libnurbs/internals/patchlist.cc"
-  "${MESA}/src/glu/sgi/libnurbs/internals/quilt.cc"
-  "${MESA}/src/glu/sgi/libnurbs/internals/reader.cc"
-  "${MESA}/src/glu/sgi/libnurbs/internals/renderhints.cc"
-  "${MESA}/src/glu/sgi/libnurbs/internals/slicer.cc"
-  "${MESA}/src/glu/sgi/libnurbs/internals/sorter.cc"
-  "${MESA}/src/glu/sgi/libnurbs/internals/splitarcs.cc"
-  "${MESA}/src/glu/sgi/libnurbs/internals/subdivider.cc"
-  "${MESA}/src/glu/sgi/libnurbs/internals/tobezier.cc"
-  "${MESA}/src/glu/sgi/libnurbs/internals/trimline.cc"
-  "${MESA}/src/glu/sgi/libnurbs/internals/trimregion.cc"
-  "${MESA}/src/glu/sgi/libnurbs/internals/trimvertpool.cc"
-  "${MESA}/src/glu/sgi/libnurbs/internals/uarray.cc"
-  "${MESA}/src/glu/sgi/libnurbs/internals/varray.cc"
-  "${MESA}/src/glu/sgi/libnurbs/nurbtess/directedLine.cc"
-  "${MESA}/src/glu/sgi/libnurbs/nurbtess/gridWrap.cc"
-  "${MESA}/src/glu/sgi/libnurbs/nurbtess/monoChain.cc"
-  "${MESA}/src/glu/sgi/libnurbs/nurbtess/monoPolyPart.cc"
-  "${MESA}/src/glu/sgi/libnurbs/nurbtess/monoTriangulation.cc"
-  "${MESA}/src/glu/sgi/libnurbs/nurbtess/partitionX.cc"
-  "${MESA}/src/glu/sgi/libnurbs/nurbtess/partitionY.cc"
-  "${MESA}/src/glu/sgi/libnurbs/nurbtess/polyDBG.cc"
-  "${MESA}/src/glu/sgi/libnurbs/nurbtess/polyUtil.cc"
-  "${MESA}/src/glu/sgi/libnurbs/nurbtess/primitiveStream.cc"
-  "${MESA}/src/glu/sgi/libnurbs/nurbtess/quicksort.cc"
-  "${MESA}/src/glu/sgi/libnurbs/nurbtess/rectBlock.cc"
-  "${MESA}/src/glu/sgi/libnurbs/nurbtess/sampleComp.cc"
-  "${MESA}/src/glu/sgi/libnurbs/nurbtess/sampleCompBot.cc"
-  "${MESA}/src/glu/sgi/libnurbs/nurbtess/sampleCompRight.cc"
-  "${MESA}/src/glu/sgi/libnurbs/nurbtess/sampleCompTop.cc"
-  "${MESA}/src/glu/sgi/libnurbs/nurbtess/sampleMonoPoly.cc"
-  "${MESA}/src/glu/sgi/libnurbs/nurbtess/sampledLine.cc"
-  "${MESA}/src/glu/sgi/libnurbs/nurbtess/searchTree.cc"
-  "${MESA}/src/glu/sgi/libtess/dict.c"
-  "${MESA}/src/glu/sgi/libtess/geom.c"
-  "${MESA}/src/glu/sgi/libtess/memalloc.c"
-  "${MESA}/src/glu/sgi/libtess/mesh.c"
-  "${MESA}/src/glu/sgi/libtess/normal.c"
-  "${MESA}/src/glu/sgi/libtess/priorityq.c"
-  "${MESA}/src/glu/sgi/libtess/render.c"
-  "${MESA}/src/glu/sgi/libtess/sweep.c"
-  "${MESA}/src/glu/sgi/libtess/tess.c"
-  "${MESA}/src/glu/sgi/libtess/tessmono.c"
-  "${MESA}/src/glu/sgi/libutil/error.c"
-  "${MESA}/src/glu/sgi/libutil/glue.c"
-  "${MESA}/src/glu/sgi/libutil/mipmap.c"
-  "${MESA}/src/glu/sgi/libutil/project.c"
-  "${MESA}/src/glu/sgi/libutil/quad.c"
-  "${MESA}/src/glu/sgi/libutil/registry.c"
-)
-
+add_library(egl INTERFACE)
 if (WIN32)
-  set(OPENRBX_MESA_LINK_OPTIONS "/INCREMENTAL:NO")
+  set(OPENRBX_MESA_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/mesa")
+  set(OPENRBX_MESA_BINARY_DIR "${CMAKE_BINARY_DIR}/3rdparty/mesa-build")
+  set(OPENRBX_MESA_PREFIX "${OPENRBX_MESA_BINARY_DIR}/install")
 
-  set(OPENRBX_MESA_COMPILE_OPTIONS "/O2" "/Ob1" "/GF" "/Gy" "/Zm1000" "/W0")
+  if (NOT EXISTS "${OPENRBX_MESA_PREFIX}/lib/libEGL.lib")
+    find_program(MESON_EXECUTABLE meson REQUIRED)
+    message(STATUS "Building Mesa in ${OPENRBX_MESA_BINARY_DIR}")
+    execute_process(
+      COMMAND "${CMAKE_COMMAND}" -E env "NINJA=${CMAKE_MAKE_PROGRAM}" PYTHONDONTWRITEBYTECODE=1
+              "${MESON_EXECUTABLE}" setup "${OPENRBX_MESA_BINARY_DIR}" "${OPENRBX_MESA_SOURCE_DIR}"
+              --wipe --wrap-mode=nodownload --backend=ninja --buildtype=release --prefix=${OPENRBX_MESA_PREFIX}
+              -Db_vscrt=md -Dplatforms=windows -Dgallium-drivers=softpipe -Dvulkan-drivers= -Dllvm=disabled
+              -Degl=enabled -Dopengl=true -Dgles1=disabled -Dgles2=disabled -Dglx=disabled -Dgbm=disabled
+              -Dgallium-va=disabled -Dgallium-mediafoundation=disabled -Dgallium-rusticl=false -Dvideo-codecs=
+              -Dgallium-d3d12-video=disabled -Dgallium-d3d12-graphics=disabled -Dmicrosoft-clc=disabled
+              -Dspirv-to-dxil=false -Dspirv-tools=disabled -Dteflon=false -Dzlib=disabled -Dzstd=disabled
+              -Dexpat=disabled -Dvalgrind=disabled -Dlibunwind=disabled -Dlmsensors=disabled -Dbuild-tests=false
+              -Dshader-cache=disabled -Dtools= -Dhtml-docs=disabled -Dxmlconfig=disabled -Dperfetto=false
+              -Dsysprof=false -Dgpuvis=false -Dtorx=false
+      RESULT_VARIABLE result
+    )
+    if (NOT result EQUAL 0)
+      message(FATAL_ERROR "Mesa configure failed")
+    endif()
+    execute_process(
+      COMMAND "${CMAKE_COMMAND}" -E env "NINJA=${CMAKE_MAKE_PROGRAM}" PYTHONDONTWRITEBYTECODE=1
+              "${MESON_EXECUTABLE}" install -C "${OPENRBX_MESA_BINARY_DIR}"
+      RESULT_VARIABLE result
+    )
+    if (NOT result EQUAL 0)
+      message(FATAL_ERROR "Mesa build failed")
+    endif()
+  endif()
 
-  add_library(mesa_core STATIC ${OPENRBX_MESA_CORE_SOURCES})
-  set_target_properties(mesa_core PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded")
-  target_include_directories(mesa_core PRIVATE
-    "${MESA}/include" "${MESA}/src/mesa" "${MESA}/src/mesa/glapi" "${MESA}/src/mesa/main"
-    "${MESA}/src/mesa/shader" "${MESA}/src/mesa/shader/slang" "${MESA}/src/mesa/shader/grammar"
-  )
-  target_compile_definitions(mesa_core PRIVATE NDEBUG WIN32 _MBCS _LIB _DLL BUILD_GL32 MESA_MINWARN)
-  target_compile_options(mesa_core PRIVATE ${OPENRBX_MESA_COMPILE_OPTIONS})
-
-  add_library(opengl32 SHARED ${OPENRBX_MESA_GDI_SOURCES})
-  set_target_properties(opengl32 PROPERTIES OUTPUT_NAME "OPENGL32" SUFFIX ".DLL"
-    MSVC_RUNTIME_LIBRARY "MultiThreaded")
-  target_include_directories(opengl32 PRIVATE
-    "${MESA}/windows/VC7/main" "${MESA}/include" "${MESA}/src/mesa" "${MESA}/src/mesa/main"
-    "${MESA}/src/mesa/glapi" "${MESA}/src/mesa/swrast" "${MESA}/src/mesa/shader"
-  )
-  target_compile_definitions(opengl32 PRIVATE
-    NDEBUG WIN32 _WINDOWS _MBCS _USRDLL GDI_EXPORTS _DLL BUILD_GL32 MESA_MINWARN)
-  target_compile_options(opengl32 PRIVATE ${OPENRBX_MESA_COMPILE_OPTIONS})
-  target_link_libraries(opengl32 PRIVATE mesa_core winmm msvcrt kernel32 user32 gdi32 advapi32)
-  target_link_options(opengl32 PRIVATE ${OPENRBX_MESA_LINK_OPTIONS}
-    "/DEF:${MESA}/src/mesa/drivers/windows/gdi/mesa.def")
-
-  add_library(osmesa32 SHARED ${OPENRBX_MESA_OSMESA_SOURCES})
-  set_target_properties(osmesa32 PROPERTIES OUTPUT_NAME "OSMESA32" SUFFIX ".DLL"
-    MSVC_RUNTIME_LIBRARY "MultiThreaded")
-  target_include_directories(osmesa32 PRIVATE
-    "${MESA}/include" "${MESA}/src/mesa" "${MESA}/src/mesa/main" "${MESA}/src/mesa/glapi"
-    "${MESA}/src/mesa/swrast" "${MESA}/src/mesa/shader"
-  )
-  target_compile_definitions(osmesa32 PRIVATE
-    WIN32 NDEBUG _WINDOWS _MBCS _USRDLL OSMESA_EXPORTS)
-  target_compile_options(osmesa32 PRIVATE ${OPENRBX_MESA_COMPILE_OPTIONS})
-  target_link_libraries(osmesa32 PRIVATE opengl32 winmm msvcrt kernel32 user32 gdi32 advapi32)
-  target_link_options(osmesa32 PRIVATE ${OPENRBX_MESA_LINK_OPTIONS}
-    "/DEF:${MESA}/src/mesa/drivers/osmesa/osmesa.def")
-
-  add_library(glu32 SHARED ${OPENRBX_MESA_GLU_SOURCES})
-  set_target_properties(glu32 PROPERTIES OUTPUT_NAME "GLU32" SUFFIX ".DLL"
-    MSVC_RUNTIME_LIBRARY "MultiThreaded")
-  target_include_directories(glu32 PRIVATE
-    "${MESA}/include" "${MESA}/src/glu/sgi/include" "${MESA}/src/glu/sgi/libnurbs/interface"
-    "${MESA}/src/glu/sgi/libnurbs/internals" "${MESA}/src/glu/sgi/libnurbs/nurbtess"
-  )
-  target_compile_definitions(glu32 PRIVATE
-    WIN32 NDEBUG _WINDOWS _MBCS _USRDLL GLU_EXPORTS BUILD_GL32)
-  target_compile_options(glu32 PRIVATE ${OPENRBX_MESA_COMPILE_OPTIONS})
-
-  set(OPENRBX_MESA_GLU_NURBS_SOURCES ${OPENRBX_MESA_GLU_SOURCES})
-  list(FILTER OPENRBX_MESA_GLU_NURBS_SOURCES INCLUDE REGEX "[.]cc$")
-  set_source_files_properties(${OPENRBX_MESA_GLU_NURBS_SOURCES} DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-    PROPERTIES COMPILE_OPTIONS "/EHs-c-" COMPILE_DEFINITIONS "LIBRARYBUILD")
-  target_link_libraries(glu32 PRIVATE msvcrt winmm opengl32 kernel32 user32 gdi32 advapi32)
-  target_link_options(glu32 PRIVATE ${OPENRBX_MESA_LINK_OPTIONS}
-    "/DEF:${MESA}/src/glu/sgi/glu.def")
+  target_include_directories(egl INTERFACE "${OPENRBX_MESA_SOURCE_DIR}/include")
+  target_link_libraries(egl INTERFACE "${OPENRBX_MESA_PREFIX}/lib/libEGL.lib" "${OPENRBX_MESA_PREFIX}/lib/opengl32.lib")
 else()
-  set(OPENRBX_MESA_INCLUDE_DIRS
-    "${MESA}/include" "${MESA}/src/mesa" "${MESA}/src/mesa/glapi" "${MESA}/src/mesa/main"
-    "${MESA}/src/mesa/swrast" "${MESA}/src/mesa/shader" "${MESA}/src/mesa/shader/slang"
-    "${MESA}/src/mesa/shader/grammar"
-  )
-
-  add_library(mesa_core STATIC ${OPENRBX_MESA_CORE_SOURCES})
-  set_target_properties(mesa_core PROPERTIES POSITION_INDEPENDENT_CODE ON)
-  target_include_directories(mesa_core PRIVATE ${OPENRBX_MESA_INCLUDE_DIRS})
-  target_compile_definitions(mesa_core PRIVATE NDEBUG PTHREADS)
-
-  add_library(osmesa SHARED ${OPENRBX_MESA_OSMESA_SOURCES})
-  set_target_properties(osmesa PROPERTIES OUTPUT_NAME "OSMesa" LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
-  target_include_directories(osmesa PRIVATE ${OPENRBX_MESA_INCLUDE_DIRS})
-  target_compile_definitions(osmesa PRIVATE NDEBUG PTHREADS)
-  target_link_libraries(osmesa PRIVATE mesa_core Threads::Threads m)
-  target_link_options(osmesa PRIVATE "LINKER:-Bsymbolic")
-
-  add_library(glu STATIC ${OPENRBX_MESA_GLU_SOURCES})
-  set_target_properties(glu PROPERTIES POSITION_INDEPENDENT_CODE ON)
-  target_include_directories(glu PRIVATE
-    "${MESA}/include" "${MESA}/src/glu/sgi/include" "${MESA}/src/glu/sgi/libnurbs/interface"
-    "${MESA}/src/glu/sgi/libnurbs/internals" "${MESA}/src/glu/sgi/libnurbs/nurbtess"
-  )
-  target_compile_definitions(glu PRIVATE NDEBUG)
-
-  set(OPENRBX_MESA_GLU_NURBS_SOURCES ${OPENRBX_MESA_GLU_SOURCES})
-  list(FILTER OPENRBX_MESA_GLU_NURBS_SOURCES INCLUDE REGEX "[.]cc$")
-  set_source_files_properties(${OPENRBX_MESA_GLU_NURBS_SOURCES} DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-    PROPERTIES COMPILE_DEFINITIONS "LIBRARYBUILD")
-
-  set_target_properties(mesa_core osmesa glu PROPERTIES C_STANDARD 99)
+  target_link_libraries(egl INTERFACE OpenGL::EGL OpenGL::OpenGL)
 endif()
 
-foreach(name graphics3d glg3d glg3d_osmesa mesa_core opengl32 osmesa32 glu32 osmesa glu)
+set(GLU "${CMAKE_CURRENT_SOURCE_DIR}/glu")
+file(GLOB OPENRBX_GLU_SOURCES "${GLU}/src/libutil/*.c" "${GLU}/src/libtess/*.c" "${GLU}/src/libnurbs/*/*.cc")
+list(REMOVE_ITEM OPENRBX_GLU_SOURCES "${GLU}/src/libtess/priorityq-heap.c")
+if (WIN32)
+  add_library(glu SHARED ${OPENRBX_GLU_SOURCES})
+  set_target_properties(glu PROPERTIES OUTPUT_NAME "GLU32" SUFFIX ".DLL")
+  target_compile_definitions(glu PRIVATE BUILD_GLU32 RESOLVE_3D_TEXTURE_SUPPORT)
+  target_include_directories(glu PRIVATE "${OPENRBX_MESA_SOURCE_DIR}/include")
+  target_link_libraries(glu PRIVATE "${OPENRBX_MESA_PREFIX}/lib/opengl32.lib")
+else()
+  add_library(glu STATIC ${OPENRBX_GLU_SOURCES})
+  set_target_properties(glu PROPERTIES POSITION_INDEPENDENT_CODE ON)
+endif()
+target_include_directories(glu PRIVATE
+  "${GLU}/src/include" "${GLU}/src/libnurbs/interface" "${GLU}/src/libnurbs/internals" "${GLU}/src/libnurbs/nurbtess"
+)
+target_include_directories(glu PUBLIC "${GLU}/include")
+target_compile_definitions(glu PRIVATE LIBRARYBUILD)
+
+foreach(name graphics3d glg3d glg3d_egl glu)
   if (TARGET ${name})
     set_target_properties(${name} PROPERTIES
       C_CLANG_TIDY "" CXX_CLANG_TIDY "" CXX_INCLUDE_WHAT_YOU_USE "")
@@ -1004,7 +748,6 @@ if (NOT WIN32)
     "${OGRE}/RenderSystems/GL/src/nvparse"
     "${OGRE}/RenderSystems/GL/src/atifs/include"
     "${OGRE}/RenderSystems/GL/src/GLSL/include"
-    "${MESA}/include"
   )
   target_compile_definitions(rggl PRIVATE ${OPENRBX_OGRE_LINUX_DEFINITIONS})
   target_compile_options(rggl PRIVATE -Wno-narrowing)

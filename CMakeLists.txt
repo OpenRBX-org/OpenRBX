@@ -64,40 +64,20 @@ set(OPENRBX_3RDPARTY "${PROJECT_SOURCE_DIR}/3rdparty")
 
 set(OPENRBX_G3D_INCLUDE_DIR   "${PROJECT_SOURCE_DIR}/Client/Rendering/g3d/include")
 set(OPENRBX_LUA_INCLUDE_DIR   "${PROJECT_SOURCE_DIR}/Client/App/lua-5.1.1/src")
-set(OPENRBX_MESA_INCLUDE_DIR  "${PROJECT_SOURCE_DIR}/Client/Rendering/Mesa-6.5/include")
 set(OPENRBX_G3D_EXTRA_INCLUDE_DIRS
   "${PROJECT_SOURCE_DIR}/Client/Rendering/g3d/png"
   "${PROJECT_SOURCE_DIR}/Client/Rendering/g3d/zlib"
 )
 
-if (WIN32)
-  add_library(fmodex IMPORTED UNKNOWN)
-  set_property(TARGET fmodex PROPERTY IMPORTED_LOCATION "${PROJECT_SOURCE_DIR}/Client/fmod/api/lib/fmodex64_vc.lib")
-else()
-  add_library(fmodex SHARED IMPORTED)
-  set_property(TARGET fmodex PROPERTY IMPORTED_LOCATION "${PROJECT_SOURCE_DIR}/Client/fmod/api/lib/libfmodex64.so")
-  set_property(TARGET fmodex PROPERTY IMPORTED_NO_SONAME TRUE)
-endif()
-set_property(TARGET fmodex PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${PROJECT_SOURCE_DIR}/Client/fmod/api/inc")
-
-if (WIN32)
-  set(OPENRBX_RUNTIME_FILES
-    Client/fmod/api/fmodex64.dll
-    Client/win/AppSettings.xml
-    Client/win/ReflectionMetadata.xml
-    Client/win/copyrights.txt
-  )
-else()
-  set(OPENRBX_RUNTIME_FILES
-    Client/fmod/api/lib/libfmodex64.so
-    Client/win/AppSettings.xml
-    Client/win/ReflectionMetadata.xml
-    Client/win/copyrights.txt
-  )
-
+set(OPENRBX_RUNTIME_FILES
+  Client/win/AppSettings.xml
+  Client/win/ReflectionMetadata.xml
+  Client/win/copyrights.txt
+)
+if (NOT WIN32)
   set(THREADS_PREFER_PTHREAD_FLAG ON)
   find_package(Threads REQUIRED)
-  find_package(OpenGL REQUIRED)
+  find_package(OpenGL REQUIRED COMPONENTS OpenGL EGL)
   find_package(X11 REQUIRED)
 endif()
 set(OPENRBX_RUNTIME_OUTPUTS)
@@ -135,14 +115,6 @@ target_include_directories(scintilla PUBLIC
 )
 target_include_directories(scintilla PRIVATE "${PROJECT_SOURCE_DIR}/3rdparty/lexilla/lexlib")
 target_link_libraries(scintilla PUBLIC Qt6::Widgets Qt6::Core5Compat)
-
-if (WIN32)
-  set(OPENRBX_G3D_LIBS   graphics3d glg3d)
-  set(OPENRBX_MESA_LIBS  opengl32 glu32 osmesa32)
-else()
-  set(OPENRBX_G3D_LIBS   glg3d_osmesa graphics3d)
-  set(OPENRBX_MESA_LIBS  glu osmesa)
-endif()
 
 set(OPENRBX_APP_SOURCES
   Client/App/security/SecurityContext.cpp
@@ -290,6 +262,7 @@ set(OPENRBX_APP_SOURCES
   Client/App/tool/ToolsArrow.cpp
   Client/App/tool/ToolsSurface.cpp
   Client/App/util/RunStateOwner.cpp
+  Client/App/util/AudioSystem.cpp
   Client/App/util/Sound.cpp
   Client/App/util/SoundWorld.cpp
   Client/App/v8datamodel/Backpack.cpp
@@ -502,7 +475,7 @@ set(OPENRBX_3RDPARTY_INCLUDE_DIRS
   ${OPENRBX_G3D_EXTRA_INCLUDE_DIRS}
 )
 if (NOT WIN32)
-  list(APPEND OPENRBX_3RDPARTY_INCLUDE_DIRS "${OPENRBX_MESA_INCLUDE_DIR}")
+  list(APPEND OPENRBX_3RDPARTY_INCLUDE_DIRS "${OPENRBX_3RDPARTY}/glu/include")
 endif()
 
 if (WIN32)
@@ -581,7 +554,8 @@ add_engine_library(app
 )
 
 if (TARGET app)
-  target_link_libraries(app PRIVATE fmodex CURL::libcurl)
+  target_include_directories(app PRIVATE "${OPENRBX_3RDPARTY}/dr_libs")
+  target_link_libraries(app PRIVATE OpenAL::OpenAL openmpt stb_vorbis CURL::libcurl)
 endif()
 
 add_engine_library(network
@@ -626,16 +600,18 @@ target_include_directories(webservice PRIVATE
   "${PROJECT_SOURCE_DIR}/WebService"
   ${OPENRBX_ENGINE_INCLUDE_DIRS}
   ${OPENRBX_3RDPARTY_INCLUDE_DIRS}
-  "${OPENRBX_MESA_INCLUDE_DIR}"
   "${OPENRBX_3RDPARTY}/cpp-httplib"
   "${OPENRBX_3RDPARTY}/nlohmann-json/include"
 )
 
 target_link_libraries(webservice PRIVATE
   ${OPENRBX_ENGINE_LIBRARIES}
-  ${OPENRBX_G3D_LIBS}
-  ${OPENRBX_MESA_LIBS}
-  fmodex
+  glg3d_egl
+  graphics3d
+  glu
+  OpenAL::OpenAL
+  openmpt
+  stb_vorbis
   CURL::libcurl
 )
 add_dependencies(webservice runtime_files)
@@ -849,7 +825,6 @@ target_include_directories(roblox PRIVATE
   ${OPENRBX_ENGINE_INCLUDE_DIRS}
   ${OPENRBX_RENDERLIBNEW_INCLUDE_DIRS}
   ${OPENRBX_3RDPARTY_INCLUDE_DIRS}
-  "${OPENRBX_MESA_INCLUDE_DIR}"
   "${OPENRBX_OGRE}/include"
   "${OPENRBX_3RDPARTY}/webview/core/include"
 )
@@ -878,7 +853,9 @@ if (NOT WIN32)
     glg3d
     graphics3d
     glu
-    fmodex
+    OpenAL::OpenAL
+    openmpt
+    stb_vorbis
     CURL::libcurl
     OpenGL::GL
     X11::X11
@@ -913,9 +890,13 @@ target_link_libraries(roblox PRIVATE
   SDL3::SDL3-static
   rgmain
   ${OPENRBX_CLIENT_ENGINE_LIBRARIES}
-  ${OPENRBX_G3D_LIBS}
-  ${OPENRBX_MESA_LIBS}
-  fmodex
+  graphics3d
+  glg3d
+  opengl32
+  glu32
+  OpenAL::OpenAL
+  openmpt
+  stb_vorbis
   CURL::libcurl
   advapi32
   dbghelp

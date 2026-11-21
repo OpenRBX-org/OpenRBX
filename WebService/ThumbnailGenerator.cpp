@@ -18,10 +18,12 @@
 #include "v8datamodel/Selection.h"
 #include "v8datamodel/Workspace.h"
 
+#include <EGL/egl.h>
+#include <EGL/eglext.h>
 #include <G3D/GImage.h>
-#include <GL/osmesa.h>
 #include <GLG3D/GWindow.h>
 #include <GLG3D/RenderDevice.h>
+#include <cstring>
 #include <memory>
 #include <mutex>
 #include <sstream>
@@ -55,20 +57,78 @@ static RBX::Reflection::BoundFuncDesc<ThumbnailGenerator, std::string(std::strin
 
 ThumbnailGenerator::ThumbnailGenerator() = default;
 
+static EGLDisplay softwareDisplay()
+{
+	static const EGLDisplay display = [] {
+#ifdef _WIN32
+		EGLDisplay display = eglGetPlatformDisplay(EGL_PLATFORM_SURFACELESS_MESA, EGL_DEFAULT_DISPLAY, nullptr);
+#else
+		EGLDisplay display = EGL_NO_DISPLAY;
+		auto queryDevices = reinterpret_cast<PFNEGLQUERYDEVICESEXTPROC>(eglGetProcAddress("eglQueryDevicesEXT"));
+		auto queryDeviceString =
+			reinterpret_cast<PFNEGLQUERYDEVICESTRINGEXTPROC>(eglGetProcAddress("eglQueryDeviceStringEXT"));
+		EGLDeviceEXT devices[16];
+		EGLint count = 0;
+		if (queryDevices && queryDeviceString && queryDevices(16, devices, &count)) {
+			for (EGLint i = 0; i < count && display == EGL_NO_DISPLAY; i++) {
+				const char* extensions = queryDeviceString(devices[i], EGL_EXTENSIONS);
+				if (extensions && std::strstr(extensions, "EGL_MESA_device_software")) {
+					display = eglGetPlatformDisplay(EGL_PLATFORM_DEVICE_EXT, devices[i], nullptr);
+				}
+			}
+		}
+#endif
+		if (display == EGL_NO_DISPLAY || !eglInitialize(display, nullptr, nullptr)) {
+			throw std::runtime_error("No software EGL display");
+		}
+		return display;
+	}();
+	return display;
+}
+
+static EGLConfig chooseConfig(EGLDisplay display, bool alphaChannel)
+{
+	const EGLint attributes[] = {
+		EGL_SURFACE_TYPE,
+		EGL_PBUFFER_BIT,
+		EGL_RENDERABLE_TYPE,
+		EGL_OPENGL_BIT,
+		EGL_RED_SIZE,
+		8,
+		EGL_GREEN_SIZE,
+		8,
+		EGL_BLUE_SIZE,
+		8,
+		EGL_ALPHA_SIZE,
+		alphaChannel ? 8 : 0,
+		EGL_DEPTH_SIZE,
+		16,
+		EGL_STENCIL_SIZE,
+		8,
+		EGL_NONE
+	};
+	EGLConfig config;
+	EGLint count = 0;
+	if (!eglChooseConfig(display, attributes, &config, 1, &count) || count == 0) {
+		throw std::runtime_error("eglChooseConfig failed");
+	}
+	return config;
+}
+
 class OSContext : public G3D::GWindow
 {
 private:
-	OSMesaContext ctx;
+	EGLDisplay display;
+	EGLConfig config;
+	EGLContext ctx;
+	EGLSurface surface = EGL_NO_SURFACE;
 
 	OSContext(bool alphaChannel)
+		: display(softwareDisplay()), config(chooseConfig(display, alphaChannel)), ctx(createContext(EGL_NO_CONTEXT))
 	{
-		ctx = OSMesaCreateContext(alphaChannel ? OSMESA_RGBA : OSMESA_RGB, nullptr);
-		if (ctx == nullptr) {
-			throw std::runtime_error("shared OSMesaCreateContext failed");
-		}
 	}
 
-	static OSMesaContext shared(bool alphaChannel)
+	static EGLContext shared(bool alphaChannel)
 	{
 		if (alphaChannel) {
 			static OSContext shared(true);
@@ -80,26 +140,57 @@ private:
 		}
 	}
 
+	EGLContext createContext(EGLContext sharedContext) const
+	{
+		if (!eglBindAPI(EGL_OPENGL_API)) {
+			throw std::runtime_error("eglBindAPI failed");
+		}
+		EGLContext context = eglCreateContext(display, config, sharedContext, nullptr);
+		if (context == EGL_NO_CONTEXT) {
+			throw std::runtime_error("eglCreateContext failed");
+		}
+		return context;
+	}
+
 public:
 	G3D::GImage image;
 
-	OSContext(int cx, int cy, bool alphaChannel) : image(cx, cy, alphaChannel ? 4 : 3)
+	OSContext(int cx, int cy, bool alphaChannel)
+		: display(softwareDisplay()), config(chooseConfig(display, alphaChannel)),
+		  ctx(createContext(shared(alphaChannel))), image(cx, cy, alphaChannel ? 4 : 3)
 	{
-		ctx = OSMesaCreateContext(alphaChannel ? OSMESA_RGBA : OSMESA_RGB, shared(alphaChannel));
-		if (ctx == nullptr) {
-			throw std::runtime_error("OSMesaCreateContext failed");
+		const EGLint attributes[] = {EGL_WIDTH, cx, EGL_HEIGHT, cy, EGL_NONE};
+		surface = eglCreatePbufferSurface(display, config, attributes);
+		if (surface == EGL_NO_SURFACE) {
+			eglDestroyContext(display, ctx);
+			throw std::runtime_error("eglCreatePbufferSurface failed");
 		}
 	}
 
-	~OSContext() override { OSMesaDestroyContext(ctx); }
+	~OSContext() override
+	{
+		if (eglGetCurrentContext() == ctx) {
+			eglMakeCurrent(display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+		}
+		if (surface != EGL_NO_SURFACE) {
+			eglDestroySurface(display, surface);
+		}
+		eglDestroyContext(display, ctx);
+	}
 
 	void reallyMakeCurrent() const override
 	{
-		if (!OSMesaMakeCurrent(
-				ctx, const_cast<G3D::uint8*>(image.byte()), GL_UNSIGNED_BYTE, image.width, image.height
-			)) {
-			throw std::runtime_error("OSMesaMakeCurrent failed");
+		if (!eglMakeCurrent(display, surface, surface, ctx)) {
+			throw std::runtime_error("eglMakeCurrent failed");
 		}
+	}
+
+	void readPixels()
+	{
+		glPixelStorei(GL_PACK_ALIGNMENT, 1);
+		glReadPixels(
+			0, 0, image.width, image.height, image.channels == 4 ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, image.byte()
+		);
 	}
 
 	void getSettings(G3D::GWindow::Settings& settings) const override { settings = G3D::GWindow::Settings(); }
@@ -225,6 +316,7 @@ std::string ThumbnailGenerator::clickTexture(std::string textureId, std::string 
 				}
 			}
 
+			context.readPixels();
 			context.image.encode(format, binaryOutput);
 
 			renderDevice.pop2D();
@@ -336,6 +428,7 @@ void ThumbnailGenerator::doClick(std::string fileType, int cx, int cy, bool hide
 	rbxView->render(&renderDevice);
 	glMatrixMode(GL_MODELVIEW);
 
+	context.readPixels();
 	if (alphaChannel) {
 		G3D::GImage::flipRGBAVertical(
 			context.image.byte(), context.image.byte(), context.image.width, context.image.height
