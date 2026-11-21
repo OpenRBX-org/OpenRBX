@@ -80,7 +80,6 @@ static std::mutex throttleMutex;
 static bool repaintRequested;
 
 static std::set<CRobloxWnd*> idleWindows;
-static double paintDuration;
 
 class RenderFrame
 {
@@ -1013,8 +1012,6 @@ void CRobloxWnd::OnPaint()
 		return;
 	}
 
-	double start = RBX::getRealTime();
-
 	bool painted;
 	if (m_graphicsMode == CRenderSettings::c_graphicsModeOpenGLStable) {
 		painted = paintG3D();
@@ -1024,10 +1021,6 @@ void CRobloxWnd::OnPaint()
 	}
 	if (!painted && m_dataModel) {
 		runViewValid(m_dataModel.get(), this);
-	}
-
-	if (painted) {
-		paintDuration = RBX::getRealTime() - start;
 	}
 }
 
@@ -1055,7 +1048,7 @@ bool CRobloxWnd::renderIdle(double& wait)
 		}
 
 		active = true;
-		if (RBX::getRealTime() + paintDuration < RBX::FrameInterpolator::getNextStepTime()) {
+		if (RBX::getRealTime() < RBX::FrameInterpolator::getNextStepTime()) {
 			RBX::FrameInterpolator::setExtraFrame(true);
 #ifdef _WIN32
 			RedrawWindow(reinterpret_cast<HWND>(window->winId()), nullptr, nullptr, RDW_INVALIDATE | RDW_UPDATENOW);
