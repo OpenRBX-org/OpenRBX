@@ -1,5 +1,6 @@
 #include "BrickMesh.h"
 
+#include "BevelMesh.h"
 #include "QuadVolume.h"
 #include "ViewBase.h"
 #include "util/Math.h"
@@ -7,6 +8,7 @@
 
 #include <G3D/g3dmath.h>
 #include <algorithm>
+#include <cmath>
 #include <map>
 
 static int orderedCompare(const G3D::Vector3& a, const G3D::Vector3& b)
@@ -73,7 +75,7 @@ const float RBX::View::BrickMesh::widthInset = 0.0f;
 
 const float RBX::View::BrickMesh::normalPerturbation = 0.05f;
 
-const float RBX::View::BrickMesh::bevel = 0.0f;
+const float RBX::View::BrickMesh::bevel = 0.065f;
 
 static G3D::Vector2 flatTex(1.0f / 64.0f, 8.0f / 9.0f);
 
@@ -83,13 +85,31 @@ void meshFace(
 	float inset,
 	RBX::View::RenderSurfaceTypes surfaceTypes,
 	float colorIndex,
+	RBX::View::BevelMesh::CornerVertices& corners,
 	RBX::Render::Mesh::LevelRef& level
 )
 {
 	RBX::View::RenderSurfaceType surfaceType = surfaceTypes.getSurfaceType((RBX::NormalId) N);
 
-	G3D::Vector3 faceCorner =
-		G3D::abs(RBX::View::uvwToObject<N>(halfSize)) - G3D::Vector3(inset, inset, RBX::View::BrickMesh::bevel);
+	const G3D::Vector3 faceRadius = G3D::abs(RBX::View::uvwToObject<N>(halfSize));
+	const G3D::Vector3 faceCorner = faceRadius - G3D::Vector3(inset, inset, 0.0f);
+	// Preserve the original atlas mapping; beveling only contracts face positions.
+	const float insetScaleX = faceRadius.x > 0.0f ? faceCorner.x / faceRadius.x : 1.0f;
+	const float insetScaleY = faceRadius.y > 0.0f ? faceCorner.y / faceRadius.y : 1.0f;
+
+	auto appendVertex =
+		[&](const G3D::Vector3& sourceVertex, const G3D::Vector3& localNormal, const G3D::Vector2& tex) {
+			G3D::Vector3 localVertex(sourceVertex.x * insetScaleX, sourceVertex.y * insetScaleY, sourceVertex.z);
+			const G3D::Vector3 vertex = RBX::View::uvwToObject<N>(localVertex);
+			const G3D::Vector3 normal = RBX::View::uvwToObject<N>(localNormal);
+			if (std::fabs(std::fabs(sourceVertex.x) - faceRadius.x) < 1e-4f &&
+				std::fabs(std::fabs(sourceVertex.y) - faceRadius.y) < 1e-4f) {
+				RBX::View::BevelMesh::recordCorner(
+					corners, (RBX::NormalId) N, sourceVertex, localVertex, localNormal, tex, 1.0f
+				);
+			}
+			return RBX::Render::Mesh::allocVertex(vertex, normal, tex, true);
+		};
 
 	G3D::Vector2 studsPerTile(0.0f, 0.0f);
 	G3D::Vector2 textureOffset(0.0f, 0.0f);
@@ -97,7 +117,7 @@ void meshFace(
 	switch (surfaceType) {
 	case RBX::View::FLAT:
 		textureOffset = flatTex;
-		studsPerTile = faceCorner.xy() * 2.0;
+		studsPerTile = faceRadius.xy() * 2.0;
 		break;
 	case RBX::View::STUDS:
 		studsPerTile = G3D::Vector2(2.0f, 4.0f);
@@ -134,88 +154,61 @@ void meshFace(
 		G3D::Vector3 nXy(perturbationMax.x, perturbationMin.y, 1.0f);
 		G3D::Vector3 nXY(perturbationMax.x, perturbationMax.y, 1.0f);
 
-		unsigned int i0 = RBX::Render::Mesh::allocVertex(
-			RBX::View::uvwToObject<N>(G3D::Vector3(-faceCorner.x, -faceCorner.y, faceCorner.z)),
-			RBX::View::uvwToObject<N>(nxy),
-			textureOffset,
-			true
-		);
-		unsigned int i1 = RBX::Render::Mesh::allocVertex(
-			RBX::View::uvwToObject<N>(G3D::Vector3(faceCorner.x, -faceCorner.y, faceCorner.z)),
-			RBX::View::uvwToObject<N>(nXy),
-			textureOffset,
-			true
-		);
-		unsigned int i2 = RBX::Render::Mesh::allocVertex(
-			RBX::View::uvwToObject<N>(G3D::Vector3(faceCorner.x, faceCorner.y, faceCorner.z)),
-			RBX::View::uvwToObject<N>(nXY),
-			textureOffset,
-			true
-		);
-		unsigned int i3 = RBX::Render::Mesh::allocVertex(
-			RBX::View::uvwToObject<N>(G3D::Vector3(-faceCorner.x, faceCorner.y, faceCorner.z)),
-			RBX::View::uvwToObject<N>(nxY),
-			textureOffset,
-			true
-		);
+		unsigned int i0 = appendVertex(G3D::Vector3(-faceRadius.x, -faceRadius.y, faceRadius.z), nxy, textureOffset);
+		unsigned int i1 = appendVertex(G3D::Vector3(faceRadius.x, -faceRadius.y, faceRadius.z), nXy, textureOffset);
+		unsigned int i2 = appendVertex(G3D::Vector3(faceRadius.x, faceRadius.y, faceRadius.z), nXY, textureOffset);
+		unsigned int i3 = appendVertex(G3D::Vector3(-faceRadius.x, faceRadius.y, faceRadius.z), nxY, textureOffset);
 
 		level->indexArray.append(i0, i1, i2, i3);
 	}
 	else {
 
 		G3D::Vector2 minCorner;
-		minCorner.x = -faceCorner.x;
+		minCorner.x = -faceRadius.x;
 
-		G3D::Vector2 normalDelta = (perturbationMax - perturbationMin) * 0.5 / faceCorner.xy();
+		G3D::Vector2 normalDelta = (perturbationMax - perturbationMin) * 0.5 / faceRadius.xy();
 
 		G3D::Vector2 minNormal;
 		minNormal.x = perturbationMin.x;
 
-		while (minCorner.x < faceCorner.x) {
+		while (minCorner.x < faceRadius.x) {
 			G3D::Vector2 maxCorner;
-			maxCorner.x = std::min(minCorner.x + studsPerTile.x, faceCorner.x);
+			maxCorner.x = std::min(minCorner.x + studsPerTile.x, faceRadius.x);
 
 			G3D::Vector2 maxNormal;
 			maxNormal.x = minNormal.x + normalDelta.x;
 
-			minCorner.y = -faceCorner.y;
+			minCorner.y = -faceRadius.y;
 			minNormal.y = perturbationMin.y;
 
-			while (minCorner.y < faceCorner.y) {
-				maxCorner.y = std::min(minCorner.y + studsPerTile.y, faceCorner.y);
+			while (minCorner.y < faceRadius.y) {
+				maxCorner.y = std::min(minCorner.y + studsPerTile.y, faceRadius.y);
 				maxNormal.y = minNormal.y + normalDelta.y;
 
-				G3D::Vector2 t0(
-					textureOffset.x + 1.0 / 1024.0,
-					textureOffset.y + (maxCorner.y - minCorner.y) / 12.0 - RBX::View::BrickMesh::bevel
-				);
+				G3D::Vector2 t0(textureOffset.x + 1.0 / 1024.0, textureOffset.y + (maxCorner.y - minCorner.y) / 12.0);
 				G3D::Vector2 t1(textureOffset.x - 1.0 / 1024.0 + (maxCorner.x - minCorner.x) / 64.0, t0.y);
-				G3D::Vector2 t2(t1.x, textureOffset.y - RBX::View::BrickMesh::bevel);
-				G3D::Vector2 t3(textureOffset.x + 1.0 / 1024.0, textureOffset.y + RBX::View::BrickMesh::bevel);
+				G3D::Vector2 t2(t1.x, textureOffset.y);
+				G3D::Vector2 t3(textureOffset.x + 1.0 / 1024.0, textureOffset.y);
 
-				unsigned int i0 = RBX::Render::Mesh::allocVertex(
-					RBX::View::uvwToObject<N>(G3D::Vector3(minCorner.x, minCorner.y, faceCorner.z)),
-					RBX::View::uvwToObject<N>(G3D::Vector3(minNormal.x, minNormal.y, 1.0f)),
-					t0,
-					true
+				unsigned int i0 = appendVertex(
+					G3D::Vector3(minCorner.x, minCorner.y, faceCorner.z),
+					G3D::Vector3(minNormal.x, minNormal.y, 1.0f),
+					t0
 				);
-				unsigned int i1 = RBX::Render::Mesh::allocVertex(
-					RBX::View::uvwToObject<N>(G3D::Vector3(maxCorner.x, minCorner.y, faceCorner.z)),
-					RBX::View::uvwToObject<N>(G3D::Vector3(maxNormal.x, minNormal.y, 1.0f)),
-					t1,
-					true
+				unsigned int i1 = appendVertex(
+					G3D::Vector3(maxCorner.x, minCorner.y, faceCorner.z),
+					G3D::Vector3(maxNormal.x, minNormal.y, 1.0f),
+					t1
 				);
-				unsigned int i2 = RBX::Render::Mesh::allocVertex(
-					RBX::View::uvwToObject<N>(G3D::Vector3(maxCorner.x, maxCorner.y, faceCorner.z)),
-					RBX::View::uvwToObject<N>(G3D::Vector3(maxNormal.x, maxNormal.y, 1.0f)),
-					t2,
-					true
+				unsigned int i2 = appendVertex(
+					G3D::Vector3(maxCorner.x, maxCorner.y, faceCorner.z),
+					G3D::Vector3(maxNormal.x, maxNormal.y, 1.0f),
+					t2
 				);
-				unsigned int i3 = RBX::Render::Mesh::allocVertex(
-					RBX::View::uvwToObject<N>(G3D::Vector3(minCorner.x, maxCorner.y, faceCorner.z)),
-					RBX::View::uvwToObject<N>(G3D::Vector3(minNormal.x, maxNormal.y, 1.0f)),
-					t3,
-					true
+				unsigned int i3 = appendVertex(
+					G3D::Vector3(minCorner.x, maxCorner.y, faceCorner.z),
+					G3D::Vector3(minNormal.x, maxNormal.y, 1.0f),
+					t3
 				);
 
 				level->indexArray.append(i0, i1, i2, i3);
@@ -249,22 +242,26 @@ BrickMesh::BrickMesh(const G3D::Vector3& size, RenderSurfaceTypes surfaceTypes, 
 		levels.append(level);
 
 		G3D::Vector3 halfSize(size.x * 0.5 - widthInset, size.y * 0.5, size.z * 0.5 - widthInset);
+		const float meshBevel = std::min(bevel, 0.5f * std::min(halfSize.x, std::min(halfSize.y, halfSize.z)));
 
 		const float colorIndex = color.getClosestPaletteIndex();
+		BevelMesh::CornerVertices corners{};
 
-		meshFace<0>(halfSize, bevel, surfaceTypes, colorIndex, level);
-		meshFace<1>(halfSize, bevel, surfaceTypes, colorIndex, level);
-		meshFace<2>(halfSize, bevel, surfaceTypes, colorIndex, level);
-		meshFace<3>(halfSize, bevel, surfaceTypes, colorIndex, level);
-		meshFace<4>(halfSize, bevel, surfaceTypes, colorIndex, level);
-		meshFace<5>(halfSize, bevel, surfaceTypes, colorIndex, level);
+		meshFace<0>(halfSize, meshBevel, surfaceTypes, colorIndex, corners, level);
+		meshFace<1>(halfSize, meshBevel, surfaceTypes, colorIndex, corners, level);
+		meshFace<2>(halfSize, meshBevel, surfaceTypes, colorIndex, corners, level);
+		meshFace<3>(halfSize, meshBevel, surfaceTypes, colorIndex, corners, level);
+		meshFace<4>(halfSize, meshBevel, surfaceTypes, colorIndex, corners, level);
+		meshFace<5>(halfSize, meshBevel, surfaceTypes, colorIndex, corners, level);
+		G3D::Vector2 bevelTex = flatTex;
+		bevelTex.x += colorIndex / 32.0f;
+		BevelMesh::appendBevelGeometry(*level, corners, bevelTex);
 	}
 
 	if (ViewBase::getShadowsEnabled()) {
 		Render::Mesh::LevelRef shadowLevel = new Render::Mesh::Level(G3D::RenderDevice::TRIANGLES);
 
-		G3D::Vector3 halfSize = G3D::Vector3(size.x * 0.5, size.y * 0.5, size.z * 0.5) -
-								G3D::Vector3(widthInset + bevel, bevel, widthInset + bevel);
+		G3D::Vector3 halfSize(size.x * 0.5 - widthInset, size.y * 0.5, size.z * 0.5 - widthInset);
 
 		unsigned int xyz = allocVertex(
 			G3D::Vector3(-halfSize.x, -halfSize.y, -halfSize.z), G3D::Vector3::zero(), G3D::Vector2::zero(), true
