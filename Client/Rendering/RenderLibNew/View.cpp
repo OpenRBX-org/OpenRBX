@@ -334,7 +334,6 @@ void View::render(void* rd)
 		MeshFactory<PBBMesh, 4>::flushCache();
 		MeshFactory<WedgeMesh, 1>::flushCache();
 		MeshFactory<TorsoMesh, 1>::flushCache();
-		BrickMesh::flushCache();
 		bevelChangePending = false;
 	}
 	sceneManager->prerender(0.0);
@@ -377,7 +376,6 @@ View::~View()
 	MeshFactory<CylinderAlongXMesh, 1>::flushCache();
 	MeshFactory<SphereMesh, 1>::flushCache();
 	MeshFactory<PBBMesh, 4>::flushCache();
-	BrickMesh::flushCache();
 }
 
 void View::updateLighting()

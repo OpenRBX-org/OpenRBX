@@ -1,7 +1,6 @@
 #include "rbxview/View.h"
 
 #include "BevelMesh.h"
-#include "BrickMesh.h"
 #include "CylinderMesh.h"
 #include "MaterialFactory.h"
 #include "PBBMesh.h"
@@ -37,7 +36,6 @@ void setBevelsEnabled(bool value)
 	MeshFactory<PBBMesh, 4>::flushCache();
 	MeshFactory<WedgeMesh, 1>::flushCache();
 	MeshFactory<TorsoMesh, 1>::flushCache();
-	BrickMesh::flushCache();
 }
 
 void setBevelSmoothShading(bool value)
@@ -50,7 +48,6 @@ void setBevelSmoothShading(bool value)
 	MeshFactory<PBBMesh, 4>::flushCache();
 	MeshFactory<WedgeMesh, 1>::flushCache();
 	MeshFactory<TorsoMesh, 1>::flushCache();
-	BrickMesh::flushCache();
 }
 
 void setBevelLodDistance(float value)
@@ -213,7 +210,6 @@ View::~View()
 	MeshFactory<CylinderAlongXMesh, 1>::flushCache();
 	MeshFactory<SphereMesh, 1>::flushCache();
 	MeshFactory<PBBMesh, 4>::flushCache();
-	BrickMesh::flushCache();
 }
 
 } // namespace RBX::View
